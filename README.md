@@ -1,54 +1,81 @@
-# React + TypeScript + Vite
+# Lab3 Frontend – Vite React TypeScript
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend application for the **Lab3** worldbuilding platform, built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and TypeScript. It uses SCSS for styling and Firebase for authentication and data storage.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Getting Started
 
-## Expanding the ESLint configuration
+### 1. Clonar el repositorio
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+$ git clone git@github.com:austral-worldbuilding-lab/front.git
+$ cd front
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Configurar los Git Hooks
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Para asegurarte de que el código cumpla con los estándares antes de subirlo, configuraremos los git hooks. Ejecuta el script de inicialización:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+$ bash git-hooks/init.sh
+```
+
+### 3. Instalar las Dependencias
+
+A continuación, instala todas las dependencias necesarias para el proyecto utilizando npm:
+
+```bash
+$ npm install
+```
+
+### 4. Configurar las Variables de Entorno
+
+Crea el archivo `.env` en la raíz del proyecto basándote en el template `.env.template` y configura las variables de entorno necesarias:
+
+```bash
+$ cp .env.template .env
+```
+
+Luego, edita el archivo `.env` con las credenciales correspondientes.
+
+### 5. Iniciar el Proyecto en Modo Desarrollo
+
+Para iniciar el servidor de desarrollo:
+
+```bash
+$ npm run dev
+```
+
+La aplicación estará disponible en [http://localhost:5173](http://localhost:5173) por defecto.
+
+### 6. Compilar para Producción
+
+Cuando estés listo para desplegar la aplicación:
+
+```bash
+$ npm run build
+```
+
+Esto generará la versión optimizada de la aplicación en el directorio `dist/`.
+
+Para previsualizar la versión compilada localmente:
+
+```bash
+$ npm run preview
+```
+
+## 🧪 Testing
+
+Para ejecutar los tests:
+
+```bash
+# Ejecutar todos los tests
+$ npm run test
+
+# Ejecutar tests con watch mode
+$ npm run test:watch
+
+# Ver cobertura de tests
+$ npm run test:coverage
 ```
