@@ -34,6 +34,29 @@ function App() {
                 <p className="mt-4">
                     Edit <code className="font-mono bg-zinc-800/20 p-1 rounded">src/App.tsx</code> and save to test HMR
                 </p>
+
+                <div className="space-y-4 p-6">
+                    <div className="bg-primary text-foreground">
+                        Probando colores: <b>bg-primary text-foreground</b>
+                    </div>
+
+                    <div className="bg-secondary text-foreground">
+                        Probando colores: <b>bg-secondary text-foreground</b>
+                    </div>
+
+                    <div className="bg-accent text-foreground">
+                        Probando colores: <b>bg-accent text-foreground</b>
+                    </div>
+
+                    <div className="bg-background text-primary p-1">
+                        Probando colores: <b>bg-background text-primary</b>
+                    </div>
+
+                    <div className="bg-foreground text-background p-1">
+                        Probando colores: <b>bg-foreground text-background</b>
+                    </div>
+                </div>
+
             </div>
             <p className="text-zinc-400">
                 Click on the Vite and React logos to learn more

@@ -2,18 +2,25 @@
 
 @layer base {
   :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
+    --color-primary: #2563eb;
+    --color-secondary: #9333ea;
+    --color-background: #ffffff;
+    --color-foreground: #000000;
+    --color-accent: #f59e0b;
 
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+  }
 
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  .dark {
+    --color-primary: #3b82f6;
+    --color-secondary: #8b5cf6;
+    --color-background: #1f2937;
+    --color-foreground: #f9fafb;
+    --color-accent: #fbbf24;
+
+    color: var(--color-foreground);
+    background-color: var(--color-background);
   }
 
   a {
@@ -58,7 +65,7 @@
     outline: 4px auto -webkit-focus-ring-color;
   }
 
-  @media (prefers-color-scheme: light) {
+  /*@media (prefers-color-scheme: light) {
     :root {
       color: #213547;
       background-color: #ffffff;
@@ -69,7 +76,7 @@
     button {
       background-color: #f9f9f9;
     }
-  }
+  }*/
 }
 
 /* Custom animations */
@@ -79,5 +86,39 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@layer utilities {
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  .bg-background {
+    background-color: var(--color-background);
+  }
+  .bg-foreground {
+    background-color: var(--color-foreground);
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  .text-accent {
+    color: var(--color-accent);
+  }
+  .text-background {
+    color: var(--color-background);
+  }
+  .text-foreground {
+    color: var(--color-foreground);
   }
 }
