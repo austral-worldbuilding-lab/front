@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import { Button } from "@/components/ui/button"
 
 function App() {
     const [count, setCount] = useState(0)
@@ -34,8 +35,9 @@ function App() {
                 <p className="mt-4">
                     Edit <code className="font-mono bg-zinc-800/20 p-1 rounded">src/App.tsx</code> and save to test HMR
                 </p>
-
                 <div className="space-y-4 p-6">
+                    <Button>Botón de Shadcn!</Button>
+
                     <div className="bg-primary-500 text-foreground">
                         Probando colores: <b>bg-primary text-foreground</b>
                     </div>
