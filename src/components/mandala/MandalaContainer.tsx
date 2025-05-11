@@ -1,6 +1,6 @@
 import Mandala from "./Mandala";
 
-const Container = () => {
+const MandalaContainer = () => {
   return (
     <div className="relative w-full h-[calc(100vh-120px)] border rounded-lg overflow-hidden bg-white">
       <div className="w-full h-full overflow-hidden">
@@ -10,4 +10,4 @@ const Container = () => {
   );
 };
 
-export default Container;
+export default MandalaContainer;

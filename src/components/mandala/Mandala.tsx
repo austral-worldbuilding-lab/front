@@ -23,15 +23,15 @@ const Mandala: React.FC<MandalaProps> = ({
         transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
       }}
     >
-      {/* Centro de la mandala */}
+      {/* Center of the mandala */}
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        {/* Círculos concéntricos */}
+        {/* Concentric circles */}
         <MandalaConcentric levels={Levels} />
 
-        {/* Persona en el centro */}
+        {/* Person in the center */}
         <MandalaPerson />
 
-        {/* Sectores, líneas, puntos, nombres y preguntas */}
+        {/* Sectors, lines, points, names, and questions */}
         <MandalaSectors
           sectors={Sectors}
           maxRadius={maxRadius}
