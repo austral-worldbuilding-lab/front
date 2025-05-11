@@ -9,12 +9,12 @@ function App() {
     const { login, register, logout, isAuth, user, error, isLoading } = useAuth();
 
     const handleRegister = async () => {
-        const ok = await register('test@email.com', '123456', 'Martina');
+        const ok = await register('test2@email.com', '123456');
         console.log('register:', ok);
     };
 
     const handleLogin = async () => {
-        const ok = await login('test@email.com', '123456');
+        const ok = await login('test2@email.com', '123456');
         console.log('login:', ok);
     };
 
