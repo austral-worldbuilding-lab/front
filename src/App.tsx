@@ -1,9 +1,22 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import { useAuth } from './hooks/useAuth';
 
 function App() {
     const [count, setCount] = useState(0)
+
+    const { login, register, logout, isAuth, user, error, isLoading } = useAuth();
+
+    const handleRegister = async () => {
+        const ok = await register('test@email.com', '123456', 'Martina');
+        console.log('register:', ok);
+    };
+
+    const handleLogin = async () => {
+        const ok = await login('test@email.com', '123456');
+        console.log('login:', ok);
+    };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen w-full">
@@ -61,6 +74,15 @@ function App() {
             <p className="text-zinc-400">
                 Click on the Vite and React logos to learn more
             </p>
+
+            <div>
+                <p>{isAuth() ? `Logueado como ${user?.email}` : 'No logueado'}</p>
+                {error && <p style={{color: 'red'}}>{error}</p>}
+                <button onClick={handleRegister}>Registrarse</button>
+                <button onClick={handleLogin}>Login</button>
+                <button onClick={logout}>Logout</button>
+                {isLoading && <p>Cargando...</p>}
+            </div>
         </div>
     )
 }
