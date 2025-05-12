@@ -21,9 +21,12 @@
     --color-input-background: #f9f9f9;
     --color-input-text: #333333;
     --color-input-border: #ccc;
-    --color-input-focus-border: #3b82f6;
+    --color-input-focus-border: #172187;
     --color-input-placeholder: #888;
     --color-input-label: #172187;
+    --color-input-disabled-bg: #f3f3f3;
+    --color-input-disabled-border: #787878;
+    --color-disabled-text: #000000;
   }
 }
 

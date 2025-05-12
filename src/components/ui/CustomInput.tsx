@@ -26,9 +26,9 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
                     disabled={disabled}
                     aria-invalid={!!error}
                     className={cn(
-                        "placeholder:text-input-placeholder text-sm",
+                        "border placeholder:text-input-placeholder text-sm",
                         disabled &&
-                        "bg-[var(--color-disabled-bg)] border-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] opacity-50",
+                        "bg-[var(--color-input-disabled-bg)] border border-[var(--color-input-disabled-border)] text-[var(--color-disabled-text)]",
                         error &&
                         "border-[var(--color-error)] text-[var(--color-error)] placeholder:text-[var(--color-error)] focus-visible:ring-[var(--color-error)]",
                         className
@@ -37,7 +37,7 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
                 />
 
                 {error && (
-                    <p className="text-xs text-[var(--color-error)]">{error}</p>
+                    <p className="text-xs text-[var(--color-error)] mt-0.5">{error}</p>
                 )}
             </div>
         );
