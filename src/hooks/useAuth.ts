@@ -9,7 +9,6 @@ import {
     User,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import Cookies from 'js-cookie';
 
 export const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -19,12 +18,6 @@ export const useAuth = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
-            if (currentUser) {
-                const token = await currentUser.getIdToken();
-                Cookies.set('token', token);
-            } else {
-                Cookies.remove('token');
-            }
             setIsLoading(false);
         });
 
@@ -37,8 +30,6 @@ export const useAuth = () => {
         try {
             await setPersistence(auth, browserLocalPersistence);
             const result = await signInWithEmailAndPassword(auth, email, password);
-            const token = await result.user.getIdToken();
-            Cookies.set('token', token);
             setUser(result.user);
             return true;
         } catch (err: any) {
@@ -57,8 +48,6 @@ export const useAuth = () => {
         setError(null);
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
-            const token = await result.user.getIdToken();
-            Cookies.set('token', token);
             setUser(result.user);
             return true;
         } catch (err: any) {
@@ -74,7 +63,6 @@ export const useAuth = () => {
         setError(null);
         try {
             await signOut(auth);
-            Cookies.remove('token');
             setUser(null);
         } catch (err: any) {
             setError(err.message);
