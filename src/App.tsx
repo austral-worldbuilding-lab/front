@@ -2,7 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { Button } from "@/components/ui/button"
-import {Input} from "./components/ui/input";
+import {CustomInput} from "./components/ui/CustomInput";
 
 function App() {
     const [count, setCount] = useState(0)
@@ -39,7 +39,7 @@ function App() {
                 <div className="space-y-4 p-6">
                     <Button>Botón de Shadcn!</Button>
 
-                    <Input
+                    <CustomInput
                         label="Email"
                         type="email"
                         placeholder="tu@email.com"
