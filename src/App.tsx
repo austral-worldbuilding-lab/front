@@ -1,25 +1,33 @@
-import MandalaContainer from "./components/mandala/MandalaContainer";
-import {Button} from "@/components/ui/button.tsx";
-import {Check, Plus, Trash} from "lucide-react";
+import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+import NotFound from './pages/NotFound';
+import MandalaContainer from './components/mandala/MandalaContainer';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import SignupPage from "@/pages/LoginPage.tsx";
 
 function App() {
   return (
-      <div className="flex flex-col items-center justify-center min-h-screen w-full">
-          <MandalaContainer/>
+    <BrowserRouter>
+      <Routes>
+          {/* Redirect root to /signup */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
-          <div className="flex flex-col gap-2 items-center justify-center min-h-screen w-full">
-              <Button variant="filled" color="primary">Primary</Button>
-              <Button variant="outline" color="secondary">Secondary Outline</Button>
-              <Button variant="text" color="tertiary">Tertiary Text</Button>
-              <Button variant="ghost" color="ghost">Ghost</Button>
-              <Button variant="filled" color="danger" icon={<Trash/>}>Eliminar</Button>
-              <Button variant="filled" color="primary" loading>Guardando...</Button>
-              <Button variant="outline" color="primary" disabled>Desactivado</Button>
-              <Button variant="filled" color="secondary" icon={<Plus/>} iconPosition="left">Agregar</Button>
-              <Button variant="filled" color="secondary" icon={<Check/>} iconPosition="right">Listo</Button>
-              <Button variant="filled" color="tertiary" icon={<Plus/>}/>
-          </div>
-      </div>
+          {/* Public routes */}
+          <Route path="/login" element={<SignupPage />} />
+
+          {/* Protected routes */}
+          <Route
+            path="/mandala"
+            element={
+              <ProtectedRoute>
+                <MandalaContainer />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 404 route */}
+          <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
