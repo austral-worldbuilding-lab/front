@@ -1,9 +1,15 @@
+import MandalaContainer from "./components/mandala/MandalaContainer";
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { useAuth } from './hooks/useAuth';
 
 function App() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen w-full">
+      <MandalaContainer />
+    </div>
+  );
     const [count, setCount] = useState(0)
 
     const { login, register, logout, isAuth, user, error, isLoading } = useAuth();
@@ -87,4 +93,4 @@ function App() {
     )
 }
 
-export default App
+export default App;
