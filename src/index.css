@@ -17,6 +17,13 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    --color-input-background: #f9f9f9;
+    --color-input-text: #333333;
+    --color-input-border: #ccc;
+    --color-input-focus-border: #3b82f6;
+    --color-input-placeholder: #888;
+    --color-input-label: #172187;
   }
 
   a {
