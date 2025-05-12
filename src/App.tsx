@@ -2,7 +2,6 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { Button } from "@/components/ui/button"
-import {Input} from "./components/ui/input";
 
 function App() {
     const [count, setCount] = useState(0)
@@ -38,12 +37,6 @@ function App() {
                 </p>
                 <div className="space-y-4 p-6">
                     <Button>Botón de Shadcn!</Button>
-
-                    <Input
-                        label="Email"
-                        type="email"
-                        placeholder="tu@email.com"
-                    />
 
                     <div className="bg-primary-500 text-foreground">
                         Probando colores: <b>bg-primary text-foreground</b>
