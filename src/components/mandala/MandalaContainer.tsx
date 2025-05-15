@@ -3,13 +3,19 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import ZoomControls from "./ZoomControls";
 import { useState } from "react";
 
-const MandalaContainer = () => {
+interface MandalaContainerProps {
+  mandalaId?: string;
+}
+
+const MandalaContainer: React.FC<MandalaContainerProps> = ({
+  mandalaId = "default",
+}) => {
   const [isPanning, setIsPanning] = useState(false);
 
   return (
     <div className="relative w-full h-screen border rounded-lg overflow-hidden bg-white">
       <TransformWrapper
-        initialScale={0.6}
+        initialScale={0.5}
         minScale={0.3}
         maxScale={4}
         centerOnInit={true}
@@ -31,9 +37,13 @@ const MandalaContainer = () => {
                 height: "100%",
                 cursor: isPanning ? "grabbing" : "grab",
               }}
-              contentStyle={{ width: "120%", height: "150%" }}
+              contentStyle={{ width: "150%", height: "160%" }}
             >
-              <Mandala scale={1} position={{ x: 0, y: 0 }} />
+              <Mandala
+                scale={1}
+                position={{ x: 0, y: 0 }}
+                mandalaId={mandalaId}
+              />
             </TransformComponent>
           </>
         )}
