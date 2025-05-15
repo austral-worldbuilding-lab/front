@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import {useAuth} from "@/hooks/useAuth.ts";
+import {useAuthContext} from "@/context/AuthContext.tsx";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
 
-  const { isAuth } = useAuth();
+  const { isAuth } = useAuthContext();
 
   if (!isAuth()) {
     return <Navigate to="/login" state={{ from: location }} replace />;
