@@ -4,25 +4,25 @@ export const Levels: Level[] = [
   {
     id: "mi-esquina",
     name: "MI ESQUINA",
-    radius: 100,
+    radius: 150,
     color: "rgba(200, 220, 255, 0.9)",
   },
   {
     id: "ciudad-barrio",
     name: "CIUDAD / BARRIO",
-    radius: 200,
+    radius: 300,
     color: "rgba(180, 210, 255, 0.7)",
   },
   {
     id: "provincia",
     name: "PROVINCIA",
-    radius: 300,
+    radius: 450,
     color: "rgba(160, 200, 255, 0.5)",
   },
   {
     id: "pais",
     name: "PAÍS",
-    radius: 400,
+    radius: 600,
     color: "rgba(140, 190, 255, 0.3)",
   },
 ];
