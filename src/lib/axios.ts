@@ -1,8 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { auth } from '../config/firebase';
 
-// Log the API URL to verify it's being loaded correctly
-console.log('API URL:', import.meta.env.VITE_API_URL);
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -11,7 +9,6 @@ const axiosInstance = axios.create({
     },
 });
 
-// Request interceptor to add auth token
 axiosInstance.interceptors.request.use(
     async (config) => {
         const user = auth.currentUser;
@@ -26,7 +23,6 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-// Generic GET request
 export async function get<T>(
     url: string,
     config?: AxiosRequestConfig
@@ -34,7 +30,6 @@ export async function get<T>(
     return axiosInstance.get<T>(url, config);
 }
 
-// Generic POST request
 export async function post<T, U>(
     url: string,
     data: U,
@@ -43,7 +38,6 @@ export async function post<T, U>(
     return axiosInstance.post<T>(url, data, config);
 }
 
-// Generic PUT request
 export async function put<T, U>(
     url: string,
     data: U,
@@ -52,7 +46,6 @@ export async function put<T, U>(
     return axiosInstance.put<T>(url, data, config);
 }
 
-// Generic DELETE request
 export async function del<T>(
     url: string,
     config?: AxiosRequestConfig
