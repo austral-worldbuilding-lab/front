@@ -5,8 +5,8 @@ import { PostIt } from "@/types/post-it";
 
 interface KonvaContainerProps {
     mandalaId: string;
-    postIts: Map<string, { data: PostIt; category: string }>;
-    onPostItUpdate: (id: string, category: string, updates: Partial<PostIt>) => void;
+    postIts: Map<string, PostIt>;
+    onPostItUpdate: (id: string, updates: Partial<PostIt>) => void;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
     onDragStart: () => void;
@@ -83,18 +83,19 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                     {[...postIts.entries()].map(([id, postIt]) => (
                         <Group
                             key={`post-it-${id}`}
-                            x={postIt.data.position.x}
-                            y={postIt.data.position.y}
+                            x={postIt.position.x}
+                            y={postIt.position.y}
                             draggable
                             onDragStart={onDragStart}
                             onDragMove={handleDragMove}
                             onDragEnd={(e) => {
                                 onDragEnd();
-                                onPostItUpdate(id, postIt.category, {
+                                onPostItUpdate(id, {
                                     position: {
                                         x: e.target.x(),
                                         y: e.target.y(),
                                     },
+                                    category: postIt.category,
                                 });
                             }}
                             onDblClick={() => setEditablePostItId(id)}
@@ -126,12 +127,13 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                                         fontSize: "11px",
                                         lineHeight: "1.1",
                                     }}
-                                    value={postIt.data.content}
+                                    value={postIt.content}
                                     ref={editablePostItId === id ? textArea : null}
                                     disabled={editablePostItId !== id}
                                     onChange={(e) =>
-                                        onPostItUpdate(id, postIt.category, {
+                                        onPostItUpdate(id, {
                                             content: e.target.value,
+                                            category: postIt.category,
                                         })
                                     }
                                 />

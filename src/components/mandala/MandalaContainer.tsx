@@ -15,50 +15,39 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
-  const [postIts, setPostIts] = useState<Map<string, { data: PostIt; category: string }>>(
+  const [postIts, setPostIts] = useState<Map<string, PostIt>>(
     new Map([
       ["1", {
-        data: {
-          content: "Test post-it 1",
-          position: { x: 950, y: 250 }
-        },
+        content: "Test post-it 1",
+        position: { x: 950, y: 250 },
         category: "ecology"
       }],
       ["2", {
-        data: {
-          content: "Test post-it 2",
-          position: { x: 750, y: 250 }
-        },
+        content: "Test post-it 2",
+        position: { x: 750, y: 250 },
         category: "governance"
       }],
       ["3", {
-        data: {
-          content: "Test post-it 3",
-          position: { x: 750, y: 750 }
-        },
+        content: "Test post-it 3",
+        position: { x: 750, y: 750 },
         category: "ecology"
       }],
       ["4", {
-        data: {
-          content: "Test post-it 4",
-          position: { x: 950, y: 320 }
-        },
+        content: "Test post-it 4",
+        position: { x: 950, y: 320 },
         category: "governance"
       }]
     ])
   );
 
-  const handlePostItUpdate = (id: string, category: string, updates: Partial<PostIt>) => {
+  const handlePostItUpdate = (id: string, updates: Partial<PostIt>) => {
     setPostIts((prev) => {
       const updated = new Map(prev);
       const postIt = updated.get(id);
       if (postIt) {
         updated.set(id, {
           ...postIt,
-          data: {
-            ...postIt.data,
-            ...updates,
-          },
+          ...updates,
         });
       }
       return updated;
