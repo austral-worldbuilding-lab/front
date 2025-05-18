@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuth, isLoading } = useAuthContext();
 
   if (isLoading) {
-    return <div className="text-center">Verificando sesión...</div>;
+    return null;
   }
 
   if (!isAuth()) {
