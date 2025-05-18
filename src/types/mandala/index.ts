@@ -13,7 +13,6 @@ export interface Sector {
 }
 
 export interface Postit {
-  id: string;
   content: string;
   position: {
     x: number;
@@ -23,13 +22,17 @@ export interface Postit {
   level: number;
 }
 
+export interface PostitDocument extends Postit {
+  id: string;
+}
+
 export interface Mandala {
   id: string;
   name: string;
-  resources: Postit[];
-  culture: Postit[];
-  infrastructure: Postit[];
-  economy: Postit[];
-  governance: Postit[];
-  ecology: Postit[];
+  resources: PostitDocument[];
+  culture: PostitDocument[];
+  infrastructure: PostitDocument[];
+  economy: PostitDocument[];
+  governance: PostitDocument[];
+  ecology: PostitDocument[];
 }

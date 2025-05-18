@@ -8,7 +8,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Mandala, Postit } from "../types/mandala";
+import { Mandala, Postit, PostitDocument } from "../types/mandala";
 
 const COLLECTION_NAME = "test-mandalas";
 
@@ -18,6 +18,8 @@ export const subscribeMandala = (
   mandalaId: string,
   callback: (mandala: Mandala | null) => void
 ) => {
+  let unsubscribes: (() => void)[] = [];
+
   // Subscribe to mandala metadata
   const mandalaRef = doc(db, COLLECTION_NAME, mandalaId);
   const unsubscribeMandala = onSnapshot(mandalaRef, (snapshot) => {
@@ -34,45 +36,49 @@ export const subscribeMandala = (
       economy: [],
       governance: [],
       culture: [],
-      infrastructure: [],
       resources: [],
+      infrastructure: [],
     };
 
+    // Clean up previous subscriptions
+    unsubscribes.forEach(unsubscribe => unsubscribe());
+    unsubscribes = [];
+
     // Subscribe to each category's postits
-    const categories: Category[] = ["ecology", "economy", "governance", "culture", "infrastructure", "resources"];
-    const unsubscribes = categories.map(category => {
+    const categories: Category[] = ["ecology", "economy", "governance", "culture", "resources", "infrastructure"];
+    categories.forEach(category => {
       const categoryRef = collection(db, COLLECTION_NAME, mandalaId, category);
-      return onSnapshot(categoryRef, (snapshot) => {
+      const unsubscribe = onSnapshot(categoryRef, (snapshot) => {
         const postits = snapshot.docs.map(doc => ({
           ...doc.data(),
           id: doc.id,
-        })) as Postit[];
+          category
+        })) as PostitDocument[];
 
         mandala[category] = postits;
         callback({ ...mandala });
       });
+      unsubscribes.push(unsubscribe);
     });
-
-    return () => {
-      unsubscribes.forEach(unsubscribe => unsubscribe());
-    };
   });
 
+  // Return cleanup function
   return () => {
     unsubscribeMandala();
+    unsubscribes.forEach(unsubscribe => unsubscribe());
   };
 };
 
 export const createPostit = async (
   mandalaId: string,
-  postit: Omit<Postit, "id">
+  postit: Postit
 ) => {
   try {
     const category = postit.category as Category;
     const postitRef = collection(db, COLLECTION_NAME, mandalaId, category);
 
     const newPostitRef = await addDoc(postitRef, postit);
-    return { ...postit, id: newPostitRef.id };
+    return { ...postit, id: newPostitRef.id } as PostitDocument;
   } catch (error) {
     console.error("Error creating postit:", error);
     throw error;
@@ -82,7 +88,7 @@ export const createPostit = async (
 export const updatePostit = async (
   mandalaId: string,
   postitId: string,
-  postitData: Partial<Omit<Postit, "id">>
+  postitData: Partial<Postit>
 ) => {
   try {
     const category = postitData.category as Category;
@@ -90,36 +96,47 @@ export const updatePostit = async (
       throw new Error("Category is required for updating postit");
     }
 
-    // Try to update in the new category first
-    const postitRef = doc(db, COLLECTION_NAME, mandalaId, category, postitId);
-    try {
-      await updateDoc(postitRef, postitData);
-      return true;
-    } catch (error) {
-      // If update fails, the document might be in a different category
-      // Try to find it in other categories
-      const categories: Category[] = ["ecology", "economy", "governance", "culture", "resources", "infrastructure"];
-      for (const oldCategory of categories) {
-        if (oldCategory === category) continue;
+    // First, try to find the postit in any category
+    const categories: Category[] = ["ecology", "economy", "governance", "culture", "resources", "infrastructure"];
+    let foundCategory: Category | null = null;
+    let oldData: any = null;
 
-        const oldPostitRef = doc(db, COLLECTION_NAME, mandalaId, oldCategory, postitId);
-        const oldPostitDoc = await getDoc(oldPostitRef);
-
-        if (oldPostitDoc.exists()) {
-          // Found it! Move it to the new category
-          const newPostitRef = collection(db, COLLECTION_NAME, mandalaId, category);
-          const newPostitData = {
-            ...oldPostitDoc.data(),
-            ...postitData,
-            id: postitId
-          };
-          await addDoc(newPostitRef, newPostitData);
-          await deleteDoc(oldPostitRef);
-          return true;
-        }
+    for (const cat of categories) {
+      const postitRef = doc(db, COLLECTION_NAME, mandalaId, cat, postitId);
+      const postitDoc = await getDoc(postitRef);
+      if (postitDoc.exists()) {
+        foundCategory = cat;
+        oldData = postitDoc.data();
+        break;
       }
+    }
+
+    if (!foundCategory) {
       throw new Error("Postit not found in any category");
     }
+
+    // If the category hasn't changed, just update the document
+    if (foundCategory === category) {
+      const { id, ...dataToUpdate } = postitData as any;
+      const postitRef = doc(db, COLLECTION_NAME, mandalaId, category, postitId);
+      await updateDoc(postitRef, dataToUpdate);
+      return true;
+    }
+
+    // If the category has changed, move the document
+    const newPostitRef = collection(db, COLLECTION_NAME, mandalaId, category);
+    const { id, ...oldDataWithoutId } = oldData;
+    const newPostitData = {
+      ...oldDataWithoutId,
+      ...postitData,
+    };
+    await addDoc(newPostitRef, newPostitData);
+
+    // Delete the old document
+    const oldPostitRef = doc(db, COLLECTION_NAME, mandalaId, foundCategory, postitId);
+    await deleteDoc(oldPostitRef);
+
+    return true;
   } catch (error) {
     console.error("Error updating postit:", error);
     throw error;

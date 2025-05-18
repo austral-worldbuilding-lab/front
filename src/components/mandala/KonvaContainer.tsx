@@ -119,12 +119,12 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
     // Combine all postits from different categories into a single array
     const allPostits = [
-        ...mandala.ecology.map(postit => ({ ...postit, category: "ecology" })),
-        ...mandala.economy.map(postit => ({ ...postit, category: "economy" })),
-        ...mandala.governance.map(postit => ({ ...postit, category: "governance" })),
-        ...mandala.culture.map(postit => ({ ...postit, category: "culture" })),
-        ...mandala.resources.map(postit => ({ ...postit, category: "resources" })),
-        ...mandala.infrastructure.map(postit => ({ ...postit, category: "infrastructure" }))
+        ...mandala.ecology,
+        ...mandala.economy,
+        ...mandala.governance,
+        ...mandala.culture,
+        ...mandala.resources,
+        ...mandala.infrastructure
     ];
 
     return (

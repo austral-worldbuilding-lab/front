@@ -22,8 +22,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       content: "New Post-It",
       position: { x: 960, y: 540 },
       category: "ecology",
-      level: 1,
-      id: crypto.randomUUID()
+      level: 1
     });
   };
 
