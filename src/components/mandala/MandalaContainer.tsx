@@ -3,56 +3,33 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Mandala from "./Mandala";
 import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
-import { PostIt } from "@/types/post-it";
+import useMandala from "@/hooks/useMandala";
 
 interface MandalaContainerProps {
   mandalaId?: string;
 }
 
 const MandalaContainer: React.FC<MandalaContainerProps> = ({
-  mandalaId = "default",
+  mandalaId = "0G5PzwefEx46hkvyfIUT",
 }) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
-  const [postIts, setPostIts] = useState<Map<string, PostIt>>(
-    new Map([
-      ["1", {
-        content: "Test post-it 1",
-        position: { x: 950, y: 250 },
-        category: "ecology"
-      }],
-      ["2", {
-        content: "Test post-it 2",
-        position: { x: 750, y: 250 },
-        category: "governance"
-      }],
-      ["3", {
-        content: "Test post-it 3",
-        position: { x: 750, y: 750 },
-        category: "ecology"
-      }],
-      ["4", {
-        content: "Test post-it 4",
-        position: { x: 950, y: 320 },
-        category: "governance"
-      }]
-    ])
-  );
+  const { mandala, loading, error, createPostit, updatePostit } = useMandala(mandalaId);
 
-  const handlePostItUpdate = (id: string, updates: Partial<PostIt>) => {
-    setPostIts((prev) => {
-      const updated = new Map(prev);
-      const postIt = updated.get(id);
-      if (postIt) {
-        updated.set(id, {
-          ...postIt,
-          ...updates,
-        });
-      }
-      return updated;
+  const handleCreatePostIt = () => {
+    createPostit({
+      content: "New Post-It",
+      position: { x: 960, y: 540 },
+      category: "ecology",
+      level: 1,
+      id: crypto.randomUUID()
     });
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!mandala) return <div>No mandala found</div>;
 
   return (
     <div className="relative w-full h-screen border rounded-lg overflow-hidden bg-white">
@@ -73,7 +50,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       >
         {() => (
           <>
-            <ZoomControls />
+            <ZoomControls onCreatePostIt={handleCreatePostIt} />
             <TransformComponent
               wrapperStyle={{
                 width: "100%",
@@ -101,8 +78,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   <div className="absolute inset-0 m-auto w-[1920px] h-[1280px] z-10">
                     <KonvaContainer
                       mandalaId={mandalaId}
-                      postIts={postIts}
-                      onPostItUpdate={handlePostItUpdate}
+                      onPostItUpdate={updatePostit}
                       onMouseEnter={() => setIsHoveringPostIt(true)}
                       onMouseLeave={() => setIsHoveringPostIt(false)}
                       onDragStart={() => setIsDraggingPostIt(true)}

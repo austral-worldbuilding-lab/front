@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Group, Rect } from "react-konva";
 import { Html } from "react-konva-utils";
-import { PostIt } from "@/types/post-it";
+import { Postit } from "@/types/mandala";
+import useMandala from "@/hooks/useMandala";
 
 interface KonvaContainerProps {
     mandalaId: string;
-    postIts: Map<string, PostIt>;
-    onPostItUpdate: (id: string, updates: Partial<PostIt>) => void;
+    onPostItUpdate: (id: string, updates: Partial<Postit>) => Promise<boolean>;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
     onDragStart: () => void;
@@ -17,7 +17,6 @@ interface KonvaContainerProps {
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
     mandalaId,
-    postIts,
     onPostItUpdate,
     onMouseEnter,
     onMouseLeave,
@@ -29,6 +28,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     const [editablePostItId, setEditablePostItId] = useState<string | null>(null);
     const textArea = useRef<HTMLTextAreaElement | null>(null);
     const [postItWidth, postItHeight, padding] = [64, 64, 5];
+    const { mandala, loading, error, updatePostit } = useMandala(mandalaId);
 
     // Textarea editing
     useEffect(() => {
@@ -76,29 +76,85 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         }
     };
 
+    const calculateLevel = (x: number, y: number): number => {
+        const centerX = 930;
+        const centerY = 610;
+        const radius = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+
+        if (radius <= 150) return 0;      // 0 to 460
+        if (radius <= 300) return 1;      // 460 to 310
+        if (radius <= 450) return 2;      // 310 to 160
+        if (radius <= 600) return 3;      // 160 to 10
+        return 3; // Default to outermost level if beyond all ranges
+    };
+
+    const calculateSection = (x: number, y: number): string => {
+        const centerX = 930;
+        const centerY = 610;
+        // Calculate angle in degrees (0 is right, 90 is up)
+        let angle = Math.atan2(centerY - y, x - centerX) * (180 / Math.PI);
+        // Convert to 0-360 range
+        angle = (angle + 360) % 360;
+
+        // Each section is 60 degrees
+        if (angle >= 0 && angle < 60) return "resources";
+        if (angle >= 60 && angle < 120) return "culture";
+        if (angle >= 120 && angle < 180) return "infrastructure";
+        if (angle >= 180 && angle < 240) return "economy";
+        if (angle >= 240 && angle < 300) return "governance";
+        return "ecology"; // 300-360 degrees
+    };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
+
+    if (!mandala) {
+        return <div>No mandala found</div>;
+    }
+
+    // Combine all postits from different categories into a single array
+    const allPostits = [
+        ...mandala.ecology.map(postit => ({ ...postit, category: "ecology" })),
+        ...mandala.economy.map(postit => ({ ...postit, category: "economy" })),
+        ...mandala.governance.map(postit => ({ ...postit, category: "governance" })),
+        ...mandala.culture.map(postit => ({ ...postit, category: "culture" })),
+        ...mandala.resources.map(postit => ({ ...postit, category: "resources" })),
+        ...mandala.infrastructure.map(postit => ({ ...postit, category: "infrastructure" }))
+    ];
+
     return (
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
             <Stage width={width} height={height}>
                 <Layer>
-                    {[...postIts.entries()].map(([id, postIt]) => (
+                    {allPostits.map((postit) => (
                         <Group
-                            key={`post-it-${id}`}
-                            x={postIt.position.x}
-                            y={postIt.position.y}
+                            key={`post-it-${postit.id}`}
+                            x={postit.position.x}
+                            y={postit.position.y}
                             draggable
                             onDragStart={onDragStart}
                             onDragMove={handleDragMove}
                             onDragEnd={(e) => {
                                 onDragEnd();
-                                onPostItUpdate(id, {
+                                const newX = e.target.x();
+                                const newY = e.target.y();
+                                const newLevel = calculateLevel(newX, newY);
+                                const newSection = calculateSection(newX, newY);
+                                updatePostit(postit.id, {
                                     position: {
-                                        x: e.target.x(),
-                                        y: e.target.y(),
+                                        x: newX,
+                                        y: newY,
                                     },
-                                    category: postIt.category,
+                                    category: newSection,
+                                    level: newLevel
                                 });
                             }}
-                            onDblClick={() => setEditablePostItId(id)}
+                            onDblClick={() => setEditablePostItId(postit.id)}
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
                         >
@@ -127,13 +183,13 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                                         fontSize: "11px",
                                         lineHeight: "1.1",
                                     }}
-                                    value={postIt.content}
-                                    ref={editablePostItId === id ? textArea : null}
-                                    disabled={editablePostItId !== id}
+                                    value={postit.content}
+                                    ref={editablePostItId === postit.id ? textArea : null}
+                                    disabled={editablePostItId !== postit.id}
                                     onChange={(e) =>
-                                        onPostItUpdate(id, {
+                                        updatePostit(postit.id, {
                                             content: e.target.value,
-                                            category: postIt.category,
+                                            category: postit.category,
                                         })
                                     }
                                 />

@@ -15,23 +15,21 @@ export interface Sector {
 export interface Postit {
   id: string;
   content: string;
-  levelId: string;
-  sectorId: string;
-  color?: string;
-  position?: {
+  position: {
     x: number;
     y: number;
   };
-  createdAt: Date;
-  updatedAt: Date;
+  category: string;
+  level: number;
 }
 
 export interface Mandala {
   id: string;
-  title: string;
-  levels: Level[];
-  sectors: Sector[];
-  postits: Postit[];
-  createdAt: Date;
-  updatedAt: Date;
+  name: string;
+  resources: Postit[];
+  culture: Postit[];
+  infrastructure: Postit[];
+  economy: Postit[];
+  governance: Postit[];
+  ecology: Postit[];
 }

@@ -27,7 +27,7 @@ const useMandala = (mandalaId: string) => {
   }, [mandalaId]);
 
   const createPostit = useCallback(
-    async (postitData: Omit<Postit, "id" | "createdAt" | "updatedAt">) => {
+    async (postitData: Postit) => {
       try {
         if (!mandalaId) throw new Error("Mandala ID is required");
         return await createPostitService(mandalaId, postitData);
@@ -44,7 +44,7 @@ const useMandala = (mandalaId: string) => {
   const updatePostit = useCallback(
     async (
       postitId: string,
-      postitData: Partial<Omit<Postit, "id" | "createdAt" | "updatedAt">>
+      postitData: Partial<Postit>
     ) => {
       try {
         if (!mandalaId) throw new Error("Mandala ID is required");
@@ -60,10 +60,10 @@ const useMandala = (mandalaId: string) => {
   );
 
   const deletePostit = useCallback(
-    async (postitId: string) => {
+    async (postitId: string, category: "ecology" | "economy" | "governance" | "culture" | "resources" | "infrastructure") => {
       try {
         if (!mandalaId) throw new Error("Mandala ID is required");
-        return await deletePostitService(mandalaId, postitId);
+        return await deletePostitService(mandalaId, postitId, category);
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
