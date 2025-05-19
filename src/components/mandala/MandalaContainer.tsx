@@ -66,8 +66,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
               }}
             >
               <div className="relative flex items-center justify-center w-full h-full">
-                <div className="absolute inset-0 m-auto w-[1920px] h-[1280px]">
-                  <div className="absolute inset-0 m-auto w-[1920px] h-[1280px] z-0 pointer-events-none flex items-center justify-center">
+                <div className="absolute inset-0 m-auto w-[960px] h-[1280px]">
+                  <div className="absolute inset-0 m-auto w-[960px] h-[1280px] z-0 pointer-events-none flex items-center justify-center">
                     <Mandala
                       scale={1}
                       position={{ x: 0, y: 0 }}
