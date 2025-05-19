@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Group, Rect } from "react-konva";
 import { Html } from "react-konva-utils";
-import { Postit } from "@/types/mandala";
-import useMandala from "@/hooks/useMandala";
+import { Mandala, Postit } from "@/types/mandala";
 
 interface KonvaContainerProps {
-    mandalaId: string;
+    mandala: Mandala;
     onPostItUpdate: (id: string, updates: Partial<Postit>) => Promise<boolean>;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
@@ -16,7 +15,7 @@ interface KonvaContainerProps {
 }
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
-    mandalaId,
+    mandala,
     onPostItUpdate,
     onMouseEnter,
     onMouseLeave,
@@ -26,9 +25,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     height,
 }) => {
     const [editablePostItId, setEditablePostItId] = useState<string | null>(null);
+    const [editableContent, setEditableContent] = useState<string>("");
     const textArea = useRef<HTMLTextAreaElement | null>(null);
     const [postItWidth, postItHeight, padding] = [64, 64, 5];
-    const { mandala, loading, error, updatePostit } = useMandala(mandalaId);
 
     // Textarea editing
     useEffect(() => {
@@ -49,7 +48,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         };
         window.addEventListener("mousedown", handleClickOutside);
         return () => window.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }, [editablePostItId, editableContent]);
 
     const handleDragMove = (e: any) => {
         const node = e.target;
@@ -73,6 +72,15 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 x: newX,
                 y: newY
             });
+        }
+    };
+
+    const handleContentChange = async (postitId: string, updates: Partial<Postit>) => {
+        try {
+            setEditableContent(updates.content!);
+            await onPostItUpdate(postitId, updates);
+        } catch (error) {
+            console.error("Error updating postit content:", error);
         }
     };
 
@@ -104,14 +112,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         if (angle >= 240 && angle < 300) return "governance";
         return "ecology"; // 300-360 degrees
     };
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (error) {
-        return <div>Error: {error.message}</div>;
-    }
 
     if (!mandala) {
         return <div>No mandala found</div>;
@@ -145,7 +145,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                                 const newY = e.target.y();
                                 const newLevel = calculateLevel(newX, newY);
                                 const newSection = calculateSection(newX, newY);
-                                updatePostit(postit.id, {
+                                onPostItUpdate(postit.id, {
                                     position: {
                                         x: newX,
                                         y: newY,
@@ -154,7 +154,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                                     level: newLevel
                                 });
                             }}
-                            onDblClick={() => setEditablePostItId(postit.id)}
+                            onDblClick={() => {
+                                setEditablePostItId(postit.id);
+                                setEditableContent(postit.content);
+                            }}
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
                         >
@@ -183,23 +186,17 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                                         fontSize: "11px",
                                         lineHeight: "1.1",
                                     }}
-                                    value={postit.content}
+                                    value={editablePostItId === postit.id ? editableContent : postit.content}
                                     ref={editablePostItId === postit.id ? textArea : null}
                                     disabled={editablePostItId !== postit.id}
-                                    onChange={(e) =>
-                                        updatePostit(postit.id, {
-                                            content: e.target.value,
-                                            category: postit.category,
-                                        })
-                                    }
+                                    onChange={(e) => handleContentChange(postit.id, { ...postit, content: e.target.value })}
                                 />
                             </Html>
                         </Group>
                     ))}
                 </Layer>
             </Stage>
-        </div>
-    );
+        </div>)
 };
 
 export default KonvaContainer;

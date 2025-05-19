@@ -76,7 +76,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   </div>
                   <div className="absolute inset-0 m-auto w-[1920px] h-[1280px] z-10">
                     <KonvaContainer
-                      mandalaId={mandalaId}
+                      mandala={mandala}
                       onPostItUpdate={updatePostit}
                       onMouseEnter={() => setIsHoveringPostIt(true)}
                       onMouseLeave={() => setIsHoveringPostIt(false)}
