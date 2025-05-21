@@ -3,41 +3,19 @@ import MandalaConcentric from "./MandalaConcentric";
 import MandalaSectors from "./MandalaSectors";
 import MandalaPerson from "./MandalaPerson";
 import { Levels, Sectors } from "@/constants/mandala";
-import useMandala from "@/hooks/useMandala";
-import Loader from "../common/Loader";
 
 interface MandalaProps {
   scale?: number;
   position?: { x: number; y: number };
-  mandalaId?: string;
 }
 
 const Mandala: React.FC<MandalaProps> = ({
   scale = 0.7,
   position = { x: 0, y: 0 },
-  mandalaId = "default",
 }) => {
-  const { mandala, loading, error } = useMandala(mandalaId);
-
   // Use the data from the mandala if available, otherwise use the default constants
-  const levels = mandala?.levels || Levels;
-  const sectors = mandala?.sectors || Sectors;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center w-full h-full">
-        <Loader size="large" text="Cargando mandala..." />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center w-full h-full text-red-500">
-        Error al cargar el mandala
-      </div>
-    );
-  }
+  const levels = Levels;
+  const sectors = Sectors;
 
   // Get the maximum radius (the outermost circle)
   const maxRadius = levels[levels.length - 1].radius;
