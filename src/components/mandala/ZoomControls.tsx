@@ -1,8 +1,12 @@
 import { useControls } from "react-zoom-pan-pinch";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCcw, Plus } from "lucide-react";
 
-const ZoomControls = () => {
+interface ZoomControlsProps {
+  onCreatePostIt: () => void;
+}
+
+const ZoomControls: React.FC<ZoomControlsProps> = ({ onCreatePostIt }) => {
   const { zoomIn, zoomOut, resetTransform } = useControls();
 
   const handleReset = () => {
@@ -28,6 +32,12 @@ const ZoomControls = () => {
         variant="filled"
         color="secondary"
         icon={<RotateCcw size={16} />}
+      />
+      <Button
+        onClick={onCreatePostIt}
+        variant="filled"
+        color="primary"
+        icon={<Plus size={16} />}
       />
     </div>
   );

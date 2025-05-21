@@ -5,59 +5,80 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Mandala, Postit } from "../types/mandala";
+import { Mandala, Postit, PostitDocument } from "../types/mandala";
 
-const COLLECTION_NAME = "mandalas";
+const COLLECTION_NAME = "test-mandalas";
+
+type Category = keyof Omit<Mandala, "id" | "name">;
 
 export const subscribeMandala = (
   mandalaId: string,
   callback: (mandala: Mandala | null) => void
 ) => {
-  // Mock implementation - will be replaced with real Firebase implementation
-  const unsubscribe = onSnapshot(
-    doc(db, COLLECTION_NAME, mandalaId),
-    (snapshot) => {
-      if (snapshot.exists()) {
-        // Mock data transformation
-        callback({
-          ...snapshot.data(),
-          id: snapshot.id,
-          createdAt: snapshot.data().createdAt?.toDate(),
-          updatedAt: snapshot.data().updatedAt?.toDate(),
-        } as Mandala);
-      } else {
-        callback(null);
-      }
-    },
-    (error) => {
-      console.error("Error getting mandala:", error);
-      callback(null);
-    }
-  );
+  let unsubscribes: (() => void)[] = [];
 
-  return unsubscribe;
+  // Subscribe to mandala metadata
+  const mandalaRef = doc(db, COLLECTION_NAME, mandalaId);
+  const unsubscribeMandala = onSnapshot(mandalaRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      callback(null);
+      return;
+    }
+
+    const data = snapshot.data();
+    const mandala: Mandala = {
+      id: snapshot.id,
+      name: data.name || "",
+      ecology: [],
+      economy: [],
+      governance: [],
+      culture: [],
+      resources: [],
+      infrastructure: [],
+    };
+
+    // Clean up previous subscriptions
+    unsubscribes.forEach(unsubscribe => unsubscribe());
+    unsubscribes = [];
+
+    // Subscribe to each category's postits
+    const categories: Category[] = ["ecology", "economy", "governance", "culture", "resources", "infrastructure"];
+    categories.forEach(category => {
+      const categoryRef = collection(db, COLLECTION_NAME, mandalaId, category);
+      const unsubscribe = onSnapshot(categoryRef, (snapshot) => {
+        const postits = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id,
+          category
+        })) as PostitDocument[];
+
+        mandala[category] = postits;
+        callback({ ...mandala });
+      });
+      unsubscribes.push(unsubscribe);
+    });
+  });
+
+  // Return cleanup function
+  return () => {
+    unsubscribeMandala();
+    unsubscribes.forEach(unsubscribe => unsubscribe());
+  };
 };
 
 export const createPostit = async (
   mandalaId: string,
-  postit: Omit<Postit, "id" | "createdAt" | "updatedAt">
+  postit: Postit
 ) => {
-  // Mock implementation
   try {
-    const mandalaRef = doc(db, COLLECTION_NAME, mandalaId);
-    const postitRef = collection(mandalaRef, "postits");
+    const category = postit.category as Category;
+    const postitRef = collection(db, COLLECTION_NAME, mandalaId, category);
 
-    // This is just a mock, in a real implementation you'd add the doc to Firestore
-    // and then update the mandala document to include the new postit
-    const newPostitRef = await addDoc(postitRef, {
-      ...postit,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-
-    return { ...postit, id: newPostitRef.id };
+    const newPostitRef = await addDoc(postitRef, postit);
+    return { ...postit, id: newPostitRef.id } as PostitDocument;
   } catch (error) {
     console.error("Error creating postit:", error);
     throw error;
@@ -67,16 +88,53 @@ export const createPostit = async (
 export const updatePostit = async (
   mandalaId: string,
   postitId: string,
-  postitData: Partial<Omit<Postit, "id" | "createdAt" | "updatedAt">>
+  postitData: Partial<Postit>
 ) => {
-  // Mock implementation
   try {
-    const postitRef = doc(db, COLLECTION_NAME, mandalaId, "postits", postitId);
+    const category = postitData.category as Category;
+    if (!category) {
+      throw new Error("Category is required for updating postit");
+    }
 
-    await updateDoc(postitRef, {
+    // First, try to find the postit in any category
+    const categories: Category[] = ["ecology", "economy", "governance", "culture", "resources", "infrastructure"];
+    let foundCategory: Category | null = null;
+    let oldData: any = null;
+
+    for (const cat of categories) {
+      const postitRef = doc(db, COLLECTION_NAME, mandalaId, cat, postitId);
+      const postitDoc = await getDoc(postitRef);
+      if (postitDoc.exists()) {
+        foundCategory = cat;
+        oldData = postitDoc.data();
+        break;
+      }
+    }
+
+    if (!foundCategory) {
+      throw new Error("Postit not found in any category");
+    }
+
+    // If the category hasn't changed, just update the document
+    if (foundCategory === category) {
+      const { id, ...dataToUpdate } = postitData as any;
+      const postitRef = doc(db, COLLECTION_NAME, mandalaId, category, postitId);
+      await updateDoc(postitRef, dataToUpdate);
+      return true;
+    }
+
+    // If the category has changed, move the document
+    const newPostitRef = collection(db, COLLECTION_NAME, mandalaId, category);
+    const { id, ...oldDataWithoutId } = oldData;
+    const newPostitData = {
+      ...oldDataWithoutId,
       ...postitData,
-      updatedAt: new Date(),
-    });
+    };
+    await addDoc(newPostitRef, newPostitData);
+
+    // Delete the old document
+    const oldPostitRef = doc(db, COLLECTION_NAME, mandalaId, foundCategory, postitId);
+    await deleteDoc(oldPostitRef);
 
     return true;
   } catch (error) {
@@ -85,10 +143,13 @@ export const updatePostit = async (
   }
 };
 
-export const deletePostit = async (mandalaId: string, postitId: string) => {
-  // Mock implementation
+export const deletePostit = async (
+  mandalaId: string,
+  postitId: string,
+  category: Category
+) => {
   try {
-    const postitRef = doc(db, COLLECTION_NAME, mandalaId, "postits", postitId);
+    const postitRef = doc(db, COLLECTION_NAME, mandalaId, category, postitId);
     await deleteDoc(postitRef);
     return true;
   } catch (error) {
