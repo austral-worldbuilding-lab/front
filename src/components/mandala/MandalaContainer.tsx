@@ -5,6 +5,10 @@ import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
+import FileList from "@/components/project/FileList";
+import { useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -14,6 +18,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
+  const [showFiles, setShowFiles] = useState(false);
+  const { projectId } = useParams<{ projectId: string }>();
+
+
   const { mandala, loading, error, createPostit, updatePostit } =
     useMandala(mandalaId);
 
@@ -62,6 +70,21 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
         >
           {() => (
             <>
+              <div className="absolute top-4 left-4 flex gap-2 z-20">
+                <Button
+                    onClick={() => setShowFiles(!showFiles)}
+                    variant="filled"
+                    color="primary"
+                >
+                  {showFiles ? "Ocultar archivos" : "Ver archivos"}
+                </Button>
+                {showFiles && projectId && (
+                    <div className="absolute top-20 right-4 z-10 max-w-sm bg-white p-4 rounded shadow overflow-y-auto max-h-[400px]">
+                      <FileList projectId={projectId} />
+                    </div>
+                )}
+              </div>
+
               <ZoomControls onCreatePostIt={handleCreatePostIt} />
               <TransformComponent
                 wrapperStyle={{
