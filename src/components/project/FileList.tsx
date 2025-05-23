@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getProjectFiles, ProjectFile } from '../../services/filesService';
+import { FileText } from 'lucide-react';
 
 interface ProjectFilesListProps {
     projectId: string;
@@ -21,15 +22,15 @@ export default function ProjectFilesList({ projectId }: ProjectFilesListProps) {
     if (error) return <p>{error}</p>;
 
     return (
-        <div className="mt-4">
+        <div>
             {files.length === 0 ? (
                 <p>No hay archivos cargados aún.</p>
             ) : (
                 <ul className="list-disc ml-6 space-y-1">
                     {files.map((file, index) => (
-                        <li key={index}>
-                            {file.file_name}{' '}
-                            <span className="text-gray-500 text-sm">({file.file_type})</span>
+                        <li key={index} className="flex items-center gap-2 text-sm text-gray-800">
+                            <FileText className="w-4 h-4 text-gray-500" />
+                            <span>{`${file.file_name}.${file.file_type}`}</span>
                         </li>
                     ))}
                 </ul>
