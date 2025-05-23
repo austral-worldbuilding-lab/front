@@ -1,23 +1,18 @@
 import { useEffect, useState } from 'react';
-import { getProjectFiles } from '../../services/filesService';
-
-type FileData = {
-    file_name: string;
-    file_type: string;
-};
+import { getProjectFiles, ProjectFile } from '../../services/filesService';
 
 interface ProjectFilesListProps {
-    projectId: string; // obligatorio
+    projectId: string;
 }
 
 export default function ProjectFilesList({ projectId }: ProjectFilesListProps) {
-    const [files, setFiles] = useState<FileData[]>([]);
+    const [files, setFiles] = useState<ProjectFile[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
         getProjectFiles(projectId)
-            .then(setFiles)
+            .then((result) => setFiles(result || []))
             .catch(() => setError('Error al cargar los archivos.'))
             .finally(() => setLoading(false));
     }, [projectId]);
