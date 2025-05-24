@@ -36,3 +36,8 @@ export interface Mandala {
   governance: PostitDocument[];
   ecology: PostitDocument[];
 }
+
+export interface SimpleMandala {
+  id: string;
+  name: string;
+}
