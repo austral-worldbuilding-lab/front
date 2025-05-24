@@ -1,0 +1,106 @@
+import { useState, useRef } from 'react';
+import axios from 'axios';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { createProjectFiles } from '@/services/filesService';
+
+const ACCEPTED_TYPES = [
+    'application/pdf',
+    'text/plain',
+    'image/png',
+    'image/jpeg',
+];
+
+interface FileUploaderProps {
+    projectId: string;
+    onUploadComplete: () => void;
+}
+
+interface PresignedUrl {
+    url: string;
+}
+
+const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
+    const [status, setStatus] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = () => {
+        const files = fileInputRef.current?.files;
+        if (files) {
+            const fileArray = Array.from(files).filter((file) => ACCEPTED_TYPES.includes(file.type));
+            setSelectedFiles(fileArray);
+        }
+    };
+
+    const handleFileUpload = async () => {
+        if (selectedFiles.length === 0) return;
+
+        try {
+            setLoading(true);
+            setStatus(null);
+
+            const payload = selectedFiles.map((file) => ({
+                file_name: file.name,
+                file_type: file.type,
+            }));
+
+            const urls = await createProjectFiles(projectId, payload);
+            await Promise.all(
+                urls.map((urlObj: PresignedUrl, index: number) => {
+                    return axios.put(urlObj.url, selectedFiles[index], {
+                        headers: {
+                            'Content-Type': selectedFiles[index].type,
+                            'x-ms-blob-type': 'BlockBlob'
+                        },
+                    });
+                })
+            );
+
+            setStatus('Files uploaded successfully!');
+            setSelectedFiles([]);
+            onUploadComplete();
+        } catch (error) {
+            console.error('Upload error:', error);
+            setStatus('An error occurred during upload.');
+        } finally {
+            setLoading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    return (
+        <div className="mb-4 space-y-2">
+            <Input
+                type="file"
+                multiple
+                accept={ACCEPTED_TYPES.join(',')}
+                ref={fileInputRef}
+                onChange={handleFileChange}
+            />
+
+            {selectedFiles.length > 0 && (
+                <div className="text-sm text-gray-600">
+                    {selectedFiles.length <= 5 ? (
+                        <ul className="list-disc pl-5">
+                            {selectedFiles.map((file, idx) => (
+                                <li key={idx}>{file.name}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>{selectedFiles.length} files selected</p>
+                    )}
+                </div>
+            )}
+
+            <Button onClick={handleFileUpload} loading={loading} color="primary">
+                Upload Files
+            </Button>
+
+            {status && <p className="text-sm text-gray-700">{status}</p>}
+        </div>
+    );
+};
+
+export default FileLoader;
