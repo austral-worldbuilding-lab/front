@@ -1,11 +1,12 @@
 import MandalaContainer from "@/components/mandala/MandalaContainer";
+import { useParams } from "react-router-dom";
 // import { useParams } from "react-router-dom";
 
 const MandalaPage = () => {
-  // const { mandalaId } = useParams(); <- TODO: get mandalaId from params
+  const { mandalaId } = useParams();
   return (
     <div>
-      <MandalaContainer mandalaId="0G5PzwefEx46hkvyfIUT" />
+      <MandalaContainer mandalaId={mandalaId!} />
     </div>
   );
 };
