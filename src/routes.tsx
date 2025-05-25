@@ -11,6 +11,7 @@ import RegisterPage from "@/pages/RegisterPage.tsx";
 import ProtectedRoute from "@/components/auth/ProtectedRoute.tsx";
 import MandalaPage from "./pages/app/project/mandala/MandalaPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
+import CreateMandalaPage from "./pages/app/project/mandala/CreateMandalaPage";
 
 // Layout component for all protected routes
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
@@ -48,6 +49,7 @@ function App() {
 
           {/* Rutas independientes */}
           <Route path="project/:projectId" element={<ProjectPage />} />
+          <Route path="project/:projectId/mandala/create" element={<CreateMandalaPage />} />
           <Route
             path="project/:projectId/mandala/:mandalaId"
             element={<MandalaPage />}
