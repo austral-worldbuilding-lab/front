@@ -14,11 +14,12 @@ export const createMandala = async (
         if (response.status !== 201) {
             throw new Error(response.data.message || "Error generating mandala with AI.");
         }
-        return response.data.id;
+        return response.data.data.mandala.id;
     }
     const response = await axiosInstance.post("/mandala", dto);
     if (response.status !== 201) {
         throw new Error(response.data.message || "Error creating mandala.");
     }
-    return response.data.id;
+    console.log(response.data.data.id);
+    return response.data.data.id;
 };

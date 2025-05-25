@@ -24,9 +24,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const handleCreatePostIt = () => {
     createPostit({
       content: "New Post-It",
-      coordinates: { x: 0.5, y: 0.5, angle: 0, percentileDistance: 0 },
-      dimension: "small",
-      section: "ecology",
+      coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
+      dimension: "Gobierno",
+      section: "Institución",
     });
   };
 

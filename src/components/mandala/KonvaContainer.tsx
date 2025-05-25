@@ -21,117 +21,146 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onDragStart,
     onDragEnd,
 }) => {
-    const containerRef = useRef<HTMLDivElement | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [size, setSize] = useState({ width: 100, height: 100 });
+
+    // Editing state
     const [editableIndex, setEditableIndex] = useState<number | null>(null);
-    const [editableContent, setEditableContent] = useState<string>("");
-    const textArea = useRef<HTMLTextAreaElement | null>(null);
-    const [postItWidth, postItHeight, padding] = [64, 64, 5];
+    const [editableContent, setEditableContent] = useState("");
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+    const [postItW, postItH, padding] = [64, 64, 5];
 
     // Observe container size
     useEffect(() => {
-        const observer = new ResizeObserver(entries => {
-            for (const entry of entries) {
-                const { width, height } = entry.contentRect;
+        const obs = new ResizeObserver(entries => {
+            for (const e of entries) {
+                const { width, height } = e.contentRect;
                 setSize({ width, height });
             }
         });
-        if (containerRef.current) observer.observe(containerRef.current);
-        return () => observer.disconnect();
+        if (containerRef.current) obs.observe(containerRef.current);
+        return () => obs.disconnect();
     }, []);
 
-    // Helpers to convert between relative [-1,1] and absolute px
-    const toAbsolute = (relX: number, relY: number) => {
-        return {
-            x: ((relX + 1) / 2) * size.width,
-            y: ((1 - relY) / 2) * size.height,
-        };
-    };
+    // Focus when editing starts
+    useEffect(() => {
+        setTimeout(() => {
+            if (editableIndex !== null && textAreaRef.current) {
+                textAreaRef.current.focus();
+                const len = textAreaRef.current.value.length;
+                textAreaRef.current.setSelectionRange(len, len);
+            }
+        }, 0);
+    }, [editableIndex]);
 
-    const toRelative = (absX: number, absY: number) => {
-        return {
-            x: (absX / size.width) * 2 - 1,
-            y: 1 - (absY / size.height) * 2,
+    // Click outside to cancel editing
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                editableIndex !== null &&
+                textAreaRef.current &&
+                !textAreaRef.current.contains(e.target as Node)
+            ) {
+                setEditableIndex(null);
+            }
         };
-    };
+        window.addEventListener("mousedown", handleClickOutside);
+        return () => window.removeEventListener("mousedown", handleClickOutside);
+    }, [editableIndex]);
 
-    // Clamp drag within bounds
+    // Convert relative [-1,1] to absolute
+    const toAbsolute = (rx: number, ry: number) => ({
+        x: ((rx + 1) / 2) * size.width,
+        y: ((1 - ry) / 2) * size.height,
+    });
+
+    // Convert absolute to relative
+    const toRelative = (x: number, y: number) => ({
+        x: (x / size.width) * 2 - 1,
+        y: 1 - (y / size.height) * 2,
+    });
+
+    // Drag clamp
     const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
         const node = e.target;
-        let newX = node.x();
-        let newY = node.y();
-        newX = Math.max(0, Math.min(size.width - postItWidth, newX));
-        newY = Math.max(0, Math.min(size.height - postItHeight, newY));
-        node.position({ x: newX, y: newY });
+        let nx = node.x(), ny = node.y();
+        nx = Math.max(0, Math.min(size.width - postItW, nx));
+        ny = Math.max(0, Math.min(size.height - postItH, ny));
+        node.position({ x: nx, y: ny });
     };
 
+    // Optional polar
     const toPolar = (x: number, y: number) => {
-        // Compute angle and percentileDistance if needed
-        const cx = size.width / 2;
-        const cy = size.height / 2;
-        const dx = x - cx;
-        const dy = cy - y;
+        const cx = size.width / 2, cy = size.height / 2;
+        const dx = x - cx, dy = cy - y;
         const angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.hypot(dx, dy);
         const maxR = Math.min(size.width, size.height) / 2;
         return { angle, percentileDistance: Math.min(dist / maxR, 1) };
     };
 
-    const handleContentChange = async (index: number, content: string) => {
-        setEditableContent(content);
-        await onPostItUpdate(index, { content });
+    const handleContentChange = async (i: number, v: string) => {
+        setEditableContent(v);
+        await onPostItUpdate(i, { content: v });
     };
 
     if (!mandala) return <div>No mandala found</div>;
 
     return (
         <div ref={containerRef} className="w-full h-full relative">
-            <Stage
-                width={size.width}
-                height={size.height}
-                style={{ position: "absolute", top: 0, left: 0 }}
-            >
+            <Stage width={size.width} height={size.height} style={{ position: "absolute", top: 0, left: 0 }}>
                 <Layer>
-                    {mandala.postits.map((postit, index) => {
-                        const { x, y } = toAbsolute(postit.coordinates.x, postit.coordinates.y);
+                    {mandala.postits.map((p, i) => {
+                        const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
+                        const isEditing = editableIndex === i;
                         return (
                             <Group
-                                key={`post-it-${index}`}
+                                key={i}
                                 x={x}
                                 y={y}
-                                draggable
+                                draggable={!isEditing}
                                 onDragStart={onDragStart}
                                 onDragMove={handleDragMove}
                                 onDragEnd={e => {
                                     onDragEnd();
-                                    const nx = e.target.x();
-                                    const ny = e.target.y();
+                                    const nx = e.target.x(), ny = e.target.y();
                                     const rel = toRelative(nx, ny);
                                     const polar = toPolar(nx, ny);
-                                    onPostItUpdate(index, {
-                                        coordinates: { x: rel.x, y: rel.y, angle: polar.angle, percentileDistance: polar.percentileDistance }
+                                    onPostItUpdate(i, {
+                                        coordinates: {
+                                            x: rel.x,
+                                            y: rel.y,
+                                            angle: polar.angle,
+                                            percentileDistance: polar.percentileDistance,
+                                        }
                                     });
                                 }}
                                 onDblClick={() => {
-                                    setEditableIndex(index);
-                                    setEditableContent(postit.content);
+                                    setEditableIndex(i);
+                                    setEditableContent(p.content);
                                 }}
                                 onMouseEnter={onMouseEnter}
                                 onMouseLeave={onMouseLeave}
                             >
-                                <Rect
-                                    width={postItWidth}
-                                    height={postItHeight}
-                                    fill="yellow"
-                                    cornerRadius={4}
-                                />
-                                <Html divProps={{ style: { pointerEvents: "none" } }}>
+                                <Rect width={postItW} height={postItH} fill="yellow" cornerRadius={4} />
+                                <Html divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}>
                                     <textarea
-                                        style={{ width: postItWidth, height: postItHeight, padding, resize: "none", backgroundColor: "transparent", boxSizing: "border-box", fontSize: "11px", lineHeight: "1.1" }}
-                                        value={editableIndex === index ? editableContent : postit.content}
-                                        ref={editableIndex === index ? textArea : null}
-                                        disabled={editableIndex !== index}
-                                        onChange={e => handleContentChange(index, e.target.value)}
+                                        ref={textAreaRef}
+                                        disabled={!isEditing}
+                                        value={isEditing ? editableContent : p.content}
+                                        onChange={e => handleContentChange(i, e.target.value)}
+                                        style={{
+                                            width: postItW,
+                                            height: postItH,
+                                            margin: 0,
+                                            padding,
+                                            resize: "none",
+                                            background: "transparent",
+                                            boxSizing: "border-box",
+                                            fontSize: 11,
+                                            lineHeight: 1.1,
+                                        }}
                                     />
                                 </Html>
                             </Group>
