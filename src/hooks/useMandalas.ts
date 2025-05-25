@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {SimpleMandala} from "../types/mandala";
-import axiosInstance from "@/lib/axios";
+import {getMandalas} from "@/services/projectService.ts";
 
 
 const useMandalas = (projectId: string) => {
@@ -18,12 +18,11 @@ const useMandalas = (projectId: string) => {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await axiosInstance.get<{ data: SimpleMandala[] }>('/mandala', {
-          params: { projectId }
-        });
 
-        setMandalas(response.data.data);
+        const mandalasData = await getMandalas(projectId);
+
+
+        setMandalas(mandalasData);
       } catch (err) {
         console.error("Error fetching mandalas:", err);
         setError(
