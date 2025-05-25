@@ -11,8 +11,6 @@ interface KonvaContainerProps {
     onMouseLeave: () => void;
     onDragStart: () => void;
     onDragEnd: () => void;
-    width: number;
-    height: number;
 }
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
@@ -22,17 +20,33 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onMouseLeave,
     onDragStart,
     onDragEnd,
-    width,
-    height,
 }) => {
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const [size, setSize] = useState({ width: 100, height: 100 });
+
     const [editableIndex, setEditableIndex] = useState<number | null>(null);
     const [editableContent, setEditableContent] = useState<string>("");
     const textArea = useRef<HTMLTextAreaElement | null>(null);
     const [postItWidth, postItHeight, padding] = [64, 64, 5];
 
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const maxRadius = Math.min(width, height) / 2;
+    const centerX = size.width / 2;
+    const centerY = size.height / 2;
+    const maxRadius = Math.min(size.width, size.height) / 2;
+
+    useEffect(() => {
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const { width, height } = entry.contentRect;
+                setSize({ width, height });
+            }
+        });
+
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         setTimeout(() => {
@@ -57,9 +71,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
         const node = e.target;
         const minX = 0;
-        const maxX = width - postItWidth;
+        const maxX = size.width - postItWidth;
         const minY = 0;
-        const maxY = height - postItHeight;
+        const maxY = size.height - postItHeight;
 
         const newX = Math.max(minX, Math.min(maxX, node.x()));
         const newY = Math.max(minY, Math.min(maxY, node.y()));
@@ -93,8 +107,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     }
 
     return (
-        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}>
-            <Stage width={width} height={height}>
+        <div ref={containerRef} className="w-full h-full relative">
+            <Stage width={size.width} height={size.height}>
                 <Layer>
                     {mandala.postits.map((postit, index) => {
                         const { x, y } = postit.coordinates;

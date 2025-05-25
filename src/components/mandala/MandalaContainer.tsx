@@ -6,7 +6,7 @@ import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { useParams } from "react-router-dom";
-import FilePopOver from '@/components/file/FilePopOver';
+import FilePopOver from "@/components/file/FilePopOver";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -18,16 +18,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const { projectId } = useParams<{ projectId: string }>();
 
-
   const { mandala, loading, error, createPostit, updatePostit } =
     useMandala(mandalaId);
 
   const handleCreatePostIt = () => {
     createPostit({
       content: "New Post-It",
-      position: { x: 960, y: 540 },
-      category: "ecology",
-      level: 1,
+      coordinates: { x: 0.5, y: 0.5, angle: 0, percentileDistance: 0 },
+      dimension: "small",
+      section: "ecology",
     });
   };
 
@@ -82,17 +81,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   left: 0,
                 }}
                 contentStyle={{
-                  width: "150%",
-                  height: "160%",
+                  width: "100%",
+                  height: "100%",
                   position: "relative",
                 }}
               >
                 <div className="relative flex items-center justify-center w-full h-full">
-                  <div className="relative inset-0 m-auto w-[1920px] h-[1280px] flex items-center justify-center">
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1920px] h-[1280px] z-0 pointer-events-none">
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    {/* Fondo del mandala (puede seguir usando coordenadas absolutas si querés centrarlo) */}
+                    <div className="absolute inset-0 z-0 pointer-events-none">
                       <Mandala scale={1} position={{ x: 0, y: 0 }} />
                     </div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1920px] h-[1280px] z-10">
+                    {/* Konva container en tamaño completo y responsive */}
+                    <div className="absolute inset-0 z-10">
                       <KonvaContainer
                         mandala={mandala}
                         onPostItUpdate={updatePostit}
@@ -100,8 +101,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onMouseLeave={() => setIsHoveringPostIt(false)}
                         onDragStart={() => setIsDraggingPostIt(true)}
                         onDragEnd={() => setIsDraggingPostIt(false)}
-                        width={1920}
-                        height={1280}
                       />
                     </div>
                   </div>
