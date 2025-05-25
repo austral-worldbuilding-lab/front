@@ -31,7 +31,7 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
         className="hidden"
       />
 
-      <div className="flex flex-col items-start gap-2">
+      <div className="flex items-start gap-2">
         <Button
           type="button"
           variant="outline"
@@ -41,7 +41,12 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
           Choose Files
         </Button>
 
-        <Button onClick={uploadFiles} loading={loading} color="primary">
+        <Button
+          onClick={uploadFiles}
+          loading={loading}
+          color="primary"
+          disabled={selectedFiles.length === 0}
+        >
           Upload Files
         </Button>
       </div>

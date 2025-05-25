@@ -34,3 +34,8 @@ export interface Mandala {
   postits: Postit[];
   name: string;
 }
+
+export interface SimpleMandala {
+  id: string;
+  name: string;
+}

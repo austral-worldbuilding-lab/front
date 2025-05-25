@@ -1,9 +1,11 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { User } from 'firebase/auth';
+import { User as FirebaseUser } from 'firebase/auth';
 import { useAuth } from '../hooks/useAuth';
+import { User as BackendUser } from '@/services/userService';
 
 interface AuthContextType {
-    user: User | null;
+    user: FirebaseUser | null;
+    backendUser: BackendUser | null;
     login: (email: string, password: string) => Promise<boolean>;
     register: (email: string, password: string) => Promise<boolean>;
     logout: () => Promise<void>;

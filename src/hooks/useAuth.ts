@@ -6,12 +6,14 @@ import {
     onAuthStateChanged,
     setPersistence,
     browserLocalPersistence,
-    User,
+    User as FirebaseUser,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import { createUser, User } from '@/services/userService';
 
 export const useAuth = () => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<FirebaseUser | null>(null);
+    const [backendUser, setBackendUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +50,21 @@ export const useAuth = () => {
         setError(null);
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
-            setUser(result.user);
+            const firebaseUser = result.user;
+
+            try {
+                const newUser = await createUser({
+                    firebaseUid: firebaseUser.uid,
+                    email: firebaseUser.email!,
+                    username: firebaseUser.email!,
+                });
+                setBackendUser(newUser);
+            } catch (backendError: any) {
+                await firebaseUser.delete();
+                throw new Error('Error creating user in backend: ' + (backendError.response?.data?.message || backendError.message));
+            }
+
+            setUser(firebaseUser);
             return true;
         } catch (err: any) {
             setError(err.message);
@@ -64,6 +80,7 @@ export const useAuth = () => {
         try {
             await signOut(auth);
             setUser(null);
+            setBackendUser(null);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -83,5 +100,6 @@ export const useAuth = () => {
         isLoading,
         error,
         user,
+        backendUser,
     };
 };
