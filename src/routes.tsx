@@ -19,6 +19,8 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>{children}</ProtectedRoute>
 );
 
+const projectId = "e2e9e2d5-e3c7-47e4-9f12-4f6f40062eee";
+
 function App() {
   return (
     <BrowserRouter>
@@ -27,7 +29,7 @@ function App() {
         {/* TODO: This is temporary, change this path when we have a home page */}
         <Route
           path="/"
-          element={<Navigate to="/app/project/12345/mandala/12345" replace />}
+          element={<Navigate to={`/app/project/${projectId}`} replace />}
         />
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -45,12 +47,15 @@ function App() {
           {/* Redirect /app to mandala */}
           <Route
             index
-            element={<Navigate to="/app/project/12345/mandala/12345" replace />}
+            element={<Navigate to={`/app/project/${projectId}`} replace />}
           />
 
           {/* Rutas independientes */}
           <Route path="project/:projectId" element={<ProjectPage />} />
-          <Route path="project/:projectId/mandala/create" element={<CreateMandalaPage />} />
+          <Route
+            path="project/:projectId/mandala/create"
+            element={<CreateMandalaPage />}
+          />
           <Route
             path="project/:projectId/mandalas"
             element={<MandalaListPage />}
