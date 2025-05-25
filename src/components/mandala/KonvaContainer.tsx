@@ -2,16 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Group, Rect } from "react-konva";
 import { Html } from "react-konva-utils";
 import { Mandala, Postit } from "@/types/mandala";
+import { KonvaEventObject } from "konva/lib/Node";
 
 interface KonvaContainerProps {
     mandala: Mandala;
-    onPostItUpdate: (id: string, updates: Partial<Postit>) => Promise<boolean>;
+    onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
     onDragStart: () => void;
     onDragEnd: () => void;
-    width: number;
-    height: number;
 }
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
@@ -21,182 +20,156 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onMouseLeave,
     onDragStart,
     onDragEnd,
-    width,
-    height,
 }) => {
-    const [editablePostItId, setEditablePostItId] = useState<string | null>(null);
-    const [editableContent, setEditableContent] = useState<string>("");
-    const textArea = useRef<HTMLTextAreaElement | null>(null);
-    const [postItWidth, postItHeight, padding] = [64, 64, 5];
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [size, setSize] = useState({ width: 100, height: 100 });
 
-    // Textarea editing
+    // Editing state
+    const [editableIndex, setEditableIndex] = useState<number | null>(null);
+    const [editableContent, setEditableContent] = useState("");
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+    const [postItW, postItH, padding] = [64, 64, 5];
+
+    // Observe container size
+    useEffect(() => {
+        const obs = new ResizeObserver(entries => {
+            for (const e of entries) {
+                const { width, height } = e.contentRect;
+                setSize({ width, height });
+            }
+        });
+        if (containerRef.current) obs.observe(containerRef.current);
+        return () => obs.disconnect();
+    }, []);
+
+    // Focus when editing starts
     useEffect(() => {
         setTimeout(() => {
-            if (editablePostItId && textArea.current) {
-                textArea.current.focus();
-                const length = textArea.current.value.length;
-                textArea.current.setSelectionRange(length, length);
+            if (editableIndex !== null && textAreaRef.current) {
+                textAreaRef.current.focus();
+                const len = textAreaRef.current.value.length;
+                textAreaRef.current.setSelectionRange(len, len);
             }
         }, 0);
-    }, [editablePostItId]);
+    }, [editableIndex]);
 
+    // Click outside to cancel editing
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
-            if (textArea.current && !textArea.current.contains(e.target as Node)) {
-                setEditablePostItId(null);
+            if (
+                editableIndex !== null &&
+                textAreaRef.current &&
+                !textAreaRef.current.contains(e.target as Node)
+            ) {
+                setEditableIndex(null);
             }
         };
         window.addEventListener("mousedown", handleClickOutside);
         return () => window.removeEventListener("mousedown", handleClickOutside);
-    }, [editablePostItId, editableContent]);
+    }, [editableIndex]);
 
-    const handleDragMove = (e: any) => {
+    // Convert relative [-1,1] to absolute
+    const toAbsolute = (rx: number, ry: number) => ({
+        x: ((rx + 1) / 2) * size.width,
+        y: ((1 - ry) / 2) * size.height,
+    });
+
+    // Convert absolute to relative
+    const toRelative = (x: number, y: number) => ({
+        x: (x / size.width) * 2 - 1,
+        y: 1 - (y / size.height) * 2,
+    });
+
+    // Drag clamp
+    const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
         const node = e.target;
-        // Use passed width/height for boundaries
-        const stageWidth = width;
-        const stageHeight = height;
-
-        // Calculate boundaries
-        const minX = 0;
-        const maxX = stageWidth - postItWidth;
-        const minY = 0;
-        const maxY = stageHeight - postItHeight;
-
-        // Constrain position
-        const newX = Math.max(minX, Math.min(maxX, node.x()));
-        const newY = Math.max(minY, Math.min(maxY, node.y()));
-
-        // Update position if it changed
-        if (newX !== node.x() || newY !== node.y()) {
-            node.position({
-                x: newX,
-                y: newY
-            });
-        }
+        let nx = node.x(), ny = node.y();
+        nx = Math.max(0, Math.min(size.width - postItW, nx));
+        ny = Math.max(0, Math.min(size.height - postItH, ny));
+        node.position({ x: nx, y: ny });
     };
 
-    const handleContentChange = async (postitId: string, updates: Partial<Postit>) => {
-        try {
-            setEditableContent(updates.content!);
-            await onPostItUpdate(postitId, updates);
-        } catch (error) {
-            console.error("Error updating postit content:", error);
-        }
+    // Optional polar
+    const toPolar = (x: number, y: number) => {
+        const cx = size.width / 2, cy = size.height / 2;
+        const dx = x - cx, dy = cy - y;
+        const angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+        const dist = Math.hypot(dx, dy);
+        const maxR = Math.min(size.width, size.height) / 2;
+        return { angle, percentileDistance: Math.min(dist / maxR, 1) };
     };
 
-    const calculateLevel = (x: number, y: number): number => {
-        const centerX = 930;
-        const centerY = 610;
-        const radius = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-
-        if (radius <= 150) return 0;      // 0 to 460
-        if (radius <= 300) return 1;      // 460 to 310
-        if (radius <= 450) return 2;      // 310 to 160
-        if (radius <= 600) return 3;      // 160 to 10
-        return 3; // Default to outermost level if beyond all ranges
+    const handleContentChange = async (i: number, v: string) => {
+        setEditableContent(v);
+        await onPostItUpdate(i, { content: v });
     };
 
-    const calculateSection = (x: number, y: number): string => {
-        const centerX = 930;
-        const centerY = 610;
-        // Calculate angle in degrees (0 is right, 90 is up)
-        let angle = Math.atan2(centerY - y, x - centerX) * (180 / Math.PI);
-        // Convert to 0-360 range
-        angle = (angle + 360) % 360;
-
-        // Each section is 60 degrees
-        if (angle >= 0 && angle < 60) return "resources";
-        if (angle >= 60 && angle < 120) return "culture";
-        if (angle >= 120 && angle < 180) return "infrastructure";
-        if (angle >= 180 && angle < 240) return "economy";
-        if (angle >= 240 && angle < 300) return "governance";
-        return "ecology"; // 300-360 degrees
-    };
-
-    if (!mandala) {
-        return <div>No mandala found</div>;
-    }
-
-    // Combine all postits from different categories into a single array
-    const allPostits = [
-        ...mandala.ecology,
-        ...mandala.economy,
-        ...mandala.governance,
-        ...mandala.culture,
-        ...mandala.resources,
-        ...mandala.infrastructure
-    ];
+    if (!mandala) return <div>No mandala found</div>;
 
     return (
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-            <Stage width={width} height={height}>
+        <div ref={containerRef} className="w-full h-full relative">
+            <Stage width={size.width} height={size.height} style={{ position: "absolute", top: 0, left: 0 }}>
                 <Layer>
-                    {allPostits.map((postit) => (
-                        <Group
-                            key={`post-it-${postit.id}`}
-                            x={postit.position.x}
-                            y={postit.position.y}
-                            draggable
-                            onDragStart={onDragStart}
-                            onDragMove={handleDragMove}
-                            onDragEnd={(e) => {
-                                onDragEnd();
-                                const newX = e.target.x();
-                                const newY = e.target.y();
-                                const newLevel = calculateLevel(newX, newY);
-                                const newSection = calculateSection(newX, newY);
-                                onPostItUpdate(postit.id, {
-                                    position: {
-                                        x: newX,
-                                        y: newY,
-                                    },
-                                    category: newSection,
-                                    level: newLevel
-                                });
-                            }}
-                            onDblClick={() => {
-                                setEditablePostItId(postit.id);
-                                setEditableContent(postit.content);
-                            }}
-                            onMouseEnter={onMouseEnter}
-                            onMouseLeave={onMouseLeave}
-                        >
-                            <Rect
-                                width={postItWidth}
-                                height={postItHeight}
-                                fill="yellow"
-                                cornerRadius={4}
-                            />
-                            <Html
-                                divProps={{
-                                    style: {
-                                        pointerEvents: "none",
-                                    },
+                    {mandala.postits.map((p, i) => {
+                        const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
+                        const isEditing = editableIndex === i;
+                        return (
+                            <Group
+                                key={i}
+                                x={x}
+                                y={y}
+                                draggable={!isEditing}
+                                onDragStart={onDragStart}
+                                onDragMove={handleDragMove}
+                                onDragEnd={e => {
+                                    onDragEnd();
+                                    const nx = e.target.x(), ny = e.target.y();
+                                    const rel = toRelative(nx, ny);
+                                    const polar = toPolar(nx, ny);
+                                    onPostItUpdate(i, {
+                                        coordinates: {
+                                            x: rel.x,
+                                            y: rel.y,
+                                            angle: polar.angle,
+                                            percentileDistance: polar.percentileDistance,
+                                        }
+                                    });
                                 }}
+                                onDblClick={() => {
+                                    setEditableIndex(i);
+                                    setEditableContent(p.content);
+                                }}
+                                onMouseEnter={onMouseEnter}
+                                onMouseLeave={onMouseLeave}
                             >
-                                <textarea
-                                    style={{
-                                        width: postItWidth,
-                                        height: postItHeight,
-                                        margin: 0,
-                                        padding: padding,
-                                        resize: "none",
-                                        backgroundColor: "transparent",
-                                        boxSizing: "border-box",
-                                        fontSize: "11px",
-                                        lineHeight: "1.1",
-                                    }}
-                                    value={editablePostItId === postit.id ? editableContent : postit.content}
-                                    ref={editablePostItId === postit.id ? textArea : null}
-                                    disabled={editablePostItId !== postit.id}
-                                    onChange={(e) => handleContentChange(postit.id, { ...postit, content: e.target.value })}
-                                />
-                            </Html>
-                        </Group>
-                    ))}
+                                <Rect width={postItW} height={postItH} fill="yellow" cornerRadius={4} />
+                                <Html divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}>
+                                    <textarea
+                                        ref={textAreaRef}
+                                        disabled={!isEditing}
+                                        value={isEditing ? editableContent : p.content}
+                                        onChange={e => handleContentChange(i, e.target.value)}
+                                        style={{
+                                            width: postItW,
+                                            height: postItH,
+                                            margin: 0,
+                                            padding,
+                                            resize: "none",
+                                            background: "transparent",
+                                            boxSizing: "border-box",
+                                            fontSize: 11,
+                                            lineHeight: 1.1,
+                                        }}
+                                    />
+                                </Html>
+                            </Group>
+                        );
+                    })}
                 </Layer>
             </Stage>
-        </div>)
+        </div>
+    );
 };
 
 export default KonvaContainer;

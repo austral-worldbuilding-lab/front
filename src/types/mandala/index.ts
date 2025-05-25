@@ -12,29 +12,27 @@ export interface Sector {
   question: string;
 }
 
-export interface Postit {
-  content: string;
-  position: {
-    x: number;
-    y: number;
-  };
-  category: string;
-  level: number;
+export interface PostitCoordinates {
+  x: number;
+  y: number;
+  angle: number;
+  percentileDistance: number;
 }
 
-export interface PostitDocument extends Postit {
-  id: string;
+export interface Postit {
+  content: string;
+  coordinates: PostitCoordinates;
+  dimension: string;
+  section: string;
 }
 
 export interface Mandala {
   id: string;
+  projectId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  postits: Postit[];
   name: string;
-  resources: PostitDocument[];
-  culture: PostitDocument[];
-  infrastructure: PostitDocument[];
-  economy: PostitDocument[];
-  governance: PostitDocument[];
-  ecology: PostitDocument[];
 }
 
 export interface SimpleMandala {
