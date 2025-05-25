@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import {SimpleMandala} from "@/types/mandala";
 
 export interface CreateMandalaDto {
     name: string;
@@ -21,4 +22,13 @@ export const createMandala = async (
         throw new Error(response.data.message || "Error creating mandala.");
     }
     return response.data.id;
+};
+
+
+export const getMandalas = async (projectId: string): Promise<SimpleMandala[]> => {
+    const response = await axiosInstance.get<{ data: SimpleMandala[] }>('/mandala', {
+        params: { projectId },
+    });
+
+    return response.data.data;
 };

@@ -10,6 +10,7 @@ import LoginPage from "@/pages/LoginPage.tsx";
 import RegisterPage from "@/pages/RegisterPage.tsx";
 import ProtectedRoute from "@/components/auth/ProtectedRoute.tsx";
 import MandalaPage from "./pages/app/project/mandala/MandalaPage";
+import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
 import CreateMandalaPage from "./pages/app/project/mandala/CreateMandalaPage";
 
@@ -50,6 +51,10 @@ function App() {
           {/* Rutas independientes */}
           <Route path="project/:projectId" element={<ProjectPage />} />
           <Route path="project/:projectId/mandala/create" element={<CreateMandalaPage />} />
+          <Route
+            path="project/:projectId/mandalas"
+            element={<MandalaListPage />}
+          />
           <Route
             path="project/:projectId/mandala/:mandalaId"
             element={<MandalaPage />}
