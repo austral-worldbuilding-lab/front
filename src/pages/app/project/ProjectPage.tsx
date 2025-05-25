@@ -15,8 +15,8 @@ const ProjectPage = () => {
       <h1 className="text-2xl font-bold mb-4">Project Page</h1>
       <p className="mb-4 text-gray-600">Project ID: {projectId}</p>
       <div className="max-w-md w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
-        <FileList projectId={projectId} />
         <FileLoader projectId={projectId} onUploadComplete={() => { }} />
+        <FileList projectId={projectId} />
       </div>
     </div>
   );
