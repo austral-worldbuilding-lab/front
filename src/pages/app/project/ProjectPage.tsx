@@ -21,13 +21,15 @@ const ProjectPage = () => {
         onClick={() => {
           navigate(`/app/project/${projectId}/mandalas`);
         }}
+        icon={<Eye size={16} />}
       >
-        <Eye className="mr-2" />
         Ver mandalas
       </Button>
       <div className="max-w-md w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
-        <h2 className="text-lg font-bold mb-4">Files</h2>
-        <FileLoader projectId={projectId} onUploadComplete={() => {}} />
+        <div className="flex justify-between items-start">
+          <h2 className="text-lg font-bold mb-4">Files</h2>
+          <FileLoader projectId={projectId} onUploadComplete={() => {}} />
+        </div>
         <FileList projectId={projectId} />
       </div>
     </div>

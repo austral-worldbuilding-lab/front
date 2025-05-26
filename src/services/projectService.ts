@@ -17,7 +17,7 @@ export const createMandala = async (
         response.data.message || "Error generating mandala with AI."
       );
     }
-    return response.data.data.id;
+    return response.data.data.mandala.id;
   }
   const response = await axiosInstance.post("/mandala", dto);
   if (response.status !== 201) {
