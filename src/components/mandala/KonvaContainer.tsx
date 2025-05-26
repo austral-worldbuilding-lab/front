@@ -1,17 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Group, Rect } from "react-konva";
 import { Html } from "react-konva-utils";
-import { Mandala, Postit } from "@/types/mandala";
+import { Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
 
-interface KonvaContainerProps {
-  mandala: Mandala;
+export interface KonvaContainerProps {
+  mandala: MandalaData;
   onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
 }
+
+const SCENE_W = 1200;
+const SCENE_H = 1200;
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
@@ -21,40 +24,20 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onDragStart,
   onDragEnd,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ width: 100, height: 100 });
-
-  // Editing state
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [editableContent, setEditableContent] = useState("");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [postItW, postItH, padding] = [64, 64, 5];
 
-  // Observe container size
   useEffect(() => {
-    const obs = new ResizeObserver((entries) => {
-      for (const e of entries) {
-        const { width, height } = e.contentRect;
-        setSize({ width, height });
-      }
-    });
-    if (containerRef.current) obs.observe(containerRef.current);
-    return () => obs.disconnect();
-  }, []);
-
-  // Focus when editing starts
-  useEffect(() => {
-    setTimeout(() => {
-      if (editableIndex !== null && textAreaRef.current) {
-        textAreaRef.current.focus();
-        const len = textAreaRef.current.value.length;
-        textAreaRef.current.setSelectionRange(len, len);
-      }
-    }, 0);
+    if (editableIndex !== null && textAreaRef.current) {
+      textAreaRef.current.focus();
+      const len = textAreaRef.current.value.length;
+      textAreaRef.current.setSelectionRange(len, len);
+    }
   }, [editableIndex]);
 
-  // Click outside to cancel editing
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -69,123 +52,92 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, [editableIndex]);
 
-  // Convert relative [-1,1] to absolute
   const toAbsolute = (rx: number, ry: number) => ({
-    x: ((rx + 1) / 2) * size.width,
-    y: ((1 - ry) / 2) * size.height,
+    x: ((rx + 1) / 2) * SCENE_W,
+    y: ((1 - ry) / 2) * SCENE_H,
   });
 
-  // Convert absolute to relative
   const toRelative = (x: number, y: number) => ({
-    x: (x / size.width) * 2 - 1,
-    y: 1 - (y / size.height) * 2,
+    x: (x / SCENE_W) * 2 - 1,
+    y: 1 - (y / SCENE_H) * 2,
   });
 
-  // Drag clamp
+  const clamp = (v: number, max: number) => Math.max(0, Math.min(v, max));
   const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
-    let nx = node.x(),
-      ny = node.y();
-    nx = Math.max(0, Math.min(size.width - postItW, nx));
-    ny = Math.max(0, Math.min(size.height - postItH, ny));
-    node.position({ x: nx, y: ny });
-  };
-
-  // Optional polar
-  const toPolar = (x: number, y: number) => {
-    const cx = size.width / 2,
-      cy = size.height / 2;
-    const dx = x - cx,
-      dy = cy - y;
-    const angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
-    const dist = Math.hypot(dx, dy);
-    const maxR = Math.min(size.width, size.height) / 2;
-    return { angle, percentileDistance: Math.min(dist / maxR, 1) };
-  };
-
-  const handleContentChange = async (i: number, v: string) => {
-    setEditableContent(v);
-    await onPostItUpdate(i, { content: v });
+    node.position({
+      x: clamp(node.x(), SCENE_W - postItW),
+      y: clamp(node.y(), SCENE_H - postItH),
+    });
   };
 
   if (!mandala) return <div>No mandala found</div>;
 
   return (
-    <div ref={containerRef} className="w-full h-full relative">
-      <Stage
-        width={size.width}
-        height={size.height}
-        style={{ position: "absolute", top: 0, left: 0 }}
-      >
-        <Layer>
-          {mandala.postits.map((p, i) => {
-            const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
-            const isEditing = editableIndex === i;
-            return (
-              <Group
-                key={i}
-                x={x}
-                y={y}
-                draggable={!isEditing}
-                onDragStart={onDragStart}
-                onDragMove={handleDragMove}
-                onDragEnd={(e) => {
-                  onDragEnd();
-                  const nx = e.target.x(),
-                    ny = e.target.y();
-                  const rel = toRelative(nx, ny);
-                  const polar = toPolar(nx, ny);
-                  onPostItUpdate(i, {
-                    coordinates: {
-                      x: rel.x,
-                      y: rel.y,
-                      angle: polar.angle,
-                      percentileDistance: polar.percentileDistance,
-                    },
-                  });
+    <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
+      <Layer>
+        {mandala.postits.map((p, i) => {
+          const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
+          const isEditing = editableIndex === i;
+          return (
+            <Group
+              key={i}
+              x={x}
+              y={y}
+              draggable={!isEditing}
+              onDragStart={onDragStart}
+              onDragMove={handleDragMove}
+              onDragEnd={async (e) => {
+                onDragEnd();
+                const nx = e.target.x(),
+                  ny = e.target.y();
+                const rel = toRelative(nx, ny);
+                await onPostItUpdate(i, {
+                  coordinates: { ...p.coordinates, x: rel.x, y: rel.y },
+                });
+              }}
+              onDblClick={() => {
+                setEditableIndex(i);
+                setEditableContent(p.content);
+              }}
+              onMouseEnter={onMouseEnter}
+              onMouseLeave={onMouseLeave}
+            >
+              <Rect
+                width={postItW}
+                height={postItH}
+                fill="yellow"
+                cornerRadius={4}
+              />
+              <Html
+                divProps={{
+                  style: { pointerEvents: isEditing ? "auto" : "none" },
                 }}
-                onDblClick={() => {
-                  setEditableIndex(i);
-                  setEditableContent(p.content);
-                }}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
               >
-                <Rect
-                  width={postItW}
-                  height={postItH}
-                  fill="yellow"
-                  cornerRadius={4}
-                />
-                <Html
-                  divProps={{
-                    style: { pointerEvents: isEditing ? "auto" : "none" },
+                <textarea
+                  ref={textAreaRef}
+                  disabled={!isEditing}
+                  value={isEditing ? editableContent : p.content}
+                  onChange={(e) => setEditableContent(e.target.value)}
+                  onBlur={() => setEditableIndex(null)}
+                  style={{
+                    width: postItW,
+                    height: postItH,
+                    padding: padding,
+                    margin: 0,
+                    resize: "none",
+                    background: "transparent",
+                    boxSizing: "border-box",
+                    fontSize: 11,
+                    lineHeight: 1.1,
                   }}
-                >
-                  <textarea
-                    ref={textAreaRef}
-                    disabled={!isEditing}
-                    value={isEditing ? editableContent : p.content}
-                    onChange={(e) => handleContentChange(i, e.target.value)}
-                    style={{
-                      width: postItW,
-                      height: postItH,
-                      margin: 0,
-                      padding,
-                      resize: "none",
-                      background: "transparent",
-                      boxSizing: "border-box",
-                      fontSize: 11,
-                      lineHeight: 1.1,
-                    }}
-                  />
-                </Html>
-              </Group>
-            );
-          })}
-        </Layer>
-      </Stage>
-    </div>
+                />
+              </Html>
+            </Group>
+          );
+        })}
+      </Layer>
+    </Stage>
   );
 };
 
