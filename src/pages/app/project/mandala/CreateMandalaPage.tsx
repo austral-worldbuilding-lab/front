@@ -14,7 +14,7 @@ export default function CreateMandalaPage() {
 
   const handleCreate = async (type: "blank" | "ai") => {
     if (!name.trim()) {
-      setError("El nombre no puede estar vacío.");
+      setError("The name cannot be empty.");
       return;
     }
 
@@ -24,7 +24,7 @@ export default function CreateMandalaPage() {
       const id = await createMandala(type, name);
       navigate(`/app/project/${projectId}/mandala/${id}`);
     } catch {
-      setError("Ocurrió un error al crear la mandala.");
+      setError("An error occurred while creating the mandala.");
     }
   };
 
@@ -32,7 +32,7 @@ export default function CreateMandalaPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center w-screen h-screen">
-        <Loader size="large" text="Creando mandala..." />
+        <Loader size="large" text="Creating mandala, please wait..." />
       </div>
     );
   }
@@ -44,9 +44,9 @@ export default function CreateMandalaPage() {
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
       </div>
-      <h1 className="text-2xl font-semibold">Crear nueva mandala</h1>
+      <h1 className="text-2xl font-semibold">Create new mandala</h1>
       <Input
-        placeholder="Nombre de la mandala"
+        placeholder="Mandala's name"
         value={name}
         onChange={(e) => setName(e.target.value)}
         disabled={loading}
@@ -60,7 +60,7 @@ export default function CreateMandalaPage() {
           icon={<FilePlus size={16} />}
           className="w-full"
         >
-          Mandala Vacia
+          Empty
         </Button>
 
         <Button
@@ -70,7 +70,7 @@ export default function CreateMandalaPage() {
           icon={<Sparkles size={16} />}
           className="w-full"
         >
-          Mandala con IA
+          AI Generated
         </Button>
       </div>
 

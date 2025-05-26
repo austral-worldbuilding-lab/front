@@ -7,15 +7,18 @@ interface ProjectFilesListProps {
   error: string;
 }
 
-export default function ProjectFilesList({ files, loading, error }: ProjectFilesListProps) {
-
-  if (loading) return <p>Cargando archivos...</p>;
+export default function ProjectFilesList({
+  files,
+  loading,
+  error,
+}: ProjectFilesListProps) {
+  if (loading) return <p>Loading files...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div>
       {files.length === 0 ? (
-        <p>No hay archivos cargados aún.</p>
+        <p>No files uploaded yet.</p>
       ) : (
         <ul className="list-disc space-y-1">
           {files.map((file, index) => (
