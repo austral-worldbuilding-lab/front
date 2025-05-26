@@ -6,7 +6,6 @@ import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { Link, useParams } from "react-router-dom";
-import FilePopOver from "@/components/file/FilePopOver";
 import { ArrowLeftIcon } from "lucide-react";
 
 interface MandalaContainerProps {
@@ -32,7 +31,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center w-screen h-screen">
-        <Loader size="large" text="Cargando mandala..." />
+        <Loader size="large" text="Loading mandala..." />
       </div>
     );
   }
@@ -40,7 +39,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   if (error) {
     return (
       <div className="flex items-center justify-center w-full h-full text-red-500">
-        Error al cargar el mandala
+        Error loading mandala
       </div>
     );
   }
@@ -73,7 +72,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   <ArrowLeftIcon className="w-5 h-5" />
                   Volver
                 </Link>
-                {projectId && <FilePopOver projectId={projectId} />}
               </div>
 
               <ZoomControls onCreatePostIt={handleCreatePostIt} />
