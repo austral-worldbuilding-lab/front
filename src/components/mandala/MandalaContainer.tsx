@@ -92,24 +92,16 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   position: "relative",
                 }}
               >
-                <div className="relative flex items-center justify-center w-full h-full">
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    {/* Fondo del mandala (puede seguir usando coordenadas absolutas si querés centrarlo) */}
-                    <div className="absolute inset-0 z-0 pointer-events-none">
-                      <Mandala scale={1} position={{ x: 0, y: 0 }} />
-                    </div>
-                    {/* Konva container en tamaño completo y responsive */}
-                    <div className="absolute inset-0 z-10">
-                      <KonvaContainer
-                        mandala={mandala}
-                        onPostItUpdate={updatePostit}
-                        onMouseEnter={() => setIsHoveringPostIt(true)}
-                        onMouseLeave={() => setIsHoveringPostIt(false)}
-                        onDragStart={() => setIsDraggingPostIt(true)}
-                        onDragEnd={() => setIsDraggingPostIt(false)}
-                      />
-                    </div>
-                  </div>
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <Mandala scale={1} position={{ x: 0, y: 0 }} />
+                  <KonvaContainer
+                    mandala={mandala}
+                    onPostItUpdate={updatePostit}
+                    onMouseEnter={() => setIsHoveringPostIt(true)}
+                    onMouseLeave={() => setIsHoveringPostIt(false)}
+                    onDragStart={() => setIsDraggingPostIt(true)}
+                    onDragEnd={() => setIsDraggingPostIt(false)}
+                  />
                 </div>
               </TransformComponent>
             </>
