@@ -1,22 +1,13 @@
-import { useEffect, useState } from "react";
-import { getProjectFiles, ProjectFile } from "../../services/filesService";
+import { ProjectFile } from "../../services/filesService";
 import { FileText } from "lucide-react";
 
 interface ProjectFilesListProps {
-  projectId: string;
+  files: ProjectFile[];
+  loading: boolean;
+  error: string;
 }
 
-export default function ProjectFilesList({ projectId }: ProjectFilesListProps) {
-  const [files, setFiles] = useState<ProjectFile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    getProjectFiles(projectId)
-      .then((result) => setFiles(result || []))
-      .catch(() => setError("Error al cargar los archivos."))
-      .finally(() => setLoading(false));
-  }, [projectId]);
+export default function ProjectFilesList({ files, loading, error }: ProjectFilesListProps) {
 
   if (loading) return <p>Cargando archivos...</p>;
   if (error) return <p>{error}</p>;
