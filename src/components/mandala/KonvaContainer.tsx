@@ -25,17 +25,17 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onDragEnd,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [editableContent, setEditableContent] = useState("");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
   const [postItW, postItH, padding] = [64, 64, 5];
 
   useEffect(() => {
-    if (editableIndex !== null && textAreaRef.current) {
-      textAreaRef.current.focus();
-      const len = textAreaRef.current.value.length;
-      textAreaRef.current.setSelectionRange(len, len);
-    }
+    setTimeout(() => {
+      if (editableIndex !== null && textAreaRef.current) {
+        textAreaRef.current.focus();
+        const len = textAreaRef.current.value.length;
+        textAreaRef.current.setSelectionRange(len, len);
+      }
+    }, 0);
   }, [editableIndex]);
 
   useEffect(() => {
@@ -98,7 +98,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               }}
               onDblClick={() => {
                 setEditableIndex(i);
-                setEditableContent(p.content);
               }}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
@@ -115,11 +114,16 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 }}
               >
                 <textarea
-                  ref={textAreaRef}
+                  ref={isEditing ? textAreaRef : null}
                   disabled={!isEditing}
-                  value={isEditing ? editableContent : p.content}
-                  onChange={(e) => setEditableContent(e.target.value)}
-                  onBlur={() => setEditableIndex(null)}
+                  value={p.content}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    onPostItUpdate(i, { content: newValue });
+                  }}
+                  onBlur={() => {
+                    setEditableIndex(null);
+                  }}
                   style={{
                     width: postItW,
                     height: postItH,
