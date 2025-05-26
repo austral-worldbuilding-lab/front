@@ -1,9 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useProject } from "@/hooks/useProject";
 import Loader from "@/components/common/Loader";
+import { ArrowLeftIcon, FilePlus, Sparkles } from "lucide-react";
 
 export default function CreateMandalaPage() {
   const navigate = useNavigate();
@@ -38,6 +39,11 @@ export default function CreateMandalaPage() {
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center h-screen">
+      <div className="absolute top-10 left-10">
+        <Link to={`/app/project/${projectId}/mandalas`}>
+          <ArrowLeftIcon className="w-5 h-5" />
+        </Link>
+      </div>
       <h1 className="text-2xl font-semibold">Crear nueva mandala</h1>
       <Input
         placeholder="Nombre de la mandala"
@@ -46,17 +52,23 @@ export default function CreateMandalaPage() {
         disabled={loading}
         className="w-96 text-lg px-4 py-2"
       />
-      <div className="flex gap-4">
+      <div className="flex gap-4 w-96 justify-center items-center">
         <Button
+          color="primary"
           onClick={() => handleCreate("blank")}
           disabled={loading || !name.trim()}
+          icon={<FilePlus size={16} />}
+          className="w-full"
         >
-          Mandala en blanco
+          Mandala Vacia
         </Button>
 
         <Button
+          color="secondary"
           onClick={() => handleCreate("ai")}
           disabled={loading || !name.trim()}
+          icon={<Sparkles size={16} />}
+          className="w-full"
         >
           Mandala con IA
         </Button>

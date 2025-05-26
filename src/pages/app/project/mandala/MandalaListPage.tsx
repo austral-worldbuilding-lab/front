@@ -1,35 +1,24 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import useMandalas from "@/hooks/useMandalas";
 import Loader from "@/components/common/Loader";
-import { GlobeIcon, PlusIcon } from "lucide-react";
+import { ArrowLeftIcon, GlobeIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const MandalaListPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const { mandalas, loading, error } = useMandalas(projectId || "");
+  const { mandalas, loading } = useMandalas(projectId || "");
   const navigate = useNavigate();
   if (!projectId) {
     return <div className="p-6 text-red-500">Error: Project ID not found</div>;
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader size="large" text="Cargando mandalas..." />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 text-red-500">
-        Error al cargar las mandalas: {error.message}
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-start pt-12">
+      <div className="absolute top-10 left-10">
+        <Link to={`/app/project/${projectId}`}>
+          <ArrowLeftIcon className="w-5 h-5" />
+        </Link>
+      </div>
       <div className="w-full max-w-2xl px-4">
         <h1 className="text-2xl font-bold mb-6 text-center">
           Mandalas del Proyecto
@@ -45,7 +34,8 @@ const MandalaListPage = () => {
           Crear mandala
         </Button>
         <div className="bg-white rounded-lg shadow-sm border">
-          {mandalas.length === 0 ? (
+          {loading && <Loader size="medium" text="Cargando mandalas..." />}
+          {mandalas.length === 0 && !loading ? (
             <p className="p-4 text-gray-600 text-center">
               No hay mandalas creadas aún.
             </p>

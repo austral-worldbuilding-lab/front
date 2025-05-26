@@ -5,8 +5,9 @@ import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import FilePopOver from "@/components/file/FilePopOver";
+import { ArrowLeftIcon } from "lucide-react";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -17,10 +18,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const { projectId } = useParams<{ projectId: string }>();
-
   const { mandala, loading, error, createPostit, updatePostit } =
     useMandala(mandalaId);
-
   const handleCreatePostIt = () => {
     createPostit({
       content: "New Post-It",
@@ -66,7 +65,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
         >
           {() => (
             <>
-              <div className="absolute top-4 left-4 flex gap-2 z-20">
+              <div className="absolute top-4 left-4 flex gap-10 z-20">
+                <Link
+                  to={`/app/project/${projectId}/mandalas`}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeftIcon className="w-5 h-5" />
+                  Volver
+                </Link>
                 {projectId && <FilePopOver projectId={projectId} />}
               </div>
 
