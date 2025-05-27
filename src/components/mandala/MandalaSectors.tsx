@@ -23,21 +23,21 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
     <>
       {/* Líneas divisorias de sectores */}
       {computedAngles.map((sector) => (
-            <div
-                key={sector.id}
-                className="absolute"
-                style={{
-                  width: maxRadius,
-                  height: "2px",
-                  left: 0,
-                  top: 0,
-                  borderTop: "2px dotted rgba(100, 150, 255, 0.5)",
-                  transform: `rotate(${sector.angle}deg)`,
-                  transformOrigin: "left center",
-                  zIndex: 50,
-                }}
-            />
-        ))}
+        <div
+          key={sector.id}
+          className="absolute"
+          style={{
+            width: maxRadius,
+            height: "2px",
+            left: 0,
+            top: 0,
+            borderTop: "2px dotted rgba(100, 150, 255, 0.5)",
+            transform: `rotate(${sector.angle}deg)`,
+            transformOrigin: "left center",
+            zIndex: 50,
+          }}
+        />
+      ))}
 
       {/* Puntos en las intersecciones */}
       {computedAngles.map((sector) => (
@@ -85,18 +85,18 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
 
       {/* Burbujas de preguntas predefinidas */}
       {computedAngles.map((sector) => (
-          <div
-                key={`question-${sector.id}`}
-                className="absolute z-20"
-                style={{
-                  left: Math.cos((sector.angle * Math.PI) / 180) * (maxRadius + 120),
-                  top: Math.sin((sector.angle * Math.PI) / 180) * (maxRadius + 120),
-                  transform: "translate(-50%, -50%)",
-                }}
-            >
-              <QuestionBubble question={sector.question}/>
-            </div>
-        ))}
+      <div
+          key={`question-${sector.id}`}
+          className="absolute z-20"
+          style={{
+            left: Math.cos((sector.angle * Math.PI) / 180) * (maxRadius + 120),
+            top: Math.sin((sector.angle * Math.PI) / 180) * (maxRadius + 120),
+            transform: "translate(-50%, -50%)",
+          }}
+      >
+        <QuestionBubble question={sector.question}/>
+      </div>
+      ))}
     </>
   );
 };
