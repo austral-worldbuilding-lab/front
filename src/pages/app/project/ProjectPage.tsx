@@ -33,7 +33,9 @@ const ProjectPage = () => {
 
   return (
     <div className="p-6 min-h-screen flex flex-col justify-center items-center">
-      <h1 className="text-2xl font-bold mb-10">Project {projectId}</h1>
+      <h1 className="text-2xl font-bold mb-10">
+        Workshop: Festejos de egresados en la universidad
+      </h1>
       <Button
         color="primary"
         className="mb-10"
