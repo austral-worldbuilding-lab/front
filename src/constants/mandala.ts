@@ -27,7 +27,7 @@ export const Levels: Level[] = [
   },
 ];
 
-const rawSectors = [
+const baseSectors = [
   {
     id: "ecologia",
     name: "ECOLOGÍA",
@@ -60,7 +60,4 @@ const rawSectors = [
   },
 ];
 
-export const Sectors: Sector[] = rawSectors.map((sector, index, array) => ({
-  ...sector,
-  angle: (360 / array.length) * index,
-}));
+export const Sectors: Sector[] = baseSectors;

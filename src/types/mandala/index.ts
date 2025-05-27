@@ -8,7 +8,6 @@ export interface Level {
 export interface Sector {
   id: string;
   name: string;
-  angle: number;
   question: string;
 }
 
