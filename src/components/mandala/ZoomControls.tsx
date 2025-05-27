@@ -27,18 +27,20 @@ const ZoomControls: React.FC<ZoomControlsProps> = ({ onCreatePostIt }) => {
         color="primary"
         icon={<ZoomOut size={16} />}
       />
-      <Button
+      {/*<Button
         onClick={handleReset}
         variant="filled"
         color="secondary"
         icon={<RotateCcw size={16} />}
-      />
+      />*/}
       <Button
         onClick={onCreatePostIt}
         variant="filled"
-        color="primary"
+        color="secondary"
         icon={<Plus size={16} />}
-      />
+      >
+        Add Post-It
+      </Button>
     </div>
   );
 };

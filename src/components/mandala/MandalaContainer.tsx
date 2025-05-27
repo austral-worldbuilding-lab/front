@@ -52,7 +52,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
           minScale={0.3}
           maxScale={4}
           centerOnInit={true}
-          limitToBounds={true}
+          limitToBounds={false}
           wheel={{ disabled: isDraggingPostIt || isHoveringPostIt }}
           pinch={{ disabled: isDraggingPostIt || isHoveringPostIt }}
           doubleClick={{ disabled: true }}
