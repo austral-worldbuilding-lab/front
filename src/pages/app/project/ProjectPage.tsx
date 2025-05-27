@@ -3,8 +3,8 @@ import FileList from "@/components/project/FileList";
 import FileLoader from "@/components/project/FileLoader";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import {useEffect, useState} from "react";
-import {getProjectFiles, ProjectFile} from "@/services/filesService.ts";
+import { useEffect, useState } from "react";
+import { getProjectFiles, ProjectFile } from "@/services/filesService.ts";
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -15,16 +15,16 @@ const ProjectPage = () => {
   const [error, setError] = useState("");
 
   const fetchFiles = () => {
-      if (!projectId) return;
-      setLoading(true);
-      getProjectFiles(projectId)
-          .then((result) => setFiles(result || []))
-          .catch(() => setError("Error al cargar los archivos"))
-          .finally(() => setLoading(false));
-  }
+    if (!projectId) return;
+    setLoading(true);
+    getProjectFiles(projectId)
+      .then((result) => setFiles(result || []))
+      .catch(() => setError("Error al cargar los archivos"))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-      fetchFiles();
+    fetchFiles();
   }, [projectId]);
 
   if (!projectId) {
@@ -33,7 +33,9 @@ const ProjectPage = () => {
 
   return (
     <div className="p-6 min-h-screen flex flex-col justify-center items-center">
-      <h1 className="text-2xl font-bold mb-10">Project {projectId}</h1>
+      <h1 className="text-2xl font-bold mb-10">
+        Workshop: Festejos de egresados en la universidad
+      </h1>
       <Button
         color="primary"
         className="mb-10"
@@ -42,12 +44,12 @@ const ProjectPage = () => {
         }}
         icon={<Eye size={16} />}
       >
-        Ver mandalas
+        View Mandalas
       </Button>
       <div className="max-w-md w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
         <div className="flex justify-between items-start">
           <h2 className="text-lg font-bold mb-4">Files</h2>
-          <FileLoader onUploadComplete={fetchFiles} projectId={projectId}/>
+          <FileLoader onUploadComplete={fetchFiles} projectId={projectId} />
         </div>
         <FileList files={files} loading={loading} error={error} />
       </div>

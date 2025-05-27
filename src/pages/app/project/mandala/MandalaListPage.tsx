@@ -20,24 +20,22 @@ const MandalaListPage = () => {
         </Link>
       </div>
       <div className="w-full max-w-2xl px-4">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Mandalas del Proyecto
-        </h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Mandalas</h1>
         <Button
           color="primary"
           className="mb-10"
           onClick={() => {
             navigate(`/app/project/${projectId}/mandala/create`);
           }}
+          icon={<PlusIcon size={16} />}
         >
-          <PlusIcon className="mr-2" />
-          Crear mandala
+          Create Mandala
         </Button>
         <div className="bg-white rounded-lg shadow-sm border">
-          {loading && <Loader size="medium" text="Cargando mandalas..." />}
+          {loading && <Loader size="medium" text="Loading mandalas..." />}
           {mandalas.length === 0 && !loading ? (
             <p className="p-4 text-gray-600 text-center">
-              No hay mandalas creadas aún.
+              No mandalas created yet.
             </p>
           ) : (
             <ul className="divide-y divide-gray-100">
@@ -52,7 +50,7 @@ const MandalaListPage = () => {
                   >
                     <GlobeIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
                     <span className="flex-1">
-                      {mandala.name || "Mandala sin nombre"}
+                      {mandala.name || "Mandala without name"}
                     </span>
                   </Link>
                 </li>
