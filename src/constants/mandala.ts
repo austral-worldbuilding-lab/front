@@ -27,41 +27,40 @@ export const Levels: Level[] = [
   },
 ];
 
-export const Sectors: Sector[] = [
+const rawSectors = [
   {
     id: "ecologia",
     name: "ECOLOGÍA",
-    angle: 0,
     question: "¿Qué tipo de terreno y vida hay en este lugar?",
   },
   {
     id: "gobierno",
     name: "GOBIERNO",
-    angle: 60,
     question: "¿Cómo se gobierna este lugar?",
   },
   {
     id: "economia",
     name: "ECONOMÍA",
-    angle: 120,
     question: "¿Cómo funciona la economía de este lugar?",
   },
   {
     id: "infraestructura",
     name: "INFRAESTRUCTURA",
-    angle: 180,
     question: "¿Cómo está construido este lugar?",
   },
   {
     id: "cultura",
     name: "CULTURA",
-    angle: 240,
     question: "¿Cuáles son las tradiciones y valores de este lugar?",
   },
   {
     id: "recursos",
     name: "RECURSOS",
-    angle: 300,
     question: "¿Qué abunda y qué falta en este lugar?",
   },
 ];
+
+export const Sectors: Sector[] = rawSectors.map((sector, index, array) => ({
+  ...sector,
+  angle: (360 / array.length) * index,
+}));

@@ -21,13 +21,13 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
           key={sector.id}
           className="absolute"
           style={{
-            width: maxRadius * 2,
+            width: maxRadius,
             height: "2px",
-            left: -maxRadius,
+            left: 0,
             top: 0,
             borderTop: "2px dotted rgba(100, 150, 255, 0.5)",
             transform: `rotate(${sector.angle}deg)`,
-            transformOrigin: "center",
+            transformOrigin: "left center",
             zIndex: 50,
           }}
         />
