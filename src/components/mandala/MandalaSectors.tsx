@@ -13,28 +13,34 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
   maxRadius,
   levels,
 }) => {
+  const computedAngles = sectors.map((sector, index) => ({
+    ...sector,
+    angle: (360 / sectors.length) * index,
+  }));
+
+
   return (
     <>
       {/* Líneas divisorias de sectores */}
-      {sectors.map((sector) => (
+      {computedAngles.map((sector) => (
         <div
           key={sector.id}
           className="absolute"
           style={{
-            width: maxRadius * 2,
+            width: maxRadius,
             height: "2px",
-            left: -maxRadius,
+            left: 0,
             top: 0,
             borderTop: "2px dotted rgba(100, 150, 255, 0.5)",
             transform: `rotate(${sector.angle}deg)`,
-            transformOrigin: "center",
+            transformOrigin: "left center",
             zIndex: 50,
           }}
         />
       ))}
 
       {/* Puntos en las intersecciones */}
-      {sectors.map((sector) =>
+      {computedAngles.map((sector) => (
         levels.map((level) => (
           <div
             key={`${sector.id}-${level.id}`}
@@ -47,13 +53,13 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
             }}
           />
         ))
-      )}
+      ))}
 
       {/* Nombres de los sectores */}
-      {sectors.map((sector, index) => {
-        const nextSector = sectors[(index + 1) % sectors.length];
+      {computedAngles.map((sector, index) => {
+        const nextSector = computedAngles[(index + 1) % computedAngles.length];
         let midAngle = (sector.angle + nextSector.angle) / 2;
-        if (index === sectors.length - 1) {
+        if (index === computedAngles.length - 1) {
           midAngle = (sector.angle + (nextSector.angle + 360)) / 2;
           if (midAngle >= 360) midAngle -= 360;
         }
@@ -78,8 +84,8 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
       })}
 
       {/* Burbujas de preguntas predefinidas */}
-      {sectors.map((sector) => (
-        <div
+      {computedAngles.map((sector) => (
+      <div
           key={`question-${sector.id}`}
           className="absolute z-20"
           style={{
@@ -87,9 +93,9 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
             top: Math.sin((sector.angle * Math.PI) / 180) * (maxRadius + 120),
             transform: "translate(-50%, -50%)",
           }}
-        >
-          <QuestionBubble question={sector.question} />
-        </div>
+      >
+        <QuestionBubble question={sector.question}/>
+      </div>
       ))}
     </>
   );
