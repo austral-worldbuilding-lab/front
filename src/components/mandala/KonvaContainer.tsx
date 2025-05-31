@@ -16,6 +16,15 @@ export interface KonvaContainerProps {
 const SCENE_W = 1200;
 const SCENE_H = 1200;
 
+const dimensionColors: Record<string, string> = {
+  "Recursos": "#e8b249",
+  "Cultura": "#d76e6e",
+  "Infraestructura": "#b3a1d9",
+  "Economía": "#e7f266",
+  "Gobierno": "#6da9e5",
+  "Ecología": "#83c896",
+};
+
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
@@ -53,13 +62,13 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   }, [editableIndex]);
 
   const toAbsolute = (rx: number, ry: number) => ({
-    x: ((rx + 1) / 2) * SCENE_W,
-    y: ((1 - ry) / 2) * SCENE_H,
+    x: ((rx + 1) / 2) * (SCENE_W - postItW),
+    y: ((1 - ry) / 2) * (SCENE_H - postItH),
   });
 
   const toRelative = (x: number, y: number) => ({
-    x: (x / SCENE_W) * 2 - 1,
-    y: 1 - (y / SCENE_H) * 2,
+    x: (x / (SCENE_W - postItW)) * 2 - 1,
+    y: 1 - (y / (SCENE_H - postItH)) * 2,
   });
 
   const clamp = (v: number, max: number) => Math.max(0, Math.min(v, max));
@@ -70,6 +79,34 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       y: clamp(node.y(), SCENE_H - postItH),
     });
   };
+
+  const getDimensionAndSectionFromCoordinates = (
+  x: number,
+  y: number,
+  dimensions: string[] = [
+    "Recursos",
+    "Cultura",
+    "Infraestructura",
+    "Economía",
+    "Gobierno",
+    "Ecología",
+  ],
+  sections: string[] = ["Persona", "Comunidad", "Institución"]
+  ): { dimension: string; section: string } => {
+  const angle = Math.atan2(y, x);
+  const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
+    
+  const rawDistance = Math.sqrt(x * x + y * y);
+  const normalizedDistance = Math.min(rawDistance / Math.SQRT2, 1);
+
+  const dimIndex = Math.floor((adjustedAngle / (2 * Math.PI)) * dimensions.length);
+  const secIndex = Math.floor(normalizedDistance * sections.length);
+
+  return {
+    dimension: dimensions[Math.min(dimIndex, dimensions.length - 1)],
+    section: sections[Math.min(secIndex, sections.length - 1)],
+  };
+};
 
   if (!mandala) return <div>No mandala found</div>;
 
@@ -92,8 +129,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 const nx = e.target.x(),
                   ny = e.target.y();
                 const rel = toRelative(nx, ny);
+                const { dimension, section } = getDimensionAndSectionFromCoordinates(
+                  rel.x,
+                  rel.y
+                );
                 await onPostItUpdate(i, {
                   coordinates: { ...p.coordinates, x: rel.x, y: rel.y },
+                  dimension,
+                  section,
                 });
               }}
               onDblClick={() => {
@@ -105,7 +148,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               <Rect
                 width={postItW}
                 height={postItH}
-                fill="yellow"
+                fill={dimensionColors[p.dimension] || "#cccccc"}
                 cornerRadius={4}
               />
               <Html
