@@ -1,0 +1,84 @@
+import { useEffect, useState, useCallback } from "react";
+import { Mandala, Postit } from "../types/mandala";
+import {
+  subscribeMandala,
+  createPostit as createPostitService,
+  updatePostit as updatePostitService,
+  deletePostit as deletePostitService,
+} from "../services/mandalaService";
+import { useParams } from "react-router-dom";
+
+const useMandala = (mandalaId: string) => {
+  const [mandala, setMandala] = useState<Mandala | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  const { projectId } = useParams<{ projectId: string }>();
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    const unsubscribe = subscribeMandala(projectId!, mandalaId, (data) => {
+      setMandala(data);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [mandalaId, projectId]);
+
+  const createPostit = useCallback(
+    async (postitData: Postit) => {
+      try {
+        if (!mandalaId) throw new Error("Mandala ID is required");
+        return await createPostitService(projectId!, mandalaId, postitData);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
+  const updatePostit = useCallback(
+    async (index: number, postitData: Partial<Postit>) => {
+      try {
+        return await updatePostitService(projectId!, mandalaId, index, postitData);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
+  const deletePostit = useCallback(
+    async (index: number) => {
+      try {
+        return await deletePostitService(projectId!, mandalaId, index);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
+  return {
+    mandala,
+    loading,
+    error,
+    createPostit,
+    updatePostit,
+    deletePostit,
+  };
+};
+
+export default useMandala;
