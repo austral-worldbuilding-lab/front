@@ -36,6 +36,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [postItW, postItH, padding] = [64, 64, 5];
+  const [editingContent, setEditingContent] = useState<string | null>(null);
+  const [zOrder, setZOrder] = useState<number[]>(
+    mandala.postits.map((_, idx) => idx)
+  );
 
   useEffect(() => {
     setTimeout(() => {
@@ -54,7 +58,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         textAreaRef.current &&
         !textAreaRef.current.contains(e.target as Node)
       ) {
+        window.getSelection()?.removeAllRanges();
         setEditableIndex(null);
+        setEditingContent(null);
       }
     };
     window.addEventListener("mousedown", handleClickOutside);
@@ -93,27 +99,35 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   ],
   sections: string[] = ["Persona", "Comunidad", "Institución"]
   ): { dimension: string; section: string } => {
-  const angle = Math.atan2(y, x);
-  const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
-    
-  const rawDistance = Math.sqrt(x * x + y * y);
-  const normalizedDistance = Math.min(rawDistance / Math.SQRT2, 1);
+    const angle = Math.atan2(y, x);
+    const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
+      
+    const rawDistance = Math.sqrt(x * x + y * y);
+    const normalizedDistance = Math.min(rawDistance / Math.SQRT2, 1);
 
-  const dimIndex = Math.floor((adjustedAngle / (2 * Math.PI)) * dimensions.length);
-  const secIndex = Math.floor(normalizedDistance * sections.length);
+    const dimIndex = Math.floor((adjustedAngle / (2 * Math.PI)) * dimensions.length);
+    const secIndex = Math.floor(normalizedDistance * sections.length);
 
-  return {
-    dimension: dimensions[Math.min(dimIndex, dimensions.length - 1)],
-    section: sections[Math.min(secIndex, sections.length - 1)],
+    return {
+      dimension: dimensions[Math.min(dimIndex, dimensions.length - 1)],
+      section: sections[Math.min(secIndex, sections.length - 1)],
+    };
   };
-};
+  
+  const bringToFront = (index: number) => {
+    setZOrder((prev) => {
+      const filtered = prev.filter((i) => i !== index);
+      return [...filtered, index]; // último = más arriba
+    });
+  };
 
   if (!mandala) return <div>No mandala found</div>;
 
   return (
     <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
       <Layer>
-        {mandala.postits.map((p, i) => {
+        {zOrder.map((i) => {
+          const p = mandala.postits[i];
           const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
           const isEditing = editableIndex === i;
           return (
@@ -122,12 +136,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               x={x}
               y={y}
               draggable={!isEditing}
-              onDragStart={onDragStart}
+              onDragStart={() => {
+                onDragStart();
+                bringToFront(i);
+              }}
               onDragMove={handleDragMove}
               onDragEnd={async (e) => {
                 onDragEnd();
-                const nx = e.target.x(),
-                  ny = e.target.y();
+                const nx = e.target.x(), ny = e.target.y();
                 const rel = toRelative(nx, ny);
                 const { dimension, section } = getDimensionAndSectionFromCoordinates(
                   rel.x,
@@ -141,6 +157,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               }}
               onDblClick={() => {
                 setEditableIndex(i);
+                setEditingContent(p.content);
+                bringToFront(i);
               }}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
@@ -153,19 +171,31 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               />
               <Html
                 divProps={{
-                  style: { pointerEvents: isEditing ? "auto" : "none" },
+                  style: {
+                    pointerEvents: isEditing ? "auto" : "none",
+                    zIndex: zOrder.indexOf(i) + 1,
+                  },
                 }}
               >
                 <textarea
                   ref={isEditing ? textAreaRef : null}
                   disabled={!isEditing}
-                  value={p.content}
+                  value={ isEditing ? editingContent ?? "" : p.content }
                   onChange={(e) => {
                     const newValue = e.target.value;
+                    setEditingContent(newValue);
                     onPostItUpdate(i, { content: newValue });
                   }}
                   onBlur={() => {
+                    window.getSelection()?.removeAllRanges();
                     setEditableIndex(null);
+                    setEditingContent(null);
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
                   }}
                   style={{
                     width: postItW,
@@ -173,10 +203,13 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                     padding: padding,
                     margin: 0,
                     resize: "none",
-                    background: "transparent",
+                    background: `${dimensionColors[p.dimension] || "#cccccc"}`,
+                    borderRadius: 4,
+                    boxShadow: "0 0 4px rgba(0,0,0,0.3)",
                     boxSizing: "border-box",
                     fontSize: 11,
                     lineHeight: 1.1,
+                    overflow: "hidden"
                   }}
                 />
               </Html>
