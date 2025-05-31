@@ -13,7 +13,7 @@ export default function ProjectFilesList({
   error,
 }: ProjectFilesListProps) {
   if (loading) return <p>Loading files...</p>;
-  if (error) return <p>{error}</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div>

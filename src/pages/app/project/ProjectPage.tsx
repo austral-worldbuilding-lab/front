@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getProjectFiles, ProjectFile } from "@/services/filesService.ts";
+import logo from "@/assets/logo.png";
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -19,7 +20,7 @@ const ProjectPage = () => {
     setLoading(true);
     getProjectFiles(projectId)
       .then((result) => setFiles(result || []))
-      .catch(() => setError("Error al cargar los archivos"))
+      .catch(() => setError("Error getting files"))
       .finally(() => setLoading(false));
   };
 
@@ -32,26 +33,33 @@ const ProjectPage = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen flex flex-col justify-center items-center">
-      <h1 className="text-2xl font-bold mb-10">
-        Workshop: Festejos de egresados en la universidad
+    <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
+      <img
+        src={logo}
+        alt="logo"
+        className="w-50 absolute left-1/2 -translate-x-1/2 top-10"
+      />
+      <h1 className="text-2xl font-bold mb-20 max-w-lg w-full">
+        Project: Festejos de egresados en la universidad
       </h1>
-      <Button
-        color="primary"
-        className="mb-10"
-        onClick={() => {
-          navigate(`/app/project/${projectId}/mandalas`);
-        }}
-        icon={<Eye size={16} />}
-      >
-        View Mandalas
-      </Button>
-      <div className="max-w-md w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
-        <div className="flex justify-between items-start">
-          <h2 className="text-lg font-bold mb-4">Files</h2>
-          <FileLoader onUploadComplete={fetchFiles} projectId={projectId} />
+      <div className="flex flex-col items-start justify-start max-w-lg w-full">
+        <Button
+          color="primary"
+          className="mb-10"
+          onClick={() => {
+            navigate(`/app/project/${projectId}/mandalas`);
+          }}
+          icon={<Eye size={16} />}
+        >
+          View Mandalas
+        </Button>
+        <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
+          <div className="flex justify-between items-start">
+            <h2 className="text-lg font-bold mb-4">Project Files</h2>
+            <FileLoader onUploadComplete={fetchFiles} projectId={projectId} />
+          </div>
+          <FileList files={files} loading={loading} error={error} />
         </div>
-        <FileList files={files} loading={loading} error={error} />
       </div>
     </div>
   );
