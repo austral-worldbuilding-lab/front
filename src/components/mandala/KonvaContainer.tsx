@@ -42,6 +42,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   );
 
   useEffect(() => {
+    setZOrder(mandala.postits.map((_, idx) => idx));
+  }, [mandala.postits, mandala.postits.length]);
+
+  useEffect(() => {
     setTimeout(() => {
       if (editableIndex !== null && textAreaRef.current) {
         textAreaRef.current.focus();
