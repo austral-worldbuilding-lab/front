@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useUploadFiles, ACCEPTED_TYPES } from "@/hooks/useUploadFiles";
-import { Upload } from "lucide-react";
+import { CloudUpload, Upload } from "lucide-react";
 
 interface FileUploaderProps {
   projectId: string;
@@ -38,6 +38,7 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
           variant="outline"
           color="tertiary"
           onClick={handleTriggerFileSelect}
+          icon={<Upload size={16} />}
         >
           Choose Files
         </Button>
@@ -47,7 +48,7 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
           loading={loading}
           color="primary"
           disabled={selectedFiles.length === 0}
-          icon={<Upload size={16} />}
+          icon={<CloudUpload size={16} />}
         >
           Upload Files
         </Button>
