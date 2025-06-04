@@ -7,6 +7,7 @@ import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
+import Buttons from "./Buttons";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -70,11 +71,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   className="flex items-center gap-2"
                 >
                   <ArrowLeftIcon className="w-5 h-5" />
-                  Volver
+                  Back
                 </Link>
               </div>
-
-              <ZoomControls onCreatePostIt={handleCreatePostIt} />
+              <Buttons onCreatePostIt={handleCreatePostIt} />
+              <ZoomControls />
               <TransformComponent
                 wrapperStyle={{
                   width: "100%",
