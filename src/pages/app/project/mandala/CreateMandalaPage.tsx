@@ -5,28 +5,12 @@ import { Input } from "@/components/ui/input";
 import { useProject } from "@/hooks/useProject";
 import Loader from "@/components/common/Loader";
 import { ArrowLeftIcon, FilePlus, Sparkles } from "lucide-react";
-import TagInput, { Item } from "@/components/common/TagInput.tsx";
-import { Sectors, Levels } from "@/constants/mandala";
 
-
-const initialDimensions: Item[] = Sectors.map(sector => ({
-  id: sector.id,
-  value: sector.name,
-  color: "rgba(180, 210, 255, 0.7)",
-}));
-
-const initialScales: Item[] = Levels.map(level => ({
-  id: level.id,
-  value: level.name,
-  color: "rgba(180, 210, 255, 0.7)",
-}));
 
 export default function CreateMandalaPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
-  const [dimensions, setDimensions] = useState<Item[]>(initialDimensions);
-  const [scales, setScales] = useState<Item[]>(initialScales);
   const { createMandala, loading, projectId } = useProject();
 
   const handleCreate = async (type: "blank" | "ai") => {
@@ -38,10 +22,6 @@ export default function CreateMandalaPage() {
     setError(null);
 
     try {
-      // TODO: Enviar `dimensions` y `scales` al backend cuando esté soportado
-      void dimensions;
-      void scales;
-      
       const id = await createMandala(type, name);
       navigate(`/app/project/${projectId}/mandala/${id}`);
     } catch {
@@ -77,20 +57,6 @@ export default function CreateMandalaPage() {
             disabled={loading}
             className="text-lg px-4 py-2"
           />
-
-          <div className="grid gap-6">
-            <TagInput
-              label="Dimensions"
-              initialItems={initialDimensions}
-              onChange={setDimensions}
-            />
-
-            <TagInput
-              label="Scales"
-              initialItems={initialScales}
-              onChange={setScales}
-            />
-          </div>
 
           <div className="flex gap-4 justify-center items-center mt-4">
             <Button
