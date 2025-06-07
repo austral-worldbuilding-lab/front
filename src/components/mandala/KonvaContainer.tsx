@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Stage, Layer, Group, Rect } from "react-konva";
+import { Stage, Layer, Group, Rect, Circle, Text } from "react-konva";
 import { Html } from "react-konva-utils";
-import { Mandala as MandalaData, Postit } from "@/types/mandala";
+import {Character, Mandala as MandalaData, Postit} from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
   onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
+  characters?: Character[];
+  onCharacterDragEnd?: (id: string, position: { x: number; y: number }) => Promise<void>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onDragStart: () => void;
@@ -28,6 +30,8 @@ const dimensionColors: Record<string, string> = {
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
+  characters,
+  onCharacterDragEnd,
   onMouseEnter,
   onMouseLeave,
   onDragStart,
@@ -220,6 +224,51 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             </Group>
           );
         })}
+        {characters?.map((character) => {
+          const { x, y } = toAbsolute(character.position.x, character.position.y);
+
+          return (
+              <Group
+                  key={`character-${character.id}`}
+                  x={x}
+                  y={y}
+                  draggable
+                  onDragStart={(e) => {
+                    e.cancelBubble = true;
+                    onDragStart();
+                  }}
+                  onDragEnd={async (e) => {
+                    onDragEnd();
+                    const newPos = toRelative(e.target.x(), e.target.y());
+                    if (onCharacterDragEnd) {
+                      await onCharacterDragEnd(character.id, newPos);
+                    }
+                  }}
+                  onMouseEnter={onMouseEnter}
+                  onMouseLeave={onMouseLeave}
+              >
+                <Circle
+                    radius={20}
+                    fill={character.color}
+                    shadowColor="black"
+                    shadowBlur={5}
+                    shadowOpacity={0.6}
+                />
+                <Text
+                    text={character.name}
+                    fontSize={14}
+                    fontStyle="bold"
+                    fill="#000"
+                    y={-35}
+                    x={-50}
+                    width={100}
+                    align="center"
+                    ellipsis
+                />
+              </Group>
+          );
+        })}
+
       </Layer>
     </Stage>
   );
