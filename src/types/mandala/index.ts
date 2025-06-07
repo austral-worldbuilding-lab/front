@@ -39,6 +39,7 @@ export interface Mandala {
   createdAt: Date;
   updatedAt: Date;
   postits: Postit[];
+  characters: Character[];
   name: string;
 }
 

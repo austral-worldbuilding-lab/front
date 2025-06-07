@@ -30,7 +30,6 @@ const dimensionColors: Record<string, string> = {
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
-  characters,
   onCharacterDragEnd,
   onMouseEnter,
   onMouseLeave,
@@ -224,7 +223,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             </Group>
           );
         })}
-        {characters?.map((character) => {
+        {mandala.characters?.map((character) => {
           const { x, y } = toAbsolute(character.position.x, character.position.y);
 
           return (
