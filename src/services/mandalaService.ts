@@ -17,10 +17,16 @@ export const subscribeMandala = (
     const data = snapshot.data();
     const mandala: Mandala = {
       id: snapshot.id,
-      name: data.name || "",
-      projectId: data.projectId,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
+      mandala: {
+        id: data.mandala?.id || "",
+        name: data.mandala?.name || "",
+        configuration: data.mandala?.configuration || {
+          dimensions: [],
+          scales: [],
+        },
+        linkedToId: data.mandala?.linkedToId || "",
+      },
+      updatedAt: data.updatedAt ? data.updatedAt.toDate() : new Date(),
       postits: data.postits || [],
       characters: data.characters || [],
     };

@@ -19,10 +19,14 @@ const useMandala = (mandalaId: string) => {
     setLoading(true);
     setError(null);
 
-    const unsubscribe = subscribeMandala(projectId!, mandalaId, (data) => {
-      setMandala(data);
-      setLoading(false);
-    });
+    const unsubscribe = subscribeMandala(
+      projectId!,
+      mandalaId,
+      (data: Mandala | null) => {
+        setMandala(data);
+        setLoading(false);
+      }
+    );
 
     return () => {
       unsubscribe();

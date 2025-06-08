@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Stage, Layer, Group, Rect, Circle, Text } from "react-konva";
-import { Html } from "react-konva-utils";
+import React, { useEffect, useState } from "react";
+import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
+import PostIt from "./postits/PostIt";
+import CharacterIcon from "./characters/CharacterIcon";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -40,7 +41,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onDragEnd,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [postItW, postItH, padding] = [64, 64, 5];
   const [editingContent, setEditingContent] = useState<string | null>(null);
   const [zOrder, setZOrder] = useState<number[]>(
@@ -50,32 +50,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   useEffect(() => {
     setZOrder(mandala.postits.map((_, idx) => idx));
   }, [mandala.postits, mandala.postits.length]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (editableIndex !== null && textAreaRef.current) {
-        textAreaRef.current.focus();
-        const len = textAreaRef.current.value.length;
-        textAreaRef.current.setSelectionRange(len, len);
-      }
-    }, 0);
-  }, [editableIndex]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        editableIndex !== null &&
-        textAreaRef.current &&
-        !textAreaRef.current.contains(e.target as Node)
-      ) {
-        window.getSelection()?.removeAllRanges();
-        setEditableIndex(null);
-        setEditingContent(null);
-      }
-    };
-    window.addEventListener("mousedown", handleClickOutside);
-    return () => window.removeEventListener("mousedown", handleClickOutside);
-  }, [editableIndex]);
 
   const toAbsolute = (rx: number, ry: number) => ({
     x: ((rx + 1) / 2) * (SCENE_W - postItW),
@@ -188,79 +162,41 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
           const p = mandala.postits[i];
           const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
           const isEditing = editableIndex === i;
+
           return (
-            <Group
+            <PostIt
               key={i}
-              x={x}
-              y={y}
-              draggable={!isEditing}
+              postit={p}
+              isEditing={isEditing}
+              editingContent={editingContent}
+              dimensionColors={dimensionColors}
+              postItW={postItW}
+              postItH={postItH}
+              padding={padding}
+              position={{ x, y }}
               onDragStart={() => {
                 onDragStart();
                 bringToFront(i);
               }}
               onDragMove={handleDragMove}
-              onDragEnd={async (e) => handleOnDragEndPostIt(e, i, p)}
+              onDragEnd={(e) => handleOnDragEndPostIt(e, i, p)}
               onDblClick={() => {
                 setEditableIndex(i);
                 setEditingContent(p.content);
                 bringToFront(i);
               }}
+              onContentChange={(newValue) => {
+                setEditingContent(newValue);
+                onPostItUpdate(i, { content: newValue });
+              }}
+              onBlur={() => {
+                window.getSelection()?.removeAllRanges();
+                setEditableIndex(null);
+                setEditingContent(null);
+              }}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
-            >
-              <Rect
-                width={postItW}
-                height={postItH}
-                fill={dimensionColors[p.dimension] || "#cccccc"}
-                cornerRadius={4}
-                shadowBlur={0}
-                shadowOpacity={0}
-              />
-              <Html
-                divProps={{
-                  style: {
-                    pointerEvents: isEditing ? "auto" : "none",
-                    zIndex: zOrder.indexOf(i) + 1,
-                  },
-                }}
-              >
-                <textarea
-                  ref={isEditing ? textAreaRef : null}
-                  disabled={!isEditing}
-                  value={isEditing ? editingContent ?? "" : p.content}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setEditingContent(newValue);
-                    onPostItUpdate(i, { content: newValue });
-                  }}
-                  onBlur={() => {
-                    window.getSelection()?.removeAllRanges();
-                    setEditableIndex(null);
-                    setEditingContent(null);
-                  }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                  }}
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                  }}
-                  style={{
-                    width: postItW,
-                    height: postItH,
-                    padding: padding,
-                    margin: 0,
-                    resize: "none",
-                    background: `${dimensionColors[p.dimension] || "#cccccc"}`,
-                    borderRadius: 4,
-                    boxShadow: "0 0 4px rgba(0,0,0,0.3)",
-                    boxSizing: "border-box",
-                    fontSize: 11,
-                    lineHeight: 1.1,
-                    overflow: "hidden",
-                  }}
-                />
-              </Html>
-            </Group>
+            />
           );
         })}
         {mandala.characters?.map((character) => {
@@ -270,37 +206,15 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
           );
 
           return (
-            <Group
+            <CharacterIcon
               key={`character-${character.id}`}
-              x={x}
-              y={y}
-              draggable
-              onDragStart={(e) => {
-                e.cancelBubble = true;
-                onDragStart();
-              }}
-              onDragEnd={async (e) => handleOnDragEndCharacter(e, character)}
+              character={character}
+              position={{ x, y }}
+              onDragStart={onDragStart}
+              onDragEnd={(e) => handleOnDragEndCharacter(e, character)}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
-            >
-              <Circle
-                radius={10}
-                fill={character.color}
-                shadowBlur={0}
-                shadowOpacity={0}
-              />
-              <Text
-                text={character.name}
-                fontSize={14}
-                fontStyle="bold"
-                fill="#000"
-                y={-35}
-                x={-50}
-                width={100}
-                align="center"
-                ellipsis
-              />
-            </Group>
+            />
           );
         })}
       </Layer>
