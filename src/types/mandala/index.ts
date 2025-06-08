@@ -30,8 +30,9 @@ export interface Character {
   name: string;
   color: string;
   position: { x: number; y: number };
+  dimension?: string;
+  section?: string;
 }
-
 
 export interface Mandala {
   id: string;

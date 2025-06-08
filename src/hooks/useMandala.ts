@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import { Mandala, Postit } from "../types/mandala";
+import { Character, Mandala, Postit } from "../types/mandala";
 import {
   subscribeMandala,
   createPostit as createPostitService,
   updatePostit as updatePostitService,
   deletePostit as deletePostitService,
+  updateCharacter as updateCharacterService,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
 
@@ -46,7 +47,12 @@ const useMandala = (mandalaId: string) => {
   const updatePostit = useCallback(
     async (index: number, postitData: Partial<Postit>) => {
       try {
-        return await updatePostitService(projectId!, mandalaId, index, postitData);
+        return await updatePostitService(
+          projectId!,
+          mandalaId,
+          index,
+          postitData
+        );
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
@@ -71,6 +77,25 @@ const useMandala = (mandalaId: string) => {
     [mandalaId, projectId]
   );
 
+  const updateCharacter = useCallback(
+    async (index: number, characterData: Partial<Character>) => {
+      try {
+        return await updateCharacterService(
+          projectId!,
+          mandalaId,
+          index,
+          characterData
+        );
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
   return {
     mandala,
     loading,
@@ -78,6 +103,7 @@ const useMandala = (mandalaId: string) => {
     createPostit,
     updatePostit,
     deletePostit,
+    updateCharacter,
   };
 };
 
