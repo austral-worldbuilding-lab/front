@@ -12,6 +12,21 @@ import { colors } from "@/constants/character";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ColorSelector from "./ColorSelector";
 import { Sparkles } from "lucide-react";
+import TagInput, { Item } from "@/components/common/TagInput.tsx";
+import { Sectors, Levels } from "@/constants/mandala";
+
+
+const initialDimensions: Item[] = Sectors.map(sector => ({
+  id: sector.id,
+  value: sector.name,
+  color: "rgba(180, 210, 255, 0.7)",
+}));
+
+const initialScales: Item[] = Levels.map(level => ({
+  id: level.id,
+  value: level.name,
+  color: "rgba(180, 210, 255, 0.7)",
+}));
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -33,6 +48,8 @@ const CreateModal = ({
   const [description, setDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [mandalaType, setMandalaType] = useState("empty");
+  const [dimensions, setDimensions] = useState<Item[]>(initialDimensions);
+  const [scales, setScales] = useState<Item[]>(initialScales);
 
   const handleCreateCharacter = () => {
     onCreateCharacter({
@@ -46,6 +63,8 @@ const CreateModal = ({
     setSelectedColor(colors[0]);
     setMandalaType("empty");
     onOpenChange(false);
+    setDimensions(dimensions);
+    setScales(scales);
   };
 
   return (
@@ -65,6 +84,21 @@ const CreateModal = ({
             onChange={(e) => setName(e.target.value)}
             className="w-full"
           />
+          <div className="grid  sm:grid-cols-2 gap-4">
+            <TagInput
+                label="Dimensions"
+                initialItems={initialDimensions}
+                onChange={setDimensions}
+            />
+
+            <TagInput
+                label="Scales"
+                initialItems={initialScales}
+                onChange={setScales}
+                colorPicker={false}
+            />
+          </div>
+
 
           <div className="flex justify-between gap-2">
             <RadioGroup
@@ -119,7 +153,7 @@ const CreateModal = ({
             variant="filled"
             color="primary"
             onClick={handleCreateCharacter}
-            disabled={!name}
+            disabled={!name || dimensions.length === 0 || scales.length === 0}
           >
             Create Character
           </Button>

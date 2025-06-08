@@ -6,6 +6,7 @@ import { useProject } from "@/hooks/useProject";
 import Loader from "@/components/common/Loader";
 import { ArrowLeftIcon, FilePlus, Sparkles } from "lucide-react";
 
+
 export default function CreateMandalaPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
@@ -44,37 +45,44 @@ export default function CreateMandalaPage() {
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
       </div>
-      <h1 className="text-2xl font-semibold">Create new mandala</h1>
-      <Input
-        placeholder="Mandala's name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        disabled={loading}
-        className="w-96 text-lg px-4 py-2"
-      />
-      <div className="flex gap-4 w-96 justify-center items-center">
-        <Button
-          color="primary"
-          onClick={() => handleCreate("blank")}
-          disabled={loading || !name.trim()}
-          icon={<FilePlus size={16} />}
-          className="w-full"
-        >
-          Empty
-        </Button>
+      
+      <div className="flex flex-col gap-6 w-full max-w-2xl px-4">
+        <h1 className="text-2xl font-semibold text-center">Create new mandala</h1>
+        
+        <div className="flex flex-col gap-4">
+          <Input
+            placeholder="Mandala's name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={loading}
+            className="text-lg px-4 py-2"
+          />
 
-        <Button
-          color="secondary"
-          onClick={() => handleCreate("ai")}
-          disabled={loading || !name.trim()}
-          icon={<Sparkles size={16} />}
-          className="w-full"
-        >
-          AI Generated
-        </Button>
+          <div className="flex gap-4 justify-center items-center mt-4">
+            <Button
+              color="primary"
+              onClick={() => handleCreate("blank")}
+              disabled={loading || !name.trim()}
+              icon={<FilePlus size={16} />}
+              className="w-full"
+            >
+              Empty
+            </Button>
+
+            <Button
+              color="secondary"
+              onClick={() => handleCreate("ai")}
+              disabled={loading || !name.trim()}
+              icon={<Sparkles size={16} />}
+              className="w-full"
+            >
+              AI Generated
+            </Button>
+          </div>
+
+          {error && <p className="text-red-500 text-center">{error}</p>}
+        </div>
       </div>
-
-      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 }
