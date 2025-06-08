@@ -38,3 +38,13 @@ export interface SimpleMandala {
   id: string;
   name: string;
 }
+
+export interface Project {
+  id: string;
+  name: string;
+}
+
+export interface CreateProject {
+  name: string;
+  userId: string;
+}

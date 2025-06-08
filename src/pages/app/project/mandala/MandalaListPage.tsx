@@ -53,7 +53,7 @@ const MandalaListPage = () => {
                       {mandala.name || "Mandala without name"}
                     </span>
                   </Link>
-                </li>
+                </li> 
               ))}
             </ul>
           )}
