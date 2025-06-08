@@ -15,6 +15,7 @@ export const subscribeMandala = (
     }
 
     const data = snapshot.data();
+
     const mandala: Mandala = {
       id: snapshot.id,
       mandala: {
