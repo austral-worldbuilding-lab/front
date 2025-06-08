@@ -52,6 +52,8 @@ const Buttons = ({ onCreatePostIt, onCreateCharacter }: ButtonsProps) => {
         isOpen={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onCreateCharacter={handleCreateCharacter}
+        title="Create New Character"
+        createButtonText="Create new character"
       />
     </>
   );
