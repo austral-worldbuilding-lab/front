@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import { SimpleMandala } from "@/types/mandala";
+import {CreateProject, Project, SimpleMandala} from "@/types/mandala";
 
 export interface CreateMandalaDto {
   name: string;
@@ -38,3 +38,22 @@ export const getMandalas = async (
 
   return response.data.data;
 };
+
+export const getProjects = async (page : number, limit : number): Promise<Project[]> => {
+  const response = await axiosInstance.get<{ data: Project[] }>(
+    `/project?page=${page}&limit=${limit}`
+  );
+
+  return response.data.data;
+}
+
+export const createProject = async (project: CreateProject): Promise<Project> => {
+
+  const response = await axiosInstance.post("/project", project);
+
+  if (response.status !== 201) {
+    throw new Error(response.data.message || "Error creating project.");
+  }
+
+  return response.data.data;
+}

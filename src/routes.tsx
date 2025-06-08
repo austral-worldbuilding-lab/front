@@ -12,6 +12,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute.tsx";
 import MandalaPage from "./pages/app/project/mandala/MandalaPage";
 import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
+import ProjectListPage from "./pages/app/project/ProjectListPage";
 import CreateMandalaPage from "./pages/app/project/mandala/CreateMandalaPage";
 
 // Layout component for all protected routes
@@ -19,7 +20,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>{children}</ProtectedRoute>
 );
 
-const projectId = "e2e9e2d5-e3c7-47e4-9f12-4f6f40062eee";
+// const projectId = "e2e9e2d5-e3c7-47e4-9f12-4f6f40062eee";
 
 function App() {
   return (
@@ -29,7 +30,7 @@ function App() {
         {/* TODO: This is temporary, change this path when we have a home page */}
         <Route
           path="/"
-          element={<Navigate to={`/app/project/${projectId}`} replace />}
+          element={<Navigate to={`/app/project/`} replace />}
         />
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -47,10 +48,11 @@ function App() {
           {/* Redirect /app to mandala */}
           <Route
             index
-            element={<Navigate to={`/app/project/${projectId}`} replace />}
+            element={<Navigate to={`/app/project`} replace />}
           />
 
           {/* Rutas independientes */}
+          <Route path="project/" element={<ProjectListPage/>} />
           <Route path="project/:projectId" element={<ProjectPage />} />
           <Route
             path="project/:projectId/mandala/create"

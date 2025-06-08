@@ -1,0 +1,31 @@
+import { useEffect, useState } from "react";
+import {Project} from "@/types/mandala";
+import {getProjects} from "@/services/projectService.ts";
+
+const useProjects = (initialPage = 1, initialLimit = 10) => {
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(initialPage);
+    const [limit, setLimit] = useState(initialLimit);
+    const [error, setError] = useState<Error | null>(null);
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                setLoading(true);
+                const response = await getProjects(page, limit);
+                setProjects(response);
+            } catch (error) {
+                setError(error instanceof Error ? error : new Error("Error al cargar los proyectos"));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProjects();
+    }, [page, limit]);
+
+    return { projects, loading, error, page, setPage, limit, setLimit};
+};
+
+export default useProjects;

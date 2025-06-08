@@ -37,12 +37,14 @@ interface CreateModalProps {
     useAIMandala: boolean;
     color: string;
   }) => void;
+  title?: string;
+  createButtonText?: string;
 }
 
 const CreateModal = ({
   isOpen,
   onOpenChange,
-  onCreateCharacter,
+  onCreateCharacter, title = "New Character", createButtonText = "Create Character"
 }: CreateModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -72,7 +74,7 @@ const CreateModal = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            New Character
+            {title}
           </DialogTitle>
         </DialogHeader>
 
@@ -155,7 +157,7 @@ const CreateModal = ({
             onClick={handleCreateCharacter}
             disabled={!name || dimensions.length === 0 || scales.length === 0}
           >
-            Create Character
+            {createButtonText}
           </Button>
         </DialogFooter>
       </DialogContent>

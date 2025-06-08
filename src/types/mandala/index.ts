@@ -36,13 +36,20 @@ export interface Character {
 
 export interface Mandala {
   id: string;
-  projectId: string;
-  createdAt: Date;
+  mandala: MandalData;
   updatedAt: Date;
   postits: Postit[];
   characters: Character[];
-  configuration: MandalaConfiguration;
+}
+
+export interface MandalData {
+  id: string;
   name: string;
+  configuration: {
+    dimensions: { name: string; color: string }[];
+    scales: string[];
+  };
+  linkedToId: string;
 }
 
 export interface SimpleMandala {
@@ -50,12 +57,12 @@ export interface SimpleMandala {
   name: string;
 }
 
-export interface MandalaConfiguration {
-  dimensions: Dimension[];
-  scales: string[];
+export interface Project {
+  id: string;
+  name: string;
 }
 
-export interface Dimension {
+export interface CreateProject {
   name: string;
-  color: string;
+  userId: string;
 }
