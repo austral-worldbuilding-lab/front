@@ -18,8 +18,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const { projectId } = useParams<{ projectId: string }>();
-  const { mandala, loading, error, createPostit, updatePostit } =
-    useMandala(mandalaId);
+  const {
+    mandala,
+    loading,
+    error,
+    createPostit,
+    updatePostit,
+    updateCharacter,
+  } = useMandala(mandalaId);
+
   const handleCreatePostIt = () => {
     createPostit({
       content: "New Post-It",
@@ -94,6 +101,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                 <div className="relative w-full h-full flex items-center justify-center">
                   <Mandala scale={1} position={{ x: 0, y: 0 }} />
                   <KonvaContainer
+                    onCharacterUpdate={updateCharacter}
                     mandala={mandala}
                     onPostItUpdate={updatePostit}
                     onMouseEnter={() => setIsHoveringPostIt(true)}

@@ -1,11 +1,6 @@
-import {
-  doc,
-  onSnapshot,
-  updateDoc,
-  getDoc,
-} from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Mandala, Postit } from "../types/mandala";
+import { Character, Mandala, Postit } from "../types/mandala";
 
 export const subscribeMandala = (
   projectId: string,
@@ -106,4 +101,30 @@ export const deletePostit = async (
   });
 
   return true;
+};
+
+export const updateCharacter = async (
+  projectId: string,
+  mandalaId: string,
+  index: number,
+  updatedData: Partial<Character>
+) => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  if (!mandalaSnap.exists()) throw new Error("Mandala not found");
+
+  const data = mandalaSnap.data();
+  const characters = data.characters || [];
+
+  if (index < 0 || index >= characters.length) {
+    throw new Error("Invalid character index");
+  }
+
+  const updatedCharacters = [...characters];
+  updatedCharacters[index] = { ...updatedCharacters[index], ...updatedData };
+
+  await updateDoc(mandalaRef, {
+    characters: updatedCharacters,
+    updatedAt: new Date(),
+  });
 };
