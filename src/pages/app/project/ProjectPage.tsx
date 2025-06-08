@@ -1,8 +1,8 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import FileList from "@/components/project/FileList";
 import FileLoader from "@/components/project/FileLoader";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { ArrowLeftIcon, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getProjectFiles, ProjectFile } from "@/services/filesService.ts";
 import logo from "@/assets/logo.png";
@@ -34,6 +34,11 @@ const ProjectPage = () => {
 
   return (
     <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
+      <div className="absolute top-10 left-10">
+        <Link to={`/app/project/`}>
+          <ArrowLeftIcon className="w-5 h-5" />
+        </Link>
+      </div>
       <img
         src={logo}
         alt="logo"
