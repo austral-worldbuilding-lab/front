@@ -1,12 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Stage, Layer, Group, Rect } from "react-konva";
+import { Stage, Layer, Group, Rect, Circle, Text } from "react-konva";
 import { Html } from "react-konva-utils";
-import { Mandala as MandalaData, Postit } from "@/types/mandala";
+import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
   onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
+  characters?: Character[];
+  onCharacterUpdate: (
+    index: number,
+    updates: Partial<Character>
+  ) => Promise<boolean | void>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onDragStart: () => void;
@@ -17,17 +22,18 @@ const SCENE_W = 1200;
 const SCENE_H = 1200;
 
 const dimensionColors: Record<string, string> = {
-  "Recursos": "#e8b249",
-  "Cultura": "#d76e6e",
-  "Infraestructura": "#b3a1d9",
-  "Economía": "#e7f266",
-  "Gobierno": "#6da9e5",
-  "Ecología": "#83c896",
+  Recursos: "#e8b249",
+  Cultura: "#d76e6e",
+  Infraestructura: "#b3a1d9",
+  Economía: "#e7f266",
+  Gobierno: "#6da9e5",
+  Ecología: "#83c896",
 };
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
+  onCharacterUpdate,
   onMouseEnter,
   onMouseLeave,
   onDragStart,
@@ -90,26 +96,74 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     });
   };
 
+  const handleOnDragEndPostIt = async (
+    e: KonvaEventObject<DragEvent>,
+    index: number,
+    postit: Postit
+  ) => {
+    onDragEnd();
+    const nx = e.target.x(),
+      ny = e.target.y();
+    const rel = toRelative(nx, ny);
+    const { dimension, section } = getDimensionAndSectionFromCoordinates(
+      rel.x,
+      rel.y
+    );
+    await onPostItUpdate(index, {
+      coordinates: { ...postit.coordinates, x: rel.x, y: rel.y },
+      dimension,
+      section,
+    });
+  };
+
+  const handleOnDragEndCharacter = async (
+    e: KonvaEventObject<DragEvent>,
+    character: Character
+  ) => {
+    onDragEnd();
+    const nx = e.target.x(),
+      ny = e.target.y();
+    const rel = toRelative(nx, ny);
+    const { dimension, section } = getDimensionAndSectionFromCoordinates(
+      rel.x,
+      rel.y
+    );
+
+    // Find the index of this character in the mandala.characters array
+    const characterIndex =
+      mandala.characters?.findIndex((c) => c.id === character.id) ?? -1;
+
+    if (characterIndex !== -1) {
+      await onCharacterUpdate(characterIndex, {
+        position: { x: rel.x, y: rel.y },
+        dimension,
+        section,
+      });
+    }
+  };
+
   const getDimensionAndSectionFromCoordinates = (
-  x: number,
-  y: number,
-  dimensions: string[] = [
-    "Recursos",
-    "Cultura",
-    "Infraestructura",
-    "Economía",
-    "Gobierno",
-    "Ecología",
-  ],
-  sections: string[] = ["Persona", "Comunidad", "Institución"]
+    x: number,
+    y: number,
+    dimensions: string[] = [
+      "Recursos",
+      "Cultura",
+      "Infraestructura",
+      "Economía",
+      "Gobierno",
+      "Ecología",
+    ],
+    sections: string[] = ["Persona", "Comunidad", "Institución"]
   ): { dimension: string; section: string } => {
     const angle = Math.atan2(y, x);
     const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
-      
+
     const rawDistance = Math.sqrt(x * x + y * y);
     const normalizedDistance = Math.min(rawDistance / Math.SQRT2, 1);
 
-    const dimIndex = Math.floor((adjustedAngle / (2 * Math.PI)) * dimensions.length);
+    const dimIndex = Math.floor(
+      (adjustedAngle / (2 * Math.PI)) * dimensions.length
+    );
     const secIndex = Math.floor(normalizedDistance * sections.length);
 
     return {
@@ -117,7 +171,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       section: sections[Math.min(secIndex, sections.length - 1)],
     };
   };
-  
+
   const bringToFront = (index: number) => {
     setZOrder((prev) => {
       const filtered = prev.filter((i) => i !== index);
@@ -145,20 +199,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 bringToFront(i);
               }}
               onDragMove={handleDragMove}
-              onDragEnd={async (e) => {
-                onDragEnd();
-                const nx = e.target.x(), ny = e.target.y();
-                const rel = toRelative(nx, ny);
-                const { dimension, section } = getDimensionAndSectionFromCoordinates(
-                  rel.x,
-                  rel.y
-                );
-                await onPostItUpdate(i, {
-                  coordinates: { ...p.coordinates, x: rel.x, y: rel.y },
-                  dimension,
-                  section,
-                });
-              }}
+              onDragEnd={async (e) => handleOnDragEndPostIt(e, i, p)}
               onDblClick={() => {
                 setEditableIndex(i);
                 setEditingContent(p.content);
@@ -172,6 +213,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 height={postItH}
                 fill={dimensionColors[p.dimension] || "#cccccc"}
                 cornerRadius={4}
+                shadowBlur={0}
+                shadowOpacity={0}
               />
               <Html
                 divProps={{
@@ -184,7 +227,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 <textarea
                   ref={isEditing ? textAreaRef : null}
                   disabled={!isEditing}
-                  value={ isEditing ? editingContent ?? "" : p.content }
+                  value={isEditing ? editingContent ?? "" : p.content}
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setEditingContent(newValue);
@@ -213,10 +256,50 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                     boxSizing: "border-box",
                     fontSize: 11,
                     lineHeight: 1.1,
-                    overflow: "hidden"
+                    overflow: "hidden",
                   }}
                 />
               </Html>
+            </Group>
+          );
+        })}
+        {mandala.characters?.map((character) => {
+          const { x, y } = toAbsolute(
+            character.position.x,
+            character.position.y
+          );
+
+          return (
+            <Group
+              key={`character-${character.id}`}
+              x={x}
+              y={y}
+              draggable
+              onDragStart={(e) => {
+                e.cancelBubble = true;
+                onDragStart();
+              }}
+              onDragEnd={async (e) => handleOnDragEndCharacter(e, character)}
+              onMouseEnter={onMouseEnter}
+              onMouseLeave={onMouseLeave}
+            >
+              <Circle
+                radius={10}
+                fill={character.color}
+                shadowBlur={0}
+                shadowOpacity={0}
+              />
+              <Text
+                text={character.name}
+                fontSize={14}
+                fontStyle="bold"
+                fill="#000"
+                y={-35}
+                x={-50}
+                width={100}
+                align="center"
+                ellipsis
+              />
             </Group>
           );
         })}
