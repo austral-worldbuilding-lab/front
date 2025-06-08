@@ -27,6 +27,7 @@ export const subscribeMandala = (
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
       postits: data.postits || [],
+      characters: data.characters || [],
     };
 
     callback(mandala);

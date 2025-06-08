@@ -25,12 +25,21 @@ export interface Postit {
   section: string;
 }
 
+export interface Character {
+  id: string;
+  name: string;
+  color: string;
+  position: { x: number; y: number };
+}
+
+
 export interface Mandala {
   id: string;
   projectId: string;
   createdAt: Date;
   updatedAt: Date;
   postits: Postit[];
+  characters: Character[];
   name: string;
 }
 
