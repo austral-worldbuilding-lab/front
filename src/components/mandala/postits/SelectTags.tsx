@@ -11,7 +11,7 @@ import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import NewTagModal from "./NewTagModal";
 
-interface Tag {
+export interface Tag {
     label: string;
     value: string;
     color: string;
