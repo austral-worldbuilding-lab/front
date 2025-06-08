@@ -41,10 +41,21 @@ export interface Mandala {
   updatedAt: Date;
   postits: Postit[];
   characters: Character[];
+  configuration: MandalaConfiguration;
   name: string;
 }
 
 export interface SimpleMandala {
   id: string;
   name: string;
+}
+
+export interface MandalaConfiguration {
+  dimensions: Dimension[];
+  scales: string[];
+}
+
+export interface Dimension {
+  name: string;
+  color: string;
 }

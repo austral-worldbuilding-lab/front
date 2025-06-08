@@ -21,15 +21,6 @@ export interface KonvaContainerProps {
 const SCENE_W = 1200;
 const SCENE_H = 1200;
 
-const dimensionColors: Record<string, string> = {
-  Recursos: "#e8b249",
-  Cultura: "#d76e6e",
-  Infraestructura: "#b3a1d9",
-  Economía: "#e7f266",
-  Gobierno: "#6da9e5",
-  Ecología: "#83c896",
-};
-
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
@@ -46,6 +37,12 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const [zOrder, setZOrder] = useState<number[]>(
     mandala.postits.map((_, idx) => idx)
   );
+
+  const dimensionColors: Record<string, string> =
+    mandala.configuration?.dimensions?.reduce((acc, d) => {
+      acc[d.name] = d.color;
+      return acc;
+    }, {} as Record<string, string>) ?? {};
 
   useEffect(() => {
     setZOrder(mandala.postits.map((_, idx) => idx));
@@ -144,17 +141,11 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
   const getDimensionAndSectionFromCoordinates = (
     x: number,
-    y: number,
-    dimensions: string[] = [
-      "Recursos",
-      "Cultura",
-      "Infraestructura",
-      "Economía",
-      "Gobierno",
-      "Ecología",
-    ],
-    sections: string[] = ["Persona", "Comunidad", "Institución"]
+    y: number
   ): { dimension: string; section: string } => {
+    const dimensions =
+      mandala.configuration?.dimensions?.map((d) => d.name) ?? [];
+    const sections = mandala.configuration?.scales ?? [];
     const angle = Math.atan2(y, x);
     const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
 

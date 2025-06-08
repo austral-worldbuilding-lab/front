@@ -1,6 +1,6 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Character, Mandala, Postit } from "../types/mandala";
+import { Character, Mandala, MandalaConfiguration, Postit } from "../types/mandala";
 
 export const subscribeMandala = (
   projectId: string,
@@ -15,6 +15,12 @@ export const subscribeMandala = (
     }
 
     const data = snapshot.data();
+
+    const configuration: MandalaConfiguration = {
+      dimensions: data?.mandala?.configuration?.dimensions || [],
+      scales: data?.mandala?.configuration?.scales || [],
+    };
+
     const mandala: Mandala = {
       id: snapshot.id,
       name: data.name || "",
@@ -23,6 +29,7 @@ export const subscribeMandala = (
       updatedAt: data.updatedAt,
       postits: data.postits || [],
       characters: data.characters || [],
+      configuration
     };
 
     callback(mandala);
