@@ -36,7 +36,7 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
 
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover modal open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
