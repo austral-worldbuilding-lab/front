@@ -16,11 +16,14 @@ import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 
 
-const initialDimensions: Item[] = Sectors.map(sector => ({
-  id: sector.id,
-  value: sector.name,
-  color: "rgba(180, 210, 255, 0.7)",
-}));
+const initialDimensions: Item[] = Sectors.map(sector => {
+  return {
+    id: sector.id,
+    value: sector.name,
+    color: sector.color,
+  };
+});
+
 
 const initialScales: Item[] = Levels.map(level => ({
   id: level.id,
@@ -57,12 +60,18 @@ const CreateModal = ({
   const [scales, setScales] = useState<Item[]>(initialScales);
 
   const handleCreateCharacter = () => {
+
+    const processedDimensions = dimensions.map((d) => ({
+      name: d.value,
+      color: d.color,
+    }));
+
     onCreateCharacter({
       name,
       description,
       useAIMandala: mandalaType === "ai",
       color: selectedColor,
-      dimensions: dimensions.map(d => ({ name: d.value, color: d.color })),
+      dimensions: processedDimensions,
       scales: scales.map((s) => s.value),
     });
     setName("");

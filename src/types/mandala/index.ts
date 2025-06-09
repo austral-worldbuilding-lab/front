@@ -6,6 +6,7 @@ export interface Level {
 }
 
 export interface Sector {
+  color: string;
   id: string;
   name: string;
   question: string;

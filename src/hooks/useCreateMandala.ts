@@ -28,7 +28,7 @@ export const useCreateMandala = (projectId: string) => {
                 },
                 dimensions: dimensions.map(({ name, color }) => ({
                     name,
-                    ...(color && { color }),
+                    color: color,
                 })),
 
                 scales,
