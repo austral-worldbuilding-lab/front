@@ -8,6 +8,7 @@ import Loader from "../common/Loader";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
 import Buttons from "./Buttons";
+import { Tag } from "./postits/SelectTags";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -34,6 +35,18 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
       dimension: "Gobierno",
       section: "Institución",
     });
+  };
+
+  // TODO: Get tags from backend
+  const [tags, setTags] = useState<Tag[]>([
+    { label: "Comedor", value: "comedor", color: "#ff0000" },
+    { label: "Aula", value: "aula", color: "#ffa500" },
+    { label: "Campus", value: "campus", color: "#0000ff" },
+  ]);
+
+  // TODO: Create tag in backend
+  const handleNewTag = (tag: Tag) => {
+    setTags([...tags, tag]);
   };
 
   if (loading) {
@@ -86,7 +99,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   {mandala.mandala.name}
                 </p>
               </div>
-              <Buttons onCreatePostIt={handleCreatePostIt} />
+              <Buttons
+                onCreatePostIt={handleCreatePostIt}
+                onNewTag={handleNewTag}
+                tags={tags}
+              />
               <ZoomControls />
               <TransformComponent
                 wrapperStyle={{
