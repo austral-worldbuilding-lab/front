@@ -37,14 +37,16 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     });
   };
 
-  const tags: Tag[] = [
+  // TODO: Get tags from backend
+  const [tags, setTags] = useState<Tag[]>([
     { label: "Comedor", value: "comedor", color: "#ff0000" },
     { label: "Aula", value: "aula", color: "#ffa500" },
     { label: "Campus", value: "campus", color: "#0000ff" },
-  ];
+  ]);
 
+  // TODO: Create tag in backend
   const handleNewTag = (tag: Tag) => {
-    console.log("New tag created:", tag);
+    setTags([...tags, tag]);
   };
 
   if (loading) {

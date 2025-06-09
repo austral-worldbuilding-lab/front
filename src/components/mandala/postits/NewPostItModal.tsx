@@ -7,8 +7,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import SelectTags, { Tag } from "./SelectTags";
+import { CustomInput } from "@/components/ui/CustomInput";
 
 interface NewPostItModalProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ const NewPostItModal = ({
   onNewTag,
 }: NewPostItModalProps) => {
   const [content, setContent] = useState("");
-  const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(tags[0]);
   const isValid = content.trim() !== "" && selectedTag;
 
   const handleCreate = () => {
@@ -52,12 +52,12 @@ const NewPostItModal = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Text
             </label>
-            <Textarea
-              rows={4}
+            <CustomInput
+              as="textarea"
               placeholder="Write your note here..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="resize-none border rounded-lg w-full"
+              className="resize-none border w-full"
             />
           </div>
 
@@ -67,7 +67,7 @@ const NewPostItModal = ({
             </label>
             <SelectTags
               tags={tags}
-              value={selectedTag?.value ?? ""}
+              value={selectedTag?.value || tags[0].value}
               onChange={setSelectedTag}
               onNewTag={onNewTag}
             />
