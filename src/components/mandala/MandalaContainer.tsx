@@ -5,9 +5,10 @@ import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
 import Buttons from "./Buttons";
+import {useCreateMandala} from "@/hooks/useCreateMandala.ts";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -26,6 +27,33 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     updatePostit,
     updateCharacter,
   } = useMandala(mandalaId);
+
+  const projectId = useParams<{ projectId: string }>().projectId!;
+  const { createMandala } = useCreateMandala(projectId);
+
+  const handleCreateCharacter = async (character: {
+    name: string;
+    description: string;
+    useAIMandala: boolean;
+    color: string;
+    dimensions: { name: string; color?: string }[]
+    scales: string[];
+    linkedToId?: string;
+  }) => {
+
+    await createMandala(
+        character.name,
+        character.description,
+        character.color,
+        character.useAIMandala,
+        character.dimensions,
+        character.scales,
+        character.linkedToId
+    );
+
+  };
+
+
 
   const handleCreatePostIt = () => {
     createPostit({
@@ -86,7 +114,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   {mandala.mandala.name}
                 </p>
               </div>
-              <Buttons onCreatePostIt={handleCreatePostIt} />
+              <Buttons onCreatePostIt={handleCreatePostIt}
+                       onCreateCharacter={handleCreateCharacter}
+                       currentMandalaId={mandalaId}
+              />
               <ZoomControls />
               <TransformComponent
                 wrapperStyle={{
