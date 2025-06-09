@@ -36,7 +36,10 @@ interface CreateModalProps {
     description: string;
     useAIMandala: boolean;
     color: string;
-  }) => void;
+    dimensions: { name: string; color?: string }[]
+    scales: string[];
+    linkedToId?: string;
+  }) => void | Promise<void>;
   title?: string;
   createButtonText?: string;
 }
@@ -59,6 +62,8 @@ const CreateModal = ({
       description,
       useAIMandala: mandalaType === "ai",
       color: selectedColor,
+      dimensions: dimensions.map(d => ({ name: d.value, color: d.color })),
+      scales: scales.map((s) => s.value),
     });
     setName("");
     setDescription("");

@@ -13,8 +13,12 @@ interface ButtonsProps {
     description: string;
     useAIMandala: boolean;
     color: string;
+    dimensions: { name: string; color?: string }[],
+    scales: string[];
+    linkedToId?: string;
   }) => void;
   tags: Tag[];
+  currentMandalaId?: string;
 }
 
 const Buttons = ({
@@ -22,6 +26,7 @@ const Buttons = ({
   onCreateCharacter,
   onNewTag,
   tags,
+  currentMandalaId,
 }: ButtonsProps) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
@@ -31,12 +36,16 @@ const Buttons = ({
     description: string;
     useAIMandala: boolean;
     color: string;
+    dimensions: { name: string; color?: string }[],
+    scales: string[];
   }) => {
     if (onCreateCharacter) {
-      onCreateCharacter(character);
+      onCreateCharacter({
+        ...character,
+        linkedToId: currentMandalaId,
+      });
     }
   };
-
   return (
     <>
       <div className="absolute top-4 right-4 flex gap-2 z-20">

@@ -5,12 +5,11 @@ import { ArrowLeftIcon, GlobeIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CreateModal from "@/components/mandala/characters/modal/CreateModal";
 import {useState} from "react";
-import {useProject} from "../../../../hooks/useProject";
+import {useCreateMandala} from "@/hooks/useCreateMandala.ts";
 
 const MandalaListPage = () => {
     const { projectId } = useParams<{ projectId: string }>();
     const { mandalas, loading: mandalasLoading } = useMandalas(projectId || "");
-    const { createMandala } = useProject();
     const navigate = useNavigate();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -20,13 +19,17 @@ const MandalaListPage = () => {
         return <div className="p-6 text-red-500">Error: Project ID not found</div>;
     }
 
+    const { createMandala } = useCreateMandala(projectId);
+
     const handleCreateMandala = async (character: {
         name: string;
         description: string;
         useAIMandala: boolean;
         color: string;
+        dimensions: { name: string; color?: string }[],
+        scales: string[];
     }) => {
-        const { name, useAIMandala } = character;
+        const { name, description, color, useAIMandala, dimensions, scales } = character;
 
         if (!name.trim()) {
             setError("The name cannot be empty.");
@@ -36,8 +39,7 @@ const MandalaListPage = () => {
         setError(null);
 
         try {
-            const type = useAIMandala ? "ai" : "blank";
-            const id = await createMandala(type, name);
+            const id = await createMandala(name, description, color, useAIMandala, dimensions, scales);
             setIsCreateModalOpen(false);
             navigate(`/app/project/${projectId}/mandala/${id}`);
         } catch {
