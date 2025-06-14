@@ -74,35 +74,35 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
 
         const textRotationAngle = midAngle + 90;
 
-        return (
-            <div
-                key={`name-${sector.id}`}
-                className="absolute z-10 cursor-pointer"
-                style={{
-                    left: Math.cos((midAngle * Math.PI) / 180) * (maxRadius + 60),
-                    top: Math.sin((midAngle * Math.PI) / 180) * (maxRadius + 60),
-                    transform: "translate(-50%, -50%)",
-                    transformOrigin: "center",
-                    width: "max-content",
-                }}
-                onClick={() => {
-                    const kebabName = toKebabCase(sector.name);
-                    navigate(`/mandala/${mandalaId}/dimension/${kebabName}`);
-                }}
-            >
+            return (
                 <div
-                    className="text-blue-900 font-bold tracking-wider hover:text-blue-600 pointer-events-none"
+                    key={`name-${sector.id}`}
+                    className="absolute z-10 cursor-pointer"
                     style={{
-                        transform: `rotate(${textRotationAngle}deg)`,
-                        fontSize: "1.2rem",
-                        whiteSpace: "nowrap",
+                        left: Math.cos((midAngle * Math.PI) / 180) * (maxRadius + 60),
+                        top: Math.sin((midAngle * Math.PI) / 180) * (maxRadius + 60),
+                        transform: `translate(-50%, -50%) rotate(${textRotationAngle}deg)`,
+                        transformOrigin: "center center",
+                        width: "max-content",
+                    }}
+                    onClick={() => {
+                        const kebabName = toKebabCase(sector.name);
+                        navigate(`/mandala/${mandalaId}/dimension/${kebabName}`);
                     }}
                 >
-                    {sector.name}
+                    <div
+                        className="text-blue-900 font-bold tracking-wider hover:text-blue-600"
+                        style={{
+                            fontSize: "1.2rem",
+                            whiteSpace: "nowrap",
+                            pointerEvents: "auto",
+                        }}
+                    >
+                        {sector.name}
+                    </div>
                 </div>
-            </div>
-        );
-      })}
+            );
+        })}
 
 
       {/* Burbujas de preguntas predefinidas */}
