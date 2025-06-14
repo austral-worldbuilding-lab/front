@@ -3,6 +3,7 @@ import MandalaConcentric from "./MandalaConcentric";
 import MandalaSectors from "./MandalaSectors";
 import MandalaPerson from "./MandalaPerson";
 import { Levels, Sectors } from "@/constants/mandala";
+import { useParams } from "react-router-dom";
 
 interface MandalaProps {
   scale?: number;
@@ -16,6 +17,7 @@ const Mandala: React.FC<MandalaProps> = ({
   // Use the data from the mandala if available, otherwise use the default constants
   const levels = Levels;
   const sectors = Sectors;
+  const { mandalaId } = useParams<{ mandalaId: string }>();
 
   // Get the maximum radius (the outermost circle)
   const maxRadius = levels[levels.length - 1].radius;
@@ -40,6 +42,7 @@ const Mandala: React.FC<MandalaProps> = ({
           sectors={sectors}
           maxRadius={maxRadius}
           levels={levels}
+          mandalaId={mandalaId!}
         />
       </div>
     </div>
