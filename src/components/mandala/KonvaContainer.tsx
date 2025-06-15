@@ -17,6 +17,7 @@ export interface KonvaContainerProps {
   onMouseLeave: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
+  appliedFilters: Record<string, string[]>;
 }
 
 const SCENE_W = 1200;
@@ -29,7 +30,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onMouseEnter,
   onMouseLeave,
   onDragStart,
-  onDragEnd,
+  onDragEnd, appliedFilters
+
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [postItW, postItH, padding] = [64, 64, 5];
@@ -37,6 +39,19 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const [zOrder, setZOrder] = useState<number[]>(
     mandala.postits.map((_, idx) => idx)
   );
+
+  const shouldShowPostIt = (postit: Postit): boolean => {
+    const { dimension, section } = postit;
+
+    const dimensionFilter = appliedFilters["Dimensiones"] || [];
+    const scaleFilter = appliedFilters["Escalas"] || [];
+    //const tagFilter = appliedFilters["Tags"] || [];
+
+    return (
+        (dimensionFilter.length === 0 || dimensionFilter.includes(dimension)) &&
+        (scaleFilter.length === 0 || scaleFilter.includes(section))
+    );
+  };
 
   const dimensionColors: Record<string, string> =
     mandala.mandala.configuration?.dimensions?.reduce((acc, d) => {
@@ -151,6 +166,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       <Layer>
         {zOrder.map((i) => {
           const p = mandala.postits[i];
+          if (!shouldShowPostIt(p)) return null;
           const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
           const isEditing = editableIndex === i;
 
