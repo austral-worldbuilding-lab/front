@@ -22,6 +22,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<Record<string, string[]>>({});
   const navigate = useNavigate();
   const {
     mandala,
@@ -99,7 +100,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
           <FiltersModal
             isOpen={isFiltersOpen}
             onOpenChange={setIsFiltersOpen}
-            onApplyFilters={() => {}}
+            onApplyFilters={(filters) => setAppliedFilters(filters)}
           />
           <TransformWrapper
             initialScale={0.5}
@@ -167,13 +168,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   <div className="relative w-full h-full flex items-center justify-center">
                     <Mandala scale={1} position={{ x: 0, y: 0 }} />
                     <KonvaContainer
-                      onCharacterUpdate={updateCharacter}
-                      mandala={mandala}
-                      onPostItUpdate={updatePostit}
-                      onMouseEnter={() => setIsHoveringPostIt(true)}
-                      onMouseLeave={() => setIsHoveringPostIt(false)}
-                      onDragStart={() => setIsDraggingPostIt(true)}
-                      onDragEnd={() => setIsDraggingPostIt(false)}
+                        mandala={mandala}
+                        onCharacterUpdate={updateCharacter}
+                        onPostItUpdate={updatePostit}
+                        onMouseEnter={() => setIsHoveringPostIt(true)}
+                        onMouseLeave={() => setIsHoveringPostIt(false)}
+                        onDragStart={() => setIsDraggingPostIt(true)}
+                        onDragEnd={() => setIsDraggingPostIt(false)}
+                        appliedFilters={appliedFilters}
                     />
                   </div>
                 </TransformComponent>
