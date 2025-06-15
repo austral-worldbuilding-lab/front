@@ -45,7 +45,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
     const dimensionFilter = appliedFilters["Dimensiones"] || [];
     const scaleFilter = appliedFilters["Escalas"] || [];
-    const tagFilter = appliedFilters["Tags"] || [];
+    //const tagFilter = appliedFilters["Tags"] || [];
 
     return (
         (dimensionFilter.length === 0 || dimensionFilter.includes(dimension)) &&
