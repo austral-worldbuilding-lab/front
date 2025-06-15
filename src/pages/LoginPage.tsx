@@ -77,7 +77,7 @@ const LoginPage = () => {
               </p>
             )}
           <p>
-            ¿No tenés una cuenta? <Link to={"/register"}>Registrate</Link>
+            ¿No tenés una cuenta? <Link to="/register" className="text-primary-500">Registrate</Link>
           </p>
         </div>
       </div>
