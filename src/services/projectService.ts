@@ -8,12 +8,14 @@ export interface CreateMandalaDto {
 
 
 export const getMandalas = async (
-  projectId: string
+  projectId: string,
+  page: number,
+  limit: number
 ): Promise<SimpleMandala[]> => {
   const response = await axiosInstance.get<{ data: SimpleMandala[] }>(
     "/mandala",
     {
-      params: { projectId },
+      params: { projectId, page, limit },
     }
   );
 
