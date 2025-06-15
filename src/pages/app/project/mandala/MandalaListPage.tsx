@@ -6,20 +6,22 @@ import { Button } from "@/components/ui/button";
 import CreateModal from "@/components/mandala/characters/modal/CreateModal";
 import {useState} from "react";
 import {useCreateMandala} from "@/hooks/useCreateMandala.ts";
+import {useDeleteMandala} from "@/hooks/useDeleteMandala.ts";
+import {MandalaMenu} from "@/components/mandala/MandalaMenu.tsx";
 
 const MandalaListPage = () => {
     const { projectId } = useParams<{ projectId: string }>();
-    const { mandalas, loading: mandalasLoading } = useMandalas(projectId || "");
+    const { mandalas, loading: mandalasLoading, refetch } = useMandalas(projectId || "");
     const navigate = useNavigate();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { deleteMandala } = useDeleteMandala();
+    const { createMandala } = useCreateMandala(projectId || "");
 
     if (!projectId) {
         return <div className="p-6 text-red-500">Error: Project ID not found</div>;
     }
-
-    const { createMandala } = useCreateMandala(projectId);
 
     const handleCreateMandala = async (character: {
         name: string;
@@ -44,6 +46,15 @@ const MandalaListPage = () => {
             navigate(`/app/project/${projectId}/mandala/${id}`);
         } catch {
             setError("An error occurred while creating the mandala.");
+        }
+    };
+
+    const handleDeleteMandala = async (id: string) => {
+        try {
+            await deleteMandala(id);
+            await refetch();
+        } catch (err) {
+            console.error("Error deleting mandala", err);
         }
     };
 
@@ -74,23 +85,25 @@ const MandalaListPage = () => {
             ) : (
             <ul className="divide-y divide-gray-100">
               {mandalas.map((mandala) => (
-                <li
-                  key={mandala.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <Link
-                    to={`/app/project/${projectId}/mandala/${mandala.id}`}
-                    className="flex items-center gap-3 p-4 text-gray-800 hover:text-blue-600 transition-colors"
+                  <li
+                      key={mandala.id}
+                      className="hover:bg-gray-50 transition-colors"
                   >
-                    <GlobeIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <span className="flex-1">
-                      {mandala.name || "Mandala without name"}
-                    </span>
-                  </Link>
-                </li> 
+                      <div className="flex items-center gap-3 p-4 text-gray-800 hover:bg-gray-50 transition-colors">
+                          <Link
+                              to={`/app/project/${projectId}/mandala/${mandala.id}`}
+                              className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
+                          >
+                              <GlobeIcon className="w-5 h-5 text-gray-400 flex-shrink-0"/>
+                              <span>{mandala.name || "Mandala without name"}</span>
+                          </Link>
+                          <MandalaMenu onDelete={() => handleDeleteMandala(mandala.id)}/>
+                      </div>
+
+                  </li>
               ))}
             </ul>
-          )}
+            )}
         </div>
       </div>
         <CreateModal
@@ -104,7 +117,7 @@ const MandalaListPage = () => {
             <p className="text-red-500 text-sm mt-4 text-center max-w-md">{error}</p>
         )}
     </div>
-  );
+    );
 };
 
 export default MandalaListPage;
