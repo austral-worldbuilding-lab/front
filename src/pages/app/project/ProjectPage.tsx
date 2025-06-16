@@ -39,14 +39,12 @@ const ProjectPage = () => {
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
       </div>
-      <img
-        src={logo}
-        alt="logo"
-        className="w-50 absolute left-1/2 -translate-x-1/2 top-10"
-      />
-      <h1 className="text-2xl font-bold mb-20 max-w-lg w-full">
-        Proyecto: Festejos de egresados en la universidad
-      </h1>
+      <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 mb-10">
+        <img src={logo} alt="logo" className="w-50 h-auto" />
+        <h1 className="text-xl sm:text-2xl font-bold text-center break-words">
+          Project: Festejos de egresados en la universidad
+        </h1>
+      </div>
       <div className="flex flex-col items-start justify-start max-w-lg w-full">
         <Button
           color="primary"

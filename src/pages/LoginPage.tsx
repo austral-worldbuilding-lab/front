@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext.tsx";
+import logo from "@/assets/logo.png";
 
 const LoginPage = () => {
   const { login, error } = useAuthContext();
@@ -18,57 +19,58 @@ const LoginPage = () => {
   }
 
   const firebaseErrorMap: Record<string, string> = {
-    "auth/invalid-email": "Correo electrónico inválido",
-    "auth/invalid-credential": "Correo electrónico o contraseña incorrectos",
-    "auth/wrong-password": "Contraseña incorrecta",
-    "auth/missing-password": "La contraseña es obligatoria",
+    "auth/invalid-email": "Invalid email",
+    "auth/invalid-credential": "Incorrect email or password",
+    "auth/wrong-password": "Incorrect password",
+    "auth/missing-password": "Password is required",
   };
 
   const getMessageFromErrorCode = (errorCode: string | null): string | null => {
     if (!errorCode) return null;
     const code = errorCode.match(/\(.*?\)/)?.[0].replace(/[()]/g, "");
-    return firebaseErrorMap[code!] || "Error desconocido.";
+    return firebaseErrorMap[code!] || "Unknown error.";
   };
 
   return (
-    <div
-      className={
-        "flex flex-col bg-secondary-100 h-screen items-center justify-center"
-      }
-    >
-      <div className={"flex flex-row gap-8 w-5/10 p-10 bg-background"}>
-        <div
-          className={
-            "w-1/2 p-4 flex col items-center justify-center text-3xl font-medium"
-          }
-        >
-          <h1>Iniciar sesión</h1>
+    <div className="flex flex-col bg-secondary-100 h-screen items-center justify-center">
+      <div className="flex flex-col sm:flex-row gap-8 w-[90%] sm:w-[50%] p-10 bg-background rounded-[10px]">
+        {/* Logo + title */}
+        <div className="w-full sm:w-1/2 flex items-center justify-center sm:items-center sm:justify-center">
+          <div className="flex flex-row sm:flex-col items-center gap-4">
+            <img src={logo} alt="logo" className="w-[60px] sm:w-[120px]" />
+            <h1 className="text-2xl font-semibold text-center sm:text-3xl">
+              Sign in
+            </h1>
+          </div>
         </div>
-        <div className={"w-1/2 p-4 flex flex-col gap-4"}>
+
+        {/* Form */}
+        <div className="w-full sm:w-1/2 p-4 flex flex-col gap-4">
           <CustomInput
-            placeholder={"Correo electrónico"}
-            color={"foreground"}
+            placeholder="Email"
+            color="foreground"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={
               error?.includes("auth/invalid-email")
-                ? "Correo electrónico inválido"
+                ? "Invalid email"
                 : undefined
             }
           />
           <CustomInput
-            placeholder={"Contraseña"}
-            color={"white"}
-            type={"password"}
+            placeholder="Password"
+            color="white"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             error={
               error?.includes("auth/wrong-password")
-                ? "Contraseña incorrecta"
+                ? "Incorrect password"
                 : undefined
             }
           />
-          <Button onClick={async () => handleLogin()}>Iniciar sesión</Button>
+          <Button onClick={handleLogin}>Sign in</Button>
+
           {error &&
             !error.includes("auth/invalid-email") &&
             !error.includes("auth/wrong-password") && (
@@ -76,8 +78,12 @@ const LoginPage = () => {
                 {getMessageFromErrorCode(error)}
               </p>
             )}
-          <p>
-            ¿No tenés una cuenta? <Link to="/register" className="text-primary-500">Registrate</Link>
+
+          <p className="text-sm">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-primary-500">
+              Register
+            </Link>
           </p>
         </div>
       </div>

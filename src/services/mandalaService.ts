@@ -1,6 +1,7 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Character, Mandala, Postit } from "../types/mandala";
+import {Character, FilterSection, Mandala, Postit} from "../types/mandala";
+import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
   projectId: string,
@@ -135,3 +136,17 @@ export const updateCharacter = async (
     updatedAt: new Date(),
   });
 };
+
+export const getFilters = async(
+    mandalaId: string,
+) => {
+  const response = await axiosInstance.get<{ data: FilterSection[] }>(
+      `/mandala/filter-options?id=${mandalaId}`
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Error fetching filters.");
+  }
+
+  return response.data.data;
+}

@@ -1,68 +1,37 @@
 import { useState, useEffect } from "react";
+import {FilterSection, Tag} from "@/types/mandala";
+import {getFilters} from "@/services/mandalaService.ts";
+import {getTags} from "@/services/projectService.ts";
 
-export interface FilterOption {
-  label: string;
-  color?: string;
-}
-
-export interface FilterSection {
-  sectionName: string;
-  type: "multiple" | "single";
-  options: FilterOption[];
-}
-
-export function useGetFilters() {
+export function useGetFilters (mandalaId: string, projectId: string) {
   const [filters, setFilters] = useState<FilterSection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Mock API call, the data is hardcoded for now
-    // TODO: get the data from the backend in a service file
-    const fetchFilters = () => {
+
+    const fetchFilters = async () => {
       setIsLoading(true);
-
-      // Mock data
-      const mockFilters: FilterSection[] = [
-        {
-          sectionName: "Dimensiones",
-          type: "multiple",
-          options: [
-            { label: "Cultura", color: "#FFD700" },
-            { label: "Gobierno", color: "#1E90FF" },
-            { label: "Economía", color: "#32CD32" },
-            { label: "Infraestructura", color: "#FF69B4" },
-            { label: "Ecología", color: "#FF4500" },
-            { label: "Recursos", color: "#00CED1" },
-          ],
-        },
-        {
-          sectionName: "Escalas",
-          type: "multiple",
-          options: [
-            { label: "Global" },
-            { label: "Campus" },
-            { label: "Persona" },
-            { label: "Comunidad" },
-          ],
-        },
-        {
-          sectionName: "Tags",
-          type: "multiple",
-          options: [
-            { label: "comedor", color: "#FF4500" },
-            { label: "aula", color: "#00CED1" },
-            { label: "residencia", color: "#9370DB" },
-            { label: "internacional", color: "#20B2AA" },
-          ],
-        },
-      ];
-
-      setFilters(mockFilters);
+        try {
+            const response : FilterSection[] = await getFilters(mandalaId);
+            const tags : Tag[] = await getTags(projectId);
+            response.push(
+                {
+                    sectionName: "Tags",
+                    type: "multiple",
+                    options: tags.map((tag) => ({
+                        label: tag.name,
+                        color: tag.color,
+                    })),
+                }
+            )
+            setFilters(response);
+        } catch (error) {
+            console.error("Error fetching filters:", error);
+        }
       setIsLoading(false);
     };
 
-    // Simulate API delay
-    setTimeout(fetchFilters, 500);
+    fetchFilters()
   }, []);
 
   return { filters, isLoading };

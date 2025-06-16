@@ -67,3 +67,21 @@ export interface CreateProject {
   name: string;
   userId: string;
 }
+
+export interface FilterOption {
+  label: string;
+  color?: string;
+}
+
+export interface FilterSection {
+  sectionName: string;
+  type: "multiple" | "single";
+  options: FilterOption[];
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+  projectId: string;
+}
