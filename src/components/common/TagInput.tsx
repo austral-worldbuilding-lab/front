@@ -3,6 +3,7 @@ import { HelpCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import {HexColorPicker} from "react-colorful";
+import {isDarkColor} from "@/utils/colorUtils.ts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export interface Item {
@@ -95,22 +96,6 @@ export default function TagInput({
       handleAddItem();
     }
   };
-
-  function isDarkColor(hex: string): boolean {
-    hex = hex.replace("#", "");
-
-    if (hex.length === 3) {
-      hex = hex.split("").map(c => c + c).join("");
-    }
-
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
-    return luminance < 128;
-  }
-
 
   return (
       <div className="flex flex-col gap-2">

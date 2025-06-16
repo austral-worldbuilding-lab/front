@@ -15,7 +15,7 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
 }) => {
   const computedAngles = sectors.map((sector, index) => ({
     ...sector,
-    angle: (360 / sectors.length) * index,
+    angle: (360 / sectors.length) * (sectors.length - index),
   }));
 
 

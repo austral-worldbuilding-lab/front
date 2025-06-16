@@ -101,6 +101,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
             isOpen={isFiltersOpen}
             onOpenChange={setIsFiltersOpen}
             onApplyFilters={(filters) => setAppliedFilters(filters)}
+            mandalaId={mandalaId}
+            projectId={projectId}
           />
           <TransformWrapper
             initialScale={0.5}
@@ -166,7 +168,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   }}
                 >
                   <div className="relative w-full h-full flex items-center justify-center">
-                    <Mandala scale={1} position={{ x: 0, y: 0 }} />
+                    <Mandala mandala={mandala} scale={1} position={{ x: 0, y: 0 }} />
                     <KonvaContainer
                         mandala={mandala}
                         onCharacterUpdate={updateCharacter}
