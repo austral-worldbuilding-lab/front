@@ -29,13 +29,13 @@ const NewTagModal = ({ isOpen, onOpenChange, onCreate }: NewTagModalProps) => {
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-center">
-                        Create New Tag
+                        Crear Nuevo Tag
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
                     <Input
-                        placeholder="Tag name"
+                        placeholder="Nombre del tag"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                     />
@@ -52,13 +52,13 @@ const NewTagModal = ({ isOpen, onOpenChange, onCreate }: NewTagModalProps) => {
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                     <Button
                         onClick={handleCreate}
                         disabled={!name.trim()}
                     >
-                        Create Tag
+                        Crear Tag
                     </Button>
                 </DialogFooter>
             </DialogContent>

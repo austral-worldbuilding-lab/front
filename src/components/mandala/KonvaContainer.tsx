@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
+import { useKonvaUtils } from "@/hooks/useKonvaUtils";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -17,6 +18,7 @@ export interface KonvaContainerProps {
   onMouseLeave: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
+  appliedFilters: Record<string, string[]>;
 }
 
 const SCENE_W = 1200;
@@ -30,13 +32,33 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onMouseLeave,
   onDragStart,
   onDragEnd,
+  appliedFilters,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [postItW, postItH, padding] = [64, 64, 5];
   const [editingContent, setEditingContent] = useState<string | null>(null);
-  const [zOrder, setZOrder] = useState<number[]>(
-    mandala.postits.map((_, idx) => idx)
-  );
+
+  const {
+    zOrder,
+    bringToFront,
+    toAbsolute,
+    toRelative,
+    clamp,
+    getDimensionAndSectionFromCoordinates,
+  } = useKonvaUtils(mandala.postits);
+
+  const shouldShowPostIt = (postit: Postit): boolean => {
+    const { dimension, section } = postit;
+
+    const dimensionFilter = appliedFilters["Dimensiones"] || [];
+    const scaleFilter = appliedFilters["Escalas"] || [];
+    //const tagFilter = appliedFilters["Tags"] || [];
+
+    return (
+      (dimensionFilter.length === 0 || dimensionFilter.includes(dimension)) &&
+      (scaleFilter.length === 0 || scaleFilter.includes(section))
+    );
+  };
 
   const dimensionColors: Record<string, string> =
     mandala.mandala.configuration?.dimensions?.reduce((acc, d) => {
@@ -44,21 +66,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       return acc;
     }, {} as Record<string, string>) ?? {};
 
-  useEffect(() => {
-    setZOrder(mandala.postits.map((_, idx) => idx));
-  }, [mandala.postits, mandala.postits.length]);
-
-  const toAbsolute = (rx: number, ry: number) => ({
-    x: ((rx + 1) / 2) * (SCENE_W - postItW),
-    y: ((1 - ry) / 2) * (SCENE_H - postItH),
-  });
-
-  const toRelative = (x: number, y: number) => ({
-    x: (x / (SCENE_W - postItW)) * 2 - 1,
-    y: 1 - (y / (SCENE_H - postItH)) * 2,
-  });
-
-  const clamp = (v: number, max: number) => Math.max(0, Math.min(v, max));
   const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
     node.position({
@@ -78,7 +85,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     const rel = toRelative(nx, ny);
     const { dimension, section } = getDimensionAndSectionFromCoordinates(
       rel.x,
-      rel.y
+      rel.y,
+      mandala.mandala.configuration?.dimensions.map((d) => d.name) || [],
+      mandala.mandala.configuration?.scales || []
     );
     await onPostItUpdate(index, {
       coordinates: { ...postit.coordinates, x: rel.x, y: rel.y },
@@ -97,7 +106,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     const rel = toRelative(nx, ny);
     const { dimension, section } = getDimensionAndSectionFromCoordinates(
       rel.x,
-      rel.y
+      rel.y,
+      mandala.mandala.configuration?.dimensions.map((d) => d.name) || [],
+      mandala.mandala.configuration?.scales || []
     );
 
     // Find the index of this character in the mandala.characters array
@@ -113,37 +124,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     }
   };
 
-  const getDimensionAndSectionFromCoordinates = (
-    x: number,
-    y: number
-  ): { dimension: string; section: string } => {
-    const dimensions =
-      mandala.mandala.configuration?.dimensions?.map((d) => d.name) ?? [];
-    const sections = mandala.mandala.configuration?.scales ?? [];
-    const angle = Math.atan2(y, x);
-    const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
-
-    const rawDistance = Math.sqrt(x * x + y * y);
-    const normalizedDistance = Math.min(rawDistance / Math.SQRT2, 1);
-
-    const dimIndex = Math.floor(
-      (adjustedAngle / (2 * Math.PI)) * dimensions.length
-    );
-    const secIndex = Math.floor(normalizedDistance * sections.length);
-
-    return {
-      dimension: dimensions[Math.min(dimIndex, dimensions.length - 1)],
-      section: sections[Math.min(secIndex, sections.length - 1)],
-    };
-  };
-
-  const bringToFront = (index: number) => {
-    setZOrder((prev) => {
-      const filtered = prev.filter((i) => i !== index);
-      return [...filtered, index]; // último = más arriba
-    });
-  };
-
   if (!mandala) return <div>No mandala found</div>;
 
   return (
@@ -151,6 +131,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       <Layer>
         {zOrder.map((i) => {
           const p = mandala.postits[i];
+          if (!shouldShowPostIt(p)) return null;
           const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
           const isEditing = editableIndex === i;
 

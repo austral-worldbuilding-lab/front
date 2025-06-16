@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { SimpleMandala } from "../types/mandala";
 import { getMandalas } from "@/services/projectService.ts";
 
-const useMandalas = (projectId: string) => {
+const useMandalas = (projectId: string, page: number, limit: number) => {
   const [mandalas, setMandalas] = useState<SimpleMandala[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -18,7 +18,7 @@ const useMandalas = (projectId: string) => {
       setLoading(true);
       setError(null);
 
-      const mandalasData = await getMandalas(projectId);
+      const mandalasData = await getMandalas(projectId, page, limit);
 
       setMandalas(mandalasData);
     } catch (err) {
@@ -35,7 +35,7 @@ const useMandalas = (projectId: string) => {
 
   useEffect(() => {
     fetchMandalas();
-  }, [projectId]);
+  }, [projectId, page, limit]);
 
   return {
     mandalas,

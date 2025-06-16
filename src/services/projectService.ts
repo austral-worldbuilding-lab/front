@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import {CreateProject, Project, SimpleMandala} from "@/types/mandala";
+import {CreateProject, Project, SimpleMandala, Tag} from "@/types/mandala";
 
 export interface CreateMandalaDto {
   name: string;
@@ -8,12 +8,14 @@ export interface CreateMandalaDto {
 
 
 export const getMandalas = async (
-  projectId: string
+  projectId: string,
+  page: number,
+  limit: number
 ): Promise<SimpleMandala[]> => {
   const response = await axiosInstance.get<{ data: SimpleMandala[] }>(
     "/mandala",
     {
-      params: { projectId },
+      params: { projectId, page, limit },
     }
   );
 
@@ -36,5 +38,21 @@ export const createProject = async (project: CreateProject): Promise<Project> =>
     throw new Error(response.data.message || "Error creating project.");
   }
 
+  return response.data.data;
+}
+
+
+export const getTags = async(
+    projectId: string,
+) => {
+  const response = await axiosInstance.get<{ data: Tag[] }>(
+      `/project/${projectId}/tags`
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Error fetching filters.");
+  }
+
+  console.log("Tags response:", response.data.data);
   return response.data.data;
 }

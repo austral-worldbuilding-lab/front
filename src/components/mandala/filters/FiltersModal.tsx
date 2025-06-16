@@ -8,21 +8,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import ToggleBadge from "@/components/ui/toggle-badge";
-import { useGetFilters, FilterSection } from "@/hooks/useGetFilters";
+import { useGetFilters } from "@/hooks/useGetFilters";
 import { useState } from "react";
+import {FilterSection} from "@/types/mandala";
 
 interface CreateModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onApplyFilters: (selectedFilters: Record<string, string[]>) => void;
+  mandalaId: string;
+  projectId: string;
 }
 
 const FiltersModal = ({
   isOpen,
   onOpenChange,
   onApplyFilters,
+  mandalaId,
+  projectId,
 }: CreateModalProps) => {
-  const { filters, isLoading } = useGetFilters();
+  const { filters, isLoading } = useGetFilters(mandalaId, projectId);
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});

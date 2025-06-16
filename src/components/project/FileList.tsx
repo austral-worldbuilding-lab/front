@@ -18,7 +18,7 @@ export default function ProjectFilesList({
   return (
     <div>
       {files.length === 0 ? (
-        <p>No files uploaded yet.</p>
+        <p>No hay archivos cargados aún</p>
       ) : (
         <ul className="list-disc space-y-1">
           {files.map((file, index) => (

@@ -55,7 +55,7 @@ const Buttons = ({
           color="secondary"
           icon={<StickyNote size={16} />}
         >
-          New Post-It
+          Nuevo Post-It
         </Button>
         <Button
           onClick={() => setIsCreateModalOpen(true)}
@@ -63,7 +63,7 @@ const Buttons = ({
           color="primary"
           icon={<PersonStanding size={16} />}
         >
-          New Character
+          Nuevo Personaje
         </Button>
       </div>
 
@@ -71,8 +71,8 @@ const Buttons = ({
         isOpen={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onCreateCharacter={handleCreateCharacter}
-        title="Create New Character"
-        createButtonText="Create new character"
+        title="Crear nuevo personaje"
+        createButtonText="Crear personaje"
       />
       <NewPostItModal
         isOpen={isPostItModalOpen}
