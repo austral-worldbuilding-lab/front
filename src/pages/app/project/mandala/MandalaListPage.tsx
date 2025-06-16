@@ -69,8 +69,10 @@ const MandalaListPage = () => {
                     Create Mandala
                 </Button>
                 <div className="bg-white rounded-lg shadow-sm border ">
-                    {mandalasLoading && <Loader size="medium" text="Loading mandalas..."/>}
-                    {mandalas.length === 0 && !mandalasLoading ? (
+                    {mandalasLoading ? (
+                        <div className="flex justify-center items-center min-h-[100px]">
+                            <Loader size="medium" text="Loading mandalas..."/>
+                        </div>                    ) : mandalas.length === 0 ? (
                         <p className="p-4 text-gray-600 text-center">
                             No mandalas created yet.
                         </p>
