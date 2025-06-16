@@ -15,8 +15,7 @@ import { Sparkles } from "lucide-react";
 import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 
-
-const initialDimensions: Item[] = Sectors.map(sector => {
+const initialDimensions: Item[] = Sectors.map((sector) => {
   return {
     id: sector.id,
     value: sector.name,
@@ -24,8 +23,7 @@ const initialDimensions: Item[] = Sectors.map(sector => {
   };
 });
 
-
-const initialScales: Item[] = Levels.map(level => ({
+const initialScales: Item[] = Levels.map((level) => ({
   id: level.id,
   value: level.name,
   color: "rgba(180, 210, 255, 0.7)",
@@ -39,18 +37,22 @@ interface CreateModalProps {
     description: string;
     useAIMandala: boolean;
     color: string;
-    dimensions: { name: string; color?: string }[]
+    dimensions: { name: string; color?: string }[];
     scales: string[];
     linkedToId?: string;
   }) => void | Promise<void>;
   title?: string;
   createButtonText?: string;
+  hideColorSelector?: boolean;
 }
 
 const CreateModal = ({
   isOpen,
   onOpenChange,
-  onCreateCharacter, title = "New Character", createButtonText = "Create Character"
+  onCreateCharacter,
+  title = "New Character",
+  createButtonText = "Create Character",
+  hideColorSelector = false,
 }: CreateModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -60,7 +62,6 @@ const CreateModal = ({
   const [scales, setScales] = useState<Item[]>(initialScales);
 
   const handleCreateCharacter = () => {
-
     const processedDimensions = dimensions.map((d) => ({
       name: d.value,
       color: d.color,
@@ -102,19 +103,20 @@ const CreateModal = ({
           />
           <div className="grid  sm:grid-cols-2 gap-4">
             <TagInput
-                label="Dimensions"
-                initialItems={initialDimensions}
-                onChange={setDimensions}
+              label="Dimensions"
+              initialItems={initialDimensions}
+              onChange={setDimensions}
+              tooltip="Dimensions are the sectors of the mandala. You can add, remove or edit them."
             />
 
             <TagInput
-                label="Scales"
-                initialItems={initialScales}
-                onChange={setScales}
-                colorPicker={false}
+              label="Scales"
+              initialItems={initialScales}
+              onChange={setScales}
+              colorPicker={false}
+              tooltip="Scales are the levels of the mandala. You can add, remove or edit them."
             />
           </div>
-
 
           <div className="flex justify-between gap-2">
             <RadioGroup
@@ -134,12 +136,14 @@ const CreateModal = ({
               </label>
             </RadioGroup>
 
-            <ColorSelector
-              className="w-1/2"
-              selectedColor={selectedColor}
-              setSelectedColor={setSelectedColor}
-              colors={colors}
-            />
+            {!hideColorSelector && (
+              <ColorSelector
+                className="w-1/2"
+                selectedColor={selectedColor}
+                setSelectedColor={setSelectedColor}
+                colors={colors}
+              />
+            )}
           </div>
 
           {mandalaType === "ai" && (

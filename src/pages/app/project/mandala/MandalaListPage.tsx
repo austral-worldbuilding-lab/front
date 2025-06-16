@@ -99,6 +99,7 @@ const MandalaListPage = () => {
             onCreateCharacter={handleCreateMandala}
             title="Create Mandala"
             createButtonText="Create Mandala"
+            hideColorSelector
         />
         {error && (
             <p className="text-red-500 text-sm mt-4 text-center max-w-md">{error}</p>

@@ -1,8 +1,9 @@
 import {useState, useEffect, useRef} from "react";
-import { X } from "lucide-react";
+import { HelpCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import {HexColorPicker} from "react-colorful";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export interface Item {
   id: string;
@@ -15,6 +16,7 @@ interface TagInputProps {
   initialItems?: Item[];
   onChange: (items: Item[]) => void;
   colorPicker?: boolean;
+  tooltip?: string;
 }
 
 export default function TagInput({ 
@@ -22,6 +24,7 @@ export default function TagInput({
   initialItems = [], 
   onChange,
   colorPicker = true,
+  tooltip,
 }: TagInputProps) {
   const [value, setValue] = useState("");
   const [items, setItems] = useState<Item[]>(initialItems);
@@ -111,8 +114,19 @@ export default function TagInput({
 
   return (
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">{label}</label>
-
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">{label}</label>
+          {tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="w-4 h-4 text-gray-500 cursor-pointer" />
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>{tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
         <div className="flex gap-2">
           <Input
               ref={inputRef}
