@@ -42,7 +42,7 @@ const ProjectPage = () => {
       <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 mb-10">
         <img src={logo} alt="logo" className="w-50 h-auto" />
         <h1 className="text-xl sm:text-2xl font-bold text-center break-words">
-          Project: Festejos de egresados en la universidad
+          Proyecto: Festejos de egresados en la universidad
         </h1>
       </div>
       <div className="flex flex-col items-start justify-start max-w-lg w-full">

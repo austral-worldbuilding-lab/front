@@ -43,18 +43,18 @@ const NewPostItModal = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            Create New Post-It
+            Crear nuevo Post-It
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Text
+              Texto
             </label>
             <CustomInput
               as="textarea"
-              placeholder="Write your note here..."
+              placeholder="Escriba su nota aquí..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="resize-none border w-full"
@@ -80,7 +80,7 @@ const NewPostItModal = ({
             color="tertiary"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             variant="filled"
@@ -88,7 +88,7 @@ const NewPostItModal = ({
             onClick={handleCreate}
             disabled={!isValid}
           >
-            Create Post-It
+            Crear Post-It
           </Button>
         </DialogFooter>
       </DialogContent>

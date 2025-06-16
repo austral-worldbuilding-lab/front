@@ -19,16 +19,16 @@ const LoginPage = () => {
   }
 
   const firebaseErrorMap: Record<string, string> = {
-    "auth/invalid-email": "Invalid email",
-    "auth/invalid-credential": "Incorrect email or password",
-    "auth/wrong-password": "Incorrect password",
-    "auth/missing-password": "Password is required",
+    "auth/invalid-email": "Correo electrónico inválido",
+    "auth/invalid-credential": "Correo electrónico o contraseña incorrectos",
+    "auth/wrong-password": "Contraseña incorrecta",
+    "auth/missing-password": "La contraseña es obligatoria",
   };
 
   const getMessageFromErrorCode = (errorCode: string | null): string | null => {
     if (!errorCode) return null;
     const code = errorCode.match(/\(.*?\)/)?.[0].replace(/[()]/g, "");
-    return firebaseErrorMap[code!] || "Unknown error.";
+    return firebaseErrorMap[code!] || "Error desconocido.";
   };
 
   return (
@@ -39,7 +39,7 @@ const LoginPage = () => {
           <div className="flex flex-row sm:flex-col items-center gap-4">
             <img src={logo} alt="logo" className="w-[60px] sm:w-[120px]" />
             <h1 className="text-2xl font-semibold text-center sm:text-3xl">
-              Sign in
+              Iniciar sesión
             </h1>
           </div>
         </div>
@@ -47,29 +47,29 @@ const LoginPage = () => {
         {/* Form */}
         <div className="w-full sm:w-1/2 p-4 flex flex-col gap-4">
           <CustomInput
-            placeholder="Email"
+            placeholder="Correo electrónico"
             color="foreground"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={
               error?.includes("auth/invalid-email")
-                ? "Invalid email"
+                ? "Correo electrónico inválido"
                 : undefined
             }
           />
           <CustomInput
-            placeholder="Password"
+            placeholder="Contraseña"
             color="white"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             error={
               error?.includes("auth/wrong-password")
-                ? "Incorrect password"
+                ? "Contraseña incorrecta"
                 : undefined
             }
           />
-          <Button onClick={handleLogin}>Sign in</Button>
+          <Button onClick={handleLogin}>Iniciar sesión</Button>
 
           {error &&
             !error.includes("auth/invalid-email") &&
@@ -80,9 +80,9 @@ const LoginPage = () => {
             )}
 
           <p className="text-sm">
-            Don't have an account?{" "}
+            ¿No tienes una cuenta?{" "}
             <Link to="/register" className="text-primary-500">
-              Register
+              Registrarse
             </Link>
           </p>
         </div>

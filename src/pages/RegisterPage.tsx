@@ -41,7 +41,7 @@ const RegisterPage = () => {
           <div className="flex flex-row sm:flex-col items-center gap-4">
             <img src={logo} alt="logo" className="w-[60px] sm:w-[120px]" />
             <h1 className="text-2xl font-semibold text-center sm:text-3xl">
-              Register
+              Registrarse
             </h1>
           </div>
         </div>
@@ -85,7 +85,7 @@ const RegisterPage = () => {
             )}
 
           <p className="text-sm">
-            Already have an account?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link to="/login" className="text-primary-500">
               Iniciar sesión
             </Link>

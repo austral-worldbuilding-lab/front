@@ -80,7 +80,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center w-screen h-screen">
-        <Loader size="large" text="Loading mandala..." />
+        <Loader size="large" text="Cargando mandala..." />
       </div>
     );
   }
@@ -88,7 +88,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   if (error) {
     return (
       <div className="flex items-center justify-center w-full h-full text-red-500">
-        Error loading mandala
+        Error cargando mandala
       </div>
     );
   }
@@ -127,7 +127,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                     className="flex items-center gap-2 cursor-pointer"
                   >
                     <ArrowLeftIcon className="w-5 h-5" />
-                    Back
+                    Atrás
                   </button>
                   <div className="flex items-center gap-2">
                     <Button
@@ -135,7 +135,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                       icon={<Filter size={16} />}
                       onClick={() => setIsFiltersOpen(true)}
                     >
-                      Filters
+                      Filtros
                     </Button>
                   </div>
                 </div>

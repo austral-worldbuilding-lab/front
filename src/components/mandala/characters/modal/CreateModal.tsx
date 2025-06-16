@@ -94,25 +94,25 @@ const CreateModal = ({
         <div className="space-y-6 py-4">
           <CustomInput
             id="name"
-            label="Name"
+            label="Nombre"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full"
           />
           <div className="grid  sm:grid-cols-2 gap-4">
             <TagInput
-              label="Dimensions"
+              label="Dimensiones"
               initialItems={initialDimensions}
               onChange={setDimensions}
-              tooltip="Dimensions are the sectors of the mandala. You can add, remove or edit them."
+              tooltip="Las dimensiones representan los sectores de la mandala. Se pueden agregar, eliminar o editar."
             />
 
             <TagInput
-              label="Scales"
+              label="Escalas"
               initialItems={initialScales}
               onChange={setScales}
               colorPicker={false}
-              tooltip="Scales are the levels of the mandala. You can add, remove or edit them."
+              tooltip="Las escalas representan los niveles de la mandala. Se pueden agergar, eliminar o editar."
             />
           </div>
 
@@ -124,12 +124,12 @@ const CreateModal = ({
             >
               <label className="flex items-center gap-3 cursor-pointer">
                 <RadioGroupItem value="empty" />
-                <span className="text-black">Empty mandala</span>
+                <span className="text-black">Mandala vacía</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <RadioGroupItem value="ai" />
                 <span className="text-black flex items-center gap-2">
-                  AI generated <Sparkles className="w-4 h-4" />
+                  Generada con IA <Sparkles className="w-4 h-4" />
                 </span>
               </label>
             </RadioGroup>
@@ -146,8 +146,8 @@ const CreateModal = ({
             <div className="space-y-2">
               <CustomInput
                 id="description"
-                label="Description (optional)"
-                about="This description will be usefull for the AI to generate the mandala with more precision"
+                label="Descripcion (opcional)"
+                about= "Esta descripción será útil para que la IA genere la mandala con más precisión"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 as="textarea"
@@ -163,7 +163,7 @@ const CreateModal = ({
             color="tertiary"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             variant="filled"

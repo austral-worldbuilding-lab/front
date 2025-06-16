@@ -58,7 +58,7 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
         </PopoverTrigger>
         <PopoverContent className="w-full p-0">
           <Command>
-            <CommandInput placeholder="Search tags..." />
+            <CommandInput placeholder="Buscar tags..." />
             <CommandList>
               <CommandEmpty>No tag found.</CommandEmpty>
               {tags.map((tag) => (
@@ -89,7 +89,7 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
                 }}
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                New tag
+                Nuevo tag
               </CommandItem>
             </CommandList>
           </Command>

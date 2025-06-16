@@ -35,7 +35,7 @@ const MandalaListPage = () => {
         const { name, description, color, useAIMandala, dimensions, scales } = character;
 
         if (!name.trim()) {
-            setError("The name cannot be empty.");
+            setError("El nombre no puede estar vacío");
             return;
         }
 
@@ -46,7 +46,7 @@ const MandalaListPage = () => {
             setIsCreateModalOpen(false);
             navigate(`/app/project/${projectId}/mandala/${id}`);
         } catch {
-            setError("An error occurred while creating the mandala.");
+            setError("Ocurrió un error al crear la mandala");
         }
     };
 
@@ -66,7 +66,7 @@ const MandalaListPage = () => {
                     onClick={() => setIsCreateModalOpen(true)}
                     icon={<PlusIcon size={16}/>}
                 >
-                    Create Mandala
+                    Crear Mandala
                 </Button>
                 <div className="bg-white rounded-lg shadow-sm border ">
                     {mandalasLoading ? (
@@ -74,7 +74,7 @@ const MandalaListPage = () => {
                             <Loader size="medium" text="Loading mandalas..."/>
                         </div>                    ) : mandalas.length === 0 ? (
                         <p className="p-4 text-gray-600 text-center">
-                            No mandalas created yet.
+                            No hay mandalas creadas aún
                         </p>
                     ) : (
                         <ul className="divide-y divide-gray-100">
@@ -89,7 +89,7 @@ const MandalaListPage = () => {
                                     >
                                         <GlobeIcon className="w-5 h-5 text-gray-400 flex-shrink-0"/>
                                         <span className="flex-1">
-                                        {mandala.name || "Mandala without name"}
+                                        {mandala.name || "Mandala sin nombre"}
                                         </span>
                                     </Link>
                                 </li>
@@ -118,8 +118,8 @@ const MandalaListPage = () => {
                 isOpen={isCreateModalOpen}
                 onOpenChange={setIsCreateModalOpen}
                 onCreateCharacter={handleCreateMandala}
-                title="Create Mandala"
-                createButtonText="Create Mandala"
+                title="Crear Mandala"
+                createButtonText="Crear Mandala"
             />
             {error && (
                 <p className="text-red-500 text-sm mt-4 text-center max-w-md">{error}</p>
