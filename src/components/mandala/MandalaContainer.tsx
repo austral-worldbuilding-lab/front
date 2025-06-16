@@ -139,7 +139,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                     </Button>
                   </div>
                 </div>
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-1000">
+                <div className="absolute left-1/2 -translate-x-1/2 z-1000 top-[84px] md:top-4">
                   <p className="text-lg text-black font-bold">
                     {mandala.mandala.name}
                   </p>
