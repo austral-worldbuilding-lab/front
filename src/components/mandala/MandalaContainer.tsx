@@ -12,6 +12,7 @@ import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "./postits/SelectTags";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
+import {useGetTags} from "@/hooks/useGetTags.ts";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -65,16 +66,12 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     });
   };
 
-  // TODO: Get tags from backend
-  const [tags, setTags] = useState<Tag[]>([
-    { label: "Comedor", value: "comedor", color: "#ff0000" },
-    { label: "Aula", value: "aula", color: "#ffa500" },
-    { label: "Campus", value: "campus", color: "#0000ff" },
-  ]);
+  const { tags } = useGetTags(projectId);
 
   // TODO: Create tag in backend
+  const [newTags, setNewTags] = useState<Tag[]>([]);
   const handleNewTag = (tag: Tag) => {
-    setTags([...tags, tag]);
+    setNewTags([...newTags, tag]);
   };
 
   if (loading) {
