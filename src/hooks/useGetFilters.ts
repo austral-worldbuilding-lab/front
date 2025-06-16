@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import {FilterSection, Tag} from "@/types/mandala";
+import {FilterSection, BackendTag} from "@/types/mandala";
 import {getFilters} from "@/services/mandalaService.ts";
 import {getTags} from "@/services/projectService.ts";
 
@@ -12,19 +12,27 @@ export function useGetFilters (mandalaId: string, projectId: string) {
     const fetchFilters = async () => {
       setIsLoading(true);
         try {
-            const response : FilterSection[] = await getFilters(mandalaId);
-            const tags : Tag[] = await getTags(projectId);
-            response.push(
-                {
-                    sectionName: "Tags",
-                    type: "multiple",
-                    options: tags.map((tag) => ({
-                        label: tag.name,
-                        color: tag.color,
-                    })),
-                }
-            )
-            setFilters(response);
+            const rawFilters: FilterSection[] = await getFilters(mandalaId);
+            const tags: BackendTag[] = await getTags(projectId);
+
+            let finalFilters = rawFilters;
+
+            if (tags.length > 0 && !rawFilters.some(f => f.sectionName === "Tags")) {
+                finalFilters = [
+                    ...rawFilters,
+                    {
+                        sectionName: "Tags",
+                        type: "multiple",
+                        options: tags.map((tag) => ({
+                            label: tag.name,
+                            color: tag.color,
+                        })),
+                    },
+                ];
+            }
+
+            setFilters(finalFilters);
+
         } catch (error) {
             console.error("Error fetching filters:", error);
         }

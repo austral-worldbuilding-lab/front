@@ -79,7 +79,7 @@ export interface FilterSection {
   options: FilterOption[];
 }
 
-export interface Tag {
+export interface BackendTag {
   id: string;
   name: string;
   color: string;
