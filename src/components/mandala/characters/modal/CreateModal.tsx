@@ -43,7 +43,6 @@ interface CreateModalProps {
   }) => void | Promise<void>;
   title?: string;
   createButtonText?: string;
-  hideColorSelector?: boolean;
 }
 
 const CreateModal = ({
@@ -52,7 +51,6 @@ const CreateModal = ({
   onCreateCharacter,
   title = "New Character",
   createButtonText = "Create Character",
-  hideColorSelector = false,
 }: CreateModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -136,14 +134,12 @@ const CreateModal = ({
               </label>
             </RadioGroup>
 
-            {!hideColorSelector && (
               <ColorSelector
                 className="w-1/2"
                 selectedColor={selectedColor}
                 setSelectedColor={setSelectedColor}
                 colors={colors}
               />
-            )}
           </div>
 
           {mandalaType === "ai" && (
