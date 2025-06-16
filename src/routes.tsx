@@ -13,6 +13,7 @@ import MandalaPage from "./pages/app/project/mandala/MandalaPage";
 import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
 import ProjectListPage from "./pages/app/project/ProjectListPage";
+import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 
 // Layout component for all protected routes
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
@@ -61,6 +62,10 @@ function App() {
           <Route
             path="project/:projectId/mandala/:mandalaId"
             element={<MandalaPage />}
+          />
+          <Route
+              path="project/:projectId/mandala/:mandalaId/dimension/:dimensionName"
+              element={<DimensionPage />}
           />
         </Route>
 
