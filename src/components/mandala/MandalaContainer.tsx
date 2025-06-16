@@ -101,6 +101,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
             isOpen={isFiltersOpen}
             onOpenChange={setIsFiltersOpen}
             onApplyFilters={(filters) => setAppliedFilters(filters)}
+            mandalaId={mandalaId}
+            projectId={projectId}
           />
           <TransformWrapper
             initialScale={0.5}
