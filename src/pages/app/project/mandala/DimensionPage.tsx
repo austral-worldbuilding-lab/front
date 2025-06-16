@@ -37,10 +37,10 @@ const DimensionPage = () => {
 
     return (
         <div className={"flex flex-col items-center justify-center w-screen h-screen p-4 bg-gray-100"}>
-            <DimensionView
+            {dimensionName && <DimensionView
                 dimensionName={dimensionName}
                 scales={scales}
-            />
+            />}
         </div>
     );
 };
