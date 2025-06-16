@@ -156,7 +156,7 @@ export default function TagInput({
             <span className="text-sm text-red-500">{error}</span>
         )}
 
-        <div className="flex flex-wrap gap-2 mt-1">
+        <div className="flex flex-wrap gap-2 mt-1 overflow-y-auto max-h-26">
           {items.map((item) => (
               <div
                   key={item.id}
