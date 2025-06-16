@@ -42,7 +42,7 @@ const ProjectPage = () => {
       <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 mb-10">
         <img src={logo} alt="logo" className="w-50 h-auto" />
         <h1 className="text-xl sm:text-2xl font-bold text-center break-words">
-          Project: Festejos de egresados en la universidad
+          Proyecto: Festejos de egresados en la universidad
         </h1>
       </div>
       <div className="flex flex-col items-start justify-start max-w-lg w-full">
@@ -54,11 +54,11 @@ const ProjectPage = () => {
           }}
           icon={<Eye size={16} />}
         >
-          View Mandalas
+          Ver Mandalas
         </Button>
         <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
           <div className="flex justify-between items-start">
-            <h2 className="text-lg font-bold mb-4">Project Files</h2>
+            <h2 className="text-lg font-bold mb-4">Archivos del proyecto</h2>
             <FileLoader onUploadComplete={fetchFiles} projectId={projectId} />
           </div>
           <FileList files={files} loading={loading} error={error} />

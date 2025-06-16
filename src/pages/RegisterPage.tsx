@@ -19,10 +19,10 @@ const RegisterPage = () => {
   };
 
   const firebaseErrorMap: Record<string, string> = {
-    "auth/invalid-email": "Invalid email",
-    "auth/email-already-in-use": "Email already in use",
-    "auth/weak-password": "Password must be at least 6 characters",
-    "auth/missing-password": "Password is required",
+    "auth/invalid-email": "Correo electrónico inválido",
+    "auth/email-already-in-use": "El correo ya está en uso",
+    "auth/weak-password": "La contraseña debe tener al menos 6 caracteres",
+    "auth/missing-password": "La contraseña es obligatoria",
   };
 
   const getMessageFromErrorCode = (
@@ -30,7 +30,7 @@ const RegisterPage = () => {
   ): string | undefined => {
     if (!errorCode) return undefined;
     const code = errorCode.match(/\(.*?\)/)?.[0].replace(/[()]/g, "");
-    return firebaseErrorMap[code!] || "Unknown error";
+    return firebaseErrorMap[code!] || "Error desconocido";
   };
 
   return (
@@ -41,7 +41,7 @@ const RegisterPage = () => {
           <div className="flex flex-row sm:flex-col items-center gap-4">
             <img src={logo} alt="logo" className="w-[60px] sm:w-[120px]" />
             <h1 className="text-2xl font-semibold text-center sm:text-3xl">
-              Register
+              Registrarse
             </h1>
           </div>
         </div>
@@ -49,7 +49,7 @@ const RegisterPage = () => {
         {/* Formulario */}
         <div className="w-full sm:w-1/2 p-4 flex flex-col gap-4">
           <CustomInput
-            placeholder="Email"
+            placeholder="Correo electrónico"
             color="foreground"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -61,7 +61,7 @@ const RegisterPage = () => {
             }
           />
           <CustomInput
-            placeholder="Password"
+            placeholder="Contraseña"
             color="white"
             type="password"
             value={password}
@@ -73,7 +73,7 @@ const RegisterPage = () => {
             }
           />
 
-          <Button onClick={handleRegister}>Create account</Button>
+          <Button onClick={handleRegister}>Crear cuenta</Button>
 
           {error &&
             !error.includes("auth/invalid-email") &&
@@ -85,9 +85,9 @@ const RegisterPage = () => {
             )}
 
           <p className="text-sm">
-            Already have an account?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link to="/login" className="text-primary-500">
-              Login
+              Iniciar sesión
             </Link>
           </p>
         </div>

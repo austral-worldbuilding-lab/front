@@ -114,8 +114,8 @@ export default function TagInput({
             if (error) setError(null);
           }}
           onKeyDown={handleKeyDown}
-          placeholder={`Add ${label.toLowerCase()}`}
-          className="flex-1 h-8"
+          placeholder={`Añadir ${label.toLowerCase()}`}
+          className="flex-1 h-8 truncate overflow-hidden text-ellipsis whitespace-nowrap"
         />
 
         <div className="relative">
@@ -148,7 +148,7 @@ export default function TagInput({
 
       <div className="flex flex-wrap items-start justify-start gap-2 mt-1 overflow-y-auto min-h-13 max-h-26 border border-grey-500 rounded-md p-2">
         {items.length === 0 && (
-          <span className="text-sm text-gray-500">No tags added</span>
+          <span className="text-sm text-gray-500">No se añadieron tags</span>
         )}
         {items.map((item) => (
           <div
