@@ -24,7 +24,7 @@ const DimensionPage = () => {
         <div className={"flex flex-col items-center justify-center w-screen h-screen p-4 bg-gray-100"}>
             <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
                 <button
-                    onClick={() => navigate(`/app/project/${projectId}/mandala/${mandalaId}`)}
+                    onClick={() => navigate(-1)}
                     className="flex items-center gap-2 cursor-pointer"
                 >
                     <ArrowLeftIcon className="w-5 h-5"/>
