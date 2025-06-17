@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import useMandalas from "@/hooks/useMandalas";
+import useGetMandalas from "@/hooks/useGetMandalas.ts";
 import Loader from "@/components/common/Loader";
 import {ArrowLeftIcon, ChevronLeft, ChevronRight, GlobeIcon, PlusIcon} from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,14 +7,14 @@ import CreateModal from "@/components/mandala/characters/modal/CreateModal";
 import {useState} from "react";
 import {useCreateMandala} from "@/hooks/useCreateMandala.ts";
 import {useDeleteMandala} from "@/hooks/useDeleteMandala.ts";
-import {MandalaMenu} from "@/components/mandala/MandalaMenu.tsx";
+import MandalaMenu from "@/components/mandala/MandalaMenu.tsx";
 
 const MandalaListPage = () => {
     const { projectId } = useParams<{ projectId: string }>();
     const [page, setPage] = useState(1);
     const limit = 10;
 
-    const { mandalas, loading: mandalasLoading } = useMandalas(projectId || "", page, limit);
+    const { mandalas, loading: mandalasLoading, refetch } = useGetMandalas(projectId || "", page, limit);
     const navigate = useNavigate();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -82,7 +82,7 @@ const MandalaListPage = () => {
                 <div className="bg-white rounded-lg shadow-sm border ">
                     {mandalasLoading ? (
                         <div className="flex justify-center items-center min-h-[100px]">
-                            <Loader size="medium" text="Loading mandalas..."/>
+                            <Loader size="medium" text="Cargando mandalas..."/>
                         </div>                    ) : mandalas.length === 0 ? (
                         <p className="p-4 text-gray-600 text-center">
                             No hay mandalas creadas aún

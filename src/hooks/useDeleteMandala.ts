@@ -1,8 +1,8 @@
-import axiosInstance from "@/lib/axios.ts";
+import { deleteMandala as deleteMandalaService } from '../services/createMandalaService.ts';
 
 export const useDeleteMandala = () => {
     const deleteMandala = async (mandalaId: string) => {
-        await axiosInstance.delete(`/mandala/${mandalaId}`);
+        await deleteMandalaService(mandalaId);
     };
 
     return { deleteMandala };
