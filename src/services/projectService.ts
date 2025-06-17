@@ -1,26 +1,11 @@
 import axiosInstance from "@/lib/axios";
-import {CreateProject, Project, SimpleMandala, BackendTag} from "@/types/mandala";
+import {CreateProject, Project, BackendTag} from "@/types/mandala";
 
 export interface CreateMandalaDto {
   name: string;
   projectId: string;
 }
 
-
-export const getMandalas = async (
-  projectId: string,
-  page: number,
-  limit: number
-): Promise<SimpleMandala[]> => {
-  const response = await axiosInstance.get<{ data: SimpleMandala[] }>(
-    "/mandala",
-    {
-      params: { projectId, page, limit },
-    }
-  );
-
-  return response.data.data;
-};
 
 export const getProjects = async (page : number, limit : number): Promise<Project[]> => {
   const response = await axiosInstance.get<{ data: Project[] }>(
