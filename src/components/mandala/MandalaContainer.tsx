@@ -32,6 +32,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     createPostit,
     updatePostit,
     updateCharacter,
+    deletePostit,
   } = useMandala(mandalaId);
 
   const projectId = useParams<{ projectId: string }>().projectId!;
@@ -175,6 +176,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onDragStart={() => setIsDraggingPostIt(true)}
                         onDragEnd={() => setIsDraggingPostIt(false)}
                         appliedFilters={appliedFilters}
+                        onPostItDelete={deletePostit}
+                        onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
                     />
                   </div>
                 </TransformComponent>

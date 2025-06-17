@@ -22,6 +22,7 @@ interface PostItProps {
   onBlur: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onContextMenu: (e: KonvaEventObject<PointerEvent>) => void; // Nueva prop
 }
 
 const PostIt: React.FC<PostItProps> = ({
@@ -41,6 +42,7 @@ const PostIt: React.FC<PostItProps> = ({
   onBlur,
   onMouseEnter,
   onMouseLeave,
+  onContextMenu,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -68,6 +70,7 @@ const PostIt: React.FC<PostItProps> = ({
       onDblClick={onDblClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onContextMenu={onContextMenu}
     >
       <Rect
         width={postItW}

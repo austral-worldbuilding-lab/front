@@ -4,16 +4,20 @@ import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
+import MandalaMenu from "./MandalaMenu";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils";
+import {useContextMenu} from "@/hooks/useContextMenu.ts";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
   onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
+  onPostItDelete: (index: number) => Promise<boolean>;
   characters?: Character[];
   onCharacterUpdate: (
     index: number,
     updates: Partial<Character>
   ) => Promise<boolean | void>;
+  onCharacterDelete: (index: number) => Promise<boolean>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onDragStart: () => void;
@@ -27,7 +31,9 @@ const SCENE_H = 1200;
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
+  onPostItDelete,
   onCharacterUpdate,
+  onCharacterDelete,
   onMouseEnter,
   onMouseLeave,
   onDragStart,
@@ -37,6 +43,19 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [postItW, postItH, padding] = [64, 64, 5];
   const [editingContent, setEditingContent] = useState<string | null>(null);
+  const {
+    contextMenu,
+    showContextMenu,
+    hideContextMenu,
+    handleDelete,
+  } = useContextMenu(
+      onPostItDelete,
+      onCharacterDelete,
+      editableIndex,
+      setEditableIndex,
+      setEditingContent
+  );
+
 
   const {
     zOrder,
@@ -48,11 +67,11 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   } = useKonvaUtils(mandala.postits);
 
   const shouldShowPostIt = (postit: Postit): boolean => {
+    if (!postit) return false;
     const { dimension, section } = postit;
 
     const dimensionFilter = appliedFilters["Dimensiones"] || [];
     const scaleFilter = appliedFilters["Escalas"] || [];
-    //const tagFilter = appliedFilters["Tags"] || [];
 
     return (
       (dimensionFilter.length === 0 || dimensionFilter.includes(dimension)) &&
@@ -127,70 +146,88 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   if (!mandala) return <div>No mandala found</div>;
 
   return (
-    <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
-      <Layer>
-        {zOrder.map((i) => {
-          const p = mandala.postits[i];
-          if (!shouldShowPostIt(p)) return null;
-          const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
-          const isEditing = editableIndex === i;
+    <div style={{ position: "relative" }} onClick={hideContextMenu}>
+      <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
+        <Layer>
+          {zOrder.map((i) => {
+            const p = mandala.postits[i];
+            if (!shouldShowPostIt(p)) return null;
+            const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
+            const isEditing = editableIndex === i;
 
-          return (
-            <PostIt
-              key={i}
-              postit={p}
-              isEditing={isEditing}
-              editingContent={editingContent}
-              dimensionColors={dimensionColors}
-              postItW={postItW}
-              postItH={postItH}
-              padding={padding}
-              position={{ x, y }}
-              onDragStart={() => {
-                onDragStart();
-                bringToFront(i);
-              }}
-              onDragMove={handleDragMove}
-              onDragEnd={(e) => handleOnDragEndPostIt(e, i, p)}
-              onDblClick={() => {
-                setEditableIndex(i);
-                setEditingContent(p.content);
-                bringToFront(i);
-              }}
-              onContentChange={(newValue) => {
-                setEditingContent(newValue);
-                onPostItUpdate(i, { content: newValue });
-              }}
-              onBlur={() => {
-                window.getSelection()?.removeAllRanges();
-                setEditableIndex(null);
-                setEditingContent(null);
-              }}
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}
-            />
-          );
-        })}
-        {mandala.characters?.map((character) => {
-          const { x, y } = toAbsolute(
-            character.position.x,
-            character.position.y
-          );
+            return (
+              <PostIt
+                key={i}
+                postit={p}
+                isEditing={isEditing}
+                editingContent={editingContent}
+                dimensionColors={dimensionColors}
+                postItW={postItW}
+                postItH={postItH}
+                padding={padding}
+                position={{ x, y }}
+                onDragStart={() => {
+                  onDragStart();
+                  bringToFront(i);
+                }}
+                onDragMove={handleDragMove}
+                onDragEnd={(e) => handleOnDragEndPostIt(e, i, p)}
+                onDblClick={() => {
+                  setEditableIndex(i);
+                  setEditingContent(p.content);
+                  bringToFront(i);
+                }}
+                onContentChange={(newValue) => {
+                  setEditingContent(newValue);
+                  onPostItUpdate(i, { content: newValue });
+                }}
+                onBlur={() => {
+                  window.getSelection()?.removeAllRanges();
+                  setEditableIndex(null);
+                  setEditingContent(null);
+                }}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                onContextMenu={(e) => showContextMenu(e, i, "postit")}
+              />
+            );
+          })}
+          {mandala.characters?.map((character, index) => {
+            const { x, y } = toAbsolute(
+              character.position.x,
+              character.position.y
+            );
 
-          return (
-            <CharacterIcon
-              key={`character-${character.id}`}
-              character={character}
-              position={{ x, y }}
-              onDragStart={onDragStart}
-              onDragEnd={(e) => handleOnDragEndCharacter(e, character)}
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}
-            />
-          );
-        })}
-      </Layer>
-    </Stage>
+            return (
+              <CharacterIcon
+                key={`character-${character.id}`}
+                character={character}
+                position={{ x, y }}
+                onDragStart={onDragStart}
+                onDragEnd={(e) => handleOnDragEndCharacter(e, character)}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                onContextMenu={(e) => showContextMenu(e, index, "character")}
+              />
+            );
+          })}
+        </Layer>
+      </Stage>
+
+      {contextMenu.visible && (
+          <div
+              style={{
+                position: "absolute",
+                top: contextMenu.y,
+                left: contextMenu.x,
+                zIndex: 1000,
+              }}
+              onClick={hideContextMenu}
+          >
+            <MandalaMenu onDelete={handleDelete} isContextMenu={true} />
+          </div>
+      )}
+    </div>
   );
 };
 
