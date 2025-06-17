@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import useMandala from "@/hooks/useMandala.ts";
 import Loader from "@/components/common/Loader.tsx";
 
@@ -39,18 +39,22 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({ dimensionName, mandala
                     {config?.scales.map((scaleName, index) => (
                         <div
                             key={index}
-                            className="flex flex-col items-center bg-blue-200 overflow-y-scroll custom-scrollbar w-full h-full p-3"
+                            className="flex flex-col justify-between items-center bg-blue-200 w-full h-full border-l"
                             style={{ minWidth: 0 }}
                         >
-                            <div className="flex flex-wrap justify-center gap-2 border-l p-3 w-full min-h-full">
+                            <div className="flex flex-wrap justify-center gap-2 p-3 w-full overflow-y-scroll grow custom-scrollbar">
                                 {mandala?.postits
                                     .filter(
                                         (p) =>
-                                            p.dimension === dimensionName &&
-                                            p.section === scaleName
+                                            p.dimension.toLowerCase() === dimensionName.toLowerCase() &&
+                                            p.section.toLowerCase() === scaleName.toLowerCase()
                                     )
                                     .map((postit, i) => (
-                                        <div key={i} className="w-20 h-20 bg-yellow-400 shadow-md p-1 text-sm">
+                                        <div
+                                            key={i}
+                                            className="w-20 h-20 bg-yellow-400 shadow-md p-1 text-sm break-words overflow-hidden whitespace-pre-line text-ellipsis"
+                                            style={{ wordBreak: "break-word" }}
+                                        >
                                             {postit.content}
                                         </div>
                                     ))}
