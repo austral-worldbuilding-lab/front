@@ -1,12 +1,29 @@
 import React from "react";
-import { FilterOption } from "@/types/mandala";
+import useMandala from "@/hooks/useMandala.ts";
+import Loader from "@/components/common/Loader.tsx";
 
 interface MandalaDimensionProps {
     dimensionName: string;
-    scales: FilterOption[];
+    mandalaId: string;
 }
 
-const DimensionView: React.FC<MandalaDimensionProps> = ({ dimensionName, scales }) => {
+const DimensionView: React.FC<MandalaDimensionProps> = ({ dimensionName, mandalaId }) => {
+
+    const {
+        mandala,
+        loading,
+        error,
+    } = useMandala(mandalaId);
+    const config = mandala?.mandala.configuration
+
+    if (loading) {
+        return <Loader/>;
+    }
+
+    if (error) {
+        return <div className="text-red-500">Error: {error.message}</div>;
+    }
+
     return (
         <div className="flex w-[70vw] h-[60vh]">
             {/* Nombre de la dimensión (vertical) */}
@@ -17,32 +34,36 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({ dimensionName, scales 
             </div>
 
             {/* Contenedor de columnas */}
-            <div className="flex flex-col bg-blue-50 w-full">
-                {/* Área scrolleable de post-its */}
-                <div className="flex flex-row overflow-y-scroll items-stretch h-full w-full">
-                    {scales.map((_, index) => (
+            <div className="flex flex-col bg-blue-50 h-full w-full">
+                <div className="flex flex-row items-stretch h-full w-full">
+                    {config?.scales.map((scaleName, index) => (
                         <div
                             key={index}
-                            className="flex flex-col flex-1 items-center"
-                            style={{minWidth: 0}}
+                            className="flex flex-col items-center bg-blue-200 overflow-y-scroll custom-scrollbar w-full h-full p-3"
+                            style={{ minWidth: 0 }}
                         >
-                            <div className="flex flex-wrap gap-2 border-l border-blue-300 bg-blue-200 p-3 min-w-full min-h-full">
-                                {/* Aquí van los post-its. Post-its MOCKEADOS: */}
-                                {[...Array(10)].map((_, i) => (
-                                    <div key={i} className="w-20 h-20 bg-yellow-400 shadow-md p-1 text-sm">
-                                        Hola, <br /> ¿todo bien?
-                                    </div>
-                                ))}
+                            <div className="flex flex-wrap justify-center gap-2 border-l p-3 w-full min-h-full">
+                                {mandala?.postits
+                                    .filter(
+                                        (p) =>
+                                            p.dimension === dimensionName &&
+                                            p.section === scaleName
+                                    )
+                                    .map((postit, i) => (
+                                        <div key={i} className="w-20 h-20 bg-yellow-400 shadow-md p-1 text-sm">
+                                            {postit.content}
+                                        </div>
+                                    ))}
                             </div>
                         </div>
                     ))}
                 </div>
                 {/* Labels fijos abajo */}
                 <div className="flex flex-row w-[98.4%]">
-                    {scales.map((scale, index) => (
+                    {config?.scales.map((scale, index) => (
                         <div key={index} className="flex-1 flex justify-center items-center p-2">
                             <span className="text-blue-900 font-bold text-xs text-center">
-                                {scale.label}
+                                {scale}
                             </span>
                         </div>
                     ))}
