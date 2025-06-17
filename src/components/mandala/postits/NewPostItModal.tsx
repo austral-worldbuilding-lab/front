@@ -67,7 +67,7 @@ const NewPostItModal = ({
             </label>
             <SelectTags
               tags={tags}
-              value={selectedTag?.value || tags[0].value}
+              value={selectedTag?.value || ""}
               onChange={setSelectedTag}
               onNewTag={onNewTag}
             />

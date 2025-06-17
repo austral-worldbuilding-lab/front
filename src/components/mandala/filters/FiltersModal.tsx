@@ -83,7 +83,7 @@ const FiltersModal = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            Filters
+            Filtros
           </DialogTitle>
         </DialogHeader>
 
@@ -102,10 +102,10 @@ const FiltersModal = ({
             onClick={handleResetFilters}
             icon={<Trash size={16} />}
           >
-            Reset Filters
+            Eliminar Filtros
           </Button>
           <Button variant="filled" color="primary" onClick={handleApplyFilters}>
-            Apply Filters
+            Aplicar Filtros
           </Button>
         </DialogFooter>
       </DialogContent>
