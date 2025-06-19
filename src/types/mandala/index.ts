@@ -20,10 +20,19 @@ export interface PostitCoordinates {
 }
 
 export interface Postit {
+  id?: string;
   content: string;
   coordinates: PostitCoordinates;
   dimension: string;
   section: string;
+  tag: Tag;
+  parentId?: string | null;
+}
+
+export interface Tag {
+  label: string;
+  value?: string;
+  color: string;
 }
 
 export interface Character {

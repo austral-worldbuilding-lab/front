@@ -14,12 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import NewTagModal from "./NewTagModal";
-
-export interface Tag {
-  label: string;
-  value: string;
-  color: string;
-}
+import { Tag } from "@/types/mandala";
 
 interface SelectTagsProps {
   tags: Tag[];
