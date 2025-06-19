@@ -40,3 +40,19 @@ export const getTags = async(
 
   return response.data.data;
 }
+
+export const createTag = async (
+  projectId: string,
+  tag: { name: string; color: string }
+): Promise<BackendTag> => {
+  const response = await axiosInstance.post<{ data: BackendTag }>(
+    `/project/${projectId}/tag`,
+    tag
+  );
+
+  if (response.status !== 201) {
+    throw new Error("Error creating tag.");
+  }
+
+  return response.data.data;
+};

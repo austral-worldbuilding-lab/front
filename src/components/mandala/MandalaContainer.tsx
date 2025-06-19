@@ -12,7 +12,7 @@ import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "./postits/SelectTags";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
-import {useGetTags} from "@/hooks/useGetTags.ts";
+import { useGetTags } from "@/hooks/useGetTags.ts";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -23,7 +23,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState<Record<string, string[]>>({});
+  const [appliedFilters, setAppliedFilters] = useState<
+    Record<string, string[]>
+  >({});
   const navigate = useNavigate();
   const {
     mandala,
@@ -67,12 +69,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     });
   };
 
-  const { tags } = useGetTags(projectId);
+  const { tags, createTag } = useGetTags(projectId);
 
-  // TODO: Create tag in backend
-  const [newTags, setNewTags] = useState<Tag[]>([]);
-  const handleNewTag = (tag: Tag) => {
-    setNewTags([...newTags, tag]);
+  const handleNewTag = async (tag: Tag) => {
+    await createTag(tag.label, tag.color);
   };
 
   if (loading) {
@@ -166,18 +166,22 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   }}
                 >
                   <div className="relative w-full h-full flex items-center justify-center">
-                    <Mandala mandala={mandala} scale={1} position={{ x: 0, y: 0 }} />
+                    <Mandala
+                      mandala={mandala}
+                      scale={1}
+                      position={{ x: 0, y: 0 }}
+                    />
                     <KonvaContainer
-                        mandala={mandala}
-                        onCharacterUpdate={updateCharacter}
-                        onPostItUpdate={updatePostit}
-                        onMouseEnter={() => setIsHoveringPostIt(true)}
-                        onMouseLeave={() => setIsHoveringPostIt(false)}
-                        onDragStart={() => setIsDraggingPostIt(true)}
-                        onDragEnd={() => setIsDraggingPostIt(false)}
-                        appliedFilters={appliedFilters}
-                        onPostItDelete={deletePostit}
-                        onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
+                      mandala={mandala}
+                      onCharacterUpdate={updateCharacter}
+                      onPostItUpdate={updatePostit}
+                      onMouseEnter={() => setIsHoveringPostIt(true)}
+                      onMouseLeave={() => setIsHoveringPostIt(false)}
+                      onDragStart={() => setIsDraggingPostIt(true)}
+                      onDragEnd={() => setIsDraggingPostIt(false)}
+                      appliedFilters={appliedFilters}
+                      onPostItDelete={deletePostit}
+                      onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
                     />
                   </div>
                 </TransformComponent>
