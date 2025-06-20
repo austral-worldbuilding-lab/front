@@ -1,24 +1,11 @@
 import axiosInstance from "@/lib/axios";
-import {CreateProject, Project, SimpleMandala} from "@/types/mandala";
+import {CreateProject, Project, BackendTag} from "@/types/mandala";
 
 export interface CreateMandalaDto {
   name: string;
   projectId: string;
 }
 
-
-export const getMandalas = async (
-  projectId: string
-): Promise<SimpleMandala[]> => {
-  const response = await axiosInstance.get<{ data: SimpleMandala[] }>(
-    "/mandala",
-    {
-      params: { projectId },
-    }
-  );
-
-  return response.data.data;
-};
 
 export const getProjects = async (page : number, limit : number): Promise<Project[]> => {
   const response = await axiosInstance.get<{ data: Project[] }>(
@@ -38,3 +25,34 @@ export const createProject = async (project: CreateProject): Promise<Project> =>
 
   return response.data.data;
 }
+
+
+export const getTags = async(
+    projectId: string,
+) => {
+  const response = await axiosInstance.get<{ data: BackendTag[] }>(
+      `/project/${projectId}/tags`
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Error fetching filters.");
+  }
+
+  return response.data.data;
+}
+
+export const createTag = async (
+  projectId: string,
+  tag: { name: string; color: string }
+): Promise<BackendTag> => {
+  const response = await axiosInstance.post<{ data: BackendTag }>(
+    `/project/${projectId}/tag`,
+    tag
+  );
+
+  if (response.status !== 201) {
+    throw new Error("Error creating tag.");
+  }
+
+  return response.data.data;
+};

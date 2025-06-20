@@ -19,7 +19,7 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
   const navigate = useNavigate();
   const computedAngles = sectors.map((sector, index) => ({
     ...sector,
-    angle: (360 / sectors.length) * index,
+    angle: (360 / sectors.length) * (sectors.length - index),
   }));
 
   const toKebabCase = (str: string) =>

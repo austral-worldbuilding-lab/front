@@ -3,6 +3,7 @@ import { Group, Rect } from "react-konva";
 import { Html } from "react-konva-utils";
 import { KonvaEventObject } from "konva/lib/Node";
 import { Postit } from "@/types/mandala";
+import { isDarkColor } from "@/utils/colorUtils";
 
 interface PostItProps {
   postit: Postit;
@@ -21,6 +22,7 @@ interface PostItProps {
   onBlur: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onContextMenu: (e: KonvaEventObject<PointerEvent>) => void; // Nueva prop
 }
 
 const PostIt: React.FC<PostItProps> = ({
@@ -40,6 +42,7 @@ const PostIt: React.FC<PostItProps> = ({
   onBlur,
   onMouseEnter,
   onMouseLeave,
+  onContextMenu,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -53,6 +56,9 @@ const PostIt: React.FC<PostItProps> = ({
     }, 0);
   }, [isEditing]);
 
+  const backgroundColor = dimensionColors[postit.dimension] || "#cccccc";
+  const textColor = isDarkColor(backgroundColor) ? "white" : "black";
+
   return (
     <Group
       x={position.x}
@@ -64,6 +70,7 @@ const PostIt: React.FC<PostItProps> = ({
       onDblClick={onDblClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onContextMenu={onContextMenu}
     >
       <Rect
         width={postItW}
@@ -101,6 +108,7 @@ const PostIt: React.FC<PostItProps> = ({
             margin: 0,
             resize: "none",
             background: `${dimensionColors[postit.dimension] || "#cccccc"}`,
+            color: textColor,
             borderRadius: 4,
             boxShadow: "0 0 4px rgba(0,0,0,0.3)",
             boxSizing: "border-box",

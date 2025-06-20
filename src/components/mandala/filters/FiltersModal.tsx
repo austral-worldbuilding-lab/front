@@ -8,21 +8,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import ToggleBadge from "@/components/ui/toggle-badge";
-import { useGetFilters, FilterSection } from "@/hooks/useGetFilters";
+import { useGetFilters } from "@/hooks/useGetFilters";
 import { useState } from "react";
+import { FilterSection } from "@/types/mandala";
 
 interface CreateModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onApplyFilters: (selectedFilters: Record<string, string[]>) => void;
+  mandalaId: string;
+  projectId: string;
 }
 
 const FiltersModal = ({
   isOpen,
   onOpenChange,
   onApplyFilters,
+  mandalaId,
+  projectId,
 }: CreateModalProps) => {
-  const { filters, isLoading } = useGetFilters();
+  const { filters, isLoading } = useGetFilters(mandalaId, projectId);
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});
@@ -47,6 +52,7 @@ const FiltersModal = ({
 
   const handleApplyFilters = () => {
     onApplyFilters(selectedFilters);
+    console.log("selectedFilters", selectedFilters);
     onOpenChange(false);
   };
 
@@ -78,7 +84,7 @@ const FiltersModal = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            Filters
+            Filtros
           </DialogTitle>
         </DialogHeader>
 
@@ -97,10 +103,10 @@ const FiltersModal = ({
             onClick={handleResetFilters}
             icon={<Trash size={16} />}
           >
-            Reset Filters
+            Eliminar Filtros
           </Button>
           <Button variant="filled" color="primary" onClick={handleApplyFilters}>
-            Apply Filters
+            Aplicar Filtros
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -15,8 +15,7 @@ import { Sparkles } from "lucide-react";
 import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 
-
-const initialDimensions: Item[] = Sectors.map(sector => {
+const initialDimensions: Item[] = Sectors.map((sector) => {
   return {
     id: sector.id,
     value: sector.name,
@@ -24,8 +23,7 @@ const initialDimensions: Item[] = Sectors.map(sector => {
   };
 });
 
-
-const initialScales: Item[] = Levels.map(level => ({
+const initialScales: Item[] = Levels.map((level) => ({
   id: level.id,
   value: level.name,
   color: "rgba(180, 210, 255, 0.7)",
@@ -39,7 +37,7 @@ interface CreateModalProps {
     description: string;
     useAIMandala: boolean;
     color: string;
-    dimensions: { name: string; color?: string }[]
+    dimensions: { name: string; color?: string }[];
     scales: string[];
     linkedToId?: string;
   }) => void | Promise<void>;
@@ -50,7 +48,9 @@ interface CreateModalProps {
 const CreateModal = ({
   isOpen,
   onOpenChange,
-  onCreateCharacter, title = "New Character", createButtonText = "Create Character"
+  onCreateCharacter,
+  title = "New Character",
+  createButtonText = "Create Character",
 }: CreateModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -60,7 +60,6 @@ const CreateModal = ({
   const [scales, setScales] = useState<Item[]>(initialScales);
 
   const handleCreateCharacter = () => {
-
     const processedDimensions = dimensions.map((d) => ({
       name: d.value,
       color: d.color,
@@ -95,26 +94,27 @@ const CreateModal = ({
         <div className="space-y-6 py-4">
           <CustomInput
             id="name"
-            label="Name"
+            label="Nombre"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full"
           />
           <div className="grid  sm:grid-cols-2 gap-4">
             <TagInput
-                label="Dimensions"
-                initialItems={initialDimensions}
-                onChange={setDimensions}
+              label="Dimensiones"
+              initialItems={initialDimensions}
+              onChange={setDimensions}
+              tooltip="Las dimensiones representan los sectores de la mandala. Se pueden agregar, eliminar o editar."
             />
 
             <TagInput
-                label="Scales"
-                initialItems={initialScales}
-                onChange={setScales}
-                colorPicker={false}
+              label="Escalas"
+              initialItems={initialScales}
+              onChange={setScales}
+              colorPicker={false}
+              tooltip="Las escalas representan los niveles de la mandala. Se pueden agergar, eliminar o editar."
             />
           </div>
-
 
           <div className="flex justify-between gap-2">
             <RadioGroup
@@ -124,30 +124,30 @@ const CreateModal = ({
             >
               <label className="flex items-center gap-3 cursor-pointer">
                 <RadioGroupItem value="empty" />
-                <span className="text-black">Empty mandala</span>
+                <span className="text-black">Mandala vacía</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <RadioGroupItem value="ai" />
                 <span className="text-black flex items-center gap-2">
-                  AI generated <Sparkles className="w-4 h-4" />
+                  Generada con IA <Sparkles className="w-4 h-4" />
                 </span>
               </label>
             </RadioGroup>
 
-            <ColorSelector
-              className="w-1/2"
-              selectedColor={selectedColor}
-              setSelectedColor={setSelectedColor}
-              colors={colors}
-            />
+              <ColorSelector
+                className="w-1/2"
+                selectedColor={selectedColor}
+                setSelectedColor={setSelectedColor}
+                colors={colors}
+              />
           </div>
 
           {mandalaType === "ai" && (
             <div className="space-y-2">
               <CustomInput
                 id="description"
-                label="Description (optional)"
-                about="This description will be usefull for the AI to generate the mandala with more precision"
+                label="Descripcion (opcional)"
+                about= "Esta descripción será útil para que la IA genere la mandala con más precisión"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 as="textarea"
@@ -163,7 +163,7 @@ const CreateModal = ({
             color="tertiary"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             variant="filled"

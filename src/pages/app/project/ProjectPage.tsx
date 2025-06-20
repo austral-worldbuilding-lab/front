@@ -39,14 +39,12 @@ const ProjectPage = () => {
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
       </div>
-      <img
-        src={logo}
-        alt="logo"
-        className="w-50 absolute left-1/2 -translate-x-1/2 top-10"
-      />
-      <h1 className="text-2xl font-bold mb-20 max-w-lg w-full">
-        Project: Festejos de egresados en la universidad
-      </h1>
+      <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 mb-10">
+        <img src={logo} alt="logo" className="w-50 h-auto" />
+        <h1 className="text-xl sm:text-2xl font-bold text-center break-words">
+          Proyecto: Festejos de egresados en la universidad
+        </h1>
+      </div>
       <div className="flex flex-col items-start justify-start max-w-lg w-full">
         <Button
           color="primary"
@@ -56,11 +54,11 @@ const ProjectPage = () => {
           }}
           icon={<Eye size={16} />}
         >
-          View Mandalas
+          Ver Mandalas
         </Button>
         <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
           <div className="flex justify-between items-start">
-            <h2 className="text-lg font-bold mb-4">Project Files</h2>
+            <h2 className="text-lg font-bold mb-4">Archivos del proyecto</h2>
             <FileLoader onUploadComplete={fetchFiles} projectId={projectId} />
           </div>
           <FileList files={files} loading={loading} error={error} />

@@ -12,6 +12,7 @@ interface CharacterIconProps {
   onDragEnd: (e: KonvaEventObject<DragEvent>) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onContextMenu?: (e: KonvaEventObject<PointerEvent>) => void;
 }
 
 const CharacterIcon: React.FC<CharacterIconProps> = ({
@@ -21,6 +22,7 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
   onDragEnd,
   onMouseEnter,
   onMouseLeave,
+  onContextMenu,
 }) => {
   const [showPopover, setShowPopover] = useState(false);
   const isDragging = useRef(false);
@@ -56,9 +58,10 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         onClick={handleClick}
+        onContextMenu={onContextMenu}
       >
         <Circle
-          radius={10}
+          radius={12}
           fill={character.color}
           shadowBlur={0}
           shadowOpacity={0}

@@ -7,15 +7,17 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import SelectTags, { Tag } from "./SelectTags";
+import SelectTags from "./SelectTags";
 import { CustomInput } from "@/components/ui/CustomInput";
+import { Tag } from "@/types/mandala";
 
 interface NewPostItModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   tags: Tag[];
-  onCreate: (content: string, tag: Tag) => void;
+  onCreate: (content: string, tag: Tag, postItFatherId?: string) => void;
   onNewTag: (tag: Tag) => void;
+  postItFatherId?: string;
 }
 
 const NewPostItModal = ({
@@ -24,6 +26,7 @@ const NewPostItModal = ({
   tags,
   onCreate,
   onNewTag,
+  postItFatherId,
 }: NewPostItModalProps) => {
   const [content, setContent] = useState("");
   const [selectedTag, setSelectedTag] = useState<Tag | null>(tags[0]);
@@ -31,7 +34,7 @@ const NewPostItModal = ({
 
   const handleCreate = () => {
     if (isValid && selectedTag) {
-      onCreate(content.trim(), selectedTag);
+      onCreate(content.trim(), selectedTag, postItFatherId);
       setContent("");
       setSelectedTag(null);
       onOpenChange(false);
@@ -43,18 +46,18 @@ const NewPostItModal = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            Create New Post-It
+            Crear nuevo Post-It
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Text
+              Texto
             </label>
             <CustomInput
               as="textarea"
-              placeholder="Write your note here..."
+              placeholder="Escriba su nota aquí..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="resize-none border w-full"
@@ -67,7 +70,7 @@ const NewPostItModal = ({
             </label>
             <SelectTags
               tags={tags}
-              value={selectedTag?.value || tags[0].value}
+              value={selectedTag?.value || ""}
               onChange={setSelectedTag}
               onNewTag={onNewTag}
             />
@@ -80,7 +83,7 @@ const NewPostItModal = ({
             color="tertiary"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             variant="filled"
@@ -88,7 +91,7 @@ const NewPostItModal = ({
             onClick={handleCreate}
             disabled={!isValid}
           >
-            Create Post-It
+            Crear Post-It
           </Button>
         </DialogFooter>
       </DialogContent>

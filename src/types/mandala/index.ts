@@ -20,10 +20,19 @@ export interface PostitCoordinates {
 }
 
 export interface Postit {
+  id?: string;
   content: string;
   coordinates: PostitCoordinates;
   dimension: string;
   section: string;
+  tag: Tag;
+  parentId?: string | null;
+}
+
+export interface Tag {
+  label: string;
+  value?: string;
+  color: string;
 }
 
 export interface Character {
@@ -66,4 +75,22 @@ export interface Project {
 export interface CreateProject {
   name: string;
   userId: string;
+}
+
+export interface FilterOption {
+  label: string;
+  color?: string;
+}
+
+export interface FilterSection {
+  sectionName: string;
+  type: "multiple" | "single";
+  options: FilterOption[];
+}
+
+export interface BackendTag {
+  id: string;
+  name: string;
+  color: string;
+  projectId: string;
 }

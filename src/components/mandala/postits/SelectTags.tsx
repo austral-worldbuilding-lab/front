@@ -14,12 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import NewTagModal from "./NewTagModal";
-
-export interface Tag {
-  label: string;
-  value: string;
-  color: string;
-}
+import { Tag } from "@/types/mandala";
 
 interface SelectTagsProps {
   tags: Tag[];
@@ -58,7 +53,7 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
         </PopoverTrigger>
         <PopoverContent className="w-full p-0">
           <Command>
-            <CommandInput placeholder="Search tags..." />
+            <CommandInput placeholder="Buscar tags..." />
             <CommandList>
               <CommandEmpty>No tag found.</CommandEmpty>
               {tags.map((tag) => (
@@ -89,7 +84,7 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
                 }}
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                New tag
+                Nuevo tag
               </CommandItem>
             </CommandList>
           </Command>
