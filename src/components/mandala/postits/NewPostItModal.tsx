@@ -7,15 +7,17 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import SelectTags, { Tag } from "./SelectTags";
+import SelectTags from "./SelectTags";
 import { CustomInput } from "@/components/ui/CustomInput";
+import { Tag } from "@/types/mandala";
 
 interface NewPostItModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   tags: Tag[];
-  onCreate: (content: string, tag: Tag) => void;
+  onCreate: (content: string, tag: Tag, postItFatherId?: string) => void;
   onNewTag: (tag: Tag) => void;
+  postItFatherId?: string;
 }
 
 const NewPostItModal = ({
@@ -24,6 +26,7 @@ const NewPostItModal = ({
   tags,
   onCreate,
   onNewTag,
+  postItFatherId,
 }: NewPostItModalProps) => {
   const [content, setContent] = useState("");
   const [selectedTag, setSelectedTag] = useState<Tag | null>(tags[0]);
@@ -31,7 +34,7 @@ const NewPostItModal = ({
 
   const handleCreate = () => {
     if (isValid && selectedTag) {
-      onCreate(content.trim(), selectedTag);
+      onCreate(content.trim(), selectedTag, postItFatherId);
       setContent("");
       setSelectedTag(null);
       onOpenChange(false);

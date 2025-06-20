@@ -9,7 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftIcon, Filter } from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
-import { Tag } from "./postits/SelectTags";
+import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useGetTags } from "@/hooks/useGetTags.ts";
@@ -37,6 +37,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     deletePostit,
   } = useMandala(mandalaId);
 
+  console.log(mandala);
+
   const projectId = useParams<{ projectId: string }>().projectId!;
   const { createMandala } = useCreateMandala(projectId);
 
@@ -60,12 +62,13 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     );
   };
 
-  const handleCreatePostIt = () => {
+  const handleCreatePostIt = (content: string, tag: Tag) => {
     createPostit({
-      content: "Nuevo Post-It",
+      content: content,
       coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
       dimension: "Gobierno",
       section: "Institución",
+      tag: tag || null,
     });
   };
 
@@ -175,6 +178,27 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                       mandala={mandala}
                       onCharacterUpdate={updateCharacter}
                       onPostItUpdate={updatePostit}
+                      onPostItChildCreate={(
+                        content: string,
+                        tag: Tag,
+                        postitFatherId?: string
+                      ) => {
+                        createPostit(
+                          {
+                            content,
+                            coordinates: {
+                              x: 0,
+                              y: 0,
+                              angle: 0,
+                              percentileDistance: 0,
+                            },
+                            tag: tag,
+                            dimension: "Gobierno",
+                            section: "Institución",
+                          },
+                          postitFatherId
+                        );
+                      }}
                       onMouseEnter={() => setIsHoveringPostIt(true)}
                       onMouseLeave={() => setIsHoveringPostIt(false)}
                       onDragStart={() => setIsDraggingPostIt(true)}
@@ -182,6 +206,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                       appliedFilters={appliedFilters}
                       onPostItDelete={deletePostit}
                       onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
+                      tags={tags}
+                      onNewTag={handleNewTag}
                     />
                   </div>
                 </TransformComponent>
