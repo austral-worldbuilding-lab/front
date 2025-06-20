@@ -6,12 +6,19 @@ import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
 import MandalaMenu from "./MandalaMenu";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils";
-import {useContextMenu} from "@/hooks/useContextMenu.ts";
+import { useContextMenu } from "@/hooks/useContextMenu.ts";
+import NewPostItModal from "./postits/NewPostItModal";
+import { Tag } from "@/types/mandala";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
   onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
   onPostItDelete: (index: number) => Promise<boolean>;
+  onPostItChildCreate: (
+    content: string,
+    tag: Tag,
+    postitFatherId?: string
+  ) => void;
   characters?: Character[];
   onCharacterUpdate: (
     index: number,
@@ -23,6 +30,8 @@ export interface KonvaContainerProps {
   onDragStart: () => void;
   onDragEnd: () => void;
   appliedFilters: Record<string, string[]>;
+  tags: Tag[];
+  onNewTag: (tag: Tag) => void;
 }
 
 const SCENE_W = 1200;
@@ -32,6 +41,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
   onPostItDelete,
+  onPostItChildCreate,
   onCharacterUpdate,
   onCharacterDelete,
   onMouseEnter,
@@ -39,23 +49,39 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onDragStart,
   onDragEnd,
   appliedFilters,
+  tags,
+  onNewTag,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [postItW, postItH, padding] = [64, 64, 5];
   const [editingContent, setEditingContent] = useState<string | null>(null);
+  const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
+  const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
+    undefined
+  );
+
+  const handleCreateChildPostIt = (postItId?: string) => {
+    setSelectedPostItId(postItId);
+    setIsChildPostItModalOpen(true);
+  };
+
   const {
     contextMenu,
     showContextMenu,
     hideContextMenu,
     handleDelete,
+    handleCreateChild,
   } = useContextMenu(
-      onPostItDelete,
-      onCharacterDelete,
-      editableIndex,
-      setEditableIndex,
-      setEditingContent
+    onPostItDelete,
+    onCharacterDelete,
+    editableIndex,
+    setEditableIndex,
+    setEditingContent,
+    (index) => {
+      const postItId = mandala.postits[index]?.id;
+      handleCreateChildPostIt(postItId);
+    }
   );
-
 
   const {
     zOrder,
@@ -216,18 +242,38 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       </Stage>
 
       {contextMenu.visible && (
-          <div
-              style={{
-                position: "absolute",
-                top: contextMenu.y,
-                left: contextMenu.x,
-                zIndex: 1000,
-              }}
-              onClick={hideContextMenu}
-          >
-            <MandalaMenu onDelete={handleDelete} isContextMenu={true} />
-          </div>
+        <div
+          style={{
+            position: "absolute",
+            top: contextMenu.y,
+            left: contextMenu.x,
+            zIndex: 1000,
+          }}
+          onClick={hideContextMenu}
+        >
+          <MandalaMenu
+            onDelete={handleDelete}
+            onCreateChild={
+              contextMenu.type === "postit" ? handleCreateChild : undefined
+            }
+            isContextMenu={true}
+          />
+        </div>
       )}
+
+      <NewPostItModal
+        isOpen={isChildPostItModalOpen}
+        onOpenChange={setIsChildPostItModalOpen}
+        tags={tags}
+        onNewTag={onNewTag}
+        postItFatherId={selectedPostItId}
+        onCreate={(content, tag, postItFatherId) => {
+          console.log("postItFatherId", postItFatherId);
+          onPostItChildCreate(content, tag, postItFatherId);
+          setIsChildPostItModalOpen(false);
+          setSelectedPostItId(undefined);
+        }}
+      />
     </div>
   );
 };

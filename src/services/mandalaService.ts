@@ -1,6 +1,6 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import {Character, FilterSection, Mandala, Postit} from "../types/mandala";
+import { Character, FilterSection, Mandala, Postit } from "../types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -39,17 +39,26 @@ export const subscribeMandala = (
   return unsubscribe;
 };
 
+//TODO: Integrar a la nueva logica del backend
 export const createPostit = async (
   projectId: string,
   mandalaId: string,
-  postit: Postit
+  postit: Postit,
+  postitFatherId?: string //TODO: Enviar este id al nuevo endpoint del backend en caso de que no sea null o undefined
 ): Promise<void> => {
   const mandalaRef = doc(db, projectId, mandalaId);
   const mandalaSnap = await getDoc(mandalaRef);
   if (!mandalaSnap.exists()) throw new Error("Mandala not found");
 
   const data = mandalaSnap.data();
-  const updatedPostits = [...(data.postits || []), postit];
+
+  // Generate a unique ID for the post-it
+  const postitWithId = {
+    ...postit,
+    id: crypto.randomUUID(),
+  };
+
+  const updatedPostits = [...(data.postits || []), postitWithId];
 
   await updateDoc(mandalaRef, {
     postits: updatedPostits,
@@ -137,11 +146,9 @@ export const updateCharacter = async (
   });
 };
 
-export const getFilters = async(
-    mandalaId: string,
-) => {
+export const getFilters = async (mandalaId: string) => {
   const response = await axiosInstance.get<{ data: FilterSection[] }>(
-      `/mandala/filter-options?id=${mandalaId}`
+    `/mandala/filter-options?id=${mandalaId}`
   );
 
   if (response.status !== 200) {
@@ -149,4 +156,4 @@ export const getFilters = async(
   }
 
   return response.data.data;
-}
+};

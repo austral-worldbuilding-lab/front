@@ -34,10 +34,15 @@ const useMandala = (mandalaId: string) => {
   }, [mandalaId, projectId]);
 
   const createPostit = useCallback(
-    async (postitData: Postit) => {
+    async (postitData: Postit, postitFatherId?: string) => {
       try {
         if (!mandalaId) throw new Error("Mandala ID is required");
-        return await createPostitService(projectId!, mandalaId, postitData);
+        return await createPostitService(
+          projectId!,
+          mandalaId,
+          postitData,
+          postitFatherId
+        );
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
