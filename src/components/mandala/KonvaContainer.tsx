@@ -181,14 +181,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       }}
       onClick={hideContextMenu}
     >
-      <Stage
-        style={{ clipPath: `circle(${SCENE_W / 2}px at center)` }}
-        width={SCENE_W}
-        height={SCENE_H}
-        offsetX={0}
-        offsetY={0}
-      >
-        <Layer style={{ clipPath: `circle(${SCENE_W / 2}px at center)` }}>
+      <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
+        <Layer>
           {zOrder.map((i) => {
             const p = mandala.postits[i];
             if (!shouldShowPostIt(p)) return null;
