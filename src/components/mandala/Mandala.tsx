@@ -3,7 +3,6 @@ import MandalaConcentric from "./MandalaConcentric";
 import MandalaSectors from "./MandalaSectors";
 import MandalaPerson from "./MandalaPerson";
 import { Levels, Sectors } from "@/constants/mandala";
-import { useParams } from "react-router-dom";
 import { Mandala as MandalaData } from "@/types/mandala";
 
 interface MandalaProps {
@@ -17,8 +16,6 @@ const Mandala: React.FC<MandalaProps> = ({
   position = { x: 0, y: 0 },
   mandala,
 }) => {
-  const { mandalaId } = useParams<{ mandalaId: string }>();
-
   function getInterpolatedLevelColor(index: number, total: number): string {
     const from = [200, 220, 255, 0.9];
     const to = [140, 190, 255, 0.3];
@@ -72,7 +69,6 @@ const Mandala: React.FC<MandalaProps> = ({
           sectors={sectors}
           maxRadius={maxRadius}
           levels={levels}
-          mandalaId={mandalaId!}
         />
       </div>
     </div>

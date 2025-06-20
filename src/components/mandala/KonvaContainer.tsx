@@ -174,7 +174,13 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   if (!mandala) return <div>No mandala found</div>;
 
   return (
-    <div style={{ position: "relative" }} onClick={hideContextMenu}>
+    <div
+      style={{
+        position: "relative",
+        clipPath: `circle(${SCENE_W / 2}px at center)`,
+      }}
+      onClick={hideContextMenu}
+    >
       <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
         <Layer>
           {zOrder.map((i) => {
@@ -217,6 +223,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
                 onContextMenu={(e) => showContextMenu(e, i, "postit")}
+                mandalaRadius={SCENE_W / 2}
               />
             );
           })}
@@ -229,6 +236,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             return (
               <CharacterIcon
                 key={`character-${character.id}`}
+                mandalaRadius={SCENE_W / 2}
                 character={character}
                 position={{ x, y }}
                 onDragStart={onDragStart}
