@@ -37,8 +37,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     deletePostit,
   } = useMandala(mandalaId);
 
-  console.log(mandala);
-
   const projectId = useParams<{ projectId: string }>().projectId!;
   const { createMandala } = useCreateMandala(projectId);
 

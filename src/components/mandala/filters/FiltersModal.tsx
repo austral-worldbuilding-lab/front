@@ -10,7 +10,7 @@ import { Trash } from "lucide-react";
 import ToggleBadge from "@/components/ui/toggle-badge";
 import { useGetFilters } from "@/hooks/useGetFilters";
 import { useState } from "react";
-import {FilterSection} from "@/types/mandala";
+import { FilterSection } from "@/types/mandala";
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -52,6 +52,7 @@ const FiltersModal = ({
 
   const handleApplyFilters = () => {
     onApplyFilters(selectedFilters);
+    console.log("selectedFilters", selectedFilters);
     onOpenChange(false);
   };
 
