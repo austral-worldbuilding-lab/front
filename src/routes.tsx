@@ -15,6 +15,7 @@ import ProjectPage from "./pages/app/project/ProjectPage";
 import ProjectListPage from "./pages/app/project/ProjectListPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 
+
 // Layout component for all protected routes
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>{children}</ProtectedRoute>
