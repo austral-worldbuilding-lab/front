@@ -6,7 +6,6 @@ import { Levels, Sectors } from "@/constants/mandala";
 import { useParams } from "react-router-dom";
 import { Mandala as MandalaData } from "@/types/mandala";
 
-
 interface MandalaProps {
   scale?: number;
   position?: { x: number; y: number };
@@ -18,10 +17,6 @@ const Mandala: React.FC<MandalaProps> = ({
   position = { x: 0, y: 0 },
   mandala,
 }) => {
-
-  // Use the data from the mandala if available, otherwise use the default constants
-  const levels = Levels;
-  const sectors = Sectors;
   const { mandalaId } = useParams<{ mandalaId: string }>();
 
   function getInterpolatedLevelColor(index: number, total: number): string {
@@ -34,7 +29,6 @@ const Mandala: React.FC<MandalaProps> = ({
       b
     )}, ${a.toFixed(2)})`;
   }
-
 
   const maxRadius = 600;
   const config = mandala.mandala.configuration;
