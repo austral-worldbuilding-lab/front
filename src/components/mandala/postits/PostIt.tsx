@@ -4,6 +4,7 @@ import { Html } from "react-konva-utils";
 import { KonvaEventObject } from "konva/lib/Node";
 import { Postit } from "@/types/mandala";
 import { isDarkColor } from "@/utils/colorUtils";
+import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 
 interface PostItProps {
   postit: Postit;
@@ -23,6 +24,7 @@ interface PostItProps {
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onContextMenu: (e: KonvaEventObject<PointerEvent>) => void; // Nueva prop
+  mandalaRadius: number;
 }
 
 const PostIt: React.FC<PostItProps> = ({
@@ -43,8 +45,10 @@ const PostIt: React.FC<PostItProps> = ({
   onMouseEnter,
   onMouseLeave,
   onContextMenu,
+  mandalaRadius,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius);
 
   useEffect(() => {
     setTimeout(() => {
@@ -71,6 +75,8 @@ const PostIt: React.FC<PostItProps> = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onContextMenu={onContextMenu}
+      className="pointer-events-auto"
+      dragBoundFunc={dragBoundFunc}
     >
       <Rect
         width={postItW}

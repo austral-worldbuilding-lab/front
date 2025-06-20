@@ -4,6 +4,7 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { Character } from "@/types/mandala";
 import { Html } from "react-konva-utils";
 import CharacterPopover from "./CharacterPopover";
+import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 
 interface CharacterIconProps {
   character: Character;
@@ -13,6 +14,7 @@ interface CharacterIconProps {
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onContextMenu?: (e: KonvaEventObject<PointerEvent>) => void;
+  mandalaRadius: number;
 }
 
 const CharacterIcon: React.FC<CharacterIconProps> = ({
@@ -23,9 +25,11 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
   onMouseEnter,
   onMouseLeave,
   onContextMenu,
+  mandalaRadius,
 }) => {
   const [showPopover, setShowPopover] = useState(false);
   const isDragging = useRef(false);
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius);
 
   const handleClick = () => {
     if (!isDragging.current) {
@@ -59,6 +63,8 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
         onMouseLeave={onMouseLeave}
         onClick={handleClick}
         onContextMenu={onContextMenu}
+        className="pointer-events-auto"
+        dragBoundFunc={dragBoundFunc}
       >
         <Circle
           radius={12}

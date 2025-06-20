@@ -1,30 +1,33 @@
 import React from "react";
 import { Sector, Level } from "@/types/mandala";
 import QuestionBubble from "./QuestionBubble";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface MandalaSectorsProps {
   sectors: Sector[];
   maxRadius: number;
   levels: Level[];
-  mandalaId: string;
 }
 
 const MandalaSectors: React.FC<MandalaSectorsProps> = ({
-                                                         sectors,
-                                                         maxRadius,
-                                                         levels,
-                                                         mandalaId,
-                                                       }) => {
+  sectors,
+  maxRadius,
+  levels,
+}) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const computedAngles = sectors.map((sector, index) => ({
     ...sector,
     angle: (360 / sectors.length) * (sectors.length - index),
   }));
 
   const toKebabCase = (str: string) =>
-      str.toLowerCase().replace(/\s+/g, "-");
-
+    str
+      .normalize("NFD") // descompone los caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, "") // elimina los diacríticos (tildes)
+      .toLowerCase()
+      .replace(/\s+/g, "-"); // reemplaza espacios por guiones
 
   return (
     <>
@@ -47,7 +50,7 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
       ))}
 
       {/* Puntos en las intersecciones */}
-      {computedAngles.map((sector) => (
+      {computedAngles.map((sector) =>
         levels.map((level) => (
           <div
             key={`${sector.id}-${level.id}`}
@@ -60,10 +63,9 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
             }}
           />
         ))
-      ))}
+      )}
 
-
-        {/* Nombres de los sectores con navegación */}
+      {/* Nombres de los sectores con navegación */}
       {computedAngles.map((sector, index) => {
         const nextSector = computedAngles[(index + 1) % computedAngles.length];
         let midAngle = (sector.angle + nextSector.angle) / 2;
@@ -74,40 +76,39 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
 
         const textRotationAngle = midAngle + 90;
 
-            return (
-                <div
-                    key={`name-${sector.id}`}
-                    className="absolute z-10 cursor-pointer"
-                    style={{
-                        left: Math.cos((midAngle * Math.PI) / 180) * (maxRadius + 60),
-                        top: Math.sin((midAngle * Math.PI) / 180) * (maxRadius + 60),
-                        transform: `translate(-50%, -50%) rotate(${textRotationAngle}deg)`,
-                        transformOrigin: "center center",
-                        width: "max-content",
-                    }}
-                    onClick={() => {
-                        const kebabName = toKebabCase(sector.name);
-                        navigate(`/mandala/${mandalaId}/dimension/${kebabName}`);
-                    }}
-                >
-                    <div
-                        className="text-blue-900 font-bold tracking-wider hover:text-blue-600"
-                        style={{
-                            fontSize: "1.2rem",
-                            whiteSpace: "nowrap",
-                            pointerEvents: "auto",
-                        }}
-                    >
-                        {sector.name}
-                    </div>
-                </div>
-            );
-        })}
-
+        return (
+          <div
+            key={`name-${sector.id}`}
+            className="absolute cursor-pointer"
+            style={{
+              left: Math.cos((midAngle * Math.PI) / 180) * (maxRadius + 60),
+              top: Math.sin((midAngle * Math.PI) / 180) * (maxRadius + 60),
+              transform: `translate(-50%, -50%) rotate(${textRotationAngle}deg)`,
+              transformOrigin: "center center",
+              width: "max-content",
+            }}
+            onClick={() => {
+              const kebabName = toKebabCase(sector.name);
+              navigate(`${location.pathname}/dimension/${kebabName}`);
+            }}
+          >
+            <div
+              className="text-primary font-bold tracking-wider hover:text-blue-600"
+              style={{
+                fontSize: "1.2rem",
+                whiteSpace: "nowrap",
+                pointerEvents: "auto",
+              }}
+            >
+              {sector.name}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Burbujas de preguntas predefinidas */}
       {computedAngles.map((sector) => (
-      <div
+        <div
           key={`question-${sector.id}`}
           className="absolute z-20"
           style={{
@@ -115,9 +116,9 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
             top: Math.sin((sector.angle * Math.PI) / 180) * (maxRadius + 120),
             transform: "translate(-50%, -50%)",
           }}
-      >
-        <QuestionBubble question={sector.question}/>
-      </div>
+        >
+          <QuestionBubble question={sector.question} />
+        </div>
       ))}
     </>
   );
