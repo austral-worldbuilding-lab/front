@@ -37,8 +37,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     deletePostit,
   } = useMandala(mandalaId);
 
-  console.log(mandala);
-
   const projectId = useParams<{ projectId: string }>().projectId!;
   const { createMandala } = useCreateMandala(projectId);
 
@@ -72,12 +70,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     });
   };
 
-  const { tags } = useGetTags(projectId);
+  const { tags, createTag } = useGetTags(projectId);
 
-  // TODO: Create tag in backend
-  const [newTags, setNewTags] = useState<Tag[]>([]);
-  const handleNewTag = (tag: Tag) => {
-    setNewTags([...newTags, tag]);
+  const handleNewTag = async (tag: Tag) => {
+    await createTag(tag.label, tag.color);
   };
 
   if (loading) {
