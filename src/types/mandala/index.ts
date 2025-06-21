@@ -62,9 +62,32 @@ export interface MandalData {
   linkedToId: string;
 }
 
-export interface SimpleMandala {
+export interface MandalaCenter {
+  name: string;
+  description: string;
+  color: string;
+}
+
+export interface MandalaDimension {
+  name: string;
+  color: string;
+}
+
+export interface MandalaConfiguration {
+  center: MandalaCenter;
+  dimensions: MandalaDimension[];
+  scales: string[];
+}
+
+export interface CompleteApiMandala {
   id: string;
   name: string;
+  projectId: string;
+  configuration: MandalaConfiguration;
+  childrenIds: string[];
+  parentIds: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Project {

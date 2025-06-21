@@ -99,7 +99,10 @@ const MandalaListPage = () => {
                               to={`/app/project/${projectId}/mandala/${mandala.id}`}
                               className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
-                              <GlobeIcon className="w-5 h-5 text-gray-400 flex-shrink-0"/>
+                              <GlobeIcon 
+                                  className="w-5 h-5 flex-shrink-0" 
+                                  style={{ color: mandala.configuration.center.color || '#6b7280' }}
+                              />
                               <span>{mandala.name || "Mandala sin nombre"}</span>
                           </Link>
                           <MandalaMenu onDelete={() => handleDeleteMandala(mandala.id)}/>

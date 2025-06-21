@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { SimpleMandala } from "../types/mandala";
+import {CompleteApiMandala} from "@/types/mandala";
 import { getMandalas } from "@/services/createMandalaService.ts";
 
 const useGetMandalas = (projectId: string, page: number, limit: number) => {
-  const [mandalas, setMandalas] = useState<SimpleMandala[]>([]);
+  const [mandalas, setMandalas] = useState<CompleteApiMandala[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
