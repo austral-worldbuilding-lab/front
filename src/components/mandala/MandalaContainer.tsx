@@ -13,7 +13,8 @@ import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useGetTags } from "@/hooks/useGetTags.ts";
-import CharactersModal from "./characters/modal/CharactersModal";
+import {useProjectCharacters} from "../../hooks/useProjectCharacters";
+import CharacterDropdown from "./characters/modal/CharacterDropdown";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -24,17 +25,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const projectId = useParams<{ projectId: string }>().projectId!;
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
-  const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
-
-  const projectCharacters = [
-    { id: "1", name: "María", color: "#F87171" },
-    { id: "2", name: "Juan", color: "#60A5FA" },
-    { id: "3", name: "Lucía", color: "#34D399" },
-    { id: "4", name: "Carla", color: "#35D381" },
-  ];
+  const { characters: projectCharacters, linkCharacter } = useProjectCharacters(mandalaId);
 
   const navigate = useNavigate();
   const {
@@ -46,8 +41,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     updateCharacter,
     deletePostit,
   } = useMandala(mandalaId);
-
-  const projectId = useParams<{ projectId: string }>().projectId!;
   const { createMandala } = useCreateMandala(projectId);
 
   const handleCreateCharacter = async (character: {
@@ -69,6 +62,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
       character.linkedToId
     );
   };
+
 
   const handleCreatePostIt = (content: string, tag: Tag) => {
     createPostit({
@@ -146,17 +140,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                     >
                       Filtros
                     </Button>
-                    <button
-                        onClick={() => setIsCharacterModalOpen(true)}
-                        className="btn"
-                    >
-                      Ver personajes
-                    </button>
-                    <CharactersModal
-                        isOpen={isCharacterModalOpen}
-                        onOpenChange={setIsCharacterModalOpen}
-                        characters={projectCharacters}
-                    />
+                    <CharacterDropdown characters={projectCharacters} onAdd={linkCharacter} />
                   </div>
                 </div>
                 <div className="absolute left-1/2 -translate-x-1/2 z-1000 top-[84px] md:top-4">

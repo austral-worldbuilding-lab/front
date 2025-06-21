@@ -157,3 +157,28 @@ export const getFilters = async (mandalaId: string) => {
 
   return response.data.data;
 };
+
+
+export const fetchAvailableCharacters = async (
+    mandalaId: string
+): Promise<
+    {
+      id: string;
+      name: string;
+      color: string;
+    }[]
+> => {
+  const res = await axiosInstance.get<{
+    data: {
+      id: string;
+      name: string;
+      color: string;
+    }[];
+  }>(`/mandala/${mandalaId}/characters`);
+
+  return res.data.data;
+};
+
+export async function linkMandalaToParent(mandalaId: string, childId: string) {
+  return axiosInstance.post(`/mandala/${mandalaId}/link/${childId}`);
+}
