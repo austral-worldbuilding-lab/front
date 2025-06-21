@@ -29,10 +29,8 @@ export async function createMandalaService(
         throw new Error( "Failed to create mandala");
     }
 
-    const id = response.data?.data?.id || response.data?.data?.mandala?.id;
-
-    return id;
-};
+    return response.data?.data?.id || response.data?.data?.mandala?.id;
+}
 
 export const getMandalas = async (
     projectId: string,
