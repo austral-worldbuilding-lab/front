@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios.ts";
-import {SimpleMandala} from "@/types/mandala";
+import {CompleteApiMandala} from "@/types/mandala";
 
 export interface CreateMandalaDto {
     name: string;
@@ -29,17 +29,15 @@ export async function createMandalaService(
         throw new Error( "Failed to create mandala");
     }
 
-    const id = response.data?.data?.id || response.data?.data?.mandala?.id;
-
-    return id;
-};
+    return response.data?.data?.id || response.data?.data?.mandala?.id;
+}
 
 export const getMandalas = async (
     projectId: string,
     page: number,
     limit: number
-): Promise<SimpleMandala[]> => {
-    const response = await axiosInstance.get<{ data: SimpleMandala[] }>(
+): Promise<CompleteApiMandala[]> => {
+    const response = await axiosInstance.get<{ data: CompleteApiMandala[] }>(
         "/mandala",
         {
             params: { projectId, page, limit },
