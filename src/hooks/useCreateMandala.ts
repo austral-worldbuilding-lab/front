@@ -11,7 +11,7 @@ export const useCreateMandala = (projectId: string) => {
         useAIMandala: boolean,
         dimensions: { name: string; color?: string }[],
         scales: string[],
-        linkedToId?: string
+        parentId?: string
     ): Promise<string> => {
         setLoading(true);
 
@@ -32,7 +32,7 @@ export const useCreateMandala = (projectId: string) => {
                 })),
 
                 scales,
-                linkedToId: linkedToId ?? null,
+                parentId: parentId ?? null,
             };
 
             return await createMandalaService(payload);
