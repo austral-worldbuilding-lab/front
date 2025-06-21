@@ -13,6 +13,7 @@ import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useGetTags } from "@/hooks/useGetTags.ts";
+import CharactersModal from "./characters/modal/CharactersModal";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -26,6 +27,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
+  const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
+
+  const projectCharacters = [
+    { id: "1", name: "María", color: "#F87171" },
+    { id: "2", name: "Juan", color: "#60A5FA" },
+    { id: "3", name: "Lucía", color: "#34D399" },
+    { id: "4", name: "Carla", color: "#35D381" },
+  ];
+
   const navigate = useNavigate();
   const {
     mandala,
@@ -136,6 +146,17 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                     >
                       Filtros
                     </Button>
+                    <button
+                        onClick={() => setIsCharacterModalOpen(true)}
+                        className="btn"
+                    >
+                      Ver personajes
+                    </button>
+                    <CharactersModal
+                        isOpen={isCharacterModalOpen}
+                        onOpenChange={setIsCharacterModalOpen}
+                        characters={projectCharacters}
+                    />
                   </div>
                 </div>
                 <div className="absolute left-1/2 -translate-x-1/2 z-1000 top-[84px] md:top-4">
