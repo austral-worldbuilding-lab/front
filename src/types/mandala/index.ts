@@ -59,7 +59,7 @@ export interface MandalData {
     dimensions: { name: string; color: string }[];
     scales: string[];
   };
-  linkedToId: string;
+  parentId: string;
 }
 
 export interface MandalaCenter {

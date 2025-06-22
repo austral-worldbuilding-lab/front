@@ -26,7 +26,7 @@ export const subscribeMandala = (
           dimensions: [],
           scales: [],
         },
-        linkedToId: data.mandala?.linkedToId || "",
+        parentId: data.mandala?.parentId || "",
       },
       updatedAt: data.updatedAt ? data.updatedAt.toDate() : new Date(),
       postits: data.postits || [],

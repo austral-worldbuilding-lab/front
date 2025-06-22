@@ -39,7 +39,7 @@ interface CreateModalProps {
     color: string;
     dimensions: { name: string; color?: string }[];
     scales: string[];
-    linkedToId?: string;
+    parentId?: string;
   }) => void | Promise<void>;
   title?: string;
   createButtonText?: string;
