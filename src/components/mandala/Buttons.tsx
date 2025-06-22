@@ -52,14 +52,14 @@ const Buttons = ({
         <Button
           onClick={() => setPostItModalOpen(true)}
           variant="filled"
-          className="w-12 h-12 bg-yellow-500 hover:bg-yellow-400"
+          className="w-12 h-12 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-400"
           icon={<StickyNote size={24} />}
           tooltipText="Nuevo post-it"
         ></Button>
         <Button
           onClick={() => setIsCreateModalOpen(true)}
           variant="filled"
-          className="w-12 h-12 bg-violet-500 hover:bg-violet-400"
+          className="w-12 h-12 bg-violet-500 hover:bg-violet-400 active:bg-violet-400"
           icon={<PersonStanding size={24} />}
           tooltipText="Nuevo personaje"
         ></Button>
