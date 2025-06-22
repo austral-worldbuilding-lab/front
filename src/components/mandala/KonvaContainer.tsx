@@ -268,7 +268,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 }}
                 onDragMove={handleDragMove}
                 onDragEnd={(e) => {
-                  setIsDraggingParent(false);
+                  setTimeout(() => {
+                    setIsDraggingParent(false);
+                  }, 100);
                   handleOnDragEndPostIt(e, i, p);
                 }}
                 onDblClick={() => {
