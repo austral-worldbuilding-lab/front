@@ -24,6 +24,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
     }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingContent, setEditingContent] = useState(postit.content);
+    const [displayContent, setDisplayContent] = useState(postit.content);
     const [showMenu, setShowMenu] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -38,6 +39,12 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
         }
     }, [isEditing]);
 
+
+    useEffect(() => {
+        setEditingContent(postit.content);
+        setDisplayContent(postit.content);
+    }, [postit.content]);
+
     const handleDoubleClick = () => {
         setIsEditing(true);
     };
@@ -45,6 +52,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
     const handleBlur = async () => {
         setIsEditing(false);
         if (editingContent !== postit.content) {
+            setDisplayContent(editingContent);
             await onUpdate({ content: editingContent });
         }
     };
@@ -118,7 +126,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                             boxSizing: "border-box",
                         }}
                     >
-                        {postit.content}
+                        {displayContent}
                     </div>
                 )}
             </div>
