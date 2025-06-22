@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
@@ -10,6 +10,12 @@ import { useContextMenu } from "@/hooks/useContextMenu.ts";
 import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
 import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
+import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
+import { useClosestPostIt } from "@/hooks/useClosestPostIt";
+import { getVisibleChildren } from "@/components/mandala/postits/getVisibleChildren";
+import { useChildAnimations } from "@/hooks/useChildAnimations";
+import { useVisibleChildrenPositions } from "@/hooks/useVisibleChildrenPositions";
+import { renderChildren } from "./postits/renderChildren";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -33,6 +39,7 @@ export interface KonvaContainerProps {
   appliedFilters: Record<string, string[]>;
   tags: Tag[];
   onNewTag: (tag: Tag) => void;
+  state: ReactZoomPanPinchState | null;
 }
 
 const SCENE_W = 1200;
@@ -52,14 +59,24 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   appliedFilters,
   tags,
   onNewTag,
+  state,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [postItW, postItH, padding] = [64, 64, 5];
   const [editingContent, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
   const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
     undefined
   );
+  const [visibleChildren, setVisibleChildren] = useState<Postit[]>([]);
+  const [isDraggingParent, setIsDraggingParent] = useState(false);
+  const [exitingChildren, setExitingChildren] = useState<
+    { postit: Postit; initialPosition: { x: number; y: number } }[]
+  >([]);
+
+  const postItW = 64;
+  const postItH = 64;
+  const padding = 12;
+  const childScale = 0.6;
 
   const handleCreateChildPostIt = (postItId?: string) => {
     setSelectedPostItId(postItId);
@@ -93,12 +110,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     getDimensionAndSectionFromCoordinates,
   } = useKonvaUtils(mandala.postits);
 
-
-  const dimensionColors: Record<string, string> =
-    mandala.mandala.configuration?.dimensions?.reduce((acc, d) => {
-      acc[d.name] = d.color;
-      return acc;
-    }, {} as Record<string, string>) ?? {};
+  const dimensionColors = useMemo(() => {
+    return (
+      mandala.mandala.configuration?.dimensions?.reduce((acc, d) => {
+        acc[d.name] = d.color;
+        return acc;
+      }, {} as Record<string, string>) ?? {}
+    );
+  }, [mandala.mandala.configuration?.dimensions]);
 
   const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
@@ -145,7 +164,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       mandala.mandala.configuration?.scales || []
     );
 
-    // Find the index of this character in the mandala.characters array
     const characterIndex =
       mandala.characters?.findIndex((c) => c.id === character.id) ?? -1;
 
@@ -158,20 +176,86 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     }
   };
 
-  if (!mandala) return <div>No mandala found</div>;
+  const zoomLevel = state?.scale;
+  const closestPostIt = useClosestPostIt(
+    mandala.postits,
+    toAbsolute,
+    state,
+    SCENE_W
+  );
+
+  const visibleChildrenPositions = useVisibleChildrenPositions(
+    closestPostIt,
+    visibleChildren,
+    toAbsolute,
+    postItW,
+    postItH,
+    childScale
+  );
+
+  const childrenToShow = getVisibleChildren(
+    zoomLevel,
+    closestPostIt,
+    mandala.postits
+  );
+
+  useChildAnimations(
+    childrenToShow,
+    visibleChildren,
+    setVisibleChildren,
+    setExitingChildren,
+    toAbsolute,
+    visibleChildrenPositions
+  );
+
+  useEffect(() => {
+    const handleStageMouseDown = (e: MouseEvent) => {
+      // Si hay algo editando y se hizo clic fuera del textarea => blur
+      if (editableIndex !== null) {
+        const clickedOnTextarea = (e.target as HTMLElement).closest("textarea");
+        if (!clickedOnTextarea) {
+          setEditableIndex(null);
+          setEditingContent(null);
+          window.getSelection()?.removeAllRanges();
+        }
+      }
+    };
+
+    const container = document.getElementById("konva-container");
+    container?.addEventListener("mousedown", handleStageMouseDown);
+
+    return () => {
+      container?.removeEventListener("mousedown", handleStageMouseDown);
+    };
+  }, [editableIndex]);
+
+  useEffect(() => {
+    if (closestPostIt && zoomLevel !== undefined) {
+      const updated = getVisibleChildren(
+        zoomLevel,
+        closestPostIt,
+        mandala.postits
+      );
+      setVisibleChildren(updated);
+    }
+  }, [mandala.postits, closestPostIt, zoomLevel]);
+
+  if (!mandala || !state) return <div>No mandala found</div>;
 
   return (
     <div
+      id="konva-container"
       style={{
         position: "relative",
         clipPath: `circle(${SCENE_W / 2}px at center)`,
       }}
       onClick={hideContextMenu}
     >
-      <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
+      <Stage width={SCENE_W} height={SCENE_H}>
         <Layer>
           {zOrder.map((i) => {
             const p = mandala.postits[i];
+            if (p.parentId) return null;
             if (!shouldShowPostIt(p, appliedFilters)) return null;
             const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
             const isEditing = editableIndex === i;
@@ -188,11 +272,18 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 padding={padding}
                 position={{ x, y }}
                 onDragStart={() => {
+                  setIsDraggingParent(true);
                   onDragStart();
+                  setVisibleChildren([]);
                   bringToFront(i);
                 }}
                 onDragMove={handleDragMove}
-                onDragEnd={(e) => handleOnDragEndPostIt(e, i, p)}
+                onDragEnd={(e) => {
+                  setTimeout(() => {
+                    setIsDraggingParent(false);
+                  }, 50);
+                  handleOnDragEndPostIt(e, i, p);
+                }}
                 onDblClick={() => {
                   setEditableIndex(i);
                   setEditingContent(p.content);
@@ -214,6 +305,40 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               />
             );
           })}
+
+          {closestPostIt &&
+            !isDraggingParent &&
+            renderChildren({
+              closestPostIt,
+              visibleChildren,
+              exitingChildren,
+              visibleChildrenPositions,
+              postItW,
+              postItH,
+              childScale,
+              dimensionColors,
+              editableIndex,
+              editingContent,
+              mandalaPostits: mandala.postits,
+              toAbsolute,
+              onEditStart: (index, content) => {
+                setEditableIndex(index);
+                setEditingContent(content);
+              },
+              onEditChange: (index, value) => {
+                setEditingContent(value);
+                onPostItUpdate(index, { content: value });
+              },
+              onEditEnd: () => {
+                window.getSelection()?.removeAllRanges();
+                setEditableIndex(null);
+                setEditingContent(null);
+              },
+              onMouseEnter,
+              onMouseLeave,
+              onContextMenu: showContextMenu,
+            })}
+
           {mandala.characters?.map((character, index) => {
             if (!shouldShowCharacter(character, appliedFilters)) return null;
             const { x, y } = toAbsolute(
@@ -265,7 +390,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         onNewTag={onNewTag}
         postItFatherId={selectedPostItId}
         onCreate={(content, tag, postItFatherId) => {
-          console.log("postItFatherId", postItFatherId);
           onPostItChildCreate(content, tag, postItFatherId);
           setIsChildPostItModalOpen(false);
           setSelectedPostItId(undefined);

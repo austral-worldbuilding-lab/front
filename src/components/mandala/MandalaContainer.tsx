@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import {
+  TransformWrapper,
+  TransformComponent,
+  ReactZoomPanPinchState,
+} from "react-zoom-pan-pinch";
 import Mandala from "./Mandala";
 import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
@@ -24,6 +28,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
+  const [state, setState] = useState<ReactZoomPanPinchState | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const projectId = useParams<{ projectId: string }>().projectId!;
   const [appliedFilters, setAppliedFilters] = useState<
@@ -127,17 +132,20 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
             <TransformWrapper
               initialScale={0.5}
               minScale={0.3}
-              maxScale={4}
+              maxScale={100}
               centerOnInit={true}
               limitToBounds={false}
-              wheel={{ disabled: isDraggingPostIt || isHoveringPostIt }}
-              pinch={{ disabled: isDraggingPostIt || isHoveringPostIt }}
+              wheel={{ disabled: isDraggingPostIt }}
+              pinch={{ disabled: isDraggingPostIt }}
               doubleClick={{ disabled: true }}
               panning={{ disabled: isDraggingPostIt || isHoveringPostIt }}
               initialPositionX={0}
               initialPositionY={0}
               onPanningStart={() => setIsPanning(true)}
               onPanningStop={() => setIsPanning(false)}
+              onTransformed={(ref) => {
+                setState({ ...ref.state });
+              }}
             >
               {() => (
                 <>
@@ -209,6 +217,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                               tag: tag,
                               dimension: "Gobierno",
                               section: "Institución",
+                              parentId: postitFatherId,
                             },
                             postitFatherId
                           );
@@ -222,6 +231,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
                         tags={tags}
                         onNewTag={handleNewTag}
+                        state={state}
                       />
                     </div>
                   </TransformComponent>

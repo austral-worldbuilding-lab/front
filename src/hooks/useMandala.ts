@@ -49,7 +49,7 @@ const useMandala = (mandalaId: string) => {
         throw err;
       }
     },
-    [mandalaId, projectId]
+    [mandalaId]
   );
 
   const updatePostit = useCallback(
