@@ -38,7 +38,6 @@ const useMandala = (mandalaId: string) => {
       try {
         if (!mandalaId) throw new Error("Mandala ID is required");
         return await createPostitService(
-          projectId!,
           mandalaId,
           postitData,
           postitFatherId
