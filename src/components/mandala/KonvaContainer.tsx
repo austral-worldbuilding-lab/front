@@ -12,7 +12,7 @@ import { Tag } from "@/types/mandala";
 import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 import { useClosestPostIt } from "@/hooks/useClosestPostIt";
-import { useVisibleChildren } from "@/hooks/useVisibleChildren";
+import { getVisibleChildren } from "@/components/mandala/postits/getVisibleChildren";
 import { useChildAnimations } from "@/hooks/useChildAnimations";
 import { useVisibleChildrenPositions } from "@/hooks/useVisibleChildrenPositions";
 import { renderChildren } from "./postits/renderChildren";
@@ -193,7 +193,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     childScale
   );
 
-  const childrenToShow = useVisibleChildren(
+  const childrenToShow = getVisibleChildren(
     zoomLevel,
     closestPostIt,
     mandala.postits
@@ -228,6 +228,17 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       container?.removeEventListener("mousedown", handleStageMouseDown);
     };
   }, [editableIndex]);
+
+  useEffect(() => {
+    if (closestPostIt && zoomLevel !== undefined) {
+      const updated = getVisibleChildren(
+        zoomLevel,
+        closestPostIt,
+        mandala.postits
+      );
+      setVisibleChildren(updated);
+    }
+  }, [mandala.postits, closestPostIt, zoomLevel]);
 
   if (!mandala || !state) return <div>No mandala found</div>;
 
@@ -270,7 +281,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onDragEnd={(e) => {
                   setTimeout(() => {
                     setIsDraggingParent(false);
-                  }, 100);
+                  }, 50);
                   handleOnDragEndPostIt(e, i, p);
                 }}
                 onDblClick={() => {
