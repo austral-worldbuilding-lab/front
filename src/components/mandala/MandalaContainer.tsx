@@ -13,7 +13,7 @@ import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useGetTags } from "@/hooks/useGetTags.ts";
-import {useProjectCharacters} from "../../hooks/useProjectCharacters";
+import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
 
 interface MandalaContainerProps {
@@ -29,7 +29,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
-  const { characters: projectCharacters, linkCharacter } = useProjectCharacters(mandalaId);
+  const { characters: projectCharacters, linkCharacter } =
+    useProjectCharacters(mandalaId);
 
   const navigate = useNavigate();
   const {
@@ -96,128 +97,140 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   }
 
   return (
-    <div className="relative w-full h-screen border rounded-lg overflow-hidden bg-white">
-      {mandala && (
-        <>
-          <FiltersModal
-            isOpen={isFiltersOpen}
-            onOpenChange={setIsFiltersOpen}
-            onApplyFilters={(filters) => setAppliedFilters(filters)}
-            mandalaId={mandalaId}
-            projectId={projectId}
-          />
-          <TransformWrapper
-            initialScale={0.5}
-            minScale={0.3}
-            maxScale={4}
-            centerOnInit={true}
-            limitToBounds={false}
-            wheel={{ disabled: isDraggingPostIt || isHoveringPostIt }}
-            pinch={{ disabled: isDraggingPostIt || isHoveringPostIt }}
-            doubleClick={{ disabled: true }}
-            panning={{ disabled: isDraggingPostIt || isHoveringPostIt }}
-            initialPositionX={0}
-            initialPositionY={0}
-            onPanningStart={() => setIsPanning(true)}
-            onPanningStop={() => setIsPanning(false)}
-          >
-            {() => (
-              <>
-                <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
-                  <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <ArrowLeftIcon className="w-5 h-5" />
-                    Atrás
-                  </button>
-                  <div className="flex items-center gap-2">
+    <div>
+      <div className="w-full bg-white flex items-center relative">
+        <Button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 cursor-pointer"
+          variant="text"
+          color="primary"
+          icon={<ArrowLeftIcon className="w-5 h-5" />}
+        >
+          Atrás
+        </Button>
+        <div className="absolute left-1/2 -translate-x-1/2 z-1000">
+          <p className="text-lg text-black font-bold">
+            {mandala?.mandala.name}
+          </p>
+        </div>
+      </div>
+      <div className="relative w-full h-screen border rounded-lg overflow-hidden bg-white">
+        {mandala && (
+          <>
+            <FiltersModal
+              isOpen={isFiltersOpen}
+              onOpenChange={setIsFiltersOpen}
+              onApplyFilters={(filters) => setAppliedFilters(filters)}
+              mandalaId={mandalaId}
+              projectId={projectId}
+            />
+            <TransformWrapper
+              initialScale={0.5}
+              minScale={0.3}
+              maxScale={4}
+              centerOnInit={true}
+              limitToBounds={false}
+              wheel={{ disabled: isDraggingPostIt || isHoveringPostIt }}
+              pinch={{ disabled: isDraggingPostIt || isHoveringPostIt }}
+              doubleClick={{ disabled: true }}
+              panning={{ disabled: isDraggingPostIt || isHoveringPostIt }}
+              initialPositionX={0}
+              initialPositionY={0}
+              onPanningStart={() => setIsPanning(true)}
+              onPanningStop={() => setIsPanning(false)}
+            >
+              {() => (
+                <>
+                  <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
+                    <div className="flex items-center gap-2">
+                      <CharacterDropdown
+                        characters={projectCharacters}
+                        onAdd={linkCharacter}
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute top-4 right-4 z-20">
                     <Button
-                      variant="outline"
+                      variant="filled"
+                      color="primary"
                       icon={<Filter size={16} />}
                       onClick={() => setIsFiltersOpen(true)}
                     >
                       Filtros
                     </Button>
-                    <CharacterDropdown characters={projectCharacters} onAdd={linkCharacter} />
                   </div>
-                </div>
-                <div className="absolute left-1/2 -translate-x-1/2 z-1000 top-[84px] md:top-4">
-                  <p className="text-lg text-black font-bold">
-                    {mandala.mandala.name}
-                  </p>
-                </div>
-                <Buttons
-                  onCreatePostIt={handleCreatePostIt}
-                  onCreateCharacter={handleCreateCharacter}
-                  currentMandalaId={mandalaId}
-                  onNewTag={handleNewTag}
-                  tags={tags}
-                />
-                <ZoomControls />
-                <TransformComponent
-                  wrapperStyle={{
-                    width: "100%",
-                    height: "100%",
-                    cursor: isPanning ? "grabbing" : "grab",
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
-                  contentStyle={{
-                    width: "100%",
-                    height: "100%",
-                    position: "relative",
-                  }}
-                >
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <Mandala
-                      mandala={mandala}
-                      scale={1}
-                      position={{ x: 0, y: 0 }}
-                    />
-                    <KonvaContainer
-                      mandala={mandala}
-                      onCharacterUpdate={updateCharacter}
-                      onPostItUpdate={updatePostit}
-                      onPostItChildCreate={(
-                        content: string,
-                        tag: Tag,
-                        postitFatherId?: string
-                      ) => {
-                        createPostit(
-                          {
-                            content,
-                            coordinates: {
-                              x: 0,
-                              y: 0,
-                              angle: 0,
-                              percentileDistance: 0,
+                  <Buttons
+                    onCreatePostIt={handleCreatePostIt}
+                    onCreateCharacter={handleCreateCharacter}
+                    currentMandalaId={mandalaId}
+                    onNewTag={handleNewTag}
+                    tags={tags}
+                  />
+                  <ZoomControls />
+                  <TransformComponent
+                    wrapperStyle={{
+                      width: "100%",
+                      height: "100%",
+                      cursor: isPanning ? "grabbing" : "grab",
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                    }}
+                    contentStyle={{
+                      width: "100%",
+                      height: "100%",
+                      position: "relative",
+                    }}
+                  >
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <Mandala
+                        mandala={mandala}
+                        scale={1}
+                        position={{ x: 0, y: 0 }}
+                      />
+                      <KonvaContainer
+                        mandala={mandala}
+                        onCharacterUpdate={updateCharacter}
+                        onPostItUpdate={updatePostit}
+                        onPostItChildCreate={(
+                          content: string,
+                          tag: Tag,
+                          postitFatherId?: string
+                        ) => {
+                          createPostit(
+                            {
+                              content,
+                              coordinates: {
+                                x: 0,
+                                y: 0,
+                                angle: 0,
+                                percentileDistance: 0,
+                              },
+                              tag: tag,
+                              dimension: "Gobierno",
+                              section: "Institución",
                             },
-                            tag: tag,
-                            dimension: "Gobierno",
-                            section: "Institución",
-                          },
-                          postitFatherId
-                        );
-                      }}
-                      onMouseEnter={() => setIsHoveringPostIt(true)}
-                      onMouseLeave={() => setIsHoveringPostIt(false)}
-                      onDragStart={() => setIsDraggingPostIt(true)}
-                      onDragEnd={() => setIsDraggingPostIt(false)}
-                      appliedFilters={appliedFilters}
-                      onPostItDelete={deletePostit}
-                      onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
-                      tags={tags}
-                      onNewTag={handleNewTag}
-                    />
-                  </div>
-                </TransformComponent>
-              </>
-            )}
-          </TransformWrapper>
-        </>
-      )}
+                            postitFatherId
+                          );
+                        }}
+                        onMouseEnter={() => setIsHoveringPostIt(true)}
+                        onMouseLeave={() => setIsHoveringPostIt(false)}
+                        onDragStart={() => setIsDraggingPostIt(true)}
+                        onDragEnd={() => setIsDraggingPostIt(false)}
+                        appliedFilters={appliedFilters}
+                        onPostItDelete={deletePostit}
+                        onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
+                        tags={tags}
+                        onNewTag={handleNewTag}
+                      />
+                    </div>
+                  </TransformComponent>
+                </>
+              )}
+            </TransformWrapper>
+          </>
+        )}
+      </div>
     </div>
   );
 };

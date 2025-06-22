@@ -22,8 +22,13 @@ const CharacterDropdown: React.FC<CharacterDropdownProps> = ({
 
   return (
     <div className="relative inline-block text-left">
-      <Button variant="outline" onClick={() => setIsOpen((prev) => !prev)}>
-        Personajes <ChevronDown className="ml-2 w-4 h-4" />
+      <Button
+        variant="outline"
+        color="primary"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="bg-white hover:bg-gray-100"
+      >
+        Personajes <ChevronDown size={18} className="ml-2" />
       </Button>
 
       {isOpen && (
