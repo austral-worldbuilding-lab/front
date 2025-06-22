@@ -61,6 +61,7 @@ const MandalaListPage = () => {
         }
     };
 
+    const { mandalas: nextPageMandalas = [] } = useGetMandalas(projectId || "", page + 1, limit);
 
     return (
         <div className="min-h-screen flex flex-col items-center pt-12 relative">
@@ -125,7 +126,7 @@ const MandalaListPage = () => {
                 <Button
                     variant="outline"
                     onClick={() => setPage(page + 1)}
-                    disabled={mandalas.length < limit}
+                    disabled={nextPageMandalas.length === 0}
                     icon={<ChevronRight size={16}/>}
                 />
             </div>
