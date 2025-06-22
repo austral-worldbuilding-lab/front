@@ -15,6 +15,7 @@ import { useClosestPostIt } from "@/hooks/useClosestPostIt";
 import { useVisibleChildren } from "@/hooks/useVisibleChildren";
 import { useChildAnimations } from "@/hooks/useChildAnimations";
 import { useVisibleChildrenPositions } from "@/hooks/useVisibleChildrenPositions";
+import { renderChildren } from "./postits/renderChildren";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -294,120 +295,35 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
           {closestPostIt &&
             !isDraggingParent &&
-            visibleChildren.map((child, i) => {
-              const parentAbs = toAbsolute(
-                closestPostIt.coordinates.x,
-                closestPostIt.coordinates.y
-              );
-
-              const parentCenterX = parentAbs.x + postItW / 2;
-              const parentCenterY = parentAbs.y + postItH / 2;
-
-              const postItRadius = (postItW * childScale) / 2;
-              const spacing = 10;
-              const requiredCircumference =
-                visibleChildren.length * (2 * postItRadius + spacing);
-              const adjustedOrbitRadius = requiredCircumference / (2 * Math.PI);
-              const orbitRadius = Math.max(adjustedOrbitRadius, 60);
-
-              const angle = (2 * Math.PI * i) / visibleChildren.length;
-
-              const rawX = parentCenterX + orbitRadius * Math.cos(angle);
-              const rawY = parentCenterY + orbitRadius * Math.sin(angle);
-
-              const finalX = rawX - postItRadius;
-              const finalY = rawY - postItRadius;
-
-              const globalIndex = mandala.postits.findIndex(
-                (p) => p.id === child.id
-              );
-              const isEditing = editableIndex === globalIndex;
-
-              return (
-                <PostIt
-                  disableDragging
-                  key={child.id}
-                  postit={child}
-                  isEditing={isEditing}
-                  editingContent={isEditing ? editingContent : null}
-                  dimensionColors={{
-                    [child.dimension]: dimensionColors[child.dimension],
-                  }}
-                  postItW={postItW * childScale}
-                  postItH={postItH * childScale}
-                  padding={padding * childScale}
-                  position={{ x: finalX, y: finalY }}
-                  onDragStart={() => {}}
-                  onDragMove={() => {}}
-                  onDragEnd={() => {}}
-                  onDblClick={() => {
-                    setEditableIndex(globalIndex);
-                    setEditingContent(child.content);
-                  }}
-                  onContentChange={(newValue) => {
-                    setEditingContent(newValue);
-                    onPostItUpdate(globalIndex, { content: newValue });
-                  }}
-                  onBlur={() => {
-                    window.getSelection()?.removeAllRanges();
-                    setEditableIndex(null);
-                    setEditingContent(null);
-                  }}
-                  onMouseEnter={onMouseEnter}
-                  onMouseLeave={onMouseLeave}
-                  onContextMenu={(e) =>
-                    showContextMenu(e, globalIndex, "postit")
-                  }
-                  mandalaRadius={SCENE_W / 2}
-                  shouldAnimate={true}
-                  initialPosition={{
-                    x: parentCenterX - (postItW * childScale) / 2,
-                    y: parentCenterY - (postItH * childScale) / 2,
-                  }}
-                />
-              );
-            })}
-
-          {closestPostIt &&
-            exitingChildren.map(({ postit: child, initialPosition }) => {
-              const parentAbs = toAbsolute(
-                closestPostIt.coordinates.x,
-                closestPostIt.coordinates.y
-              );
-
-              const finalX =
-                parentAbs.x + postItW / 2 - (postItW * childScale) / 2;
-              const finalY =
-                parentAbs.y + postItH / 2 - (postItH * childScale) / 2;
-
-              return (
-                <PostIt
-                  disableDragging
-                  key={`exiting-${child.id}`}
-                  postit={child}
-                  isEditing={false}
-                  editingContent={null}
-                  dimensionColors={{
-                    [child.dimension]: dimensionColors[child.dimension],
-                  }}
-                  postItW={postItW * childScale}
-                  postItH={postItH * childScale}
-                  padding={padding * childScale}
-                  position={{ x: finalX, y: finalY }}
-                  initialPosition={initialPosition}
-                  shouldAnimate={true}
-                  onDragStart={() => {}}
-                  onDragMove={() => {}}
-                  onDragEnd={() => {}}
-                  onDblClick={() => {}}
-                  onContentChange={() => {}}
-                  onBlur={() => {}}
-                  onMouseEnter={() => {}}
-                  onMouseLeave={() => {}}
-                  onContextMenu={() => {}}
-                  mandalaRadius={SCENE_W / 2}
-                />
-              );
+            renderChildren({
+              closestPostIt,
+              visibleChildren,
+              exitingChildren,
+              visibleChildrenPositions,
+              postItW,
+              postItH,
+              childScale,
+              dimensionColors,
+              editableIndex,
+              editingContent,
+              mandalaPostits: mandala.postits,
+              toAbsolute,
+              onEditStart: (index, content) => {
+                setEditableIndex(index);
+                setEditingContent(content);
+              },
+              onEditChange: (index, value) => {
+                setEditingContent(value);
+                onPostItUpdate(index, { content: value });
+              },
+              onEditEnd: () => {
+                window.getSelection()?.removeAllRanges();
+                setEditableIndex(null);
+                setEditingContent(null);
+              },
+              onMouseEnter,
+              onMouseLeave,
+              onContextMenu: showContextMenu,
             })}
 
           {mandala.characters?.map((character, index) => {
