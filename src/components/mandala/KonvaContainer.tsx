@@ -240,8 +240,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
   if (!mandala || !state) return <div>No mandala found</div>;
 
-  const orbitRadius = 80;
-
   return (
     <div
       style={{
@@ -301,13 +299,28 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
           {closestPostIt &&
             visibleChildren.map((child, i) => {
-              const angle = (2 * Math.PI * i) / visibleChildren.length;
-              const { x: parentX, y: parentY } = toAbsolute(
+              const parentAbs = toAbsolute(
                 closestPostIt.coordinates.x,
                 closestPostIt.coordinates.y
               );
-              const x = parentX + orbitRadius * Math.cos(angle);
-              const y = parentY + orbitRadius * Math.sin(angle);
+
+              const parentCenterX = parentAbs.x + postItW / 2;
+              const parentCenterY = parentAbs.y + postItH / 2;
+
+              const postItRadius = (postItW * childScale) / 2;
+              const spacing = 10;
+              const requiredCircumference =
+                visibleChildren.length * (2 * postItRadius + spacing);
+              const adjustedOrbitRadius = requiredCircumference / (2 * Math.PI);
+              const orbitRadius = Math.max(adjustedOrbitRadius, 60);
+
+              const angle = (2 * Math.PI * i) / visibleChildren.length;
+
+              const rawX = parentCenterX + orbitRadius * Math.cos(angle);
+              const rawY = parentCenterY + orbitRadius * Math.sin(angle);
+
+              const finalX = rawX - postItRadius;
+              const finalY = rawY - postItRadius;
 
               return (
                 <PostIt
@@ -321,7 +334,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   postItW={postItW * childScale}
                   postItH={postItH * childScale}
                   padding={padding * childScale}
-                  position={{ x, y }}
+                  position={{ x: finalX, y: finalY }}
                   onDragStart={() => {}}
                   onDragMove={() => {}}
                   onDragEnd={() => {}}
@@ -334,7 +347,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   mandalaRadius={SCENE_W / 2}
                   shouldAnimate={true}
                   isExiting={!childrenToShow.find((p) => p.id === child.id)}
-                  initialPosition={{ x: parentX, y: parentY }}
+                  initialPosition={{
+                    x: parentCenterX - (postItW * childScale) / 2,
+                    y: parentCenterY - (postItH * childScale) / 2,
+                  }}
                 />
               );
             })}

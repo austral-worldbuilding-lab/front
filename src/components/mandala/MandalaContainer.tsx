@@ -144,7 +144,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
               onPanningStart={() => setIsPanning(true)}
               onPanningStop={() => setIsPanning(false)}
               onTransformed={(ref) => {
-                setState(ref.state);
+                setState({ ...ref.state });
               }}
             >
               {() => (
