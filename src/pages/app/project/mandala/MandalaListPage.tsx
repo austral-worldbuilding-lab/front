@@ -4,7 +4,7 @@ import Loader from "@/components/common/Loader";
 import {ArrowLeftIcon, ChevronLeft, ChevronRight, GlobeIcon, PlusIcon} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CreateModal from "@/components/mandala/characters/modal/CreateModal";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useCreateMandala} from "@/hooks/useCreateMandala.ts";
 import {useDeleteMandala} from "@/hooks/useDeleteMandala.ts";
 import MandalaMenu from "@/components/mandala/MandalaMenu.tsx";
@@ -14,13 +14,18 @@ const MandalaListPage = () => {
     const [page, setPage] = useState(1);
     const limit = 10;
 
-    const { mandalas, loading: mandalasLoading, refetch } = useGetMandalas(projectId || "", page, limit);
-    const navigate = useNavigate();
+    const { mandalas: fetchedMandalas, loading: mandalasLoading } = useGetMandalas(projectId || "", page, limit);
+    const [mandalas, setMandalas] = useState(fetchedMandalas);
 
+    const navigate = useNavigate();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { deleteMandala } = useDeleteMandala();
     const { createMandala } = useCreateMandala(projectId || "");
+
+    useEffect(() => {
+        setMandalas(fetchedMandalas);
+    }, [fetchedMandalas]);
 
     if (!projectId) {
         return <div className="p-6 text-red-500">Error: Project ID not found</div>;
@@ -55,7 +60,7 @@ const MandalaListPage = () => {
     const handleDeleteMandala = async (id: string) => {
         try {
             await deleteMandala(id);
-            await refetch();
+            setMandalas((prev) => prev.filter((m) => m.id !== id));
         } catch (err) {
             console.error("Error deleting mandala", err);
         }
