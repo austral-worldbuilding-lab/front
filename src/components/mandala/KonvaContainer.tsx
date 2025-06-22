@@ -9,6 +9,7 @@ import { useKonvaUtils } from "@/hooks/useKonvaUtils";
 import { useContextMenu } from "@/hooks/useContextMenu.ts";
 import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
+import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -92,20 +93,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     getDimensionAndSectionFromCoordinates,
   } = useKonvaUtils(mandala.postits);
 
-  const shouldShowPostIt = (postit: Postit): boolean => {
-    if (!postit) return false;
-    const { dimension, section } = postit;
-
-    const dimensionFilter = appliedFilters["Dimensiones"] || [];
-    const scaleFilter = appliedFilters["Escalas"] || [];
-    const tagFilter = appliedFilters["Tags"] || [];
-
-    return (
-      (dimensionFilter.length === 0 || dimensionFilter.includes(dimension)) &&
-      (scaleFilter.length === 0 || scaleFilter.includes(section)) &&
-      (tagFilter.length === 0 || tagFilter.includes(postit.tag?.label || ""))
-    );
-  };
 
   const dimensionColors: Record<string, string> =
     mandala.mandala.configuration?.dimensions?.reduce((acc, d) => {
@@ -185,7 +172,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         <Layer>
           {zOrder.map((i) => {
             const p = mandala.postits[i];
-            if (!shouldShowPostIt(p)) return null;
+            if (!shouldShowPostIt(p, appliedFilters)) return null;
             const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
             const isEditing = editableIndex === i;
 
@@ -228,6 +215,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             );
           })}
           {mandala.characters?.map((character, index) => {
+            if (!shouldShowCharacter(character, appliedFilters)) return null;
             const { x, y } = toAbsolute(
               character.position.x,
               character.position.y
