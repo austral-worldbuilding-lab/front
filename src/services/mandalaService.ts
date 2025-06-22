@@ -39,32 +39,32 @@ export const subscribeMandala = (
   return unsubscribe;
 };
 
-//TODO: Integrar a la nueva logica del backend
-export const createPostit = async (
-  projectId: string,
-  mandalaId: string,
-  postit: Postit,
-  postitFatherId?: string //TODO: Enviar este id al nuevo endpoint del backend en caso de que no sea null o undefined
-): Promise<void> => {
-  const mandalaRef = doc(db, projectId, mandalaId);
-  const mandalaSnap = await getDoc(mandalaRef);
-  if (!mandalaSnap.exists()) throw new Error("Mandala not found");
+  export const createPostit = async (
+      mandalaId: string,
+      postit: Postit,
+      postitFatherId?: string
+  ): Promise<void> => {
+    try {
+      const payload = {
+        content: postit.content,
+        dimension: postit.dimension,
+        section: postit.section,
+        coordinates: postit.coordinates,
+        tags: [
+          {
+            name: postit.tag.label,
+            color: postit.tag.color,
+          },
+        ],
+        parentId: postitFatherId ?? undefined,
+      };
 
-  const data = mandalaSnap.data();
-
-  // Generate a unique ID for the post-it
-  const postitWithId = {
-    ...postit,
-    id: crypto.randomUUID(),
+      await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
+    } catch (error) {
+      console.error("Error creating postit:", error);
+      throw error;
+    }
   };
-
-  const updatedPostits = [...(data.postits || []), postitWithId];
-
-  await updateDoc(mandalaRef, {
-    postits: updatedPostits,
-    updatedAt: new Date(),
-  });
-};
 
 export const updatePostit = async (
   projectId: string,
