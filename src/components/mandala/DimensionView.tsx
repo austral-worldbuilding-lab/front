@@ -2,6 +2,9 @@ import React from "react";
 import useMandala from "@/hooks/useMandala.ts";
 import Loader from "@/components/common/Loader.tsx";
 import { cn } from "@/lib/utils";
+import {deletePostit, updatePostit} from "@/services/mandalaService.ts";
+import DimensionPostit from "@/components/mandala/postits/DimensionPostit.tsx";
+import {useParams} from "react-router-dom";
 
 interface MandalaDimensionProps {
   dimensionName: string;
@@ -14,6 +17,12 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
 }) => {
   const { mandala, loading, error } = useMandala(mandalaId);
   const config = mandala?.mandala.configuration;
+
+  const { projectId } = useParams<{ projectId: string }>();
+
+  if (!projectId) {
+    return <div className="text-red-500">Project ID is required</div>;
+  }
 
   if (loading) {
     return <Loader />;
@@ -47,21 +56,38 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 md:gap-2 lg:gap-3 w-fit">
                   {mandala?.postits
-                    .filter(
-                      (p) =>
-                        p.dimension.toLowerCase() ===
-                          dimensionName.toLowerCase() &&
-                        p.section.toLowerCase() === scaleName.toLowerCase()
-                    )
-                    .map((postit, i) => (
-                      <div
-                        key={i}
-                        className="w-16 h-16 md:w-20 md:h-20 lg:w-23 lg:h-23 bg-yellow-400 shadow-md p-2 text-sm break-words overflow-hidden whitespace-pre-line text-ellipsis"
-                        style={{ wordBreak: "break-word" }}
-                      >
-                        {postit.content}
-                      </div>
-                    ))}
+                      .filter(
+                          (p) =>
+                              p.dimension.toLowerCase() === dimensionName.toLowerCase() &&
+                              p.section.toLowerCase() === scaleName.toLowerCase()
+                      )
+                      .map((postit) => {
+                        const dimensionColor =
+                            mandala.mandala.configuration?.dimensions.find(
+                                (d) => d.name.toLowerCase() === postit.dimension.toLowerCase()
+                            )?.color ?? "#facc15";
+                        const postitIndex = mandala.postits.findIndex((p) => p.id === postit.id);
+
+                        return (
+                            <DimensionPostit
+                                key={postit.id}
+                                postit={postit}
+                                color={dimensionColor}
+                                onUpdate={(updates) =>
+                                    updatePostit(
+                                        projectId,
+                                        mandalaId,
+                                        postitIndex,
+                                        updates
+                                    )
+                                }
+                                onDelete={() =>
+                                    deletePostit(projectId, mandalaId, postitIndex)
+                                }
+                            />
+                        );
+                      })}
+
                 </div>
               </div>
               <div
