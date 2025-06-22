@@ -132,7 +132,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
             <TransformWrapper
               initialScale={0.5}
               minScale={0.3}
-              maxScale={4}
+              maxScale={100}
               centerOnInit={true}
               limitToBounds={false}
               wheel={{ disabled: isDraggingPostIt }}

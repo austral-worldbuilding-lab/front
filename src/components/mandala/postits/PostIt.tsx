@@ -27,8 +27,8 @@ interface PostItProps {
   onContextMenu: (e: KonvaEventObject<PointerEvent>) => void;
   mandalaRadius: number;
   shouldAnimate?: boolean;
-  isExiting?: boolean;
   initialPosition?: { x: number; y: number };
+  disableDragging?: boolean;
 }
 
 const PostIt: React.FC<PostItProps> = ({
@@ -51,22 +51,16 @@ const PostIt: React.FC<PostItProps> = ({
   onContextMenu,
   mandalaRadius,
   shouldAnimate,
-  isExiting,
   initialPosition,
+  disableDragging,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const groupRef = useRef<Konva.Group>(null);
   const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
-
   const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    if (
-      groupRef.current &&
-      shouldAnimate &&
-      !isExiting &&
-      !hasAnimatedRef.current
-    ) {
+    if (groupRef.current && shouldAnimate && !hasAnimatedRef.current) {
       const from = initialPosition ?? { x: mandalaRadius, y: mandalaRadius };
       groupRef.current.setAttrs({ x: from.x, y: from.y });
 
@@ -80,24 +74,8 @@ const PostIt: React.FC<PostItProps> = ({
       });
 
       hasAnimatedRef.current = true;
-    } else if (groupRef.current && isExiting) {
-      groupRef.current.to({
-        x: initialPosition?.x ?? mandalaRadius,
-        y: initialPosition?.y ?? mandalaRadius,
-        duration: 0.3,
-        easing: Konva.Easings.EaseIn,
-      });
-
-      hasAnimatedRef.current = false;
     }
-  }, [
-    shouldAnimate,
-    isExiting,
-    position.x,
-    position.y,
-    mandalaRadius,
-    initialPosition,
-  ]);
+  }, [shouldAnimate, position.x, position.y, mandalaRadius, initialPosition]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -111,14 +89,14 @@ const PostIt: React.FC<PostItProps> = ({
 
   const backgroundColor = dimensionColors[postit.dimension] || "#cccccc";
   const textColor = isDarkColor(backgroundColor) ? "white" : "black";
-  const scaleRatio = postItW / 64; // base size used for text
+  const scaleRatio = postItW / 64;
 
   return (
     <Group
       ref={groupRef}
       x={position.x}
       y={position.y}
-      draggable={!isEditing}
+      draggable={!isEditing && !disableDragging}
       onDragStart={onDragStart}
       onDragMove={onDragMove}
       onDragEnd={onDragEnd}
@@ -138,11 +116,7 @@ const PostIt: React.FC<PostItProps> = ({
         shadowOpacity={0}
       />
       <Html
-        divProps={{
-          style: {
-            pointerEvents: isEditing ? "auto" : "none",
-          },
-        }}
+        divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}
       >
         <textarea
           ref={isEditing ? textAreaRef : null}
