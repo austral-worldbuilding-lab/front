@@ -48,7 +48,7 @@ const PostIt: React.FC<PostItProps> = ({
   mandalaRadius,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius);
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
 
   useEffect(() => {
     setTimeout(() => {
