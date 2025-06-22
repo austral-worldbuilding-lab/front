@@ -12,7 +12,7 @@ const buttonVariants = cva(
         filled: "",
         outline: "border",
         text: "",
-        ghost: "bg-transparent border",
+        ghost: "bg-transparent",
       },
       size: {
         sm: "h-8 px-3 text-sm",
@@ -20,18 +20,142 @@ const buttonVariants = cva(
         lg: "h-12 px-6 text-lg",
       },
       color: {
-        primary:
-          "bg-primary text-white hover:bg-primary-hover active:bg-primary-active border-primary",
-        secondary:
-          "bg-secondary text-primary hover:bg-secondary-hover active:bg-secondary-active border-primary",
-        tertiary:
-          "bg-white text-tertiary hover:text-tertiary-hover active:text-tertiary-active border-tertiary",
-        danger:
-          "bg-danger text-white hover:bg-danger-hover active:bg-danger-active border-danger",
-        ghost:
-          "bg-transparent text-primary hover:bg-tertiary/5 active:bg-tertiary/10 border-primary",
+        primary: "",
+        secondary: "",
+        tertiary: "",
+        danger: "",
+        ghost: "",
       },
     },
+    compoundVariants: [
+      // Filled variants
+      {
+        variant: "filled",
+        color: "primary",
+        className:
+          "bg-primary text-white hover:bg-primary-hover active:bg-primary-active",
+      },
+      {
+        variant: "filled",
+        color: "secondary",
+        className:
+          "bg-secondary text-primary hover:bg-secondary-hover active:bg-secondary-active",
+      },
+      {
+        variant: "filled",
+        color: "tertiary",
+        className:
+          "bg-white text-tertiary hover:text-tertiary-hover active:text-tertiary-active",
+      },
+      {
+        variant: "filled",
+        color: "danger",
+        className:
+          "bg-danger text-white hover:bg-danger-hover active:bg-danger-active",
+      },
+      {
+        variant: "filled",
+        color: "ghost",
+        className:
+          "bg-transparent text-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+
+      // Outline variants
+      {
+        variant: "outline",
+        color: "primary",
+        className:
+          "bg-transparent text-primary border-primary hover:bg-primary/5 active:bg-primary/10",
+      },
+      {
+        variant: "outline",
+        color: "secondary",
+        className:
+          "bg-transparent text-secondary border-secondary hover:bg-secondary/5 active:bg-secondary/10",
+      },
+      {
+        variant: "outline",
+        color: "tertiary",
+        className:
+          "bg-transparent text-tertiary border-tertiary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+      {
+        variant: "outline",
+        color: "danger",
+        className:
+          "bg-transparent text-danger border-danger hover:bg-danger/5 active:bg-danger/10",
+      },
+      {
+        variant: "outline",
+        color: "ghost",
+        className:
+          "bg-transparent text-primary border-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+
+      // Text variants
+      {
+        variant: "text",
+        color: "primary",
+        className:
+          "bg-transparent text-primary hover:text-primary/50 active:text-primary/50 w-fit",
+      },
+      {
+        variant: "text",
+        color: "secondary",
+        className:
+          "bg-transparent text-secondary hover:bg-secondary/5 active:bg-secondary/10",
+      },
+      {
+        variant: "text",
+        color: "tertiary",
+        className:
+          "bg-transparent text-tertiary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+      {
+        variant: "text",
+        color: "danger",
+        className:
+          "bg-transparent text-danger hover:bg-danger/5 active:bg-danger/10",
+      },
+      {
+        variant: "text",
+        color: "ghost",
+        className:
+          "bg-transparent text-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+
+      // Ghost variants
+      {
+        variant: "ghost",
+        color: "primary",
+        className:
+          "bg-transparent text-primary border-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+      {
+        variant: "ghost",
+        color: "secondary",
+        className:
+          "bg-transparent text-secondary border-secondary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+      {
+        variant: "ghost",
+        color: "tertiary",
+        className:
+          "bg-transparent text-tertiary border-tertiary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+      {
+        variant: "ghost",
+        color: "danger",
+        className:
+          "bg-transparent text-danger border-danger hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+      {
+        variant: "ghost",
+        color: "ghost",
+        className:
+          "bg-transparent text-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+      },
+    ],
     defaultVariants: {
       variant: "filled",
       size: "md",

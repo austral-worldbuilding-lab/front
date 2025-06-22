@@ -13,7 +13,7 @@ import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useGetTags } from "@/hooks/useGetTags.ts";
-import {useProjectCharacters} from "../../hooks/useProjectCharacters";
+import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
 
 interface MandalaContainerProps {
@@ -29,7 +29,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
-  const { characters: projectCharacters, linkCharacter } = useProjectCharacters(mandalaId);
+  const { characters: projectCharacters, linkCharacter } =
+    useProjectCharacters(mandalaId);
 
   const navigate = useNavigate();
   const {
@@ -124,23 +125,31 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
             {() => (
               <>
                 <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
-                  <button
+                  <Button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 cursor-pointer"
+                    variant="text"
+                    color="primary"
+                    icon={<ArrowLeftIcon className="w-5 h-5" />}
                   >
-                    <ArrowLeftIcon className="w-5 h-5" />
                     Atrás
-                  </button>
+                  </Button>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      icon={<Filter size={16} />}
-                      onClick={() => setIsFiltersOpen(true)}
-                    >
-                      Filtros
-                    </Button>
-                    <CharacterDropdown characters={projectCharacters} onAdd={linkCharacter} />
+                    <CharacterDropdown
+                      characters={projectCharacters}
+                      onAdd={linkCharacter}
+                    />
                   </div>
+                </div>
+                <div className="absolute top-20 right-4 z-20">
+                  <Button
+                    variant="filled"
+                    color="primary"
+                    icon={<Filter size={16} />}
+                    onClick={() => setIsFiltersOpen(true)}
+                  >
+                    Filtros
+                  </Button>
                 </div>
                 <div className="absolute left-1/2 -translate-x-1/2 z-1000 top-[84px] md:top-4">
                   <p className="text-lg text-black font-bold">
