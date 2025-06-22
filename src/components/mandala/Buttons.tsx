@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { PersonStanding, StickyNote } from "lucide-react";
 import CreateModal from "./characters/modal/CreateModal";
 import NewPostItModal from "./postits/NewPostItModal";
-import { Tag } from "./postits/SelectTags";
+import { Tag } from "@/types/mandala";
 
 interface ButtonsProps {
   onCreatePostIt: (content: string, tag: Tag) => void;
@@ -13,7 +13,7 @@ interface ButtonsProps {
     description: string;
     useAIMandala: boolean;
     color: string;
-    dimensions: { name: string; color?: string }[],
+    dimensions: { name: string; color?: string }[];
     scales: string[];
     parentId?: string;
   }) => void;
@@ -36,7 +36,7 @@ const Buttons = ({
     description: string;
     useAIMandala: boolean;
     color: string;
-    dimensions: { name: string; color?: string }[],
+    dimensions: { name: string; color?: string }[];
     scales: string[];
   }) => {
     if (onCreateCharacter) {
@@ -48,23 +48,21 @@ const Buttons = ({
   };
   return (
     <>
-      <div className="absolute top-4 right-4 flex gap-2 z-20">
+      <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-20 bg-white rounded-lg p-2 shadow">
         <Button
           onClick={() => setPostItModalOpen(true)}
           variant="filled"
-          color="secondary"
-          icon={<StickyNote size={16} />}
-        >
-          Nuevo Post-It
-        </Button>
+          className="w-12 h-12 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-400"
+          icon={<StickyNote size={24} />}
+          tooltipText="Nuevo post-it"
+        ></Button>
         <Button
           onClick={() => setIsCreateModalOpen(true)}
           variant="filled"
-          color="primary"
-          icon={<PersonStanding size={16} />}
-        >
-          Nuevo Personaje
-        </Button>
+          className="w-12 h-12 bg-violet-500 hover:bg-violet-400 active:bg-violet-400"
+          icon={<PersonStanding size={24} />}
+          tooltipText="Nuevo personaje"
+        ></Button>
       </div>
 
       <CreateModal
