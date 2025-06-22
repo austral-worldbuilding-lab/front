@@ -50,7 +50,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     color: string;
     dimensions: { name: string; color?: string }[];
     scales: string[];
-    linkedToId?: string;
+    parentId?: string;
   }) => {
     await createMandala(
       character.name,
@@ -59,10 +59,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
       character.useAIMandala,
       character.dimensions,
       character.scales,
-      character.linkedToId
+      character.parentId
     );
   };
-
 
   const handleCreatePostIt = (content: string, tag: Tag) => {
     createPostit({

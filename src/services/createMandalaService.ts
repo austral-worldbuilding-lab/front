@@ -13,7 +13,7 @@ export interface CreateMandalaDto {
     };
     dimensions: { name: string; color?: string }[]
     scales: string[];
-    linkedToId?: string | null;
+    parentId?: string | null;
 }
 
 

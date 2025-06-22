@@ -15,7 +15,7 @@ interface ButtonsProps {
     color: string;
     dimensions: { name: string; color?: string }[],
     scales: string[];
-    linkedToId?: string;
+    parentId?: string;
   }) => void;
   tags: Tag[];
   currentMandalaId?: string;
@@ -42,7 +42,7 @@ const Buttons = ({
     if (onCreateCharacter) {
       onCreateCharacter({
         ...character,
-        linkedToId: currentMandalaId,
+        parentId: currentMandalaId,
       });
     }
   };
