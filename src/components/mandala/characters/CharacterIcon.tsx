@@ -29,7 +29,7 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
 }) => {
   const [showPopover, setShowPopover] = useState(false);
   const isDragging = useRef(false);
-  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius);
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, 0, 0, 12);
 
   const handleClick = () => {
     if (!isDragging.current) {
