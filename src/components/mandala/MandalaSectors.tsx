@@ -22,12 +22,6 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
     angle: (360 / sectors.length) * (sectors.length - index),
   }));
 
-  const toKebabCase = (str: string) =>
-    str
-      .normalize("NFD") // descompone los caracteres acentuados
-      .replace(/[\u0300-\u036f]/g, "") // elimina los diacríticos (tildes)
-      .toLowerCase()
-      .replace(/\s+/g, "-"); // reemplaza espacios por guiones
 
   return (
     <>
@@ -88,8 +82,8 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
               width: "max-content",
             }}
             onClick={() => {
-              const kebabName = toKebabCase(sector.name);
-              navigate(`${location.pathname}/dimension/${kebabName}`);
+              const encodedName = encodeURIComponent(sector.name);
+              navigate(`${location.pathname}/dimension/${encodedName}`);
             }}
           >
             <div
