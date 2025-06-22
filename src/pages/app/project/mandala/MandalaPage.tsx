@@ -3,11 +3,7 @@ import { useParams } from "react-router-dom";
 
 const MandalaPage = () => {
   const { mandalaId } = useParams();
-  return (
-    <div>
-      <MandalaContainer mandalaId={mandalaId!} />
-    </div>
-  );
+  return <MandalaContainer mandalaId={mandalaId!} />;
 };
 
 export default MandalaPage;

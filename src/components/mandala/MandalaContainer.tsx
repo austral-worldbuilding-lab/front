@@ -97,8 +97,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   }
 
   return (
-    <div>
-      <div className="w-full bg-white flex items-center relative">
+    <div className="overflow-hidden h-screen">
+      <div className="w-full bg-white flex items-center relative overflow-hidden">
         <Button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 cursor-pointer"
@@ -114,7 +114,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
           </p>
         </div>
       </div>
-      <div className="relative w-full h-screen border rounded-lg overflow-hidden bg-white">
+      <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (
           <>
             <FiltersModal
