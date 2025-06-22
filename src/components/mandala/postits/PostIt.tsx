@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from "react";
-import { Group, Rect } from "react-konva";
+import { Circle, Group } from "react-konva";
 import { Html } from "react-konva-utils";
 import { KonvaEventObject } from "konva/lib/Node";
 import { Postit } from "@/types/mandala";
 import { isDarkColor } from "@/utils/colorUtils";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
+import Konva from "konva";
 
 interface PostItProps {
   postit: Postit;
@@ -23,8 +24,11 @@ interface PostItProps {
   onBlur: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  onContextMenu: (e: KonvaEventObject<PointerEvent>) => void; // Nueva prop
+  onContextMenu: (e: KonvaEventObject<PointerEvent>) => void;
   mandalaRadius: number;
+  shouldAnimate?: boolean;
+  isExiting?: boolean;
+  initialPosition?: { x: number; y: number };
 }
 
 const PostIt: React.FC<PostItProps> = ({
@@ -46,9 +50,54 @@ const PostIt: React.FC<PostItProps> = ({
   onMouseLeave,
   onContextMenu,
   mandalaRadius,
+  shouldAnimate,
+  isExiting,
+  initialPosition,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const groupRef = useRef<Konva.Group>(null);
   const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
+
+  const hasAnimatedRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      groupRef.current &&
+      shouldAnimate &&
+      !isExiting &&
+      !hasAnimatedRef.current
+    ) {
+      const from = initialPosition ?? { x: mandalaRadius, y: mandalaRadius };
+      groupRef.current.setAttrs({ x: from.x, y: from.y });
+
+      requestAnimationFrame(() => {
+        groupRef.current?.to({
+          x: position.x,
+          y: position.y,
+          duration: 0.4,
+          easing: Konva.Easings.EaseOut,
+        });
+      });
+
+      hasAnimatedRef.current = true;
+    } else if (groupRef.current && isExiting) {
+      groupRef.current.to({
+        x: initialPosition?.x ?? mandalaRadius,
+        y: initialPosition?.y ?? mandalaRadius,
+        duration: 0.3,
+        easing: Konva.Easings.EaseIn,
+      });
+
+      hasAnimatedRef.current = false;
+    }
+  }, [
+    shouldAnimate,
+    isExiting,
+    position.x,
+    position.y,
+    mandalaRadius,
+    initialPosition,
+  ]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -62,9 +111,11 @@ const PostIt: React.FC<PostItProps> = ({
 
   const backgroundColor = dimensionColors[postit.dimension] || "#cccccc";
   const textColor = isDarkColor(backgroundColor) ? "white" : "black";
+  const scaleRatio = postItW / 64; // base size used for text
 
   return (
     <Group
+      ref={groupRef}
       x={position.x}
       y={position.y}
       draggable={!isEditing}
@@ -78,11 +129,11 @@ const PostIt: React.FC<PostItProps> = ({
       className="pointer-events-auto"
       dragBoundFunc={dragBoundFunc}
     >
-      <Rect
-        width={postItW}
-        height={postItH}
-        fill={dimensionColors[postit.dimension] || "#cccccc"}
-        cornerRadius={4}
+      <Circle
+        x={postItW / 2}
+        y={postItH / 2}
+        radius={postItW / 2}
+        fill={backgroundColor}
         shadowBlur={0}
         shadowOpacity={0}
       />
@@ -97,30 +148,25 @@ const PostIt: React.FC<PostItProps> = ({
           ref={isEditing ? textAreaRef : null}
           disabled={!isEditing}
           value={isEditing ? editingContent ?? "" : postit.content}
-          onChange={(e) => {
-            onContentChange(e.target.value);
-          }}
+          onChange={(e) => onContentChange(e.target.value)}
           onBlur={onBlur}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
           style={{
             width: postItW,
             height: postItH,
-            padding: padding,
+            padding,
             margin: 0,
             resize: "none",
-            background: `${dimensionColors[postit.dimension] || "#cccccc"}`,
+            background: backgroundColor,
             color: textColor,
-            borderRadius: 4,
+            borderRadius: "50%",
             boxShadow: "0 0 4px rgba(0,0,0,0.3)",
             boxSizing: "border-box",
-            fontSize: 11,
+            fontSize: `${11 * scaleRatio}px`,
             lineHeight: 1.1,
             overflow: "hidden",
+            textAlign: "center",
           }}
         />
       </Html>

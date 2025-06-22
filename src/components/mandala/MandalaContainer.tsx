@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import {
+  TransformWrapper,
+  TransformComponent,
+  ReactZoomPanPinchState,
+} from "react-zoom-pan-pinch";
 import Mandala from "./Mandala";
 import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
@@ -13,7 +17,7 @@ import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useGetTags } from "@/hooks/useGetTags.ts";
-import {useProjectCharacters} from "../../hooks/useProjectCharacters";
+import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
 
 interface MandalaContainerProps {
@@ -24,12 +28,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
+  const [state, setState] = useState<ReactZoomPanPinchState | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const projectId = useParams<{ projectId: string }>().projectId!;
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
-  const { characters: projectCharacters, linkCharacter } = useProjectCharacters(mandalaId);
+  const { characters: projectCharacters, linkCharacter } =
+    useProjectCharacters(mandalaId);
 
   const navigate = useNavigate();
   const {
@@ -112,14 +118,17 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
             maxScale={4}
             centerOnInit={true}
             limitToBounds={false}
-            wheel={{ disabled: isDraggingPostIt || isHoveringPostIt }}
-            pinch={{ disabled: isDraggingPostIt || isHoveringPostIt }}
+            wheel={{ disabled: isDraggingPostIt }}
+            pinch={{ disabled: isDraggingPostIt }}
             doubleClick={{ disabled: true }}
             panning={{ disabled: isDraggingPostIt || isHoveringPostIt }}
             initialPositionX={0}
             initialPositionY={0}
             onPanningStart={() => setIsPanning(true)}
             onPanningStop={() => setIsPanning(false)}
+            onTransformed={(ref) => {
+              setState({ ...ref.state });
+            }}
           >
             {() => (
               <>
@@ -139,7 +148,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                     >
                       Filtros
                     </Button>
-                    <CharacterDropdown characters={projectCharacters} onAdd={linkCharacter} />
+                    <CharacterDropdown
+                      characters={projectCharacters}
+                      onAdd={linkCharacter}
+                    />
                   </div>
                 </div>
                 <div className="absolute left-1/2 -translate-x-1/2 z-1000 top-[84px] md:top-4">
@@ -197,6 +209,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                             tag: tag,
                             dimension: "Gobierno",
                             section: "Institución",
+                            parentId: postitFatherId,
                           },
                           postitFatherId
                         );
@@ -210,6 +223,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                       onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
                       tags={tags}
                       onNewTag={handleNewTag}
+                      state={state}
                     />
                   </div>
                 </TransformComponent>
