@@ -255,7 +255,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         <Layer>
           {zOrder.map((i) => {
             const p = mandala.postits[i];
-            if (p.parentId) return null;
+            if (p?.parentId) return null;
             if (!shouldShowPostIt(p, appliedFilters)) return null;
             const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
             const isEditing = editableIndex === i;
