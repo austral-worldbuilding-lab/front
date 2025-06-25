@@ -20,7 +20,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
        onDelete,
        width = 80,
        height = 80,
-       padding = 5,
+       padding = 8,
     }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingContent, setEditingContent] = useState(postit.content);
@@ -39,7 +39,6 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
         }
     }, [isEditing]);
 
-
     useEffect(() => {
         setEditingContent(postit.content);
         setDisplayContent(postit.content);
@@ -49,13 +48,6 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
         setIsEditing(true);
     };
 
-    const handleBlur = async () => {
-        setIsEditing(false);
-        if (editingContent !== postit.content) {
-            setDisplayContent(editingContent);
-            await onUpdate({ content: editingContent });
-        }
-    };
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -71,7 +63,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
     return (
         <>
             <div
-                className="relative text-sm whitespace-pre-line break-words overflow-hidden rounded-[4px]"
+                className="relative text-sm whitespace-pre-line break-words overflow-hidden rounded-full"
                 style={{
                     backgroundColor: color,
                     color: textColor,
@@ -84,35 +76,64 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                     cursor: isEditing ? "text" : "pointer",
                     outline: isEditing ? "1px solid #ccc" : "none",
                     outlineOffset: "-2px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                 }}
                 onDoubleClick={handleDoubleClick}
                 onContextMenu={handleContextMenu}
             >
                 {isEditing ? (
-                    <textarea
-                        ref={textAreaRef}
-                        className="resize-none outline-none"
-                        value={editingContent}
-                        onChange={(e) => setEditingContent(e.target.value)}
-                        onBlur={handleBlur}
+                    <div
+                        contentEditable
+                        suppressContentEditableWarning
+                        ref={(el) => {
+                            if (el && isEditing) {
+                                el.focus();
+                                const range = document.createRange();
+                                const sel = window.getSelection();
+                                range.selectNodeContents(el);
+                                range.collapse(false);
+                                sel?.removeAllRanges();
+                                sel?.addRange(range);
+                            }
+                        }}
+                        onBlur={(e) => {
+                            setIsEditing(false);
+                            const newText = e.currentTarget.innerText;
+                            if (newText !== postit.content) {
+                                setEditingContent(newText);
+                                setDisplayContent(newText);
+                                onUpdate({content: newText});
+                            }
+                        }}
+                        onInput={(e) => setEditingContent((e.target as HTMLElement).innerText)}
                         style={{
-                            width: width,
-                            height: height,
-                            padding: padding,
+                            width,
+                            height,
                             backgroundColor: color,
                             color: textColor,
-                            boxSizing: "border-box",
                             fontSize: 11,
                             lineHeight: 1.1,
                             fontFamily: "inherit",
-                            borderRadius: 4,
-                            border: "none",
+                            borderRadius: "50%",
                             boxShadow: "0 0 4px rgba(0,0,0,0.3)",
-                            overflow: "hidden",
-                            resize: "none",
+                            boxSizing: "border-box",
+                            textAlign: "center",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 8,
+                            outline: "none",
                             whiteSpace: "pre-wrap",
+                            overflow: "hidden",
+                            userSelect: "text",
+                            cursor: "text",
                         }}
-                    />
+                    >
+                        {editingContent}
+                    </div>
+
                 ) : (
                     <div
                         style={{
@@ -124,6 +145,11 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                             padding: padding,
                             height: "100%",
                             boxSizing: "border-box",
+                            textAlign: "center",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            overflow: "hidden",
                         }}
                     >
                         {displayContent}
@@ -133,12 +159,12 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
 
             {showMenu && (
                 <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
                     <div
                         className="fixed z-50"
-                        style={{ left: menuPosition.x, top: menuPosition.y }}
+                        style={{left: menuPosition.x, top: menuPosition.y}}
                     >
-                        <MandalaMenu onDelete={handleDelete} isContextMenu />
+                    <MandalaMenu onDelete={handleDelete} isContextMenu />
                     </div>
                 </>
             )}
