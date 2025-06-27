@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import ToggleBadge from "@/components/ui/toggle-badge";
 import { useGetFilters } from "@/hooks/useGetFilters";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FilterSection } from "@/types/mandala";
 
 interface CreateModalProps {
@@ -27,10 +27,35 @@ const FiltersModal = ({
   mandalaId,
   projectId,
 }: CreateModalProps) => {
-  const { filters, isLoading } = useGetFilters(mandalaId, projectId);
+  const { filters = [], isLoading } = useGetFilters(mandalaId, projectId);
+
+  const filtersList = Array.isArray(filters) ? filters : [];
+
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});
+
+  useEffect(() => {
+    if (filtersList.length > 0) {
+      const updatedFilters: Record<string, string[]> = {};
+
+      Object.entries(selectedFilters).forEach(([section, options]) => {
+        const filterSection = filtersList.find(
+          (f) => f.sectionName === section
+        );
+        if (filterSection) {
+          const validOptions = options.filter((option) =>
+            filterSection.options.some((o) => o.label === option)
+          );
+          if (validOptions.length > 0) {
+            updatedFilters[section] = validOptions;
+          }
+        }
+      });
+
+      setSelectedFilters(updatedFilters);
+    }
+  }, [filtersList, isOpen]);
 
   const handleToggle = (sectionName: string, optionLabel: string) => {
     setSelectedFilters((prev) => {
@@ -52,7 +77,6 @@ const FiltersModal = ({
 
   const handleApplyFilters = () => {
     onApplyFilters(selectedFilters);
-    console.log("selectedFilters", selectedFilters);
     onOpenChange(false);
   };
 
@@ -90,9 +114,9 @@ const FiltersModal = ({
 
         <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
           {isLoading ? (
-            <div className="text-center py-4">Loading filters...</div>
+            <div className="text-center py-4">Cargando filtros...</div>
           ) : (
-            filters.map(renderFilterSection)
+            filtersList.map(renderFilterSection)
           )}
         </div>
 

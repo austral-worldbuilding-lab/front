@@ -1,46 +1,66 @@
-import { useState, useEffect } from "react";
-import {FilterSection, BackendTag} from "@/types/mandala";
-import {getFilters} from "@/services/mandalaService.ts";
-import {getTags} from "@/services/projectService.ts";
+import { useQuery } from "@tanstack/react-query";
+import { FilterSection } from "@/types/mandala";
+import { getFilters } from "@/services/mandalaService.ts";
+import { tagKeys } from "./useTags";
+import { getTags } from "@/services/projectService.ts";
 
-export function useGetFilters (mandalaId: string, projectId: string) {
-  const [filters, setFilters] = useState<FilterSection[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+interface TagData {
+  label: string;
+  value: string;
+  color: string;
+}
 
-  useEffect(() => {
+export const filterKeys = {
+  all: ["filters"] as const,
+  byMandala: (mandalaId: string) => [...filterKeys.all, mandalaId] as const,
+};
 
-    const fetchFilters = async () => {
-      setIsLoading(true);
-        try {
-            const rawFilters: FilterSection[] = await getFilters(mandalaId);
-            const tags: BackendTag[] = await getTags(projectId);
+export function useGetFilters(mandalaId: string, projectId: string) {
+  const { data: tagsFromBackend } = useQuery({
+    queryKey: tagKeys.byProject(projectId),
+    queryFn: async () => {
+      if (!projectId) return [];
+      const backendTags = await getTags(projectId);
+      return backendTags.map((tag) => ({
+        label: tag.name,
+        value: tag.name.toLowerCase(),
+        color: tag.color,
+      }));
+    },
+    enabled: !!projectId,
+  });
 
-            let finalFilters = rawFilters;
+  const tagsData = tagsFromBackend as TagData[] | undefined;
 
-            if (tags.length > 0 && !rawFilters.some(f => f.sectionName === "Tags")) {
-                finalFilters = [
-                    ...rawFilters,
-                    {
-                        sectionName: "Tags",
-                        type: "multiple",
-                        options: tags.map((tag) => ({
-                            label: tag.name,
-                            color: tag.color,
-                        })),
-                    },
-                ];
-            }
+  const { data: filters = [], isLoading } = useQuery({
+    queryKey: filterKeys.byMandala(mandalaId),
+    queryFn: async () => {
+      const rawFilters: FilterSection[] = await getFilters(mandalaId);
 
-            setFilters(finalFilters);
+      let finalFilters = rawFilters;
 
-        } catch (error) {
-            console.error("Error fetching filters:", error);
-        }
-      setIsLoading(false);
-    };
+      if (
+        tagsData &&
+        tagsData.length > 0 &&
+        !rawFilters.some((f) => f.sectionName === "Tags")
+      ) {
+        finalFilters = [
+          ...rawFilters,
+          {
+            sectionName: "Tags",
+            type: "multiple",
+            options: tagsData.map((tag: TagData) => ({
+              label: tag.label,
+              color: tag.color,
+            })),
+          },
+        ];
+      }
 
-    fetchFilters()
-  }, []);
+      return finalFilters;
+    },
+    enabled: !!mandalaId && !!projectId && !!tagsData,
+  });
 
   return { filters, isLoading };
 }
