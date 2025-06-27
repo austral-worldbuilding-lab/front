@@ -23,7 +23,7 @@ export interface KonvaContainerProps {
   onPostItDelete: (index: number) => Promise<boolean>;
   onPostItChildCreate: (
     content: string,
-    tag: Tag,
+    tags: Tag[],
     postitFatherId?: string
   ) => void;
   characters?: Character[];
@@ -389,8 +389,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         tags={tags}
         onNewTag={onNewTag}
         postItFatherId={selectedPostItId}
-        onCreate={(content, tag, postItFatherId) => {
-          onPostItChildCreate(content, tag, postItFatherId);
+        onCreate={(content, tags, postItFatherId) => {
+          onPostItChildCreate(content, tags, postItFatherId);
           setIsChildPostItModalOpen(false);
           setSelectedPostItId(undefined);
         }}

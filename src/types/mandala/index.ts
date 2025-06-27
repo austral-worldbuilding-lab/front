@@ -25,12 +25,12 @@ export interface Postit {
   coordinates: PostitCoordinates;
   dimension: string;
   section: string;
-  tag: Tag;
+  tags: Tag[];
   parentId?: string | null;
 }
 
 export interface Tag {
-  label: string;
+  name: string;
   value?: string;
   color: string;
 }

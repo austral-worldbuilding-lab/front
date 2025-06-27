@@ -50,12 +50,7 @@ export const subscribeMandala = (
         dimension: postit.dimension,
         section: postit.section,
         coordinates: postit.coordinates,
-        tags: [
-          {
-            name: postit.tag.label,
-            color: postit.tag.color,
-          },
-        ],
+        tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
         parentId: postitFatherId ?? undefined,
       };
 

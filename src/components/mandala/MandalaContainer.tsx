@@ -69,13 +69,13 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     );
   };
 
-  const handleCreatePostIt = (content: string, tag: Tag) => {
+  const handleCreatePostIt = (content: string, tags: Tag[]) => {
     createPostit({
       content: content,
       coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
       dimension: "Gobierno",
       section: "Institución",
-      tag: tag || null,
+      tags: tags || null,
     });
   };
 
@@ -83,7 +83,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
 
   const handleNewTag = async (tag: Tag) => {
     try {
-      await createTag(tag.label, tag.color);
+      await createTag(tag.name, tag.color);
     } catch (error) {
       console.error("Error al crear el tag:", error);
     }
@@ -206,7 +206,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onPostItUpdate={updatePostit}
                         onPostItChildCreate={(
                           content: string,
-                          tag: Tag,
+                          tags: Tag[],
                           postitFatherId?: string
                         ) => {
                           createPostit(
@@ -218,7 +218,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                                 angle: 0,
                                 percentileDistance: 0,
                               },
-                              tag: tag,
+                              tags,
                               dimension: "Gobierno",
                               section: "Institución",
                               parentId: postitFatherId,

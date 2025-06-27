@@ -16,7 +16,7 @@ const filterKeys = {
 };
 
 export interface TagFormat {
-  label: string;
+  name: string;
   value: string;
   color: string;
 }
@@ -36,7 +36,7 @@ export function useTags(projectId: string) {
 
       const tagsFromBackend: BackendTag[] = await getTags(projectId);
       return tagsFromBackend.map((tag) => ({
-        label: tag.name,
+        name: tag.name,
         value: tag.name.toLowerCase(),
         color: tag.color,
       }));
