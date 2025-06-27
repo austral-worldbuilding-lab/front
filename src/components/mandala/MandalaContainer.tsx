@@ -16,7 +16,7 @@ import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
-import { useGetTags } from "@/hooks/useGetTags.ts";
+import { useTags } from "@/hooks/useTags";
 import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
 
@@ -79,10 +79,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     });
   };
 
-  const { tags, createTag } = useGetTags(projectId);
+  const { tags, createTag } = useTags(projectId);
 
   const handleNewTag = async (tag: Tag) => {
-    await createTag(tag.label, tag.color);
+    try {
+      await createTag(tag.label, tag.color);
+    } catch (error) {
+      console.error("Error al crear el tag:", error);
+    }
   };
 
   if (loading) {
