@@ -1,6 +1,7 @@
 import React from "react";
 import { Sector, Level } from "@/types/mandala";
 import QuestionBubble from "./QuestionBubble";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface MandalaSectorsProps {
   sectors: Sector[];
@@ -13,9 +14,12 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
   maxRadius,
   levels,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const computedAngles = sectors.map((sector, index) => ({
     ...sector,
-    angle: (360 / sectors.length) * index,
+    angle: (360 / sectors.length) * (sectors.length - index),
   }));
 
 
@@ -40,7 +44,7 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
       ))}
 
       {/* Puntos en las intersecciones */}
-      {computedAngles.map((sector) => (
+      {computedAngles.map((sector) =>
         levels.map((level) => (
           <div
             key={`${sector.id}-${level.id}`}
@@ -53,9 +57,9 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
             }}
           />
         ))
-      ))}
+      )}
 
-      {/* Nombres de los sectores */}
+      {/* Nombres de los sectores con navegación */}
       {computedAngles.map((sector, index) => {
         const nextSector = computedAngles[(index + 1) % computedAngles.length];
         let midAngle = (sector.angle + nextSector.angle) / 2;
@@ -69,23 +73,36 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
         return (
           <div
             key={`name-${sector.id}`}
-            className="absolute text-blue-900 font-bold tracking-wider z-10"
+            className="absolute cursor-pointer"
             style={{
               left: Math.cos((midAngle * Math.PI) / 180) * (maxRadius + 60),
               top: Math.sin((midAngle * Math.PI) / 180) * (maxRadius + 60),
               transform: `translate(-50%, -50%) rotate(${textRotationAngle}deg)`,
-              transformOrigin: "center",
-              fontSize: "1.2rem",
+              transformOrigin: "center center",
+              width: "max-content",
+            }}
+            onClick={() => {
+              const encodedName = encodeURIComponent(sector.name);
+              navigate(`${location.pathname}/dimension/${encodedName}`);
             }}
           >
-            <div>{sector.name}</div>
+            <div
+              className="text-primary font-bold tracking-wider hover:text-blue-600"
+              style={{
+                fontSize: "1.2rem",
+                whiteSpace: "nowrap",
+                pointerEvents: "auto",
+              }}
+            >
+              {sector.name}
+            </div>
           </div>
         );
       })}
 
       {/* Burbujas de preguntas predefinidas */}
       {computedAngles.map((sector) => (
-      <div
+        <div
           key={`question-${sector.id}`}
           className="absolute z-20"
           style={{
@@ -93,9 +110,9 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
             top: Math.sin((sector.angle * Math.PI) / 180) * (maxRadius + 120),
             transform: "translate(-50%, -50%)",
           }}
-      >
-        <QuestionBubble question={sector.question}/>
-      </div>
+        >
+          <QuestionBubble question={sector.question} />
+        </div>
       ))}
     </>
   );

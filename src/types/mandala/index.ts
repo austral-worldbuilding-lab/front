@@ -6,6 +6,7 @@ export interface Level {
 }
 
 export interface Sector {
+  color: string;
   id: string;
   name: string;
   question: string;
@@ -19,22 +20,100 @@ export interface PostitCoordinates {
 }
 
 export interface Postit {
+  id?: string;
   content: string;
   coordinates: PostitCoordinates;
   dimension: string;
   section: string;
+  tag: Tag;
+  parentId?: string | null;
+}
+
+export interface Tag {
+  label: string;
+  value?: string;
+  color: string;
+}
+
+export interface Character {
+  id: string;
+  name: string;
+  color: string;
+  position: { x: number; y: number };
+  dimension?: string;
+  section?: string;
 }
 
 export interface Mandala {
   id: string;
-  projectId: string;
-  createdAt: Date;
+  mandala: MandalData;
   updatedAt: Date;
   postits: Postit[];
+  characters: Character[];
+}
+
+export interface MandalData {
+  id: string;
+  name: string;
+  configuration: {
+    dimensions: { name: string; color: string }[];
+    scales: string[];
+  };
+  parentId: string;
+}
+
+export interface MandalaCenter {
+  name: string;
+  description: string;
+  color: string;
+}
+
+export interface MandalaDimension {
+  name: string;
+  color: string;
+}
+
+export interface MandalaConfiguration {
+  center: MandalaCenter;
+  dimensions: MandalaDimension[];
+  scales: string[];
+}
+
+export interface CompleteApiMandala {
+  id: string;
+  name: string;
+  projectId: string;
+  configuration: MandalaConfiguration;
+  childrenIds: string[];
+  parentIds: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Project {
+  id: string;
   name: string;
 }
 
-export interface SimpleMandala {
+export interface CreateProject {
+  name: string;
+  userId: string;
+}
+
+export interface FilterOption {
+  label: string;
+  color?: string;
+}
+
+export interface FilterSection {
+  sectionName: string;
+  type: "multiple" | "single";
+  options: FilterOption[];
+}
+
+export interface BackendTag {
   id: string;
   name: string;
+  color: string;
+  projectId: string;
 }

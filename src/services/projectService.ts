@@ -1,40 +1,58 @@
 import axiosInstance from "@/lib/axios";
-import { SimpleMandala } from "@/types/mandala";
+import {CreateProject, Project, BackendTag} from "@/types/mandala";
 
 export interface CreateMandalaDto {
   name: string;
   projectId: string;
 }
 
-export const createMandala = async (
-  type: "blank" | "ai",
-  dto: CreateMandalaDto
-): Promise<string> => {
-  if (type === "ai") {
-    const response = await axiosInstance.post("/mandala/generate", dto);
-    if (response.status !== 201) {
-      throw new Error(
-        response.data.message || "Error generating mandala with AI."
-      );
-    }
-    return response.data.data.mandala.id;
-  }
-  const response = await axiosInstance.post("/mandala", dto);
-  if (response.status !== 201) {
-    throw new Error(response.data.message || "Error creating mandala.");
-  }
-  return response.data.data.id;
-};
 
-export const getMandalas = async (
-  projectId: string
-): Promise<SimpleMandala[]> => {
-  const response = await axiosInstance.get<{ data: SimpleMandala[] }>(
-    "/mandala",
-    {
-      params: { projectId },
-    }
+export const getProjects = async (page : number, limit : number): Promise<Project[]> => {
+  const response = await axiosInstance.get<{ data: Project[] }>(
+    `/project?page=${page}&limit=${limit}`
   );
+
+  return response.data.data;
+}
+
+export const createProject = async (project: CreateProject): Promise<Project> => {
+
+  const response = await axiosInstance.post("/project", project);
+
+  if (response.status !== 201) {
+    throw new Error(response.data.message || "Error creating project.");
+  }
+
+  return response.data.data;
+}
+
+
+export const getTags = async(
+    projectId: string,
+) => {
+  const response = await axiosInstance.get<{ data: BackendTag[] }>(
+      `/project/${projectId}/tags`
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Error fetching filters.");
+  }
+
+  return response.data.data;
+}
+
+export const createTag = async (
+  projectId: string,
+  tag: { name: string; color: string }
+): Promise<BackendTag> => {
+  const response = await axiosInstance.post<{ data: BackendTag }>(
+    `/project/${projectId}/tag`,
+    tag
+  );
+
+  if (response.status !== 201) {
+    throw new Error("Error creating tag.");
+  }
 
   return response.data.data;
 };

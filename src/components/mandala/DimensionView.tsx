@@ -1,0 +1,109 @@
+import React from "react";
+import useMandala from "@/hooks/useMandala.ts";
+import Loader from "@/components/common/Loader.tsx";
+import { cn } from "@/lib/utils";
+import {deletePostit, updatePostit} from "@/services/mandalaService.ts";
+import DimensionPostit from "@/components/mandala/postits/DimensionPostit.tsx";
+import {useParams} from "react-router-dom";
+
+interface MandalaDimensionProps {
+  dimensionName: string;
+  mandalaId: string;
+}
+
+const DimensionView: React.FC<MandalaDimensionProps> = ({
+  dimensionName,
+  mandalaId,
+}) => {
+  const { mandala, loading, error } = useMandala(mandalaId);
+  const config = mandala?.mandala.configuration;
+
+  const { projectId } = useParams<{ projectId: string }>();
+
+  if (!projectId) {
+    return <div className="text-red-500">Project ID is required</div>;
+  }
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return <div className="text-red-500">Error: {error.message}</div>;
+  }
+
+  return (
+    <div className="flex flex-col justify-center items-center w-[90vw] h-[80vh]">
+      <div className="flex items-center justify-center absolute top-5 left-1/2 -translate-x-1/2">
+        <span className="text-blue-900 font-bold text-lg transform whitespace-nowrap">
+          {dimensionName.toUpperCase()}
+        </span>
+      </div>
+
+      {/* Contenedor de columnas */}
+      <div className="flex flex-col h-full w-full">
+        <div className="flex flex-row items-stretch h-full w-full">
+          {config?.scales.map((scaleName, index) => (
+            <div key={index} className="flex flex-col w-full h-full">
+              <div
+                className={cn(
+                  "flex flex-col w-full items-center overflow-y-scroll custom-scrollbar p-3 h-[95%] border-l-2 border-white bg-blue-200",
+                  index === 0 && "border-l-0 rounded-bl-xl rounded-tl-xl",
+                  index === config?.scales.length - 1 &&
+                    "rounded-br-xl rounded-tr-xl"
+                )}
+                style={{ minWidth: 0 }}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 md:gap-2 lg:gap-3 w-fit">
+                  {mandala?.postits
+                      .filter(
+                          (p) =>
+                              p.dimension.toLowerCase() === dimensionName.toLowerCase() &&
+                              p.section.toLowerCase() === scaleName.toLowerCase()
+                      )
+                      .map((postit) => {
+                        const dimensionColor =
+                            mandala.mandala.configuration?.dimensions.find(
+                                (d) => d.name.toLowerCase() === postit.dimension.toLowerCase()
+                            )?.color ?? "#facc15";
+                        const postitIndex = mandala.postits.findIndex((p) => p.id === postit.id);
+
+                        return (
+                            <DimensionPostit
+                                key={postit.id}
+                                postit={postit}
+                                color={dimensionColor}
+                                onUpdate={(updates) =>
+                                    updatePostit(
+                                        projectId,
+                                        mandalaId,
+                                        postitIndex,
+                                        updates
+                                    )
+                                }
+                                onDelete={() =>
+                                    deletePostit(projectId, mandalaId, postitIndex)
+                                }
+                            />
+                        );
+                      })}
+
+                </div>
+              </div>
+              <div
+                key={index}
+                className="flex-1 flex justify-center items-center p-2"
+              >
+                <span className="text-blue-900 font-bold text-xs text-center">
+                  {scaleName}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DimensionView;

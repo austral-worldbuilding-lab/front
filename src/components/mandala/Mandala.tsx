@@ -3,22 +3,51 @@ import MandalaConcentric from "./MandalaConcentric";
 import MandalaSectors from "./MandalaSectors";
 import MandalaPerson from "./MandalaPerson";
 import { Levels, Sectors } from "@/constants/mandala";
+import { Mandala as MandalaData } from "@/types/mandala";
 
 interface MandalaProps {
   scale?: number;
   position?: { x: number; y: number };
+  mandala: MandalaData;
 }
 
 const Mandala: React.FC<MandalaProps> = ({
   scale = 0.7,
   position = { x: 0, y: 0 },
+  mandala,
 }) => {
-  // Use the data from the mandala if available, otherwise use the default constants
-  const levels = Levels;
-  const sectors = Sectors;
+  function getInterpolatedLevelColor(index: number, total: number): string {
+    const from = [200, 220, 255, 0.9];
+    const to = [140, 190, 255, 0.3];
+    const t = index / (total - 1);
+    const interpolated = from.map((start, i) => start + (to[i] - start) * t);
+    const [r, g, b, a] = interpolated;
+    return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(
+      b
+    )}, ${a.toFixed(2)})`;
+  }
 
-  // Get the maximum radius (the outermost circle)
-  const maxRadius = levels[levels.length - 1].radius;
+  const maxRadius = 600;
+  const config = mandala.mandala.configuration;
+
+  const levels =
+    config?.scales?.map((name, index) => {
+      const t = (index + 1) / config.scales.length;
+      return {
+        id: `level-${index}`,
+        name,
+        radius: t * 600,
+        color: getInterpolatedLevelColor(index, config.scales.length),
+      };
+    }) ?? Levels;
+
+  const sectors =
+    config?.dimensions?.map((dimension, index) => ({
+      id: `sector-${index}`,
+      name: dimension.name,
+      question: `¿Qué pasa en ${dimension.name}?`,
+      color: dimension.color,
+    })) ?? Sectors;
 
   return (
     <div

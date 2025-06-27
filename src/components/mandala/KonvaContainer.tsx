@@ -1,87 +1,124 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Stage, Layer, Group, Rect } from "react-konva";
-import { Html } from "react-konva-utils";
-import { Mandala as MandalaData, Postit } from "@/types/mandala";
+import React, { useEffect, useMemo, useState } from "react";
+import { Stage, Layer } from "react-konva";
+import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
+import PostIt from "./postits/PostIt";
+import CharacterIcon from "./characters/CharacterIcon";
+import MandalaMenu from "./MandalaMenu";
+import { useKonvaUtils } from "@/hooks/useKonvaUtils";
+import { useContextMenu } from "@/hooks/useContextMenu.ts";
+import NewPostItModal from "./postits/NewPostItModal";
+import { Tag } from "@/types/mandala";
+import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
+import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
+import { useClosestPostIt } from "@/hooks/useClosestPostIt";
+import { getVisibleChildren } from "@/components/mandala/postits/getVisibleChildren";
+import { useChildAnimations } from "@/hooks/useChildAnimations";
+import { useVisibleChildrenPositions } from "@/hooks/useVisibleChildrenPositions";
+import { renderChildren } from "./postits/renderChildren";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
   onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
+  onPostItDelete: (index: number) => Promise<boolean>;
+  onPostItChildCreate: (
+    content: string,
+    tag: Tag,
+    postitFatherId?: string
+  ) => void;
+  characters?: Character[];
+  onCharacterUpdate: (
+    index: number,
+    updates: Partial<Character>
+  ) => Promise<boolean | void>;
+  onCharacterDelete: (index: number) => Promise<boolean>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
+  appliedFilters: Record<string, string[]>;
+  tags: Tag[];
+  onNewTag: (tag: Tag) => void;
+  state: ReactZoomPanPinchState | null;
 }
 
 const SCENE_W = 1200;
 const SCENE_H = 1200;
 
-const dimensionColors: Record<string, string> = {
-  "Recursos": "#e8b249",
-  "Cultura": "#d76e6e",
-  "Infraestructura": "#b3a1d9",
-  "Economía": "#e7f266",
-  "Gobierno": "#6da9e5",
-  "Ecología": "#83c896",
-};
-
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
+  onPostItDelete,
+  onPostItChildCreate,
+  onCharacterUpdate,
+  onCharacterDelete,
   onMouseEnter,
   onMouseLeave,
   onDragStart,
   onDragEnd,
+  appliedFilters,
+  tags,
+  onNewTag,
+  state,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [postItW, postItH, padding] = [64, 64, 5];
   const [editingContent, setEditingContent] = useState<string | null>(null);
-  const [zOrder, setZOrder] = useState<number[]>(
-    mandala.postits.map((_, idx) => idx)
+  const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
+  const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
+    undefined
+  );
+  const [visibleChildren, setVisibleChildren] = useState<Postit[]>([]);
+  const [isDraggingParent, setIsDraggingParent] = useState(false);
+  const [exitingChildren, setExitingChildren] = useState<
+    { postit: Postit; initialPosition: { x: number; y: number } }[]
+  >([]);
+
+  const postItW = 64;
+  const postItH = 64;
+  const padding = 12;
+  const childScale = 0.6;
+
+  const handleCreateChildPostIt = (postItId?: string) => {
+    setSelectedPostItId(postItId);
+    setIsChildPostItModalOpen(true);
+  };
+
+  const {
+    contextMenu,
+    showContextMenu,
+    hideContextMenu,
+    handleDelete,
+    handleCreateChild,
+  } = useContextMenu(
+    onPostItDelete,
+    onCharacterDelete,
+    editableIndex,
+    setEditableIndex,
+    setEditingContent,
+    (index) => {
+      const postItId = mandala.postits[index]?.id;
+      handleCreateChildPostIt(postItId);
+    }
   );
 
-  useEffect(() => {
-    setZOrder(mandala.postits.map((_, idx) => idx));
-  }, [mandala.postits, mandala.postits.length]);
+  const {
+    zOrder,
+    bringToFront,
+    toAbsolute,
+    toRelative,
+    clamp,
+    getDimensionAndSectionFromCoordinates,
+  } = useKonvaUtils(mandala.postits);
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (editableIndex !== null && textAreaRef.current) {
-        textAreaRef.current.focus();
-        const len = textAreaRef.current.value.length;
-        textAreaRef.current.setSelectionRange(len, len);
-      }
-    }, 0);
-  }, [editableIndex]);
+  const dimensionColors = useMemo(() => {
+    return (
+      mandala.mandala.configuration?.dimensions?.reduce((acc, d) => {
+        acc[d.name] = d.color;
+        return acc;
+      }, {} as Record<string, string>) ?? {}
+    );
+  }, [mandala.mandala.configuration?.dimensions]);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        editableIndex !== null &&
-        textAreaRef.current &&
-        !textAreaRef.current.contains(e.target as Node)
-      ) {
-        window.getSelection()?.removeAllRanges();
-        setEditableIndex(null);
-        setEditingContent(null);
-      }
-    };
-    window.addEventListener("mousedown", handleClickOutside);
-    return () => window.removeEventListener("mousedown", handleClickOutside);
-  }, [editableIndex]);
-
-  const toAbsolute = (rx: number, ry: number) => ({
-    x: ((rx + 1) / 2) * (SCENE_W - postItW),
-    y: ((1 - ry) / 2) * (SCENE_H - postItH),
-  });
-
-  const toRelative = (x: number, y: number) => ({
-    x: (x / (SCENE_W - postItW)) * 2 - 1,
-    y: 1 - (y / (SCENE_H - postItH)) * 2,
-  });
-
-  const clamp = (v: number, max: number) => Math.max(0, Math.min(v, max));
   const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
     node.position({
@@ -90,138 +127,275 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     });
   };
 
-  const getDimensionAndSectionFromCoordinates = (
-  x: number,
-  y: number,
-  dimensions: string[] = [
-    "Recursos",
-    "Cultura",
-    "Infraestructura",
-    "Economía",
-    "Gobierno",
-    "Ecología",
-  ],
-  sections: string[] = ["Persona", "Comunidad", "Institución"]
-  ): { dimension: string; section: string } => {
-    const angle = Math.atan2(y, x);
-    const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
-      
-    const rawDistance = Math.sqrt(x * x + y * y);
-    const normalizedDistance = Math.min(rawDistance / Math.SQRT2, 1);
-
-    const dimIndex = Math.floor((adjustedAngle / (2 * Math.PI)) * dimensions.length);
-    const secIndex = Math.floor(normalizedDistance * sections.length);
-
-    return {
-      dimension: dimensions[Math.min(dimIndex, dimensions.length - 1)],
-      section: sections[Math.min(secIndex, sections.length - 1)],
-    };
-  };
-  
-  const bringToFront = (index: number) => {
-    setZOrder((prev) => {
-      const filtered = prev.filter((i) => i !== index);
-      return [...filtered, index]; // último = más arriba
+  const handleOnDragEndPostIt = async (
+    e: KonvaEventObject<DragEvent>,
+    index: number,
+    postit: Postit
+  ) => {
+    onDragEnd();
+    const nx = e.target.x(),
+      ny = e.target.y();
+    const rel = toRelative(nx, ny);
+    const { dimension, section } = getDimensionAndSectionFromCoordinates(
+      rel.x,
+      rel.y,
+      mandala.mandala.configuration?.dimensions.map((d) => d.name) || [],
+      mandala.mandala.configuration?.scales || []
+    );
+    await onPostItUpdate(index, {
+      coordinates: { ...postit.coordinates, x: rel.x, y: rel.y },
+      dimension,
+      section,
     });
   };
 
-  if (!mandala) return <div>No mandala found</div>;
+  const handleOnDragEndCharacter = async (
+    e: KonvaEventObject<DragEvent>,
+    character: Character
+  ) => {
+    onDragEnd();
+    const nx = e.target.x(),
+      ny = e.target.y();
+    const rel = toRelative(nx, ny);
+    const { dimension, section } = getDimensionAndSectionFromCoordinates(
+      rel.x,
+      rel.y,
+      mandala.mandala.configuration?.dimensions.map((d) => d.name) || [],
+      mandala.mandala.configuration?.scales || []
+    );
+
+    const characterIndex =
+      mandala.characters?.findIndex((c) => c.id === character.id) ?? -1;
+
+    if (characterIndex !== -1) {
+      await onCharacterUpdate(characterIndex, {
+        position: { x: rel.x, y: rel.y },
+        dimension,
+        section,
+      });
+    }
+  };
+
+  const zoomLevel = state?.scale;
+  const closestPostIt = useClosestPostIt(
+    mandala.postits,
+    toAbsolute,
+    state,
+    SCENE_W
+  );
+
+  const visibleChildrenPositions = useVisibleChildrenPositions(
+    closestPostIt,
+    visibleChildren,
+    toAbsolute,
+    postItW,
+    postItH,
+    childScale
+  );
+
+  const childrenToShow = getVisibleChildren(
+    zoomLevel,
+    closestPostIt,
+    mandala.postits
+  );
+
+  useChildAnimations(
+    childrenToShow,
+    visibleChildren,
+    setVisibleChildren,
+    setExitingChildren,
+    toAbsolute,
+    visibleChildrenPositions
+  );
+
+  useEffect(() => {
+    const handleStageMouseDown = (e: MouseEvent) => {
+      // Si hay algo editando y se hizo clic fuera del textarea => blur
+      if (editableIndex !== null) {
+        const clickedOnTextarea = (e.target as HTMLElement).closest("textarea");
+        if (!clickedOnTextarea) {
+          setEditableIndex(null);
+          setEditingContent(null);
+          window.getSelection()?.removeAllRanges();
+        }
+      }
+    };
+
+    const container = document.getElementById("konva-container");
+    container?.addEventListener("mousedown", handleStageMouseDown);
+
+    return () => {
+      container?.removeEventListener("mousedown", handleStageMouseDown);
+    };
+  }, [editableIndex]);
+
+  useEffect(() => {
+    if (closestPostIt && zoomLevel !== undefined) {
+      const updated = getVisibleChildren(
+        zoomLevel,
+        closestPostIt,
+        mandala.postits
+      );
+      setVisibleChildren(updated);
+    }
+  }, [mandala.postits, closestPostIt, zoomLevel]);
+
+  if (!mandala || !state) return <div>No mandala found</div>;
 
   return (
-    <Stage width={SCENE_W} height={SCENE_H} offsetX={0} offsetY={0}>
-      <Layer>
-        {zOrder.map((i) => {
-          const p = mandala.postits[i];
-          const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
-          const isEditing = editableIndex === i;
-          return (
-            <Group
-              key={i}
-              x={x}
-              y={y}
-              draggable={!isEditing}
-              onDragStart={() => {
-                onDragStart();
-                bringToFront(i);
-              }}
-              onDragMove={handleDragMove}
-              onDragEnd={async (e) => {
-                onDragEnd();
-                const nx = e.target.x(), ny = e.target.y();
-                const rel = toRelative(nx, ny);
-                const { dimension, section } = getDimensionAndSectionFromCoordinates(
-                  rel.x,
-                  rel.y
-                );
-                await onPostItUpdate(i, {
-                  coordinates: { ...p.coordinates, x: rel.x, y: rel.y },
-                  dimension,
-                  section,
-                });
-              }}
-              onDblClick={() => {
-                setEditableIndex(i);
-                setEditingContent(p.content);
-                bringToFront(i);
-              }}
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}
-            >
-              <Rect
-                width={postItW}
-                height={postItH}
-                fill={dimensionColors[p.dimension] || "#cccccc"}
-                cornerRadius={4}
-              />
-              <Html
-                divProps={{
-                  style: {
-                    pointerEvents: isEditing ? "auto" : "none",
-                    zIndex: zOrder.indexOf(i) + 1,
-                  },
+    <div
+      id="konva-container"
+      style={{
+        position: "relative",
+        clipPath: `circle(${SCENE_W / 2}px at center)`,
+      }}
+      onClick={hideContextMenu}
+    >
+      <Stage width={SCENE_W} height={SCENE_H}>
+        <Layer>
+          {zOrder.map((i) => {
+            const p = mandala.postits[i];
+            if (p?.parentId) return null;
+            if (!shouldShowPostIt(p, appliedFilters)) return null;
+            const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
+            const isEditing = editableIndex === i;
+
+            return (
+              <PostIt
+                key={i}
+                postit={p}
+                isEditing={isEditing}
+                editingContent={editingContent}
+                dimensionColors={dimensionColors}
+                postItW={postItW}
+                postItH={postItH}
+                padding={padding}
+                position={{ x, y }}
+                onDragStart={() => {
+                  setIsDraggingParent(true);
+                  onDragStart();
+                  setVisibleChildren([]);
+                  bringToFront(i);
                 }}
-              >
-                <textarea
-                  ref={isEditing ? textAreaRef : null}
-                  disabled={!isEditing}
-                  value={ isEditing ? editingContent ?? "" : p.content }
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setEditingContent(newValue);
-                    onPostItUpdate(i, { content: newValue });
-                  }}
-                  onBlur={() => {
-                    window.getSelection()?.removeAllRanges();
-                    setEditableIndex(null);
-                    setEditingContent(null);
-                  }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                  }}
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                  }}
-                  style={{
-                    width: postItW,
-                    height: postItH,
-                    padding: padding,
-                    margin: 0,
-                    resize: "none",
-                    background: `${dimensionColors[p.dimension] || "#cccccc"}`,
-                    borderRadius: 4,
-                    boxShadow: "0 0 4px rgba(0,0,0,0.3)",
-                    boxSizing: "border-box",
-                    fontSize: 11,
-                    lineHeight: 1.1,
-                    overflow: "hidden"
-                  }}
-                />
-              </Html>
-            </Group>
-          );
-        })}
-      </Layer>
-    </Stage>
+                onDragMove={handleDragMove}
+                onDragEnd={(e) => {
+                  setTimeout(() => {
+                    setIsDraggingParent(false);
+                  }, 50);
+                  handleOnDragEndPostIt(e, i, p);
+                }}
+                onDblClick={() => {
+                  setEditableIndex(i);
+                  setEditingContent(p.content);
+                  bringToFront(i);
+                }}
+                onContentChange={(newValue) => {
+                  setEditingContent(newValue);
+                  onPostItUpdate(i, { content: newValue });
+                }}
+                onBlur={() => {
+                  window.getSelection()?.removeAllRanges();
+                  setEditableIndex(null);
+                  setEditingContent(null);
+                }}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                onContextMenu={(e) => showContextMenu(e, i, "postit")}
+                mandalaRadius={SCENE_W / 2}
+              />
+            );
+          })}
+
+          {closestPostIt &&
+            !isDraggingParent &&
+            renderChildren({
+              closestPostIt,
+              visibleChildren,
+              exitingChildren,
+              visibleChildrenPositions,
+              postItW,
+              postItH,
+              childScale,
+              dimensionColors,
+              editableIndex,
+              editingContent,
+              mandalaPostits: mandala.postits,
+              toAbsolute,
+              onEditStart: (index, content) => {
+                setEditableIndex(index);
+                setEditingContent(content);
+              },
+              onEditChange: (index, value) => {
+                setEditingContent(value);
+                onPostItUpdate(index, { content: value });
+              },
+              onEditEnd: () => {
+                window.getSelection()?.removeAllRanges();
+                setEditableIndex(null);
+                setEditingContent(null);
+              },
+              onMouseEnter,
+              onMouseLeave,
+              onContextMenu: showContextMenu,
+            })}
+
+          {mandala.characters?.map((character, index) => {
+            if (!shouldShowCharacter(character, appliedFilters)) return null;
+            const { x, y } = toAbsolute(
+              character.position.x,
+              character.position.y
+            );
+
+            return (
+              <CharacterIcon
+                key={`character-${character.id}`}
+                mandalaRadius={SCENE_W / 2}
+                character={character}
+                position={{ x, y }}
+                onDragStart={onDragStart}
+                onDragEnd={(e) => handleOnDragEndCharacter(e, character)}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                onContextMenu={(e) => showContextMenu(e, index, "character")}
+              />
+            );
+          })}
+        </Layer>
+      </Stage>
+
+      {contextMenu.visible && (
+        <div
+          style={{
+            position: "absolute",
+            top: contextMenu.y,
+            left: contextMenu.x,
+            zIndex: 1000,
+          }}
+          onClick={hideContextMenu}
+        >
+          <MandalaMenu
+            onDelete={handleDelete}
+            onCreateChild={
+              contextMenu.type === "postit" ? handleCreateChild : undefined
+            }
+            isContextMenu={true}
+          />
+        </div>
+      )}
+
+      <NewPostItModal
+        isOpen={isChildPostItModalOpen}
+        onOpenChange={setIsChildPostItModalOpen}
+        tags={tags}
+        onNewTag={onNewTag}
+        postItFatherId={selectedPostItId}
+        onCreate={(content, tag, postItFatherId) => {
+          onPostItChildCreate(content, tag, postItFatherId);
+          setIsChildPostItModalOpen(false);
+          setSelectedPostItId(undefined);
+        }}
+      />
+    </div>
   );
 };
 

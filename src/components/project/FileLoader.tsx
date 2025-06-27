@@ -40,7 +40,7 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
           onClick={handleTriggerFileSelect}
           icon={<Upload size={16} />}
         >
-          Choose Files
+          Elegir archivos
         </Button>
 
         <Button
@@ -50,7 +50,7 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
           disabled={selectedFiles.length === 0}
           icon={<CloudUpload size={16} />}
         >
-          Upload Files
+          Subir archivos
         </Button>
       </div>
 

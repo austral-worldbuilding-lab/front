@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import { Mandala, Postit } from "../types/mandala";
+import { Character, Mandala, Postit } from "../types/mandala";
 import {
   subscribeMandala,
   createPostit as createPostitService,
   updatePostit as updatePostitService,
   deletePostit as deletePostitService,
+  updateCharacter as updateCharacterService,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
 
@@ -18,10 +19,14 @@ const useMandala = (mandalaId: string) => {
     setLoading(true);
     setError(null);
 
-    const unsubscribe = subscribeMandala(projectId!, mandalaId, (data) => {
-      setMandala(data);
-      setLoading(false);
-    });
+    const unsubscribe = subscribeMandala(
+      projectId!,
+      mandalaId,
+      (data: Mandala | null) => {
+        setMandala(data);
+        setLoading(false);
+      }
+    );
 
     return () => {
       unsubscribe();
@@ -29,10 +34,14 @@ const useMandala = (mandalaId: string) => {
   }, [mandalaId, projectId]);
 
   const createPostit = useCallback(
-    async (postitData: Postit) => {
+    async (postitData: Postit, postitFatherId?: string) => {
       try {
         if (!mandalaId) throw new Error("Mandala ID is required");
-        return await createPostitService(projectId!, mandalaId, postitData);
+        return await createPostitService(
+          mandalaId,
+          postitData,
+          postitFatherId
+        );
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
@@ -40,13 +49,18 @@ const useMandala = (mandalaId: string) => {
         throw err;
       }
     },
-    [mandalaId, projectId]
+    [mandalaId]
   );
 
   const updatePostit = useCallback(
     async (index: number, postitData: Partial<Postit>) => {
       try {
-        return await updatePostitService(projectId!, mandalaId, index, postitData);
+        return await updatePostitService(
+          projectId!,
+          mandalaId,
+          index,
+          postitData
+        );
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
@@ -71,6 +85,25 @@ const useMandala = (mandalaId: string) => {
     [mandalaId, projectId]
   );
 
+  const updateCharacter = useCallback(
+    async (index: number, characterData: Partial<Character>) => {
+      try {
+        return await updateCharacterService(
+          projectId!,
+          mandalaId,
+          index,
+          characterData
+        );
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
   return {
     mandala,
     loading,
@@ -78,6 +111,7 @@ const useMandala = (mandalaId: string) => {
     createPostit,
     updatePostit,
     deletePostit,
+    updateCharacter,
   };
 };
 
