@@ -62,17 +62,12 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                               p.section.toLowerCase() === scaleName.toLowerCase()
                       )
                       .map((postit) => {
-                        const dimensionColor =
-                            mandala.mandala.configuration?.dimensions.find(
-                                (d) => d.name.toLowerCase() === postit.dimension.toLowerCase()
-                            )?.color ?? "#facc15";
                         const postitIndex = mandala.postits.findIndex((p) => p.id === postit.id);
 
                         return (
                             <DimensionPostit
                                 key={postit.id}
                                 postit={postit}
-                                color={dimensionColor}
                                 onUpdate={(updates) =>
                                     updatePostit(
                                         projectId,

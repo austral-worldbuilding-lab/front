@@ -5,7 +5,7 @@ import { isDarkColor } from "@/utils/colorUtils";
 
 interface EditablePostitCardProps {
     postit: Postit;
-    color: string;
+    color?: string;
     onUpdate: (updates: Partial<Postit>) => Promise<boolean>;
     onDelete: () => Promise<boolean>;
     width?: number;
@@ -29,7 +29,8 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-    const textColor = isDarkColor(color) ? "white" : "black";
+    const fixedColor = color ?? "#facc15";
+    const textColor = isDarkColor(fixedColor) ? "white" : "black";
 
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
@@ -38,6 +39,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
             textAreaRef.current.setSelectionRange(len, len);
         }
     }, [isEditing]);
+
 
     useEffect(() => {
         setEditingContent(postit.content);
@@ -48,6 +50,13 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
         setIsEditing(true);
     };
 
+    const handleBlur = async () => {
+        setIsEditing(false);
+        if (editingContent !== postit.content) {
+            setDisplayContent(editingContent);
+            await onUpdate({ content: editingContent });
+        }
+    };
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -63,9 +72,9 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
     return (
         <>
             <div
-                className="relative text-sm whitespace-pre-line break-words overflow-hidden rounded-full"
+                className="relative text-sm whitespace-pre-line break-words overflow-hidden rounded-[4px]"
                 style={{
-                    backgroundColor: color,
+                    backgroundColor: fixedColor,
                     color: textColor,
                     width,
                     height,
@@ -76,64 +85,35 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                     cursor: isEditing ? "text" : "pointer",
                     outline: isEditing ? "1px solid #ccc" : "none",
                     outlineOffset: "-2px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                 }}
                 onDoubleClick={handleDoubleClick}
                 onContextMenu={handleContextMenu}
             >
                 {isEditing ? (
-                    <div
-                        contentEditable
-                        suppressContentEditableWarning
-                        ref={(el) => {
-                            if (el && isEditing) {
-                                el.focus();
-                                const range = document.createRange();
-                                const sel = window.getSelection();
-                                range.selectNodeContents(el);
-                                range.collapse(false);
-                                sel?.removeAllRanges();
-                                sel?.addRange(range);
-                            }
-                        }}
-                        onBlur={(e) => {
-                            setIsEditing(false);
-                            const newText = e.currentTarget.innerText;
-                            if (newText !== postit.content) {
-                                setEditingContent(newText);
-                                setDisplayContent(newText);
-                                onUpdate({content: newText});
-                            }
-                        }}
-                        onInput={(e) => setEditingContent((e.target as HTMLElement).innerText)}
+                    <textarea
+                        ref={textAreaRef}
+                        className="resize-none outline-none"
+                        value={editingContent}
+                        onChange={(e) => setEditingContent(e.target.value)}
+                        onBlur={handleBlur}
                         style={{
-                            width,
-                            height,
-                            backgroundColor: color,
+                            width: width,
+                            height: height,
+                            padding: padding,
+                            backgroundColor: fixedColor,
                             color: textColor,
+                            boxSizing: "border-box",
                             fontSize: 11,
                             lineHeight: 1.1,
                             fontFamily: "inherit",
-                            borderRadius: "50%",
+                            borderRadius: 4,
+                            border: "none",
                             boxShadow: "0 0 4px rgba(0,0,0,0.3)",
-                            boxSizing: "border-box",
-                            textAlign: "center",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: 8,
-                            outline: "none",
-                            whiteSpace: "pre-wrap",
                             overflow: "hidden",
-                            userSelect: "text",
-                            cursor: "text",
+                            resize: "none",
+                            whiteSpace: "pre-wrap",
                         }}
-                    >
-                        {editingContent}
-                    </div>
-
+                    />
                 ) : (
                     <div
                         style={{
@@ -145,11 +125,6 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                             padding: padding,
                             height: "100%",
                             boxSizing: "border-box",
-                            textAlign: "center",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            overflow: "hidden",
                         }}
                     >
                         {displayContent}
@@ -159,12 +134,12 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
 
             {showMenu && (
                 <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
                     <div
                         className="fixed z-50"
-                        style={{left: menuPosition.x, top: menuPosition.y}}
+                        style={{ left: menuPosition.x, top: menuPosition.y }}
                     >
-                    <MandalaMenu onDelete={handleDelete} isContextMenu />
+                        <MandalaMenu onDelete={handleDelete} isContextMenu />
                     </div>
                 </>
             )}
