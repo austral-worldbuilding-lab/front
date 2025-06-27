@@ -18,8 +18,8 @@ import { Tag } from "@/types/mandala";
 
 interface SelectTagsProps {
   tags: Tag[];
-  value: string;
-  onChange: (tag: Tag) => void;
+  value: Tag[];
+  onChange: (tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
 }
 
@@ -27,7 +27,14 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const selectedTag = tags.find((t) => t.value === value);
+  const toggleTag = (tag: Tag) => {
+    const isSelected = value.some((t) => t.value === tag.value);
+    if (isSelected) {
+      onChange(value.filter((t) => t.value !== tag.value));
+    } else {
+      onChange([...value, tag]);
+    }
+  };
 
   return (
     <>
@@ -40,13 +47,19 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
             className="justify-between w-full"
           >
             <span className="flex items-center gap-2">
-              {selectedTag && (
+              {value.length > 0 ? value.map((t) => (
+                 <span
+                     key={t.value}
+                     className="flex items-center gap-1 mr-2"
+                 >
                 <span
                   className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: selectedTag.color }}
+                  style={{ backgroundColor: t.color }}
                 />
-              )}
-              {selectedTag ? selectedTag.label : "Select tag"}
+                  {t.name}
+                </span>
+                  ))
+                  : "Seleccionar tags"}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
           </Button>
@@ -55,28 +68,28 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
           <Command>
             <CommandInput placeholder="Buscar tags..." />
             <CommandList>
-              <CommandEmpty>No tag found.</CommandEmpty>
-              {tags.map((tag) => (
+              <CommandEmpty>No se encontraron tags.</CommandEmpty>
+              {tags.map((tag) => {
+                  const isSelected = value.some((t) => t.value === tag.value);
+                  return (
                 <CommandItem
-                  key={tag.value}
-                  value={tag.value}
-                  onSelect={() => {
-                    onChange(tag);
-                    setOpen(false);
-                  }}
-                >
+                          key={tag.value}
+                          value={tag.value}
+                          onSelect={() => toggleTag(tag)}
+                      >
                   <span className="flex items-center gap-2">
                     <span
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: tag.color }}
                     />
-                    {tag.label}
+                    {tag.name}
                   </span>
-                  {value === tag.value && (
+                  {isSelected && (
                     <Check className="ml-auto h-4 w-4 text-green-500" />
                   )}
                 </CommandItem>
-              ))}
+              );
+          })}
               <CommandItem
                 onSelect={() => {
                   setOpen(false);
@@ -95,8 +108,13 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
         onCreate={(newTag) => {
-          onNewTag(newTag);
-          onChange(newTag);
+          const tagWithName: Tag = {
+              name: newTag.label,
+              value: newTag.value,
+              color: newTag.color,
+              };
+              onNewTag(tagWithName);
+              onChange([...value, tagWithName]);
         }}
       />
     </>
