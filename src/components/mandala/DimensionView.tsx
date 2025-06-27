@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import useMandala from "@/hooks/useMandala.ts";
 import Loader from "@/components/common/Loader.tsx";
 import { cn } from "@/lib/utils";
-import {deletePostit, updatePostit} from "@/services/mandalaService.ts";
+import {
+  deletePostit,
+  updatePostit,
+  createPostit as createPostitService,
+} from "@/services/mandalaService.ts";
 import DimensionPostit from "@/components/mandala/postits/DimensionPostit.tsx";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
+import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
+import { useTags } from "@/hooks/useTags";
 
 interface MandalaDimensionProps {
   dimensionName: string;
@@ -12,25 +18,23 @@ interface MandalaDimensionProps {
 }
 
 const DimensionView: React.FC<MandalaDimensionProps> = ({
-  dimensionName,
-  mandalaId,
-}) => {
+                                                          dimensionName,
+                                                          mandalaId,
+                                                        }) => {
   const { mandala, loading, error } = useMandala(mandalaId);
   const config = mandala?.mandala.configuration;
-
   const { projectId } = useParams<{ projectId: string }>();
+  const { tags, createTag } = useTags(projectId ?? "");
+  const [isChildModalOpen, setIsChildModalOpen] = useState(false);
+  const [postitFatherId, setPostitFatherId] = useState<string | undefined>();
 
   if (!projectId) {
     return <div className="text-red-500">Project ID is required</div>;
   }
 
-  if (loading) {
-    return <Loader />;
-  }
 
-  if (error) {
-    return <div className="text-red-500">Error: {error.message}</div>;
-  }
+  if (loading) return <Loader />;
+  if (error) return <div className="text-red-500">Error: {error.message}</div>;
 
   return (
     <div className="flex flex-col justify-center items-center w-[90vw] h-[80vh]">
@@ -79,10 +83,13 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                                 onDelete={() =>
                                     deletePostit(projectId, mandalaId, postitIndex)
                                 }
-                            />
-                        );
-                      })}
-
+                                    onCreateChild={() => {
+                                      setPostitFatherId(postit.id);
+                                      setIsChildModalOpen(true);
+                                    }}
+                                />
+                            );
+                          })}
                 </div>
               </div>
               <div
@@ -92,12 +99,42 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                 <span className="text-blue-900 font-bold text-xs text-center">
                   {scaleName}
                 </span>
-              </div>
-            </div>
-          ))}
+                  </div>
+                </div>
+            ))}
+          </div>
         </div>
+
+        <NewPostItModal
+            isOpen={isChildModalOpen}
+            onOpenChange={setIsChildModalOpen}
+            tags={tags}
+            postItFatherId={postitFatherId}
+            onNewTag={async (tag) => {
+              try {
+                await createTag(tag.name, tag.color);
+              } catch (e) {
+                console.error("Error creating tag:", e);
+              }
+            }}
+            onCreate={async (content, selectedTags, parentId) => {
+              await createPostitService(
+                  mandalaId,
+                  {
+                    content,
+                    tags: selectedTags,
+                    coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
+                    dimension: dimensionName,
+                    section: "Institución",
+                  },
+                  parentId
+              );
+
+              setIsChildModalOpen(false);
+              setPostitFatherId(undefined);
+            }}
+        />
       </div>
-    </div>
   );
 };
 

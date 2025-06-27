@@ -8,6 +8,7 @@ interface EditablePostitCardProps {
     color?: string;
     onUpdate: (updates: Partial<Postit>) => Promise<boolean>;
     onDelete: () => Promise<boolean>;
+    onCreateChild?: () => void;
     width?: number;
     height?: number;
     padding?: number;
@@ -18,6 +19,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
        color,
        onUpdate,
        onDelete,
+       onCreateChild,
        width = 80,
        height = 80,
        padding = 8,
@@ -67,6 +69,13 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
     const handleDelete = async () => {
         await onDelete();
         setShowMenu(false);
+    };
+
+    const handleCreateChild = () => {
+        if (onCreateChild) {
+            onCreateChild();
+            setShowMenu(false);
+        }
     };
 
     return (
@@ -139,7 +148,10 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                         className="fixed z-50"
                         style={{ left: menuPosition.x, top: menuPosition.y }}
                     >
-                        <MandalaMenu onDelete={handleDelete} isContextMenu />
+                        <MandalaMenu
+                            onDelete={handleDelete}
+                            onCreateChild={handleCreateChild}
+                            isContextMenu />
                     </div>
                 </>
             )}
