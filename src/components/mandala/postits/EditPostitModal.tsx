@@ -1,0 +1,115 @@
+import { useState, useEffect } from "react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import SelectTags from "./SelectTags";
+import { CustomInput } from "@/components/ui/CustomInput";
+import { Tag } from "@/types/mandala";
+
+interface EditPostItModalProps {
+    isOpen: boolean;
+    onOpenChange: (open: boolean) => void;
+    tags: Tag[];
+    onUpdate: (content: string, tags: Tag[]) => void;
+    initialContent: string;
+    initialTags: Tag[];
+    onNewTag: (tag: Tag) => void;
+}
+
+
+const EditPostItModal = ({
+                             isOpen,
+                             onOpenChange,
+                             tags,
+                             onUpdate,
+                             initialContent,
+                             initialTags,
+                             onNewTag,
+                         }: EditPostItModalProps) => {
+    const [content, setContent] = useState(initialContent);
+    const [selectedTags, setSelectedTags] = useState<Tag[]>(initialTags);
+
+    useEffect(() => {
+        if (isOpen) {
+            setContent(initialContent);
+
+            const normalizedSelectedTags = initialTags
+                .map((tag) => tags.find((t) => t.name === tag.name))
+                .filter((t): t is Tag => !!t);
+
+            setSelectedTags(normalizedSelectedTags);
+        }
+    }, [isOpen, initialContent, initialTags, tags]);
+
+
+
+
+    const isValid = content.trim() !== "";
+
+    const handleUpdate = () => {
+        if (isValid) {
+            onUpdate(content.trim(), selectedTags);
+            onOpenChange(false);
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold text-center">
+                        Editar Post-It
+                    </DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-6 py-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Texto
+                        </label>
+                        <CustomInput
+                            as="textarea"
+                            placeholder="Editar nota..."
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            className="resize-none border w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Tags
+                        </label>
+                        <SelectTags
+                            tags={tags}
+                            value={selectedTags}
+                            onChange={setSelectedTags}
+                            onNewTag={onNewTag}
+                        />
+                    </div>
+                </div>
+
+                <DialogFooter className="flex sm:justify-between">
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant="filled"
+                        color="primary"
+                        onClick={handleUpdate}
+                        disabled={!isValid}
+                    >
+                        Actualizar Post-It
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+export default EditPostItModal;

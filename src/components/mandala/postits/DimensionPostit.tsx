@@ -9,6 +9,7 @@ interface EditablePostitCardProps {
     onUpdate: (updates: Partial<Postit>) => Promise<boolean>;
     onDelete: () => Promise<boolean>;
     onCreateChild?: () => void;
+    onEdit?: () => void;
     width?: number;
     height?: number;
     padding?: number;
@@ -20,6 +21,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
        onUpdate,
        onDelete,
        onCreateChild,
+       onEdit,
        width = 80,
        height = 80,
        padding = 8,
@@ -77,6 +79,13 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
             setShowMenu(false);
         }
     };
+    const handleEdit = () => {
+        if (onEdit) {
+            onEdit();
+            setShowMenu(false);
+        }
+    };
+
 
     return (
         <>
@@ -151,6 +160,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                         <MandalaMenu
                             onDelete={handleDelete}
                             onCreateChild={handleCreateChild}
+                            onEdit={handleEdit}
                             isContextMenu />
                     </div>
                 </>
