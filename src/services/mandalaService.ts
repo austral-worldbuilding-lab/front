@@ -1,6 +1,6 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Character, FilterSection, Mandala, Postit } from "../types/mandala";
+import { Character, FilterSection, Mandala, Postit, Tag } from "../types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -177,3 +177,15 @@ export const fetchAvailableCharacters = async (
 export async function linkMandalaToParent(mandalaId: string, childId: string) {
   return axiosInstance.post(`/mandala/${mandalaId}/link/${childId}`);
 }
+
+export const updatePostItTags = async (
+    mandalaId: string,
+    postitId: string,
+    payload: {
+      content: string;
+      tags: Tag[];
+    }
+): Promise<void> => {
+  await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
+};
+

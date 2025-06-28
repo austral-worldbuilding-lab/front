@@ -16,6 +16,8 @@ import { getVisibleChildren } from "@/components/mandala/postits/getVisibleChild
 import { useChildAnimations } from "@/hooks/useChildAnimations";
 import { useVisibleChildrenPositions } from "@/hooks/useVisibleChildrenPositions";
 import { renderChildren } from "./postits/renderChildren";
+import {useEditPostIt} from "@/hooks/useEditPostit.ts";
+import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -89,6 +91,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     hideContextMenu,
     handleDelete,
     handleCreateChild,
+    handleEditPostIt,
   } = useContextMenu(
     onPostItDelete,
     onCharacterDelete,
@@ -98,8 +101,18 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     (index) => {
       const postItId = mandala.postits[index]?.id;
       handleCreateChildPostIt(postItId);
-    }
+    },
+  (index) => {
+    openEditModal(mandala.id, mandala.postits[index]);
+  }
   );
+  const {
+    isOpen: isEditModalOpen,
+    postit: editingPostit,
+    open: openEditModal,
+    close: closeEditModal,
+    handleUpdate,
+  } = useEditPostIt();
 
   const {
     zOrder,
@@ -378,6 +391,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             onCreateChild={
               contextMenu.type === "postit" ? handleCreateChild : undefined
             }
+            onEdit={contextMenu.type === "postit" ? handleEditPostIt : undefined}
             isContextMenu={true}
           />
         </div>
@@ -395,6 +409,20 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
           setSelectedPostItId(undefined);
         }}
       />
+      {editingPostit && (
+          <EditPostItModal
+              isOpen={isEditModalOpen}
+              onOpenChange={(open) => {
+                if (!open) closeEditModal();
+              }}
+              tags={tags}
+              onUpdate={handleUpdate}
+              initialContent={editingPostit.content}
+              initialTags={editingPostit.tags}
+              onNewTag={onNewTag}
+          />
+      )}
+
     </div>
   );
 };

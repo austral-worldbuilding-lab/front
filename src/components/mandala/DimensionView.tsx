@@ -11,6 +11,9 @@ import DimensionPostit from "@/components/mandala/postits/DimensionPostit.tsx";
 import { useParams } from "react-router-dom";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import { useTags } from "@/hooks/useTags";
+import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
+import {useEditPostIt} from "@/hooks/useEditPostit.ts";
+
 
 interface MandalaDimensionProps {
   dimensionName: string;
@@ -27,6 +30,14 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
   const { tags, createTag } = useTags(projectId ?? "");
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
   const [postitFatherId, setPostitFatherId] = useState<string | undefined>();
+
+    const {
+        isOpen: isEditModalOpen,
+        postit: editingPostit,
+        open: openEditModal,
+        close: closeEditModal,
+        handleUpdate,
+    } = useEditPostIt();
 
   if (!projectId) {
     return <div className="text-red-500">Project ID is required</div>;
@@ -58,7 +69,7 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                 )}
                 style={{ minWidth: 0 }}
               >
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 md:gap-2 lg:gap-3 w-fit">
+                <div className="flex flex-wrap gap-2 w-full justify-start ">
                   {mandala?.postits
                       .filter(
                           (p) =>
@@ -83,11 +94,13 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                                 onDelete={() =>
                                     deletePostit(projectId, mandalaId, postitIndex)
                                 }
-                                    onCreateChild={() => {
-                                      setPostitFatherId(postit.id);
-                                      setIsChildModalOpen(true);
-                                    }}
-                                />
+                                onCreateChild={() => {
+                                  setPostitFatherId(postit.id);
+                                  setIsChildModalOpen(true);
+                                }}
+                                onEdit={() => openEditModal(mandalaId, postit)}
+
+                            />
                             );
                           })}
                 </div>
@@ -134,7 +147,27 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
               setPostitFatherId(undefined);
             }}
         />
-      </div>
+        {editingPostit && (
+            <EditPostItModal
+                isOpen={isEditModalOpen}
+                onOpenChange={(open) => {
+                    if (!open) closeEditModal();
+                }}
+                tags={tags}
+                onUpdate={handleUpdate}
+                initialContent={editingPostit.content}
+                initialTags={editingPostit.tags}
+                onNewTag={async (tag) => {
+                    try {
+                        await createTag(tag.name, tag.color);
+                    } catch (e) {
+                        console.error("Error creating tag:", e);
+                    }
+                }}
+            />
+        )}
+
+    </div>
   );
 };
 

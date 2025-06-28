@@ -1,15 +1,17 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { MoreVertical, Plus } from "lucide-react";
+import {MoreVertical, Pencil, Plus, Trash2} from "lucide-react";
 
 interface MandalaMenuProps {
   onDelete: () => void;
   onCreateChild?: () => void;
+  onEdit?: () => void;
   isContextMenu?: boolean;
 }
 
 const MandalaMenu = ({
   onDelete,
   onCreateChild,
+    onEdit,
   isContextMenu = false,
 }: MandalaMenuProps) => {
   if (isContextMenu) {
@@ -24,11 +26,21 @@ const MandalaMenu = ({
             Crear Hijo
           </button>
         )}
-        <button
-          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left"
+          {onEdit && (
+              <button
+                  className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
+                  onClick={onEdit}
+              >
+                  <Pencil size={14} />
+                  Editar
+              </button>
+          )}
+          <button
+          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
           onClick={onDelete}
         >
-          Eliminar
+            <Trash2 size={14} />
+            Eliminar
         </button>
       </div>
     );
@@ -56,10 +68,11 @@ const MandalaMenu = ({
           </DropdownMenu.Item>
         )}
         <DropdownMenu.Item
-          className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600"
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
           onSelect={onDelete}
         >
-          Eliminar
+            <Trash2 size={14} />
+            Eliminar
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

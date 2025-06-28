@@ -18,7 +18,9 @@ export function useContextMenu(
   editableIndex: number | null,
   setEditableIndex: (i: number | null) => void,
   setEditingContent: (content: string | null) => void,
-  onPostItCreateChild?: (index: number) => void
+  onPostItCreateChild?: (index: number) => void,
+  onPostItEdit?: (index: number) => void
+
 ) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
@@ -116,6 +118,16 @@ export function useContextMenu(
       hideContextMenu();
     }
   };
+  const handleEditPostIt = () => {
+    if (
+        contextMenu.type === "postit" &&
+        contextMenu.postItIndex !== null &&
+        onPostItEdit
+    ) {
+      onPostItEdit(contextMenu.postItIndex);
+      hideContextMenu();
+    }
+  };
 
   return {
     contextMenu,
@@ -123,5 +135,6 @@ export function useContextMenu(
     hideContextMenu,
     handleDelete,
     handleCreateChild,
+    handleEditPostIt
   };
 }
