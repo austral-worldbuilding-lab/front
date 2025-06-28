@@ -69,7 +69,7 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                 )}
                 style={{ minWidth: 0 }}
               >
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 md:gap-2 lg:gap-3 w-fit">
+                <div className="flex flex-wrap gap-2 w-full justify-start ">
                   {mandala?.postits
                       .filter(
                           (p) =>
