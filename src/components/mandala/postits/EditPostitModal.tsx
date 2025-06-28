@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     Dialog,
     DialogContent,
@@ -33,6 +33,7 @@ const EditPostItModal = ({
                          }: EditPostItModalProps) => {
     const [content, setContent] = useState(initialContent);
     const [selectedTags, setSelectedTags] = useState<Tag[]>(initialTags);
+    const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -43,6 +44,14 @@ const EditPostItModal = ({
                 .filter((t): t is Tag => !!t);
 
             setSelectedTags(normalizedSelectedTags);
+
+            setTimeout(() => {
+                if (inputRef.current) {
+                    const length = inputRef.current.value.length;
+                    inputRef.current.focus();
+                    inputRef.current.setSelectionRange(length, length);
+                }
+            }, 0);
         }
     }, [isOpen, initialContent, initialTags, tags]);
 
@@ -78,6 +87,7 @@ const EditPostItModal = ({
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             className="resize-none border w-full"
+                            ref={inputRef}
                         />
                     </div>
 
