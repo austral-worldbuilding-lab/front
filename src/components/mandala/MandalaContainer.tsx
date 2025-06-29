@@ -46,6 +46,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     updatePostit,
     updateCharacter,
     deletePostit,
+    deleteCharacter,
   } = useMandala(mandalaId);
   const { createMandala } = useCreateMandala(projectId);
 
@@ -87,6 +88,16 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
       await createTag(tag.label, tag.color);
     } catch (error) {
       console.error("Error al crear el tag:", error);
+    }
+  };
+
+  const handleDeleteCharacter = async (index: number) => {
+    try {
+      await deleteCharacter(index);
+      return true;
+    } catch (e) {
+      console.error("Error al eliminar el personaje:", e);
+      return false;
     }
   };
 
@@ -233,7 +244,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onDragEnd={() => setIsDraggingPostIt(false)}
                         appliedFilters={appliedFilters}
                         onPostItDelete={deletePostit}
-                        onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
+                        onCharacterDelete={handleDeleteCharacter}
                         tags={tags}
                         onNewTag={handleNewTag}
                         state={state}
