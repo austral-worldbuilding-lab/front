@@ -5,7 +5,7 @@ import {
   createPostit as createPostitService,
   updatePostit as updatePostitService,
   deletePostit as deletePostitService,
-  updateCharacter as updateCharacterService,
+  updateCharacter as updateCharacterService, updateMandalaCharacters,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
 
@@ -104,6 +104,24 @@ const useMandala = (mandalaId: string) => {
     [mandalaId, projectId]
   );
 
+  const deleteCharacter = useCallback(
+      async (index: number) => {
+        try {
+          const updatedCharacters = [...(mandala?.characters ?? [])];
+          updatedCharacters.splice(index, 1);
+          await updateMandalaCharacters(projectId!, mandalaId, updatedCharacters);
+          setMandala((prev) =>
+              prev ? { ...prev, characters: updatedCharacters } : prev
+          );
+          return true;
+        } catch (err) {
+          setError(err instanceof Error ? err : new Error("Unknown error occurred"));
+          return false;
+        }
+      },
+      [mandala, mandalaId]
+  );
+
   return {
     mandala,
     loading,
@@ -112,6 +130,7 @@ const useMandala = (mandalaId: string) => {
     updatePostit,
     deletePostit,
     updateCharacter,
+    deleteCharacter,
   };
 };
 
