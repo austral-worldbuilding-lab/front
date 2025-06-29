@@ -63,7 +63,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     usePostItAnimation(postit.id!);
 
   const scale = 0.3;
-  const fontSize = 11 * scale;
+  const fontSize = 24 * scale;
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
   const orbit = useMemo(() => {

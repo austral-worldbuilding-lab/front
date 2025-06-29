@@ -106,11 +106,10 @@ export const deletePostit = async (
   const data = mandalaSnap.data();
   const postits: Postit[] = data.postits || [];
 
-  const updatedPostits = postits.filter((postit) => postit.id !== postitId);
+  const updatedPostits = removePostItRecursively(postits, postitId);
 
-  if (updatedPostits.length === postits.length) {
-    throw new Error("Postit ID not found");
-  }
+  const wasDeleted = JSON.stringify(postits) !== JSON.stringify(updatedPostits);
+  if (!wasDeleted) throw new Error("Postit ID not found");
 
   await updateDoc(mandalaRef, {
     postits: updatedPostits,
@@ -119,6 +118,18 @@ export const deletePostit = async (
 
   return true;
 };
+
+function removePostItRecursively(
+  postits: Postit[],
+  targetId: string
+): Postit[] {
+  return postits
+    .filter((postit) => postit.id !== targetId)
+    .map((postit) => ({
+      ...postit,
+      childrens: removePostItRecursively(postit.childrens || [], targetId),
+    }));
+}
 
 export const updateCharacter = async (
   projectId: string,
