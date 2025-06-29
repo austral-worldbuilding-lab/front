@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Circle, Group } from "react-konva";
 import { Html } from "react-konva-utils";
 import Konva from "konva";
@@ -10,8 +10,6 @@ import { usePostItAnimation } from "@/hooks/usePostItAnimation";
 
 interface PostItProps {
   postit: Postit;
-  isEditing: boolean;
-  editingContent: string | null;
   color: string;
   postItW: number;
   postItH: number;
@@ -33,8 +31,6 @@ interface PostItProps {
 const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const {
     postit,
-    isEditing,
-    editingContent,
     color,
     postItW,
     postItH,
@@ -61,9 +57,13 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
   const { shouldAnimate, markAnimated, isOpen, toggleOpen, setOpen } =
     usePostItAnimation(postit.id!);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingContent, setEditingContent] = useState<string>(
+    postit.content ?? ""
+  );
 
   const scale = 0.3;
-  const fontSize = 24 * scale;
+  const fontSize = postItW / 6;
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
   const orbit = useMemo(() => {
@@ -119,6 +119,28 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     }, 250);
   };
 
+  const exitEditMode = () => {
+    setIsEditing(false);
+    window.getSelection()?.removeAllRanges();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        isEditing &&
+        textAreaRef.current &&
+        !textAreaRef.current.contains(e.target as Node)
+      ) {
+        exitEditMode();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditing]);
+
   return (
     <>
       {!isDragging &&
@@ -127,12 +149,10 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             key={child.id}
             ref={null}
             postit={child}
-            isEditing={false}
-            editingContent={null}
             color={color}
             postItW={postItW * scale}
             postItH={postItH * scale}
-            padding={padding}
+            padding={padding * scale}
             position={childPositions[i]}
             onDragStart={onDragStart}
             onDragMove={onDragMove}
@@ -176,7 +196,17 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             clearTimeout(clickTimeout.current);
             clickTimeout.current = null;
           }
-          onDblClick();
+          setIsEditing(true);
+          setEditingContent(postit.content ?? "");
+
+          setTimeout(() => {
+            const textarea = textAreaRef.current;
+            if (textarea) {
+              textarea.focus();
+              textarea.selectionStart = textarea.selectionEnd =
+                textarea.value.length;
+            }
+          }, 0);
         }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
@@ -192,14 +222,21 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           fill={color}
         />
         <Html
-          divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}
+          divProps={{
+            style: {
+              pointerEvents: isEditing ? "auto" : "none",
+              zIndex: disableDragging ? 0 : 1,
+            },
+          }}
         >
           <textarea
-            ref={isEditing ? textAreaRef : null}
+            ref={textAreaRef}
             disabled={!isEditing}
             value={isEditing ? editingContent ?? "" : postit.content}
-            onChange={(e) => onContentChange(e.target.value)}
-            onBlur={onBlur}
+            onChange={(e) => {
+              setEditingContent(e.target.value);
+              onContentChange(e.target.value);
+            }}
             onMouseDown={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
             style={{

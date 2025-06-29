@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
@@ -57,7 +57,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   state,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
-  const [editingContent, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
   const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
     undefined
@@ -89,9 +88,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onCharacterDelete,
     editableIndex,
     setEditableIndex,
-    setEditingContent,
     (id) => {
-      setSelectedPostItId(id);
+      setSelectedPostItId(id!);
       setIsChildPostItModalOpen(true);
     }
   );
@@ -162,26 +160,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     }
   };
 
-  useEffect(() => {
-    const handleStageMouseDown = (e: MouseEvent) => {
-      if (editableIndex !== null) {
-        const clickedOnTextarea = (e.target as HTMLElement).closest("textarea");
-        if (!clickedOnTextarea) {
-          setEditableIndex(null);
-          setEditingContent(null);
-          window.getSelection()?.removeAllRanges();
-        }
-      }
-    };
-
-    const container = document.getElementById("konva-container");
-    container?.addEventListener("mousedown", handleStageMouseDown);
-
-    return () => {
-      container?.removeEventListener("mousedown", handleStageMouseDown);
-    };
-  }, [editableIndex]);
-
   if (!mandala || !state) return <div>No mandala found</div>;
 
   return (
@@ -199,14 +177,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             const p = mandala.postits[i];
             if (!shouldShowPostIt(p, appliedFilters)) return null;
             const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
-            const isEditing = editableIndex === i;
-
             return (
               <PostIt
                 key={`static-${p.id}`}
                 postit={p}
-                isEditing={isEditing}
-                editingContent={editingContent}
                 color={dimensionColors[p.dimension] || "#cccccc"}
                 postItW={postItW}
                 postItH={postItH}
@@ -222,17 +196,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 }}
                 onDblClick={() => {
                   setEditableIndex(i);
-                  setEditingContent(p.content);
                   bringToFront(i);
                 }}
                 onContentChange={(newValue) => {
-                  setEditingContent(newValue);
                   onPostItUpdate(i, { content: newValue });
                 }}
                 onBlur={() => {
                   window.getSelection()?.removeAllRanges();
                   setEditableIndex(null);
-                  setEditingContent(null);
                 }}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
