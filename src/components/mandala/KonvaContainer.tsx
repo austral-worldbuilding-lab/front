@@ -11,11 +11,6 @@ import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
 import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
-import { useClosestPostIt } from "@/hooks/useClosestPostIt";
-import { getVisibleChildren } from "@/components/mandala/postits/getVisibleChildren";
-import { useChildAnimations } from "@/hooks/useChildAnimations";
-import { useVisibleChildrenPositions } from "@/hooks/useVisibleChildrenPositions";
-import { renderChildren } from "./postits/renderChildren";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -67,21 +62,21 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
     undefined
   );
-  const [visibleChildren, setVisibleChildren] = useState<Postit[]>([]);
-  const [isDraggingParent, setIsDraggingParent] = useState(false);
-  const [exitingChildren, setExitingChildren] = useState<
-    { postit: Postit; initialPosition: { x: number; y: number } }[]
-  >([]);
 
   const postItW = 64;
   const postItH = 64;
   const padding = 12;
-  const childScale = 0.6;
 
-  const handleCreateChildPostIt = (postItId?: string) => {
-    setSelectedPostItId(postItId);
-    setIsChildPostItModalOpen(true);
-  };
+  const {
+    zOrder,
+    bringToFront,
+    toAbsolute,
+    toRelative,
+    clamp,
+    getDimensionAndSectionFromCoordinates,
+    toAbsolutePostit,
+    toRelativePostit,
+  } = useKonvaUtils(mandala.postits);
 
   const {
     contextMenu,
@@ -97,18 +92,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     setEditingContent,
     (index) => {
       const postItId = mandala.postits[index]?.id;
-      handleCreateChildPostIt(postItId);
+      setSelectedPostItId(postItId);
+      setIsChildPostItModalOpen(true);
     }
   );
-
-  const {
-    zOrder,
-    bringToFront,
-    toAbsolute,
-    toRelative,
-    clamp,
-    getDimensionAndSectionFromCoordinates,
-  } = useKonvaUtils(mandala.postits);
 
   const dimensionColors = useMemo(() => {
     return (
@@ -135,7 +122,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onDragEnd();
     const nx = e.target.x(),
       ny = e.target.y();
-    const rel = toRelative(nx, ny);
+    const rel = toRelativePostit(nx, ny);
     const { dimension, section } = getDimensionAndSectionFromCoordinates(
       rel.x,
       rel.y,
@@ -176,41 +163,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     }
   };
 
-  const zoomLevel = state?.scale;
-  const closestPostIt = useClosestPostIt(
-    mandala.postits,
-    toAbsolute,
-    state,
-    SCENE_W
-  );
-
-  const visibleChildrenPositions = useVisibleChildrenPositions(
-    closestPostIt,
-    visibleChildren,
-    toAbsolute,
-    postItW,
-    postItH,
-    childScale
-  );
-
-  const childrenToShow = getVisibleChildren(
-    zoomLevel,
-    closestPostIt,
-    mandala.postits
-  );
-
-  useChildAnimations(
-    childrenToShow,
-    visibleChildren,
-    setVisibleChildren,
-    setExitingChildren,
-    toAbsolute,
-    visibleChildrenPositions
-  );
-
   useEffect(() => {
     const handleStageMouseDown = (e: MouseEvent) => {
-      // Si hay algo editando y se hizo clic fuera del textarea => blur
       if (editableIndex !== null) {
         const clickedOnTextarea = (e.target as HTMLElement).closest("textarea");
         if (!clickedOnTextarea) {
@@ -229,17 +183,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     };
   }, [editableIndex]);
 
-  useEffect(() => {
-    if (closestPostIt && zoomLevel !== undefined) {
-      const updated = getVisibleChildren(
-        zoomLevel,
-        closestPostIt,
-        mandala.postits
-      );
-      setVisibleChildren(updated);
-    }
-  }, [mandala.postits, closestPostIt, zoomLevel]);
-
   if (!mandala || !state) return <div>No mandala found</div>;
 
   return (
@@ -255,33 +198,27 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         <Layer>
           {zOrder.map((i) => {
             const p = mandala.postits[i];
-            if (p?.parentId) return null;
             if (!shouldShowPostIt(p, appliedFilters)) return null;
-            const { x, y } = toAbsolute(p.coordinates.x, p.coordinates.y);
+            const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
             const isEditing = editableIndex === i;
 
             return (
               <PostIt
-                key={i}
+                key={`static-${p.id}`}
                 postit={p}
                 isEditing={isEditing}
                 editingContent={editingContent}
-                dimensionColors={dimensionColors}
+                color={dimensionColors[p.dimension] || "#cccccc"}
                 postItW={postItW}
                 postItH={postItH}
                 padding={padding}
                 position={{ x, y }}
                 onDragStart={() => {
-                  setIsDraggingParent(true);
                   onDragStart();
-                  setVisibleChildren([]);
                   bringToFront(i);
                 }}
                 onDragMove={handleDragMove}
                 onDragEnd={(e) => {
-                  setTimeout(() => {
-                    setIsDraggingParent(false);
-                  }, 50);
                   handleOnDragEndPostIt(e, i, p);
                 }}
                 onDblClick={() => {
@@ -305,39 +242,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               />
             );
           })}
-
-          {closestPostIt &&
-            !isDraggingParent &&
-            renderChildren({
-              closestPostIt,
-              visibleChildren,
-              exitingChildren,
-              visibleChildrenPositions,
-              postItW,
-              postItH,
-              childScale,
-              dimensionColors,
-              editableIndex,
-              editingContent,
-              mandalaPostits: mandala.postits,
-              toAbsolute,
-              onEditStart: (index, content) => {
-                setEditableIndex(index);
-                setEditingContent(content);
-              },
-              onEditChange: (index, value) => {
-                setEditingContent(value);
-                onPostItUpdate(index, { content: value });
-              },
-              onEditEnd: () => {
-                window.getSelection()?.removeAllRanges();
-                setEditableIndex(null);
-                setEditingContent(null);
-              },
-              onMouseEnter,
-              onMouseLeave,
-              onContextMenu: showContextMenu,
-            })}
 
           {mandala.characters?.map((character, index) => {
             if (!shouldShowCharacter(character, appliedFilters)) return null;

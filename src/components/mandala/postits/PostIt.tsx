@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { Circle, Group } from "react-konva";
 import { Html } from "react-konva-utils";
 import { KonvaEventObject } from "konva/lib/Node";
@@ -11,7 +11,7 @@ interface PostItProps {
   postit: Postit;
   isEditing: boolean;
   editingContent: string | null;
-  dimensionColors: Record<string, string>;
+  color: string;
   postItW: number;
   postItH: number;
   padding: number;
@@ -26,8 +26,6 @@ interface PostItProps {
   onMouseLeave: () => void;
   onContextMenu: (e: KonvaEventObject<PointerEvent>) => void;
   mandalaRadius: number;
-  shouldAnimate?: boolean;
-  initialPosition?: { x: number; y: number };
   disableDragging?: boolean;
 }
 
@@ -35,7 +33,7 @@ const PostIt: React.FC<PostItProps> = ({
   postit,
   isEditing,
   editingContent,
-  dimensionColors,
+  color,
   postItW,
   postItH,
   padding,
@@ -50,101 +48,137 @@ const PostIt: React.FC<PostItProps> = ({
   onMouseLeave,
   onContextMenu,
   mandalaRadius,
-  shouldAnimate,
-  initialPosition,
   disableDragging,
 }) => {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const groupRef = useRef<Konva.Group>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
-  const hasAnimatedRef = useRef(false);
 
-  useEffect(() => {
-    if (groupRef.current && shouldAnimate && !hasAnimatedRef.current) {
-      const from = initialPosition ?? { x: mandalaRadius, y: mandalaRadius };
-      groupRef.current.setAttrs({ x: from.x, y: from.y });
-
-      requestAnimationFrame(() => {
-        groupRef.current?.to({
-          x: position.x,
-          y: position.y,
-          duration: 0.4,
-          easing: Konva.Easings.EaseOut,
-        });
-      });
-
-      hasAnimatedRef.current = true;
-    }
-  }, [shouldAnimate, position.x, position.y, mandalaRadius, initialPosition]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (isEditing && textAreaRef.current) {
-        textAreaRef.current.focus();
-        const len = textAreaRef.current.value.length;
-        textAreaRef.current.setSelectionRange(len, len);
-      }
-    }, 0);
-  }, [isEditing]);
-
-  const backgroundColor = dimensionColors[postit.dimension] || "#cccccc";
+  const backgroundColor = color;
   const textColor = isDarkColor(backgroundColor) ? "white" : "black";
   const scaleRatio = postItW / 64;
+  const children = useMemo(() => postit.childrens || [], [postit.childrens]);
+
+  const scale = 0.3;
+  const radius = postItW / 2;
+  const expandedRadius = radius * scale;
+  const spacing = 1 - 3 * scale;
+  const orbit = 2 * expandedRadius + spacing;
+
+  const childPositions = useMemo(() => {
+    return children.map((_, i) => {
+      const angle = (2 * Math.PI * i) / children.length;
+      return {
+        x: position.x + Math.cos(angle) * (orbit + 3),
+        y: position.y + Math.sin(angle) * (orbit + 3),
+      };
+    });
+  }, [children, orbit, position.x, position.y]);
+
+  useEffect(() => {
+    if (isEditing && textAreaRef.current) {
+      setTimeout(() => {
+        const len = textAreaRef.current!.value.length;
+        textAreaRef.current!.focus();
+        textAreaRef.current!.setSelectionRange(len, len);
+      }, 0);
+    }
+  }, [isEditing]);
 
   return (
-    <Group
-      ref={groupRef}
-      x={position.x}
-      y={position.y}
-      draggable={!isEditing && !disableDragging}
-      onDragStart={onDragStart}
-      onDragMove={onDragMove}
-      onDragEnd={onDragEnd}
-      onDblClick={onDblClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onContextMenu={onContextMenu}
-      className="pointer-events-auto"
-      dragBoundFunc={dragBoundFunc}
-    >
-      <Circle
-        x={postItW / 2}
-        y={postItH / 2}
-        radius={postItW / 2}
-        fill={backgroundColor}
-        shadowBlur={0}
-        shadowOpacity={0}
-      />
-      <Html
-        divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}
+    <>
+      {isOpen &&
+        !isDragging &&
+        children.map((child, i) => (
+          <PostIt
+            key={child.id}
+            postit={child}
+            isEditing={false}
+            editingContent={null}
+            color={backgroundColor}
+            postItW={postItW * scale}
+            postItH={postItH * scale}
+            padding={padding}
+            position={childPositions[i]}
+            onDragStart={onDragStart}
+            onDragMove={onDragMove}
+            onDragEnd={onDragEnd}
+            onDblClick={onDblClick}
+            onContentChange={onContentChange}
+            onBlur={onBlur}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onContextMenu={onContextMenu}
+            mandalaRadius={mandalaRadius}
+            disableDragging={true}
+          />
+        ))}
+
+      <Group
+        ref={groupRef}
+        x={position.x}
+        y={position.y}
+        draggable={!isEditing && !disableDragging}
+        dragBoundFunc={dragBoundFunc}
+        onDragStart={() => {
+          onDragStart();
+          setIsDragging(true);
+        }}
+        onDragMove={onDragMove}
+        onDragEnd={(e) => {
+          onDragEnd(e);
+          setTimeout(() => setIsDragging(false), 100);
+        }}
+        onClick={() => {
+          if (children.length > 0) setIsOpen((prev) => !prev);
+        }}
+        onDblClick={onDblClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onContextMenu={onContextMenu}
+        scale={isOpen ? { x: scale, y: scale } : { x: 1, y: 1 }}
+        offset={{ x: postItW / 2, y: postItH / 2 }}
+        className="pointer-events-auto"
       >
-        <textarea
-          ref={isEditing ? textAreaRef : null}
-          disabled={!isEditing}
-          value={isEditing ? editingContent ?? "" : postit.content}
-          onChange={(e) => onContentChange(e.target.value)}
-          onBlur={onBlur}
-          onMouseDown={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-          style={{
-            width: postItW,
-            height: postItH,
-            padding,
-            margin: 0,
-            resize: "none",
-            background: backgroundColor,
-            color: textColor,
-            borderRadius: "50%",
-            boxShadow: "0 0 4px rgba(0,0,0,0.3)",
-            boxSizing: "border-box",
-            fontSize: `${11 * scaleRatio}px`,
-            lineHeight: 1.1,
-            overflow: "hidden",
-            textAlign: "center",
-          }}
+        <Circle
+          x={postItW / 2}
+          y={postItH / 2}
+          radius={postItW / 2}
+          fill={backgroundColor}
         />
-      </Html>
-    </Group>
+        <Html
+          divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}
+        >
+          {/* <textarea
+            ref={isEditing ? textAreaRef : null}
+            disabled={!isEditing}
+            value={isEditing ? editingContent ?? "" : postit.content}
+            onChange={(e) => onContentChange(e.target.value)}
+            onBlur={onBlur}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            style={{
+              width: postItW,
+              height: postItH,
+              padding,
+              margin: 0,
+              resize: "none",
+              background: backgroundColor,
+              color: textColor,
+              borderRadius: "50%",
+              boxShadow: "0 0 4px rgba(0,0,0,0.3)",
+              boxSizing: "border-box",
+              fontSize: `${11 * scaleRatio}px`,
+              lineHeight: 1.1,
+              overflow: "hidden",
+              textAlign: "center",
+            }}
+          /> */}
+        </Html>
+      </Group>
+    </>
   );
 };
 
