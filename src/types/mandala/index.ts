@@ -26,7 +26,7 @@ export interface Postit {
   dimension: string;
   section: string;
   tag: Tag;
-  parentId?: string | null;
+  childrens: Postit[];
 }
 
 export interface Tag {

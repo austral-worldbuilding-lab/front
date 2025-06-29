@@ -76,6 +76,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
       dimension: "Gobierno",
       section: "Institución",
       tag: tag || null,
+      childrens: [],
     });
   };
 
@@ -221,7 +222,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                               tag: tag,
                               dimension: "Gobierno",
                               section: "Institución",
-                              parentId: postitFatherId,
+                              childrens: [],
                             },
                             postitFatherId
                           );

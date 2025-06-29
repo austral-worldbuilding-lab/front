@@ -5,6 +5,7 @@ import Routes from "./routes.tsx";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { AuthProvider } from "./context/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PostItAnimationProvider } from "./context/PostItAnimationContext.tsx";
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient({
@@ -20,13 +21,15 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Routes />
-        </TooltipProvider>
-      </AuthProvider>
-      {/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
-    </QueryClientProvider>
+    <PostItAnimationProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Routes />
+          </TooltipProvider>
+        </AuthProvider>
+        {/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
+      </QueryClientProvider>
+    </PostItAnimationProvider>
   </StrictMode>
 );
