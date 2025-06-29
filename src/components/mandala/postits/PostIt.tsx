@@ -1,11 +1,12 @@
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useMemo, useState } from "react";
 import { Circle, Group } from "react-konva";
 import { Html } from "react-konva-utils";
+import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { Postit } from "@/types/mandala";
 import { isDarkColor } from "@/utils/colorUtils";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
-import Konva from "konva";
+import { usePostItAnimation } from "@/hooks/usePostItAnimation";
 
 interface PostItProps {
   postit: Postit;
@@ -29,75 +30,106 @@ interface PostItProps {
   disableDragging?: boolean;
 }
 
-const PostIt: React.FC<PostItProps> = ({
-  postit,
-  isEditing,
-  editingContent,
-  color,
-  postItW,
-  postItH,
-  padding,
-  position,
-  onDragStart,
-  onDragMove,
-  onDragEnd,
-  onDblClick,
-  onContentChange,
-  onBlur,
-  onMouseEnter,
-  onMouseLeave,
-  onContextMenu,
-  mandalaRadius,
-  disableDragging,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const groupRef = useRef<Konva.Group>(null);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
+const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
+  const {
+    postit,
+    isEditing,
+    editingContent,
+    color,
+    postItW,
+    postItH,
+    padding,
+    position,
+    onDragStart,
+    onDragMove,
+    onDragEnd,
+    onDblClick,
+    onContentChange,
+    onBlur,
+    onMouseEnter,
+    onMouseLeave,
+    onContextMenu,
+    mandalaRadius,
+    disableDragging,
+  } = props;
 
-  const backgroundColor = color;
-  const textColor = isDarkColor(backgroundColor) ? "white" : "black";
-  const scaleRatio = postItW / 64;
-  const children = useMemo(() => postit.childrens || [], [postit.childrens]);
+  const groupRef = useRef<Konva.Group>(null);
+  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const textColor = isDarkColor(color) ? "white" : "black";
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
+  const { shouldAnimate, markAnimated, isOpen, toggleOpen, setOpen } =
+    usePostItAnimation(postit.id!);
 
   const scale = 0.3;
-  const radius = postItW / 2;
-  const expandedRadius = radius * scale;
-  const spacing = 1 - 3 * scale;
-  const orbit = 2 * expandedRadius + spacing;
+  const fontSize = 11 * scale;
+  const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
-  const childPositions = useMemo(() => {
-    return children.map((_, i) => {
-      const angle = (2 * Math.PI * i) / children.length;
-      return {
-        x: position.x + Math.cos(angle) * (orbit + 3),
-        y: position.y + Math.sin(angle) * (orbit + 3),
-      };
-    });
-  }, [children, orbit, position.x, position.y]);
+  const orbit = useMemo(() => {
+    const r = (postItW / 2) * scale;
+    return 2 * r + (1 - 3 * scale);
+  }, [postItW]);
 
-  useEffect(() => {
-    if (isEditing && textAreaRef.current) {
-      setTimeout(() => {
-        const len = textAreaRef.current!.value.length;
-        textAreaRef.current!.focus();
-        textAreaRef.current!.setSelectionRange(len, len);
-      }, 0);
-    }
-  }, [isEditing]);
+  const childPositions = useMemo(
+    () =>
+      children.map((_, i) => {
+        const angle = (2 * Math.PI * i) / children.length;
+        return {
+          x: position.x + Math.cos(angle) * orbit,
+          y: position.y + Math.sin(angle) * orbit,
+        };
+      }),
+    [children, orbit, position.x, position.y]
+  );
+
+  const isAnimatingRef = useRef(false);
+  const hasAnimatedRef = useRef(shouldAnimate); // capture only once on mount
+
+  const handleClick = () => {
+    if (clickTimeout.current || isAnimatingRef.current) return;
+
+    clickTimeout.current = setTimeout(() => {
+      clickTimeout.current = null;
+
+      if (!children.length) return;
+
+      const group = groupRef.current;
+      if (!group) return;
+
+      isAnimatingRef.current = true;
+
+      // Prevent multiple animations
+      if (hasAnimatedRef.current) {
+        markAnimated();
+        hasAnimatedRef.current = false;
+      }
+
+      group.to({
+        scaleX: !isOpen ? scale : 1,
+        scaleY: !isOpen ? scale : 1,
+        duration: 0.25,
+        easing: Konva.Easings.EaseInOut,
+        onFinish: () => {
+          isAnimatingRef.current = false;
+        },
+      });
+
+      toggleOpen();
+    }, 250);
+  };
 
   return (
     <>
-      {isOpen &&
-        !isDragging &&
+      {!isDragging &&
         children.map((child, i) => (
           <PostIt
             key={child.id}
+            ref={null}
             postit={child}
             isEditing={false}
             editingContent={null}
-            color={backgroundColor}
+            color={color}
             postItW={postItW * scale}
             postItH={postItH * scale}
             padding={padding}
@@ -117,11 +149,18 @@ const PostIt: React.FC<PostItProps> = ({
         ))}
 
       <Group
-        ref={groupRef}
+        ref={(node) => {
+          groupRef.current = node;
+          if (typeof ref === "function") ref(node);
+          else if (ref)
+            (ref as React.MutableRefObject<Konva.Group | null>).current = node;
+        }}
         x={position.x}
         y={position.y}
         draggable={!isEditing && !disableDragging}
         dragBoundFunc={dragBoundFunc}
+        offset={{ x: postItW / 2, y: postItH / 2 }}
+        scale={isOpen ? { x: scale, y: scale } : { x: 1, y: 1 }}
         onDragStart={() => {
           onDragStart();
           setIsDragging(true);
@@ -131,25 +170,26 @@ const PostIt: React.FC<PostItProps> = ({
           onDragEnd(e);
           setTimeout(() => setIsDragging(false), 100);
         }}
-        onClick={() => {
-          if (children.length > 0) setIsOpen((prev) => !prev);
+        onClick={handleClick}
+        onDblClick={() => {
+          if (clickTimeout.current) {
+            clearTimeout(clickTimeout.current);
+            clickTimeout.current = null;
+          }
+          onDblClick();
         }}
-        onDblClick={onDblClick}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         onContextMenu={(e) => {
           onContextMenu(e, postit.id!);
-          setIsOpen(false);
+          setOpen(false);
         }}
-        scale={isOpen ? { x: scale, y: scale } : { x: 1, y: 1 }}
-        offset={{ x: postItW / 2, y: postItH / 2 }}
-        className="pointer-events-auto"
       >
         <Circle
           x={postItW / 2}
           y={postItH / 2}
           radius={postItW / 2}
-          fill={backgroundColor}
+          fill={color}
         />
         <Html
           divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}
@@ -168,12 +208,12 @@ const PostIt: React.FC<PostItProps> = ({
               padding,
               margin: 0,
               resize: "none",
-              background: backgroundColor,
+              background: color,
               color: textColor,
               borderRadius: "50%",
               boxShadow: "0 0 4px rgba(0,0,0,0.3)",
               boxSizing: "border-box",
-              fontSize: `${11 * scaleRatio}px`,
+              fontSize: `${fontSize}px`,
               lineHeight: 1.1,
               overflow: "hidden",
               textAlign: "center",
@@ -183,6 +223,6 @@ const PostIt: React.FC<PostItProps> = ({
       </Group>
     </>
   );
-};
+});
 
 export default PostIt;
