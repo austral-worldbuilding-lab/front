@@ -1,24 +1,25 @@
 import { useState, useEffect, useCallback } from "react";
 import { Postit } from "@/types/mandala";
 
-const SCENE_W = 1200;
-const SCENE_H = 1200;
 const POSTIT_W = 64;
 const POSTIT_H = 64;
 
-export const useKonvaUtils = (postits: Postit[]) => {
+export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
   const [zOrder, setZOrder] = useState<number[]>(postits.map((_, i) => i));
 
   useEffect(() => {
     setZOrder(postits.map((_, idx) => idx));
   }, [postits]);
 
+  const SCENE_W = mandalaRadius * 2;
+  const SCENE_H = mandalaRadius * 2;
+
   const toAbsolute = useCallback(
     (rx: number, ry: number) => ({
       x: ((rx + 1) / 2) * (SCENE_W - POSTIT_W),
       y: ((1 - ry) / 2) * (SCENE_H - POSTIT_H),
     }),
-    []
+    [SCENE_H, SCENE_W]
   );
 
   const toAbsolutePostit = useCallback(
@@ -26,7 +27,7 @@ export const useKonvaUtils = (postits: Postit[]) => {
       x: ((rx + 1) / 2) * SCENE_W,
       y: ((1 - ry) / 2) * SCENE_H,
     }),
-    []
+    [SCENE_H, SCENE_W]
   );
 
   const toRelative = useCallback(
@@ -34,7 +35,7 @@ export const useKonvaUtils = (postits: Postit[]) => {
       x: (x / (SCENE_W - POSTIT_W)) * 2 - 1,
       y: 1 - (y / (SCENE_H - POSTIT_H)) * 2,
     }),
-    []
+    [SCENE_H, SCENE_W]
   );
 
   const toRelativePostit = useCallback(
@@ -42,7 +43,7 @@ export const useKonvaUtils = (postits: Postit[]) => {
       x: (rx / SCENE_W) * 2 - 1,
       y: 1 - (ry / SCENE_H) * 2,
     }),
-    []
+    [SCENE_H, SCENE_W]
   );
 
   const clamp = useCallback(

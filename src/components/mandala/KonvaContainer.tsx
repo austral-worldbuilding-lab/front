@@ -37,9 +37,6 @@ export interface KonvaContainerProps {
   state: ReactZoomPanPinchState | null;
 }
 
-const SCENE_W = 1200;
-const SCENE_H = 1200;
-
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
   mandala,
   onPostItUpdate,
@@ -63,6 +60,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     undefined
   );
 
+  const maxRadius = 150 * (mandala.mandala.configuration?.scales.length || 1);
+  const SCENE_W = maxRadius * 2;
+  const SCENE_H = maxRadius * 2;
+
   const postItW = 64;
   const postItH = 64;
   const padding = 12;
@@ -76,7 +77,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     getDimensionAndSectionFromCoordinates,
     toAbsolutePostit,
     toRelativePostit,
-  } = useKonvaUtils(mandala.postits);
+  } = useKonvaUtils(mandala.postits, maxRadius);
 
   const {
     contextMenu,
@@ -169,11 +170,11 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       id="konva-container"
       style={{
         position: "relative",
-        clipPath: `circle(${SCENE_W / 2}px at center)`,
+        clipPath: `circle(${maxRadius}px at center)`,
       }}
       onClick={hideContextMenu}
     >
-      <Stage width={SCENE_W} height={SCENE_H}>
+      <Stage width={SCENE_W} height={SCENE_H} offset={{ x: 0, y: 0 }}>
         <Layer>
           {zOrder.map((i) => {
             const p = mandala.postits[i];
