@@ -15,7 +15,7 @@ import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 export interface KonvaContainerProps {
   mandala: MandalaData;
   onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
-  onPostItDelete: (index: number) => Promise<boolean>;
+  onPostItDelete: (id: string) => Promise<boolean>;
   onPostItChildCreate: (
     content: string,
     tag: Tag,
@@ -26,7 +26,7 @@ export interface KonvaContainerProps {
     index: number,
     updates: Partial<Character>
   ) => Promise<boolean | void>;
-  onCharacterDelete: (index: number) => Promise<boolean>;
+  onCharacterDelete: (id: string) => Promise<boolean>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onDragStart: () => void;
@@ -90,9 +90,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     editableIndex,
     setEditableIndex,
     setEditingContent,
-    (index) => {
-      const postItId = mandala.postits[index]?.id;
-      setSelectedPostItId(postItId);
+    (id) => {
+      setSelectedPostItId(id);
       setIsChildPostItModalOpen(true);
     }
   );
@@ -237,13 +236,13 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 }}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
-                onContextMenu={(e) => showContextMenu(e, i, "postit")}
+                onContextMenu={(e, i) => showContextMenu(e, i, "postit")}
                 mandalaRadius={SCENE_W / 2}
               />
             );
           })}
 
-          {mandala.characters?.map((character, index) => {
+          {mandala.characters?.map((character) => {
             if (!shouldShowCharacter(character, appliedFilters)) return null;
             const { x, y } = toAbsolute(
               character.position.x,
@@ -260,7 +259,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onDragEnd={(e) => handleOnDragEndCharacter(e, character)}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
-                onContextMenu={(e) => showContextMenu(e, index, "character")}
+                onContextMenu={(e) =>
+                  showContextMenu(e, character.id, "character")
+                }
               />
             );
           })}

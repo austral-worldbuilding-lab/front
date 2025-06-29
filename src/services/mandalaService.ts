@@ -39,32 +39,32 @@ export const subscribeMandala = (
   return unsubscribe;
 };
 
-  export const createPostit = async (
-      mandalaId: string,
-      postit: Postit,
-      postitFatherId?: string
-  ): Promise<void> => {
-    try {
-      const payload = {
-        content: postit.content,
-        dimension: postit.dimension,
-        section: postit.section,
-        coordinates: postit.coordinates,
-        tags: [
-          {
-            name: postit.tag.label,
-            color: postit.tag.color,
-          },
-        ],
-        parentId: postitFatherId ?? undefined,
-      };
+export const createPostit = async (
+  mandalaId: string,
+  postit: Postit,
+  postitFatherId?: string
+): Promise<void> => {
+  try {
+    const payload = {
+      content: postit.content,
+      dimension: postit.dimension,
+      section: postit.section,
+      coordinates: postit.coordinates,
+      tags: [
+        {
+          name: postit.tag.label,
+          color: postit.tag.color,
+        },
+      ],
+      parentId: postitFatherId ?? undefined,
+    };
 
-      await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
-    } catch (error) {
-      console.error("Error creating postit:", error);
-      throw error;
-    }
-  };
+    await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
+  } catch (error) {
+    console.error("Error creating postit:", error);
+    throw error;
+  }
+};
 
 export const updatePostit = async (
   projectId: string,
@@ -97,20 +97,20 @@ export const updatePostit = async (
 export const deletePostit = async (
   projectId: string,
   mandalaId: string,
-  index: number
-) => {
+  postitId: string
+): Promise<boolean> => {
   const mandalaRef = doc(db, projectId, mandalaId);
   const mandalaSnap = await getDoc(mandalaRef);
   if (!mandalaSnap.exists()) throw new Error("Mandala not found");
 
   const data = mandalaSnap.data();
-  const postits = data.postits || [];
+  const postits: Postit[] = data.postits || [];
 
-  if (index < 0 || index >= postits.length) {
-    throw new Error("Invalid postit index");
+  const updatedPostits = postits.filter((postit) => postit.id !== postitId);
+
+  if (updatedPostits.length === postits.length) {
+    throw new Error("Postit ID not found");
   }
-
-  const updatedPostits = postits.filter((_: Postit, i: number) => i !== index);
 
   await updateDoc(mandalaRef, {
     postits: updatedPostits,
@@ -158,15 +158,14 @@ export const getFilters = async (mandalaId: string) => {
   return response.data.data;
 };
 
-
 export const fetchAvailableCharacters = async (
-    mandalaId: string
+  mandalaId: string
 ): Promise<
-    {
-      id: string;
-      name: string;
-      color: string;
-    }[]
+  {
+    id: string;
+    name: string;
+    color: string;
+  }[]
 > => {
   const res = await axiosInstance.get<{
     data: {

@@ -24,7 +24,7 @@ interface PostItProps {
   onBlur: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  onContextMenu: (e: KonvaEventObject<PointerEvent>) => void;
+  onContextMenu: (e: KonvaEventObject<PointerEvent>, id: string) => void;
   mandalaRadius: number;
   disableDragging?: boolean;
 }
@@ -137,7 +137,10 @@ const PostIt: React.FC<PostItProps> = ({
         onDblClick={onDblClick}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        onContextMenu={onContextMenu}
+        onContextMenu={(e) => {
+          onContextMenu(e, postit.id!);
+          setIsOpen(false);
+        }}
         scale={isOpen ? { x: scale, y: scale } : { x: 1, y: 1 }}
         offset={{ x: postItW / 2, y: postItH / 2 }}
         className="pointer-events-auto"
@@ -151,7 +154,7 @@ const PostIt: React.FC<PostItProps> = ({
         <Html
           divProps={{ style: { pointerEvents: isEditing ? "auto" : "none" } }}
         >
-          {/* <textarea
+          <textarea
             ref={isEditing ? textAreaRef : null}
             disabled={!isEditing}
             value={isEditing ? editingContent ?? "" : postit.content}
@@ -175,7 +178,7 @@ const PostIt: React.FC<PostItProps> = ({
               overflow: "hidden",
               textAlign: "center",
             }}
-          /> */}
+          />
         </Html>
       </Group>
     </>

@@ -72,9 +72,9 @@ const useMandala = (mandalaId: string) => {
   );
 
   const deletePostit = useCallback(
-    async (index: number) => {
+    async (id: string) => {
       try {
-        return await deletePostitService(projectId!, mandalaId, index);
+        return await deletePostitService(projectId!, mandalaId, id);
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
