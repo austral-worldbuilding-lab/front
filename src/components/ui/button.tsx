@@ -222,4 +222,4 @@ function Button({
   return buttonContent;
 }
 
-export { Button };
+export {Button, buttonVariants};
