@@ -56,3 +56,17 @@ export const createTag = async (
 
   return response.data.data;
 };
+
+export const deleteTagService = async (
+    projectId: string,
+    tagId: string
+): Promise<void> => {
+  const response = await axiosInstance.delete(
+      `/project/${projectId}/tags/${tagId}`
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Error deleting tag.");
+  }
+};
+

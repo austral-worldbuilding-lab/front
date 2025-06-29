@@ -30,6 +30,7 @@ export interface Postit {
 }
 
 export interface Tag {
+  id: string;
   label: string;
   value?: string;
   color: string;
