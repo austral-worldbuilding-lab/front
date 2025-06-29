@@ -19,7 +19,7 @@ interface PostItProps {
   onDragMove: (e: KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: KonvaEventObject<DragEvent>) => void;
   onDblClick: () => void;
-  onContentChange: (newValue: string) => void;
+  onContentChange: (newValue: string, id: string) => void;
   onBlur: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -235,7 +235,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             value={isEditing ? editingContent ?? "" : postit.content}
             onChange={(e) => {
               setEditingContent(e.target.value);
-              onContentChange(e.target.value);
+              onContentChange(e.target.value, postit.id!);
             }}
             onMouseDown={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}

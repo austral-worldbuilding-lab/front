@@ -69,22 +69,24 @@ export const createPostit = async (
 export const updatePostit = async (
   projectId: string,
   mandalaId: string,
-  index: number,
+  postitId: string,
   updatedData: Partial<Postit>
-) => {
+): Promise<boolean> => {
   const mandalaRef = doc(db, projectId, mandalaId);
   const mandalaSnap = await getDoc(mandalaRef);
   if (!mandalaSnap.exists()) throw new Error("Mandala not found");
 
   const data = mandalaSnap.data();
-  const postits = data.postits || [];
+  const postits: Postit[] = data.postits || [];
 
-  if (index < 0 || index >= postits.length) {
-    throw new Error("Invalid postit index");
-  }
+  const updatedPostits = updatePostItRecursively(
+    postits,
+    postitId,
+    updatedData
+  );
 
-  const updatedPostits = [...postits];
-  updatedPostits[index] = { ...updatedPostits[index], ...updatedData };
+  const wasUpdated = JSON.stringify(postits) !== JSON.stringify(updatedPostits);
+  if (!wasUpdated) throw new Error("Postit ID not found");
 
   await updateDoc(mandalaRef, {
     postits: updatedPostits,
@@ -93,6 +95,27 @@ export const updatePostit = async (
 
   return true;
 };
+
+function updatePostItRecursively(
+  postits: Postit[],
+  id: string,
+  updatedData: Partial<Postit>
+): Postit[] {
+  return postits.map((p) => {
+    if (p.id === id) {
+      return { ...p, ...updatedData };
+    }
+
+    if (p.childrens && p.childrens.length > 0) {
+      return {
+        ...p,
+        childrens: updatePostItRecursively(p.childrens, id, updatedData),
+      };
+    }
+
+    return p;
+  });
+}
 
 export const deletePostit = async (
   projectId: string,

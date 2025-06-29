@@ -14,7 +14,7 @@ import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
-  onPostItUpdate: (index: number, updates: Partial<Postit>) => Promise<boolean>;
+  onPostItUpdate: (id: string, updates: Partial<Postit>) => Promise<boolean>;
   onPostItDelete: (id: string) => Promise<boolean>;
   onPostItChildCreate: (
     content: string,
@@ -113,7 +113,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
   const handleOnDragEndPostIt = async (
     e: KonvaEventObject<DragEvent>,
-    index: number,
+    id: string,
     postit: Postit
   ) => {
     onDragEnd();
@@ -126,7 +126,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       mandala.mandala.configuration?.dimensions.map((d) => d.name) || [],
       mandala.mandala.configuration?.scales || []
     );
-    await onPostItUpdate(index, {
+    await onPostItUpdate(id, {
       coordinates: { ...postit.coordinates, x: rel.x, y: rel.y },
       dimension,
       section,
@@ -192,14 +192,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 }}
                 onDragMove={handleDragMove}
                 onDragEnd={(e) => {
-                  handleOnDragEndPostIt(e, i, p);
+                  handleOnDragEndPostIt(e, p.id!, p);
                 }}
                 onDblClick={() => {
                   setEditableIndex(i);
                   bringToFront(i);
                 }}
-                onContentChange={(newValue) => {
-                  onPostItUpdate(i, { content: newValue });
+                onContentChange={(newValue, id) => {
+                  onPostItUpdate(id, { content: newValue });
                 }}
                 onBlur={() => {
                   window.getSelection()?.removeAllRanges();
