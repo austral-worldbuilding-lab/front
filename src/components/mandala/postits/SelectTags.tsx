@@ -129,6 +129,9 @@ const SelectTags = ({ tags, value, onChange, onNewTag }: SelectTagsProps) => {
               onNewTag(tagWithName);
               onChange([...value, tagWithName]);
         }}
+        existingTags={tags
+            .filter((t) => typeof t.value === "string")
+            .map((t) => ({ value: t.value! }))}
       />
     </>
   );

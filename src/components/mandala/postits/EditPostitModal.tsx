@@ -53,7 +53,7 @@ const EditPostItModal = ({
                 }
             }, 0);
         }
-    }, [isOpen, initialContent, initialTags, tags]);
+    }, [isOpen, initialContent, initialTags]);
 
 
 
@@ -99,8 +99,12 @@ const EditPostItModal = ({
                             tags={tags}
                             value={selectedTags}
                             onChange={setSelectedTags}
-                            onNewTag={onNewTag}
+                            onNewTag={(newTag) => {
+                                onNewTag(newTag);
+                                setSelectedTags((prev) => [...prev, newTag]);
+                            }}
                         />
+
                     </div>
                 </div>
 

@@ -10,17 +10,33 @@ interface NewTagModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     onCreate: (tag: { label: string; value: string; color: string }) => void;
+    existingTags: { value: string }[];
 }
 
-const NewTagModal = ({ isOpen, onOpenChange, onCreate }: NewTagModalProps) => {
+const NewTagModal = ({ isOpen, onOpenChange, onCreate, existingTags }: NewTagModalProps) => {
     const [name, setName] = useState("");
     const [color, setColor] = useState(colors[0]);
+    const [error, setError] = useState("");
 
     const handleCreate = () => {
-        if (!name.trim()) return;
-        onCreate({ label: name, value: name.toLowerCase(), color });
+        const trimmedName = name.trim();
+        const lowerCaseName = trimmedName.toLowerCase();
+
+        const alreadyExists = existingTags.some(
+            (t) => t.value.toLowerCase() === lowerCaseName
+        );
+
+        if (!trimmedName) return;
+
+        if (alreadyExists) {
+            setError("Ya existe un tag con ese nombre.");
+            return;
+        }
+
+        onCreate({ label: trimmedName, value: lowerCaseName, color });
         setName("");
         setColor(colors[0]);
+        setError("");
         onOpenChange(false);
     };
 
@@ -37,8 +53,11 @@ const NewTagModal = ({ isOpen, onOpenChange, onCreate }: NewTagModalProps) => {
                     <Input
                         placeholder="Nombre del tag"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            if (error) setError("");
+                        }}                    />
+                    {error && <p className="text-sm text-red-500">{error}</p>}
 
                     <ColorSelector
                         selectedColor={color}
