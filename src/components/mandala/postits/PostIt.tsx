@@ -86,7 +86,9 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const isAnimatingRef = useRef(false);
   const hasAnimatedRef = useRef(shouldAnimate); // capture only once on mount
 
-  const handleClick = () => {
+  const handleClick = (e: KonvaEventObject<MouseEvent>) => {
+    if (e.evt.button !== 0) return; // Only proceed on left click
+
     if (clickTimeout.current || isAnimatingRef.current) return;
 
     clickTimeout.current = setTimeout(() => {
@@ -99,7 +101,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
 
       isAnimatingRef.current = true;
 
-      // Prevent multiple animations
       if (hasAnimatedRef.current) {
         markAnimated();
         hasAnimatedRef.current = false;
