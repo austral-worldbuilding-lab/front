@@ -57,6 +57,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   state,
 }) => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
+  const [, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
   const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
     undefined
@@ -88,6 +89,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onCharacterDelete,
     editableIndex,
     setEditableIndex,
+    setEditingContent,
     (id) => {
       setSelectedPostItId(id!);
       setIsChildPostItModalOpen(true);
