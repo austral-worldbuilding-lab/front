@@ -68,8 +68,10 @@ export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
       const angle = Math.atan2(y, x);
       const adjustedAngle = angle < 0 ? angle + 2 * Math.PI : angle;
 
-      const rawDistance = Math.sqrt(x * x + y * y);
-      const normalizedDistance = Math.min(rawDistance / Math.SQRT2, 1);
+      const absX = x * mandalaRadius;
+      const absY = y * mandalaRadius;
+      const rawDistance = Math.sqrt(absX * absX + absY * absY);
+      const normalizedDistance = Math.min(rawDistance / mandalaRadius, 1);
 
       const dimIndex = Math.floor(
         (adjustedAngle / (2 * Math.PI)) * dimensions.length
@@ -81,7 +83,7 @@ export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
         section: sections[Math.min(secIndex, sections.length - 1)],
       };
     },
-    []
+    [mandalaRadius]
   );
 
   return {
