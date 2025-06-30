@@ -222,3 +222,28 @@ export const updatePostItTags = async (
   await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
 };
 
+
+export const deleteMandalaService = async (mandalaId: string) => {
+  const response = await axiosInstance.delete(`/mandala/${mandalaId}`);
+  if (response.status !== 200) {
+    throw new Error("Error deleting mandala.");
+  }
+  return response.data;
+}
+
+export const updateMandalaCharacters = async (
+    projectId: string,
+    mandalaId: string,
+    updatedCharacters: Character[]
+) => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  if (!mandalaSnap.exists()) throw new Error("Mandala not found");
+
+  await updateDoc(mandalaRef, {
+    characters: updatedCharacters,
+    updatedAt: new Date(),
+  });
+
+  return true;
+};

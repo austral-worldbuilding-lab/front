@@ -69,7 +69,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const {
     toAbsolutePostit,
     toRelativePostit,
-  } = useKonvaUtils(mandala.postits);
+  } = useKonvaUtils(mandala.postits, SCENE_W / 2);
 
   const {
     contextMenu,
