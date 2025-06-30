@@ -1,6 +1,6 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Character, FilterSection, Mandala, Postit } from "../types/mandala";
+import { Character, FilterSection, Mandala, Postit, Tag } from "../types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -50,14 +50,9 @@ export const createPostit = async (
       dimension: postit.dimension,
       section: postit.section,
       coordinates: postit.coordinates,
-      tags: [
-        {
-          name: postit.tag.label,
-          color: postit.tag.color,
-        },
-      ],
-      parentId: postitFatherId ?? undefined,
-    };
+      tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
+        parentId: postitFatherId ?? undefined,
+      };
 
     await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
   } catch (error) {
@@ -240,3 +235,14 @@ export const updateMandalaCharacters = async (
 
   return true;
 };
+export const updatePostItTags = async (
+    mandalaId: string,
+    postitId: string,
+    payload: {
+      content: string;
+      tags: Tag[];
+    }
+): Promise<void> => {
+  await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
+};
+

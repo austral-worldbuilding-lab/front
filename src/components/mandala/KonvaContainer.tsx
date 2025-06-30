@@ -12,13 +12,16 @@ import { Tag } from "@/types/mandala";
 import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 
+import {useEditPostIt} from "@/hooks/useEditPostit.ts";
+import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
+
 export interface KonvaContainerProps {
   mandala: MandalaData;
   onPostItUpdate: (id: string, updates: Partial<Postit>) => Promise<boolean>;
   onPostItDelete: (id: string) => Promise<boolean>;
   onPostItChildCreate: (
     content: string,
-    tag: Tag,
+    tags: Tag[],
     postitFatherId?: string
   ) => void;
   characters?: Character[];
@@ -56,7 +59,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onNewTag,
   state,
 }) => {
-  const [editableIndex, setEditableIndex] = useState<number | null>(null);
+  const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
   const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
@@ -64,12 +67,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   );
 
   const {
-    zOrder,
-    bringToFront,
-    toAbsolute,
-    toRelative,
-    clamp,
-    getDimensionAndSectionFromCoordinates,
     toAbsolutePostit,
     toRelativePostit,
   } = useKonvaUtils(mandala.postits, SCENE_W / 2);
@@ -80,17 +77,40 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     hideContextMenu,
     handleDelete,
     handleCreateChild,
+    handleEditPostIt,
   } = useContextMenu(
-    onPostItDelete,
-    onCharacterDelete,
-    editableIndex,
-    setEditableIndex,
-    setEditingContent,
-    (id) => {
-      setSelectedPostItId(id!);
-      setIsChildPostItModalOpen(true);
-    }
+      onPostItDelete,
+      onCharacterDelete,
+      setEditableIndex,
+      setEditingContent,
+      (id) => {
+        setSelectedPostItId(id);
+        setIsChildPostItModalOpen(true);
+      },
+      (id) => {
+        const postit = mandala.postits.find((p) => p.id === id);
+        if (postit) {
+          openEditModal(mandala.id, postit);
+        }
+      }
   );
+
+  const {
+    isOpen: isEditModalOpen,
+    postit: editingPostit,
+    open: openEditModal,
+    close: closeEditModal,
+    handleUpdate,
+  } = useEditPostIt();
+
+  const {
+    zOrder,
+    bringToFront,
+    toAbsolute,
+    toRelative,
+    clamp,
+    getDimensionAndSectionFromCoordinates,
+  } = useKonvaUtils(mandala.postits, SCENE_W / 2);
 
   const dimensionColors = useMemo(() => {
     return (
@@ -251,6 +271,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             onCreateChild={
               contextMenu.type === "postit" ? handleCreateChild : undefined
             }
+            onEdit={contextMenu.type === "postit" ? handleEditPostIt : undefined}
             isContextMenu={true}
           />
         </div>
@@ -262,12 +283,26 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         tags={tags}
         onNewTag={onNewTag}
         postItFatherId={selectedPostItId}
-        onCreate={(content, tag, postItFatherId) => {
-          onPostItChildCreate(content, tag, postItFatherId);
+        onCreate={(content, tags, postItFatherId) => {
+          onPostItChildCreate(content, tags, postItFatherId);
           setIsChildPostItModalOpen(false);
           setSelectedPostItId(undefined);
         }}
       />
+      {editingPostit && (
+          <EditPostItModal
+              isOpen={isEditModalOpen}
+              onOpenChange={(open) => {
+                if (!open) closeEditModal();
+              }}
+              tags={tags}
+              onUpdate={handleUpdate}
+              initialContent={editingPostit.content}
+              initialTags={editingPostit.tags}
+              onNewTag={onNewTag}
+          />
+      )}
+
     </div>
   );
 };

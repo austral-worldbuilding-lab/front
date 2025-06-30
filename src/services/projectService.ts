@@ -15,6 +15,11 @@ export const getProjects = async (page : number, limit : number): Promise<Projec
   return response.data.data;
 }
 
+export const getProject = async (id: string): Promise<Project> => {
+    const response = await axiosInstance.get<{ data: Project }>(`/project/${id}`);
+    return response.data.data;
+}
+
 export const createProject = async (project: CreateProject): Promise<Project> => {
 
   const response = await axiosInstance.post("/project", project);

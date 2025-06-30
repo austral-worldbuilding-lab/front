@@ -17,7 +17,7 @@ interface NewPostItModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   tags: Tag[];
-  onCreate: (content: string, tag: Tag, postItFatherId?: string) => void;
+  onCreate: (content: string, tags: Tag[], postItFatherId?: string) => void;
   onNewTag: (tag: Tag) => void;
   postItFatherId?: string;
 }
@@ -31,16 +31,17 @@ const NewPostItModal = ({
   postItFatherId,
 }: NewPostItModalProps) => {
   const [content, setContent] = useState("");
-  const [selectedTag, setSelectedTag] = useState<Tag | null>(tags[0]);
-  const isValid = content.trim() !== "" && selectedTag;
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
+  const isValid = content.trim() !== "";
   const { projectId } = useParams<{ projectId: string }>();
   const { deleteTag } = useTags(projectId!);
 
   const handleCreate = () => {
-    if (isValid && selectedTag) {
-      onCreate(content.trim(), selectedTag, postItFatherId);
+    if (isValid) {
+      onCreate(content.trim(), selectedTags, postItFatherId);
       setContent("");
-      setSelectedTag(null);
+      setSelectedTags([]);
       onOpenChange(false);
     }
   };
@@ -48,9 +49,7 @@ const NewPostItModal = ({
   const handleDeleteTag = async (tagId: string) => {
     try {
       await deleteTag(tagId);
-      if (selectedTag?.id === tagId) {
-        setSelectedTag(null);
-      }
+      setSelectedTags((prev) => prev.filter(tag => tag.id !== tagId));
     } catch (err) {
       console.error("Error deleting tag:", err);
     }
@@ -85,8 +84,8 @@ const NewPostItModal = ({
             </label>
             <SelectTags
               tags={tags}
-              value={selectedTag?.value || ""}
-              onChange={setSelectedTag}
+              value={selectedTags}
+              onChange={setSelectedTags}
               onNewTag={onNewTag}
               onDeleteTag={handleDeleteTag}
             />

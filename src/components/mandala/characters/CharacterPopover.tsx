@@ -57,7 +57,7 @@ const CharacterPopover: React.FC<CharacterPopoverProps> = ({
           icon={<EyeIcon />}
           onClick={() => handleOpenMandala(character.id)}
         >
-          View Mandala
+          Ver Mandala
         </Button>
       </div>
     </div>

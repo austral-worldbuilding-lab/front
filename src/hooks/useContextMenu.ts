@@ -15,10 +15,10 @@ interface ContextMenuState {
 export function useContextMenu(
   onPostItDelete: (id: string) => Promise<boolean>,
   onCharacterDelete: (id: string) => Promise<boolean>,
-  editableIndex: number | null,
   setEditableIndex: (i: number | null) => void,
   setEditingContent: (content: string | null) => void,
-  onPostItCreateChild?: (id: string) => void
+  onPostItCreateChild?: (id: string) => void,
+  onPostItEdit?: (id: string) => void
 ) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
@@ -108,6 +108,16 @@ export function useContextMenu(
       hideContextMenu();
     }
   };
+  const handleEditPostIt = () => {
+    if (
+        contextMenu.type === "postit" &&
+        contextMenu.postItId !== null &&
+        onPostItEdit
+    ) {
+      onPostItEdit(contextMenu.postItId);
+      hideContextMenu();
+    }
+  };
 
   return {
     contextMenu,
@@ -115,5 +125,6 @@ export function useContextMenu(
     hideContextMenu,
     handleDelete,
     handleCreateChild,
+    handleEditPostIt
   };
 }
