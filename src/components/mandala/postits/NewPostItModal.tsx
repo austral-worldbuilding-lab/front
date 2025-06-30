@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import SelectTags from "./SelectTags";
 import { CustomInput } from "@/components/ui/CustomInput";
 import { Tag } from "@/types/mandala";
+import { useTags } from "@/hooks/useTags";
+import {useParams} from "react-router-dom";
 
 interface NewPostItModalProps {
   isOpen: boolean;
@@ -32,6 +34,8 @@ const NewPostItModal = ({
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   const isValid = content.trim() !== "";
+  const { projectId } = useParams<{ projectId: string }>();
+  const { deleteTag } = useTags(projectId!);
 
   const handleCreate = () => {
     if (isValid) {
@@ -39,6 +43,17 @@ const NewPostItModal = ({
       setContent("");
       setSelectedTags([]);
       onOpenChange(false);
+    }
+  };
+
+  const handleDeleteTag = async (tagId: string) => {
+    try {
+      await deleteTag(tagId);
+      if (selectedTag?.id === tagId) {
+        setSelectedTag(null);
+      }
+    } catch (err) {
+      console.error("Error deleting tag:", err);
     }
   };
 
@@ -74,6 +89,7 @@ const NewPostItModal = ({
               value={selectedTags}
               onChange={setSelectedTags}
               onNewTag={onNewTag}
+              onDeleteTag={handleDeleteTag}
             />
           </div>
         </div>

@@ -77,7 +77,10 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                               p.section.toLowerCase() === scaleName.toLowerCase()
                       )
                       .map((postit) => {
-                        const postitIndex = mandala.postits.findIndex((p) => p.id === postit.id);
+                        const dimensionColor =
+                            mandala.mandala.configuration?.dimensions.find(
+                                (d) => d.name.toLowerCase() === postit.dimension.toLowerCase()
+                            )?.color ?? "#facc15";
 
                         return (
                             <DimensionPostit
@@ -87,12 +90,12 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                                     updatePostit(
                                         projectId,
                                         mandalaId,
-                                        postitIndex,
+                                        postit.id!,
                                         updates
                                     )
                                 }
                                 onDelete={() =>
-                                    deletePostit(projectId, mandalaId, postitIndex)
+                                    deletePostit(projectId, mandalaId, postit.id!)
                                 }
                                 onCreateChild={() => {
                                   setPostitFatherId(postit.id);
