@@ -64,10 +64,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const SCENE_W = maxRadius * 2;
   const SCENE_H = maxRadius * 2;
 
-  const postItW = 64;
-  const postItH = 64;
-  const padding = 12;
-
   const {
     zOrder,
     bringToFront,
@@ -109,8 +105,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
     node.position({
-      x: clamp(node.x(), SCENE_W - postItW),
-      y: clamp(node.y(), SCENE_H - postItH),
+      x: clamp(node.x(), SCENE_W - 100),
+      y: clamp(node.y(), SCENE_H - 100),
     });
   };
 
@@ -185,9 +181,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 key={`static-${p.id}`}
                 postit={p}
                 color={dimensionColors[p.dimension] || "#cccccc"}
-                postItW={postItW}
-                postItH={postItH}
-                padding={padding}
                 position={{ x, y }}
                 onDragStart={() => {
                   onDragStart();
@@ -249,6 +242,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             top: contextMenu.y,
             left: contextMenu.x,
             zIndex: 1000,
+            transform: state ? `scale(${1 / state.scale})` : "none",
+            transformOrigin: "top left",
           }}
           onClick={hideContextMenu}
         >
