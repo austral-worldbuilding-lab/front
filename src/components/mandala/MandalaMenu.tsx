@@ -5,12 +5,16 @@ interface MandalaMenuProps {
   onDelete: () => void;
   onCreateChild?: () => void;
   isContextMenu?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const MandalaMenu = ({
   onDelete,
   onCreateChild,
   isContextMenu = false,
+  open,
+  onOpenChange,
 }: MandalaMenuProps) => {
   if (isContextMenu) {
     return (
@@ -35,7 +39,7 @@ const MandalaMenu = ({
   }
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={onOpenChange}>
       <DropdownMenu.Trigger asChild>
         <button className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-gray-200 active:bg-gray-300">
           <MoreVertical className="w-4 h-4" />

@@ -9,7 +9,7 @@ import {DialogFooter} from "../../ui/dialog";
 interface NewTagModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onCreate: (tag: { label: string; value: string; color: string }) => void;
+    onCreate: (tag: { id: string, label: string; value: string; color: string }) => void;
 }
 
 const NewTagModal = ({ isOpen, onOpenChange, onCreate }: NewTagModalProps) => {
@@ -18,7 +18,7 @@ const NewTagModal = ({ isOpen, onOpenChange, onCreate }: NewTagModalProps) => {
 
     const handleCreate = () => {
         if (!name.trim()) return;
-        onCreate({ label: name, value: name.toLowerCase(), color });
+        onCreate({ id: name, label: name, value: name.toLowerCase(), color });
         setName("");
         setColor(colors[0]);
         onOpenChange(false);

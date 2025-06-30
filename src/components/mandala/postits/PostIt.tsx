@@ -11,9 +11,6 @@ import { usePostItAnimation } from "@/hooks/usePostItAnimation";
 interface PostItProps {
   postit: Postit;
   color: string;
-  postItW: number;
-  postItH: number;
-  padding: number;
   position: { x: number; y: number };
   onDragStart: () => void;
   onDragMove: (e: KonvaEventObject<DragEvent>) => void;
@@ -26,15 +23,13 @@ interface PostItProps {
   onContextMenu: (e: KonvaEventObject<PointerEvent>, id: string) => void;
   mandalaRadius: number;
   disableDragging?: boolean;
+  scale?: number;
 }
 
 const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const {
     postit,
     color,
-    postItW,
-    postItH,
-    padding,
     position,
     onDragStart,
     onDragMove,
@@ -47,6 +42,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     onContextMenu,
     mandalaRadius,
     disableDragging,
+    scale = 1,
   } = props;
 
   const groupRef = useRef<Konva.Group>(null);
@@ -54,22 +50,25 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const [isDragging, setIsDragging] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textColor = isDarkColor(color) ? "white" : "black";
-  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
-  const { shouldAnimate, markAnimated, isOpen, toggleOpen, setOpen } =
+  const { shouldAnimate, markAnimated, isOpen, toggleOpen } =
     usePostItAnimation(postit.id!);
   const [isEditing, setIsEditing] = useState(false);
   const [editingContent, setEditingContent] = useState<string>(
     postit.content ?? ""
   );
 
-  const scale = 0.3;
-  const fontSize = postItW / 6;
+  const postItW = 100;
+  const postItH = 100;
+  const padding = 12;
+  const scaleFather = 0.4 * scale;
+  const scaleChildren = 0.25 * scale;
+  const fontSize = postItW / 10;
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
   const orbit = useMemo(() => {
-    const r = (postItW / 2) * scale;
-    return 2 * r + (1 - 3 * scale);
-  }, [postItW]);
+    return postItW * 0.37 * scale;
+  }, [postItW, scale]);
 
   const childPositions = useMemo(
     () =>
@@ -107,9 +106,9 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       }
 
       group.to({
-        scaleX: !isOpen ? scale : 1,
-        scaleY: !isOpen ? scale : 1,
-        duration: 0.25,
+        scaleX: !isOpen ? scaleFather : scale,
+        scaleY: !isOpen ? scaleFather : scale,
+        duration: 0.1,
         easing: Konva.Easings.EaseInOut,
         onFinish: () => {
           isAnimatingRef.current = false;
@@ -143,7 +142,34 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   }, [isEditing]);
 
   return (
-    <>
+    <Group>
+      {/* Círculo transparente HTML (fondo) */}
+      {!isDragging && children.length !== 0 && (
+        <Html
+          divProps={{
+            style: {
+              pointerEvents: "none",
+              zIndex: -1,
+            },
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              width: postItW * scale,
+              height: postItH * scale,
+              borderRadius: "100%",
+              backgroundColor: color,
+              opacity: 0.3,
+              pointerEvents: "none",
+              transform: "translate(-50%, -50%)",
+              left: position.x,
+              top: position.y,
+            }}
+          />
+        </Html>
+      )}
+
       {!isDragging &&
         children.map((child, i) => (
           <PostIt
@@ -151,9 +177,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             ref={null}
             postit={child}
             color={color}
-            postItW={postItW * scale}
-            postItH={postItH * scale}
-            padding={padding * scale}
             position={childPositions[i]}
             onDragStart={onDragStart}
             onDragMove={onDragMove}
@@ -166,6 +189,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             onContextMenu={onContextMenu}
             mandalaRadius={mandalaRadius}
             disableDragging={true}
+            scale={scaleChildren}
           />
         ))}
 
@@ -181,7 +205,9 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         draggable={!isEditing && !disableDragging}
         dragBoundFunc={dragBoundFunc}
         offset={{ x: postItW / 2, y: postItH / 2 }}
-        scale={isOpen ? { x: scale, y: scale } : { x: 1, y: 1 }}
+        scale={
+          isOpen ? { x: scaleFather, y: scaleFather } : { x: scale, y: scale }
+        }
         onDragStart={() => {
           onDragStart();
           setIsDragging(true);
@@ -213,15 +239,53 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         onMouseLeave={onMouseLeave}
         onContextMenu={(e) => {
           onContextMenu(e, postit.id!);
-          setOpen(false);
         }}
       >
         <Circle
           x={postItW / 2}
           y={postItH / 2}
           radius={postItW / 2}
-          fill={color}
+          onMouseEnter={(e) => {
+            const container = e.target.getStage()?.container();
+            if (container) {
+              container.style.cursor = "pointer";
+            }
+          }}
+          onMouseLeave={(e) => {
+            const container = e.target.getStage()?.container();
+            if (container) {
+              container.style.cursor = "grab";
+            }
+          }}
         />
+
+        {children.length > 0 && !isOpen && (
+          <Html
+            divProps={{
+              style: {
+                pointerEvents: "none",
+                zIndex: 0,
+              },
+            }}
+          >
+            <div
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                fontSize: `${fontSize * 0.8}px`,
+                textAlign: "center",
+                pointerEvents: "none",
+                lineHeight: 1,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                padding: "2px 4px",
+                borderRadius: "100px",
+              }}
+            >
+              {children.length}
+            </div>
+          </Html>
+        )}
+
         <Html
           divProps={{
             style: {
@@ -249,7 +313,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
               background: color,
               color: textColor,
               borderRadius: "50%",
-              boxShadow: "0 0 4px rgba(0,0,0,0.3)",
+              border: "solid 1px rgba(0,0,0,0.3)",
               boxSizing: "border-box",
               fontSize: `${fontSize}px`,
               lineHeight: 1.1,
@@ -259,7 +323,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           />
         </Html>
       </Group>
-    </>
+    </Group>
   );
 });
 
