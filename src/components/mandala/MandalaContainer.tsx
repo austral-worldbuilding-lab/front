@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -9,7 +9,7 @@ import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
-import { useNavigate, useParams } from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { ArrowLeftIcon, Filter } from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
@@ -19,6 +19,8 @@ import FiltersModal from "./filters/FiltersModal";
 import { useTags } from "@/hooks/useTags";
 import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
+import {useMandalaHistory} from "@/hooks/useMandalaHistory.ts";
+import BreadcrumbMandala from "@/components/mandala/BreadcrumbMandala.tsx";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -119,6 +121,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
 
   return (
     <div className="overflow-hidden h-screen">
+      <BreadcrumbMandala/>
       <div className="w-full bg-white flex items-center relative overflow-hidden">
         <Button
           onClick={() => navigate(-1)}
