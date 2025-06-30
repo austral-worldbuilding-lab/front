@@ -86,6 +86,7 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                             <DimensionPostit
                                 key={postit.id}
                                 postit={postit}
+                                color={dimensionColor}
                                 onUpdate={(updates) =>
                                     updatePostit(
                                         projectId,
@@ -133,7 +134,8 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                 console.error("Error creating tag:", e);
               }
             }}
-            onCreate={async (content, selectedTags, parentId) => {
+            onCreate={
+            async (content, selectedTags, parentId) => {
               await createPostitService(
                   mandalaId,
                   {
@@ -142,6 +144,7 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                     coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
                     dimension: dimensionName,
                     section: "Institución",
+                    childrens: [],
                   },
                   parentId
               );

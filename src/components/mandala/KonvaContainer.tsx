@@ -11,11 +11,7 @@ import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
 import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
-import { useClosestPostIt } from "@/hooks/useClosestPostIt";
-import { getVisibleChildren } from "@/components/mandala/postits/getVisibleChildren";
-import { useChildAnimations } from "@/hooks/useChildAnimations";
-import { useVisibleChildrenPositions } from "@/hooks/useVisibleChildrenPositions";
-import { renderChildren } from "./postits/renderChildren";
+
 import {useEditPostIt} from "@/hooks/useEditPostit.ts";
 import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
 
@@ -63,7 +59,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onNewTag,
   state,
 }) => {
-  const [editableIndex, setEditableIndex] = useState<number | null>(null);
+  const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
   const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
@@ -71,12 +67,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   );
 
   const {
-    zOrder,
-    bringToFront,
-    toAbsolute,
-    toRelative,
-    clamp,
-    getDimensionAndSectionFromCoordinates,
     toAbsolutePostit,
     toRelativePostit,
   } = useKonvaUtils(mandala.postits);
@@ -89,19 +79,22 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     handleCreateChild,
     handleEditPostIt,
   } = useContextMenu(
-    onPostItDelete,
-    onCharacterDelete,
-    editableIndex,
-    setEditableIndex,
-    setEditingContent,
-    (id) => {
-      setSelectedPostItId(id!);
-      setIsChildPostItModalOpen(true);
-    },
-  (index) => {
-    openEditModal(mandala.id, mandala.postits[index]);
-  }
+      onPostItDelete,
+      onCharacterDelete,
+      setEditableIndex,
+      setEditingContent,
+      (id) => {
+        setSelectedPostItId(id);
+        setIsChildPostItModalOpen(true);
+      },
+      (id) => {
+        const postit = mandala.postits.find((p) => p.id === id);
+        if (postit) {
+          openEditModal(mandala.id, postit);
+        }
+      }
   );
+
   const {
     isOpen: isEditModalOpen,
     postit: editingPostit,

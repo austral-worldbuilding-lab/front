@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Trash2, Check, ChevronsUpDown, PlusCircle, X } from "lucide-react";
+import {Check, ChevronsUpDown, PlusCircle, Trash2, X} from "lucide-react";
 import { useState } from "react";
 import NewTagModal from "./NewTagModal";
 import { Tag } from "@/types/mandala";
@@ -26,8 +26,6 @@ interface SelectTagsProps {
 const SelectTags = ({ tags, value, onChange, onNewTag, onDeleteTag }: SelectTagsProps) => {
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [hoveredTagValue, setHoveredTagValue] = useState<string | null>(null);
-
 
   const toggleTag = (tag: Tag) => {
     const isSelected = value.some((t) => t.value === tag.value);
@@ -43,108 +41,118 @@ const SelectTags = ({ tags, value, onChange, onNewTag, onDeleteTag }: SelectTags
     onChange(value.filter((t) => t.value !== tag.value));
   };
 
-
   return (
-    <>
-      <Popover modal open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-              variant="outline"
-              color="ghost"
-              role="combobox"
-              className="justify-between w-full"
-          >
-            <span className="flex items-center gap-2">
-              {selectedTag && (
+      <>
+        <Popover modal open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <div
+                onClick={() => setOpen(true)}
+                role="combobox"
+                tabIndex={0}
+                className="w-full cursor-pointer border rounded-md px-3 py-2 min-h-[42px] flex flex-wrap gap-2 items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {value.length > 0 ? (
+                  value.map((t) => (
+                      <span
+                          key={t.value}
+                          className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md text-sm"
+                      >
                   <span
                       className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: selectedTag.color }}
+                      style={{ backgroundColor: t.color }}
                   />
+                        {t.name}
+                        <button
+                            onClick={(e) => removeTag(t, e)}
+                            className="ml-1 text-gray-500 hover:text-red-500"
+                            aria-label={`Eliminar tag ${t.name}`}
+                        >
+                    <X size={12} />
+                  </button>
+                </span>
+                  ))
+              ) : (
+                  <span className="text-gray-500">Seleccionar tags</span>
               )}
-              {selectedTag ? selectedTag.label : "Select tag"}
-            </span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command>
-            <CommandInput placeholder="Buscar tags..." />
-            <CommandList>
-              <CommandEmpty>No tag found.</CommandEmpty>
-              {tags.map((tag) => {
-                const isSelected = value === tag.value;
-                const isHovered = hoveredTagValue === tag.value;
+              <ChevronsUpDown className="ml-auto h-4 w-4 opacity-50" />
+            </div>
+          </PopoverTrigger>
 
-                return (
-                    <CommandItem
-                        key={tag.value}
-                        value={tag.value}
-                        onSelect={() => {
-                          onChange(tag);
-                          setOpen(false);
-                        }}
-                        onMouseEnter={() => setHoveredTagValue(tag.value  ?? null)}
-                        onMouseLeave={() => setHoveredTagValue(null)}
-                        className="relative flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                      <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: tag.color }}
-                      />
-                        <span>{tag.label}</span>
-                      </div>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput placeholder="Buscar tags..." />
+              <CommandList>
+                <CommandEmpty>No se encontraron tags.</CommandEmpty>
+                {tags.map((tag) => {
+                  const isSelected = value.some((t) => t.value === tag.value);
+                  return (
+                      <CommandItem
+                          key={tag.value}
+                          value={tag.value}
+                          onSelect={() => toggleTag(tag)}
+                          className="relative flex items-center justify-between group" // <== para hover
+                      >
+                        <span className="flex items-center gap-2">
+                          <span
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: tag.color }}
+                          />
+                          {tag.name}
+                        </span>
 
-                      <div className="flex items-center gap-2">
-                        {isSelected && !isHovered && (
-                            <Check className="h-4 w-4 text-green-500" />
-                        )}
+                        <div className="flex items-center gap-2">
+                          {isSelected && (
+                              <Check className="h-4 w-4 text-green-500" />
+                          )}
 
-                        {isHovered && onDeleteTag && (
-                            <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                          <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onDeleteTag) {
                                   onDeleteTag(tag.id!);
-                                  setHoveredTagValue(null);
-                                }}
-                                className="text-red-600 hover:text-red-800 focus:outline-none"
-                                aria-label={`Eliminar tag ${tag.label}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                        )}
-                      </div>
-                    </CommandItem>
-                );
-              })}
-              <CommandItem
-                  onSelect={() => {
-                    setOpen(false);
-                    setIsModalOpen(true);
-                  }}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Nuevo tag
-              </CommandItem>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+                                }
+                              }}
+                              className="text-red-600 hover:text-red-800 focus:outline-none ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              aria-label={`Eliminar tag ${tag.name}`}
+                              title="Eliminar tag del proyecto"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </CommandItem>
 
-      <NewTagModal
-          isOpen={isModalOpen}
-          onOpenChange={setIsModalOpen}
-          onCreate={(newTag) => {
-            const tagWithName: Tag = {
-              name: newTag.label,
-              value: newTag.value,
-              color: newTag.color,
+                  );
+                })}
+                <CommandItem
+                    onSelect={() => {
+                      setOpen(false);
+                      setIsModalOpen(true);
+                    }}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Nuevo tag
+                </CommandItem>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        <NewTagModal
+            isOpen={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            onCreate={(newTag) => {
+              const tagWithName: Tag = {
+                id: newTag.id,
+                name: newTag.label,
+                value: newTag.value,
+                color: newTag.color,
               };
               onNewTag(tagWithName);
               onChange([...value, tagWithName]);
-          }}
-      />
-    </>
+            }}
+            existingTags={tags.map((t) => t.name)}
+        />
+      </>
   );
 };
 

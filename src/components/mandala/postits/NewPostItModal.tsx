@@ -49,9 +49,7 @@ const NewPostItModal = ({
   const handleDeleteTag = async (tagId: string) => {
     try {
       await deleteTag(tagId);
-      if (selectedTag?.id === tagId) {
-        setSelectedTag(null);
-      }
+      setSelectedTags((prev) => prev.filter(tag => tag.id !== tagId));
     } catch (err) {
       console.error("Error deleting tag:", err);
     }
