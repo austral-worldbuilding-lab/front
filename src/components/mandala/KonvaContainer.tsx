@@ -110,7 +110,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     toRelative,
     clamp,
     getDimensionAndSectionFromCoordinates,
-  } = useKonvaUtils(mandala.postits);
+  } = useKonvaUtils(mandala.postits, SCENE_W / 2);
 
   const dimensionColors = useMemo(() => {
     return (
