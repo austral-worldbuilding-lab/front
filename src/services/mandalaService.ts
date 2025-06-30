@@ -211,18 +211,6 @@ export async function linkMandalaToParent(mandalaId: string, childId: string) {
   return axiosInstance.post(`/mandala/${mandalaId}/link/${childId}`);
 }
 
-export const updatePostItTags = async (
-    mandalaId: string,
-    postitId: string,
-    payload: {
-      content: string;
-      tags: Tag[];
-    }
-): Promise<void> => {
-  await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
-};
-
-
 export const deleteMandalaService = async (mandalaId: string) => {
   const response = await axiosInstance.delete(`/mandala/${mandalaId}`);
   if (response.status !== 200) {
@@ -247,3 +235,14 @@ export const updateMandalaCharacters = async (
 
   return true;
 };
+export const updatePostItTags = async (
+    mandalaId: string,
+    postitId: string,
+    payload: {
+      content: string;
+      tags: Tag[];
+    }
+): Promise<void> => {
+  await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
+};
+
