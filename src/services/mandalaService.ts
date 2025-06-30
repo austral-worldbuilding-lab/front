@@ -39,47 +39,49 @@ export const subscribeMandala = (
   return unsubscribe;
 };
 
-  export const createPostit = async (
-      mandalaId: string,
-      postit: Postit,
-      postitFatherId?: string
-  ): Promise<void> => {
-    try {
-      const payload = {
-        content: postit.content,
-        dimension: postit.dimension,
-        section: postit.section,
-        coordinates: postit.coordinates,
-        tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
+export const createPostit = async (
+  mandalaId: string,
+  postit: Postit,
+  postitFatherId?: string
+): Promise<void> => {
+  try {
+    const payload = {
+      content: postit.content,
+      dimension: postit.dimension,
+      section: postit.section,
+      coordinates: postit.coordinates,
+      tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
         parentId: postitFatherId ?? undefined,
       };
 
-      await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
-    } catch (error) {
-      console.error("Error creating postit:", error);
-      throw error;
-    }
-  };
+    await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
+  } catch (error) {
+    console.error("Error creating postit:", error);
+    throw error;
+  }
+};
 
 export const updatePostit = async (
   projectId: string,
   mandalaId: string,
-  index: number,
+  postitId: string,
   updatedData: Partial<Postit>
-) => {
+): Promise<boolean> => {
   const mandalaRef = doc(db, projectId, mandalaId);
   const mandalaSnap = await getDoc(mandalaRef);
   if (!mandalaSnap.exists()) throw new Error("Mandala not found");
 
   const data = mandalaSnap.data();
-  const postits = data.postits || [];
+  const postits: Postit[] = data.postits || [];
 
-  if (index < 0 || index >= postits.length) {
-    throw new Error("Invalid postit index");
-  }
+  const updatedPostits = updatePostItRecursively(
+    postits,
+    postitId,
+    updatedData
+  );
 
-  const updatedPostits = [...postits];
-  updatedPostits[index] = { ...updatedPostits[index], ...updatedData };
+  const wasUpdated = JSON.stringify(postits) !== JSON.stringify(updatedPostits);
+  if (!wasUpdated) throw new Error("Postit ID not found");
 
   await updateDoc(mandalaRef, {
     postits: updatedPostits,
@@ -88,24 +90,44 @@ export const updatePostit = async (
 
   return true;
 };
+
+function updatePostItRecursively(
+  postits: Postit[],
+  id: string,
+  updatedData: Partial<Postit>
+): Postit[] {
+  return postits.map((p) => {
+    if (p.id === id) {
+      return { ...p, ...updatedData };
+    }
+
+    if (p.childrens && p.childrens.length > 0) {
+      return {
+        ...p,
+        childrens: updatePostItRecursively(p.childrens, id, updatedData),
+      };
+    }
+
+    return p;
+  });
+}
 
 export const deletePostit = async (
   projectId: string,
   mandalaId: string,
-  index: number
-) => {
+  postitId: string
+): Promise<boolean> => {
   const mandalaRef = doc(db, projectId, mandalaId);
   const mandalaSnap = await getDoc(mandalaRef);
   if (!mandalaSnap.exists()) throw new Error("Mandala not found");
 
   const data = mandalaSnap.data();
-  const postits = data.postits || [];
+  const postits: Postit[] = data.postits || [];
 
-  if (index < 0 || index >= postits.length) {
-    throw new Error("Invalid postit index");
-  }
+  const updatedPostits = removePostItRecursively(postits, postitId);
 
-  const updatedPostits = postits.filter((_: Postit, i: number) => i !== index);
+  const wasDeleted = JSON.stringify(postits) !== JSON.stringify(updatedPostits);
+  if (!wasDeleted) throw new Error("Postit ID not found");
 
   await updateDoc(mandalaRef, {
     postits: updatedPostits,
@@ -114,6 +136,18 @@ export const deletePostit = async (
 
   return true;
 };
+
+function removePostItRecursively(
+  postits: Postit[],
+  targetId: string
+): Postit[] {
+  return postits
+    .filter((postit) => postit.id !== targetId)
+    .map((postit) => ({
+      ...postit,
+      childrens: removePostItRecursively(postit.childrens || [], targetId),
+    }));
+}
 
 export const updateCharacter = async (
   projectId: string,
@@ -153,15 +187,14 @@ export const getFilters = async (mandalaId: string) => {
   return response.data.data;
 };
 
-
 export const fetchAvailableCharacters = async (
-    mandalaId: string
+  mandalaId: string
 ): Promise<
-    {
-      id: string;
-      name: string;
-      color: string;
-    }[]
+  {
+    id: string;
+    name: string;
+    color: string;
+  }[]
 > => {
   const res = await axiosInstance.get<{
     data: {

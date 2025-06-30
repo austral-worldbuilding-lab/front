@@ -21,10 +21,26 @@ export const useKonvaUtils = (postits: Postit[]) => {
     []
   );
 
+  const toAbsolutePostit = useCallback(
+    (rx: number, ry: number) => ({
+      x: ((rx + 1) / 2) * SCENE_W,
+      y: ((1 - ry) / 2) * SCENE_H,
+    }),
+    []
+  );
+
   const toRelative = useCallback(
     (x: number, y: number) => ({
       x: (x / (SCENE_W - POSTIT_W)) * 2 - 1,
       y: 1 - (y / (SCENE_H - POSTIT_H)) * 2,
+    }),
+    []
+  );
+
+  const toRelativePostit = useCallback(
+    (rx: number, ry: number) => ({
+      x: (rx / SCENE_W) * 2 - 1,
+      y: 1 - (ry / SCENE_H) * 2,
     }),
     []
   );
@@ -74,5 +90,7 @@ export const useKonvaUtils = (postits: Postit[]) => {
     toRelative,
     clamp,
     getDimensionAndSectionFromCoordinates,
+    toAbsolutePostit,
+    toRelativePostit,
   };
 };

@@ -37,11 +37,7 @@ const useMandala = (mandalaId: string) => {
     async (postitData: Postit, postitFatherId?: string) => {
       try {
         if (!mandalaId) throw new Error("Mandala ID is required");
-        return await createPostitService(
-          mandalaId,
-          postitData,
-          postitFatherId
-        );
+        return await createPostitService(mandalaId, postitData, postitFatherId);
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
@@ -53,14 +49,9 @@ const useMandala = (mandalaId: string) => {
   );
 
   const updatePostit = useCallback(
-    async (index: number, postitData: Partial<Postit>) => {
+    async (id: string, postitData: Partial<Postit>) => {
       try {
-        return await updatePostitService(
-          projectId!,
-          mandalaId,
-          index,
-          postitData
-        );
+        return await updatePostitService(projectId!, mandalaId, id, postitData);
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")
@@ -72,9 +63,9 @@ const useMandala = (mandalaId: string) => {
   );
 
   const deletePostit = useCallback(
-    async (index: number) => {
+    async (id: string) => {
       try {
-        return await deletePostitService(projectId!, mandalaId, index);
+        return await deletePostitService(projectId!, mandalaId, id);
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Unknown error occurred")

@@ -26,10 +26,11 @@ export interface Postit {
   dimension: string;
   section: string;
   tags: Tag[];
-  parentId?: string | null;
+  childrens: Postit[];
 }
 
 export interface Tag {
+  id: string;
   name: string;
   value?: string;
   color: string;

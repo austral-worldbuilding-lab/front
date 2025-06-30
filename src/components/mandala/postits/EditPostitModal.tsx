@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import SelectTags from "./SelectTags";
 import { CustomInput } from "@/components/ui/CustomInput";
 import { Tag } from "@/types/mandala";
+import {useTags} from "@/hooks/useTags.ts";
+import {useParams} from "react-router-dom";
 
 interface EditPostItModalProps {
     isOpen: boolean;
@@ -34,6 +36,9 @@ const EditPostItModal = ({
     const [content, setContent] = useState(initialContent);
     const [selectedTags, setSelectedTags] = useState<Tag[]>(initialTags);
     const inputRef = useRef<HTMLTextAreaElement | null>(null);
+    const { projectId } = useParams<{ projectId: string }>();
+    const { deleteTag } = useTags(projectId!);
+
 
     useEffect(() => {
         if (isOpen) {
@@ -64,6 +69,15 @@ const EditPostItModal = ({
         if (isValid) {
             onUpdate(content.trim(), selectedTags);
             onOpenChange(false);
+        }
+    };
+
+    const handleDeleteTag = async (tagId: string) => {
+        try {
+            await deleteTag(tagId);
+            setSelectedTags((prev) => prev.filter(tag => tag.id !== tagId));
+        } catch (err) {
+            console.error("Error deleting tag:", err);
         }
     };
 
@@ -103,6 +117,7 @@ const EditPostItModal = ({
                                 onNewTag(newTag);
                                 setSelectedTags((prev) => [...prev, newTag]);
                             }}
+                            onDeleteTag={handleDeleteTag}
                         />
 
                     </div>

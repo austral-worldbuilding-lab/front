@@ -9,34 +9,31 @@ import {DialogFooter} from "../../ui/dialog";
 interface NewTagModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onCreate: (tag: { label: string; value: string; color: string }) => void;
-    existingTags: { value: string }[];
+    onCreate: (tag: { id: string, label: string; value: string; color: string }) => void;
+    existingTags:  string[];
 }
 
 const NewTagModal = ({ isOpen, onOpenChange, onCreate, existingTags }: NewTagModalProps) => {
     const [name, setName] = useState("");
     const [color, setColor] = useState(colors[0]);
-    const [error, setError] = useState("");
+    const [error, setError] = useState<string | null>(null);
 
     const handleCreate = () => {
-        const trimmedName = name.trim();
-        const lowerCaseName = trimmedName.toLowerCase();
+        if (!name.trim()) return;
 
+        const normalizedName = name.trim().toLowerCase();
         const alreadyExists = existingTags.some(
-            (t) => t.value.toLowerCase() === lowerCaseName
+            (existing) => existing.trim().toLowerCase() === normalizedName
         );
 
-        if (!trimmedName) return;
-
         if (alreadyExists) {
-            setError("Ya existe un tag con ese nombre.");
+            setError("Ya existe un tag con ese nombre");
             return;
         }
 
-        onCreate({ label: trimmedName, value: lowerCaseName, color });
+        onCreate({ id: name, label: name, value: normalizedName, color });
         setName("");
         setColor(colors[0]);
-        setError("");
         onOpenChange(false);
     };
 
@@ -55,9 +52,10 @@ const NewTagModal = ({ isOpen, onOpenChange, onCreate, existingTags }: NewTagMod
                         value={name}
                         onChange={(e) => {
                             setName(e.target.value);
-                            if (error) setError("");
-                        }}                    />
-                    {error && <p className="text-sm text-red-500">{error}</p>}
+                            if (error) setError(null);
+                        }}
+                    />
+                    {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
 
                     <ColorSelector
                         selectedColor={color}

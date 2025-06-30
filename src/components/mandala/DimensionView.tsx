@@ -77,22 +77,26 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                               p.section.toLowerCase() === scaleName.toLowerCase()
                       )
                       .map((postit) => {
-                        const postitIndex = mandala.postits.findIndex((p) => p.id === postit.id);
+                        const dimensionColor =
+                            mandala.mandala.configuration?.dimensions.find(
+                                (d) => d.name.toLowerCase() === postit.dimension.toLowerCase()
+                            )?.color ?? "#facc15";
 
                         return (
                             <DimensionPostit
                                 key={postit.id}
                                 postit={postit}
+                                color={dimensionColor}
                                 onUpdate={(updates) =>
                                     updatePostit(
                                         projectId,
                                         mandalaId,
-                                        postitIndex,
+                                        postit.id!,
                                         updates
                                     )
                                 }
                                 onDelete={() =>
-                                    deletePostit(projectId, mandalaId, postitIndex)
+                                    deletePostit(projectId, mandalaId, postit.id!)
                                 }
                                 onCreateChild={() => {
                                   setPostitFatherId(postit.id);
@@ -130,7 +134,8 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                 console.error("Error creating tag:", e);
               }
             }}
-            onCreate={async (content, selectedTags, parentId) => {
+            onCreate={
+            async (content, selectedTags, parentId) => {
               await createPostitService(
                   mandalaId,
                   {
@@ -139,6 +144,7 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                     coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
                     dimension: dimensionName,
                     section: "Institución",
+                    childrens: [],
                   },
                   parentId
               );
