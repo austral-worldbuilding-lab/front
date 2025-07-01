@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import axios from 'axios';
 import { createProjectFiles } from '@/services/filesService';
+import { useQueryClient } from '@tanstack/react-query';
+import { fileKeys } from './useProjectFiles';
 
 export const ACCEPTED_TYPES = [
   'application/pdf',
@@ -18,11 +20,12 @@ interface PresignedUrl {
   url: string;
 }
 
-export const useUploadFiles = (projectId: string, onUploadComplete: () => void) => {
+export const useUploadFiles = (projectId: string, onUploadComplete?: () => void) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files;
@@ -61,7 +64,12 @@ export const useUploadFiles = (projectId: string, onUploadComplete: () => void) 
 
       setStatus('Files uploaded successfully!');
       setSelectedFiles([]);
-      onUploadComplete();
+      
+      queryClient.invalidateQueries({ queryKey: fileKeys.byProject(projectId) });
+      
+      if (onUploadComplete) {
+        onUploadComplete();
+      }
     } catch (error) {
       console.error('Upload error:', error);
       setStatus('An error occurred during upload.');

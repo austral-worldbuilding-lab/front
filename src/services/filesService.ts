@@ -30,3 +30,17 @@ export const createProjectFiles = async (
         throw error;
     }
 };
+
+export const deleteFile = async (
+    projectId: string,
+    fileName: string
+): Promise<void> => {
+    try {
+        await axiosInstance.delete(
+            `/files/${projectId}/${encodeURIComponent(fileName)}`
+        );
+    } catch (error) {
+        console.error("Error deleting file:", error);
+        throw error;
+    }
+};
