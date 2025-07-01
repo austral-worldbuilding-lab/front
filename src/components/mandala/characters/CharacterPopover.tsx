@@ -37,8 +37,11 @@ const CharacterPopover: React.FC<CharacterPopoverProps> = ({
   }, [onClose]);
 
   const handleOpenMandala = (mandalaId: string) => {
-    navigate(`/app/project/${projectId}/mandala/${mandalaId}`);
+    navigate(`/app/project/${projectId}/mandala/${mandalaId}`, {
+      state: { fromMandala: true },
+    });
   };
+
 
   return (
     <div
