@@ -1,5 +1,6 @@
 import axiosInstance from "@/lib/axios.ts";
 import {CompleteApiMandala} from "@/types/mandala";
+import axios from "axios";
 
 export interface CreateMandalaDto {
     name: string;
@@ -28,13 +29,16 @@ export async function createMandalaService(payload: CreateMandalaDto): Promise<s
         }
 
         return response.data?.data?.id || response.data?.data?.mandala?.id;
-    } catch (error: any) {
-        if (
-            error.response?.data?.statusCode === 500 &&
-            error.response?.data?.path === "/mandala/generate"
-        ) {
-            throw new Error("Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA.");
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            const statusCode = error.response?.data?.statusCode;
+            const path = error.response?.data?.path;
+
+            if (statusCode === 500 && path === "/mandala/generate") {
+                throw new Error("Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA.");
+            }
         }
+        throw error;
     }
 }
 
