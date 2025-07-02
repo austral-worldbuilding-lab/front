@@ -17,19 +17,25 @@ export interface CreateMandalaDto {
 }
 
 
-export async function createMandalaService(
-    payload: CreateMandalaDto):
-    Promise<string> {
-
+export async function createMandalaService(payload: CreateMandalaDto): Promise<string> {
     const endpoint = payload.useAIMandala ? "/mandala/generate" : "/mandala";
 
-    const response = await axiosInstance.post(endpoint, payload);
+    try {
+        const response = await axiosInstance.post(endpoint, payload);
 
-    if (response.status !== 201) {
-        throw new Error( "Failed to create mandala");
+        if (response.status !== 201) {
+            throw new Error("Failed to create mandala");
+        }
+
+        return response.data?.data?.id || response.data?.data?.mandala?.id;
+    } catch (error: any) {
+        if (
+            error.response?.data?.statusCode === 500 &&
+            error.response?.data?.path === "/mandala/generate"
+        ) {
+            throw new Error("Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA.");
+        }
     }
-
-    return response.data?.data?.id || response.data?.data?.mandala?.id;
 }
 
 export const getMandalas = async (

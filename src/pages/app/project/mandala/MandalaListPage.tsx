@@ -64,8 +64,13 @@ const MandalaListPage = () => {
             const id = await createMandala(name, description, color, useAIMandala, dimensions, scales);
             setIsCreateModalOpen(false);
             navigate(`/app/project/${projectId}/mandala/${id}`);
-        } catch {
-            setError("Ocurrió un error al crear la mandala");
+        } catch (err: any) {
+            const msg = err?.message ?? err?.response?.data?.message ?? "";
+            if (msg.includes("Este proyecto no tiene archivos")) {
+                setError("Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA.");
+            } else {
+                setError("Ocurrió un error al crear la mandala");
+            }
         }
     };
 
