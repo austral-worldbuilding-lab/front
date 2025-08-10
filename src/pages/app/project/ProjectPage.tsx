@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { getProjectFiles, ProjectFile } from "@/services/filesService.ts";
 import logo from "@/assets/logo.png";
 import useProject from "@/hooks/useProject.ts";
+import ProjectUserList from "@/components/project/ProjectUserList";
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -73,6 +74,11 @@ const ProjectPage = () => {
             <FileLoader onUploadComplete={fetchFiles} projectId={projectId} />
           </div>
           <FileList files={files} loading={loading} error={error} />
+        </div>
+
+        <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
+          <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
+          <ProjectUserList projectId={projectId} />
         </div>
       </div>
     </div>
