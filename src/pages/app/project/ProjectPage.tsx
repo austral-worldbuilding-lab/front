@@ -3,7 +3,7 @@ import FileList from "@/components/project/FileList";
 import FileLoader from "@/components/project/FileLoader";
 import Loader from "@/components/common/Loader.tsx";
 import { Button } from "@/components/ui/button";
-import {ArrowLeftIcon, Eye} from "lucide-react";
+import { ArrowLeftIcon, Eye, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getProjectFiles, ProjectFile } from "@/services/filesService.ts";
 import logo from "@/assets/logo.png";
@@ -57,16 +57,23 @@ const ProjectPage = () => {
         </h1>
       </div>
       <div className="flex flex-col items-start justify-start max-w-lg w-full">
-        <Button
-          color="primary"
-          className="mb-10"
-          onClick={() => {
-            navigate(`/app/project/${projectId}/mandalas`);
-          }}
-          icon={<Eye size={16} />}
-        >
-          Ver Mandalas
-        </Button>
+        <div className="flex gap-3 mb-10">
+          <Button
+            color="primary"
+            onClick={() => navigate(`/app/project/${projectId}/mandalas`)}
+            icon={<Eye size={16} />}
+          >
+            Ver Mandalas
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/app/project/${projectId}/invite`)}
+            icon={<UserPlus size={16} />}
+            aria-label="Invitar miembros al proyecto"
+          >
+            Invitar
+          </Button>
+        </div>
         <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
           <div className="flex justify-between items-start">
             <h2 className="text-lg font-bold mb-4">Archivos del proyecto</h2>
