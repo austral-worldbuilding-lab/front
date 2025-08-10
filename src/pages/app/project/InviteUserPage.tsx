@@ -50,11 +50,10 @@ const InviteUserPage = () => {
           <InviteUserForm
             projectId={projectId}
             onSuccess={() => setSuccessOpen(true)}
-            onError={(status, message) => {
+            onError={(status) => {
               if (status === 409) {
                 setConflictMsg(
-                  message ||
-                    "Ya existe una invitación pendiente para ese usuario."
+                  "Ya existe una invitación pendiente para ese usuario."
                 );
                 setConflictOpen(true);
               }
