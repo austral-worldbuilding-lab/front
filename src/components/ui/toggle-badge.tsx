@@ -17,7 +17,7 @@ const ToggleBadge = ({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 cursor-pointer border rounded-full p-2 bg-white hover:bg-gray-100 w-fit px-4",
+        "flex items-center gap-2 cursor-pointer border rounded-full p-2 bg-white hover:bg-gray-100 w-fit px-4 text-nowrap",
         isActive ? "border-primary" : "border-gray-300"
       )}
       onClick={onToggle}

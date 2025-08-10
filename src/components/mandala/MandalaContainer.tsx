@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useState } from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -9,8 +9,8 @@ import KonvaContainer from "./KonvaContainer";
 import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
-import { ArrowLeftIcon, Filter } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeftIcon, Filter, Sparkles } from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "@/types/mandala";
@@ -19,8 +19,8 @@ import FiltersModal from "./filters/FiltersModal";
 import { useTags } from "@/hooks/useTags";
 import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
-import {useMandalaHistory} from "@/hooks/useMandalaHistory.ts";
 import BreadcrumbMandala from "@/components/mandala/BreadcrumbMandala.tsx";
+import QuestionMachineSidebar from "./sidebar/QuestionMachineSidebar";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -36,6 +36,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { characters: projectCharacters, linkCharacter } =
     useProjectCharacters(mandalaId);
 
@@ -121,7 +122,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
 
   return (
     <div className="overflow-hidden h-screen">
-      <BreadcrumbMandala/>
+      <BreadcrumbMandala />
       <div className="w-full bg-white flex items-center relative overflow-hidden">
         <Button
           onClick={() => navigate(-1)}
@@ -138,6 +139,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
           </p>
         </div>
       </div>
+      <QuestionMachineSidebar
+        sections={
+          mandala?.mandala.configuration.dimensions.map((dim) => dim.name) || []
+        }
+        scales={mandala?.mandala.configuration.scales || []}
+        open={isSidebarOpen}
+        onOpenChange={setIsSidebarOpen}
+      />
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (
           <>
@@ -169,11 +178,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
               {() => (
                 <>
                   <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-2">
                       <CharacterDropdown
                         characters={projectCharacters}
                         onAdd={linkCharacter}
                       />
+                      <Button
+                        variant="filled"
+                        color="primary"
+                        onClick={() => setIsSidebarOpen(true)}
+                        icon={<Sparkles size={16} />}
+                      >
+                        Herramientas IA
+                      </Button>
                     </div>
                   </div>
                   <div className="absolute top-4 right-4 z-20">
@@ -247,7 +264,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onDragEnd={() => setIsDraggingPostIt(false)}
                         appliedFilters={appliedFilters}
                         onPostItDelete={deletePostit}
-                        onCharacterDelete={handleDeleteCharacter}
+                        onCharacterDelete={(id: string) =>
+                          handleDeleteCharacter(parseInt(id))
+                        }
                         tags={tags}
                         onNewTag={handleNewTag}
                         state={state}
