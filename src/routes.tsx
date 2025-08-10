@@ -14,6 +14,7 @@ import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
 import ProjectListPage from "./pages/app/project/ProjectListPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
+import MyInvitationsPage from "@/pages/MyInvitationsPage";
 
 
 // Layout component for all protected routes
@@ -36,6 +37,15 @@ function App() {
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
+        <Route
+          path="/my-invitations"
+          element={
+            <ProtectedLayout>
+              <MyInvitationsPage />
+            </ProtectedLayout>
+          }
+        />
 
         {/* Protected routes - all under /app path */}
         <Route
