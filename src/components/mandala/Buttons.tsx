@@ -6,7 +6,7 @@ import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
 
 interface ButtonsProps {
-  onCreatePostIt: (content: string, tag: Tag) => void;
+  onCreatePostIt: (content: string, tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
   onCreateCharacter?: (character: {
     name: string;

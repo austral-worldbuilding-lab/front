@@ -10,7 +10,7 @@ import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Filter } from "lucide-react";
+import { ArrowLeftIcon, Filter, Sparkles } from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "@/types/mandala";
@@ -19,6 +19,8 @@ import FiltersModal from "./filters/FiltersModal";
 import { useTags } from "@/hooks/useTags";
 import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
+import BreadcrumbMandala from "@/components/mandala/BreadcrumbMandala.tsx";
+import QuestionMachineSidebar from "./sidebar/QuestionMachineSidebar";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -34,6 +36,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { characters: projectCharacters, linkCharacter } =
     useProjectCharacters(mandalaId);
 
@@ -46,6 +49,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     updatePostit,
     updateCharacter,
     deletePostit,
+    deleteCharacter,
   } = useMandala(mandalaId);
   const { createMandala } = useCreateMandala(projectId);
 
@@ -69,13 +73,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     );
   };
 
-  const handleCreatePostIt = (content: string, tag: Tag) => {
+  const handleCreatePostIt = (content: string, tags: Tag[]) => {
     createPostit({
       content: content,
       coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
       dimension: "Gobierno",
       section: "Institución",
-      tag: tag || null,
+      tags: tags || null,
+      childrens: [],
     });
   };
 
@@ -83,9 +88,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
 
   const handleNewTag = async (tag: Tag) => {
     try {
-      await createTag(tag.label, tag.color);
+      await createTag(tag.name, tag.color);
     } catch (error) {
       console.error("Error al crear el tag:", error);
+    }
+  };
+
+  const handleDeleteCharacter = async (index: number) => {
+    try {
+      await deleteCharacter(index);
+      return true;
+    } catch (e) {
+      console.error("Error al eliminar el personaje:", e);
+      return false;
     }
   };
 
@@ -107,6 +122,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
 
   return (
     <div className="overflow-hidden h-screen">
+      <BreadcrumbMandala />
       <div className="w-full bg-white flex items-center relative overflow-hidden">
         <Button
           onClick={() => navigate(-1)}
@@ -123,6 +139,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
           </p>
         </div>
       </div>
+      <QuestionMachineSidebar
+        sections={
+          mandala?.mandala.configuration.dimensions.map((dim) => dim.name) || []
+        }
+        scales={mandala?.mandala.configuration.scales || []}
+        open={isSidebarOpen}
+        onOpenChange={setIsSidebarOpen}
+      />
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (
           <>
@@ -154,11 +178,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
               {() => (
                 <>
                   <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-2">
                       <CharacterDropdown
                         characters={projectCharacters}
                         onAdd={linkCharacter}
                       />
+                      <Button
+                        variant="filled"
+                        color="primary"
+                        onClick={() => setIsSidebarOpen(true)}
+                        icon={<Sparkles size={16} />}
+                      >
+                        Herramientas IA
+                      </Button>
                     </div>
                   </div>
                   <div className="absolute top-4 right-4 z-20">
@@ -206,7 +238,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onPostItUpdate={updatePostit}
                         onPostItChildCreate={(
                           content: string,
-                          tag: Tag,
+                          tags: Tag[],
                           postitFatherId?: string
                         ) => {
                           createPostit(
@@ -218,10 +250,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                                 angle: 0,
                                 percentileDistance: 0,
                               },
-                              tag: tag,
+                              tags,
                               dimension: "Gobierno",
                               section: "Institución",
-                              parentId: postitFatherId,
+                              childrens: [],
                             },
                             postitFatherId
                           );
@@ -232,7 +264,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                         onDragEnd={() => setIsDraggingPostIt(false)}
                         appliedFilters={appliedFilters}
                         onPostItDelete={deletePostit}
-                        onCharacterDelete={async () => false} // TODO: implementar logica para eliminar personajes
+                        onCharacterDelete={(id: string) =>
+                          handleDeleteCharacter(parseInt(id))
+                        }
                         tags={tags}
                         onNewTag={handleNewTag}
                         state={state}

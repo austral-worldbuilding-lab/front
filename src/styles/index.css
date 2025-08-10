@@ -53,25 +53,24 @@
   --color-foreground: #000000;
 
   --color-primary: #172187;
-  --color-primary-hover: #121A67;
+  --color-primary-hover: #121a67;
   --color-primary-active: #172187;
   --color-primary-disabled: #172187;
 
-  --color-secondary: #DBA5E5;
-  --color-secondary-hover: #BE92C6;
-  --color-secondary-active: #DBA5E5;
-  --color-secondary-disabled: #DBA5E5;
+  --color-secondary: #dba5e5;
+  --color-secondary-hover: #be92c6;
+  --color-secondary-active: #dba5e5;
+  --color-secondary-disabled: #dba5e5;
 
-  --color-danger: #DC2626;
-  --color-danger-hover: #B91C1C;
-  --color-danger-active: #991B1B;
-  --color-danger-disabled: #DC2626;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-active: #991b1b;
+  --color-danger-disabled: #dc2626;
 
-  --color-tertiary: #DBA5E5;
-  --color-tertiary-hover: #BE92C6;
-  --color-tertiary-active: #DBA5E5;
-  --color-tertiary-disabled: #DBA5E5;
-
+  --color-tertiary: #dba5e5;
+  --color-tertiary-hover: #be92c6;
+  --color-tertiary-active: #dba5e5;
+  --color-tertiary-disabled: #dba5e5;
 }
 
 @theme inline {
@@ -194,14 +193,14 @@
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
-  background: #bfdbfe; /* bg-blue-100 */
+  background: #172187; /* bg-blue-100 */
   border-radius: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #93c5fd; /* bg-blue-200 */
+  background: #172187; /* bg-blue-200 */
   border-radius: 8px;
 }
 .custom-scrollbar {
-  scrollbar-color: #93c5fd #bfdbfe; /* thumb bg-blue-200, track bg-blue-100 */
+  scrollbar-color: #172187 #f3f3f378; /* thumb bg-blue-200, track bg-blue-100 */
   scrollbar-width: thin;
 }

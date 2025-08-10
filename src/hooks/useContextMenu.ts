@@ -7,31 +7,31 @@ interface ContextMenuState {
   visible: boolean;
   x: number;
   y: number;
-  postItIndex: number | null;
-  characterIndex: number | null;
+  postItId: string | null;
+  characterId: string | null;
   type: ContextMenuType;
 }
 
 export function useContextMenu(
-  onPostItDelete: (index: number) => Promise<boolean>,
-  onCharacterDelete: (index: number) => Promise<boolean>,
-  editableIndex: number | null,
+  onPostItDelete: (id: string) => Promise<boolean>,
+  onCharacterDelete: (id: string) => Promise<boolean>,
   setEditableIndex: (i: number | null) => void,
   setEditingContent: (content: string | null) => void,
-  onPostItCreateChild?: (index: number) => void
+  onPostItCreateChild?: (id: string) => void,
+  onPostItEdit?: (id: string) => void
 ) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
     x: 0,
     y: 0,
-    postItIndex: null,
-    characterIndex: null,
+    postItId: null,
+    characterId: null,
     type: null,
   });
 
   const showContextMenu = (
     e: KonvaEventObject<PointerEvent>,
-    index: number,
+    id: string,
     type: ContextMenuType
   ) => {
     e.evt.preventDefault();
@@ -45,8 +45,8 @@ export function useContextMenu(
       visible: true,
       x: pointer.x,
       y: pointer.y,
-      postItIndex: type === "postit" ? index : null,
-      characterIndex: type === "character" ? index : null,
+      postItId: type === "postit" ? id : null,
+      characterId: type === "character" ? id : null,
       type,
     });
   };
@@ -56,28 +56,20 @@ export function useContextMenu(
       visible: false,
       x: 0,
       y: 0,
-      postItIndex: null,
-      characterIndex: null,
+      postItId: null,
+      characterId: null,
       type: null,
     });
   };
 
   const handleDeletePostIt = async () => {
-    if (contextMenu.postItIndex !== null) {
+    if (contextMenu.postItId !== null) {
       try {
-        const success = await onPostItDelete(contextMenu.postItIndex);
+        const success = await onPostItDelete(contextMenu.postItId);
         if (success) {
           hideContextMenu();
-
-          if (editableIndex === contextMenu.postItIndex) {
-            setEditableIndex(null);
-            setEditingContent(null);
-          } else if (
-            editableIndex !== null &&
-            editableIndex > contextMenu.postItIndex
-          ) {
-            setEditableIndex(editableIndex - 1);
-          }
+          setEditableIndex(null);
+          setEditingContent(null);
         }
       } catch (error) {
         console.error("Error al eliminar postit:", error);
@@ -86,9 +78,9 @@ export function useContextMenu(
   };
 
   const handleDeleteCharacter = async () => {
-    if (contextMenu.characterIndex !== null) {
+    if (contextMenu.characterId !== null) {
       try {
-        const success = await onCharacterDelete(contextMenu.characterIndex);
+        const success = await onCharacterDelete(contextMenu.characterId);
         if (success) {
           hideContextMenu();
         }
@@ -109,10 +101,20 @@ export function useContextMenu(
   const handleCreateChild = () => {
     if (
       contextMenu.type === "postit" &&
-      contextMenu.postItIndex !== null &&
+      contextMenu.postItId !== null &&
       onPostItCreateChild
     ) {
-      onPostItCreateChild(contextMenu.postItIndex);
+      onPostItCreateChild(contextMenu.postItId);
+      hideContextMenu();
+    }
+  };
+  const handleEditPostIt = () => {
+    if (
+        contextMenu.type === "postit" &&
+        contextMenu.postItId !== null &&
+        onPostItEdit
+    ) {
+      onPostItEdit(contextMenu.postItId);
       hideContextMenu();
     }
   };
@@ -123,5 +125,6 @@ export function useContextMenu(
     hideContextMenu,
     handleDelete,
     handleCreateChild,
+    handleEditPostIt
   };
 }

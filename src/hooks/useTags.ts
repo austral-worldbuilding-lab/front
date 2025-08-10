@@ -4,19 +4,17 @@ import {
   createTag as createTagService,
 } from "@/services/projectService.ts";
 import { BackendTag } from "@/types/mandala";
+import {deleteTagService} from "../services/projectService";
+import { filterKeys } from "./useGetFilters";
 
 export const tagKeys = {
   all: ["tags"] as const,
   byProject: (projectId: string) => [...tagKeys.all, projectId] as const,
 };
 
-const filterKeys = {
-  all: ["filters"] as const,
-  byMandala: (mandalaId: string) => [...filterKeys.all, mandalaId] as const,
-};
-
 export interface TagFormat {
-  label: string;
+  id: string;
+  name: string;
   value: string;
   color: string;
 }
@@ -36,7 +34,8 @@ export function useTags(projectId: string) {
 
       const tagsFromBackend: BackendTag[] = await getTags(projectId);
       return tagsFromBackend.map((tag) => ({
-        label: tag.name,
+        id: tag.id,
+        name: tag.name,
         value: tag.name.toLowerCase(),
         color: tag.color,
       }));
@@ -52,7 +51,6 @@ export function useTags(projectId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagKeys.byProject(projectId) });
-
       queryClient.invalidateQueries({ queryKey: filterKeys.all });
     },
   });
@@ -64,11 +62,26 @@ export function useTags(projectId: string) {
     return createTagMutation.mutateAsync({ name, color });
   };
 
+  const deleteTagMutation = useMutation({
+    mutationFn: async (tagId: string) => {
+      return await deleteTagService(projectId, tagId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: tagKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: filterKeys.all });
+    },
+  });
+
+  const deleteTag = async (tagId: string) => {
+    return deleteTagMutation.mutateAsync(tagId);
+  };
+
   return {
     tags,
     isLoading,
     error,
     createTag,
+    deleteTag,
     refetch,
   };
 }
