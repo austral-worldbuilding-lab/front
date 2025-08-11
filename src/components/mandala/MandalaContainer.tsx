@@ -146,6 +146,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
         scales={mandala?.mandala.configuration.scales || []}
         open={isSidebarOpen}
         onOpenChange={setIsSidebarOpen}
+        mandalaId={mandalaId}
       />
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (

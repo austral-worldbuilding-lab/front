@@ -7,8 +7,18 @@ import { Sparkles } from "lucide-react";
 import Message from "./Message";
 import {MessageDTO} from "@/types/mandala";
 import {getMessages} from "@/services/chatService.ts";
+import {generateQuestionsService} from "@/services/questionMachineService.ts";
 
 interface QuestionMachineSidebarProps {
+  mandalaId: string;
+  sections?: string[];
+  scales?: string[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+interface QuestionMachineSidebarProps {
+  mandalaId: string;
   sections?: string[];
   scales?: string[];
   open?: boolean;
@@ -16,6 +26,7 @@ interface QuestionMachineSidebarProps {
 }
 
 const QuestionMachineSidebar: React.FC<QuestionMachineSidebarProps> = ({
+  mandalaId,
   sections = ["Seccion 1", "Seccion 2", "Seccion 2"],
   scales = ["Escala 1", "Escala 2", "Escala 2"],
   open = false,
@@ -27,6 +38,9 @@ const QuestionMachineSidebar: React.FC<QuestionMachineSidebarProps> = ({
   );
   const [activeScales, setActiveScales] = useState<Record<string, boolean>>({});
   const [messages, setMessages] = useState<MessageDTO[]>([]);
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionsError, setQuestionsError] = useState<string | null>(null);
 
   useEffect(() => {
     getMessages()
@@ -48,6 +62,29 @@ const QuestionMachineSidebar: React.FC<QuestionMachineSidebarProps> = ({
     }));
   };
 
+  const handleGenerateQuestions = async () => {
+    const selectedDimensions = Object.keys(activeSections).filter((k) => activeSections[k]);
+    const selectedScales     = Object.keys(activeScales).filter((k) => activeScales[k]);
+
+    const dims = selectedDimensions.length ? selectedDimensions : sections;
+    const scs  = selectedScales.length ? selectedScales : scales;
+
+    setLoadingQuestions(true);
+    setQuestionsError(null);
+    try {
+      const res = await generateQuestionsService(mandalaId, { dimensions: dims, scales: scs });
+      // filtrar mensajes vac[ios
+      const list = res
+          .map((q) => (q.question ?? "").trim())
+          .filter(Boolean);
+      setQuestions(list);
+    } catch (e: any) {
+      setQuestionsError(e?.message ?? "Error generando preguntas");
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[500px] px-4 py-[20px]">
@@ -64,15 +101,21 @@ const QuestionMachineSidebar: React.FC<QuestionMachineSidebarProps> = ({
             </TabsList>
             <TabsContent
               value="questions"
-              className="flex flex-col flex-1 justify-between"
-            >
-              <div className="flex flex-col h-[70%]">
-                <div className="relative w-full border rounded-lg mb-4 p-4 overflow-y-auto h-full">
-                  <Message
-                    message="Como es la economía en tu hogar?"
-                    isUser={false}
-                  />
-                  <Message message="Que suelen comprar?" isUser={false} />
+              className="flex flex-col flex-1 min-h-0 overflow-hidden"             >
+              <div className="flex-1 min-h-0">
+                <div className="h-full border rounded-lg mb-4 p-4 overflow-y-auto">
+                  {loadingQuestions && <p>Generando…</p>}
+                  {questionsError && <p className="text-red-600">{questionsError}</p>}
+
+                  {!loadingQuestions && !questionsError && questions.length === 0 && (
+                      <p>No hay preguntas para mostrar.</p>
+                  )}
+
+                  {!loadingQuestions && !questionsError && questions.length > 0 && (
+                      questions.map((q, index) => (
+                          <Message key={index} message={q} isUser={true} />
+                      ))
+                  )}
                 </div>
               </div>
 
@@ -108,7 +151,8 @@ const QuestionMachineSidebar: React.FC<QuestionMachineSidebarProps> = ({
                     size="lg"
                     variant="filled"
                     color="primary"
-                    icon={<Sparkles size={16} />}
+                    icon={<Sparkles size={16}/>}
+                    onClick={handleGenerateQuestions}
                   >
                     Generar Preguntas
                   </Button>
