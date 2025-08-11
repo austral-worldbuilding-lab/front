@@ -3,34 +3,32 @@ import useProjectUsers from "@/hooks/useProjectUsers";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 import { removeProjectUser } from "@/services/userService";
+import axiosInstance from "@/lib/axios";
+import ProjectUserRow, { Role } from "./ProjectUserRow";
 
 interface ProjectUserListProps {
   projectId: string;
-  canManage?: boolean; // pass true if current user is admin/owner
+  canManage: boolean;
 }
 
-const ProjectUserList = ({ projectId, canManage = false }: ProjectUserListProps) => {
+const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
   const { users, loading, error, refetch } = useProjectUsers(projectId);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  if (loading) {
-    return <div className="p-3">Cargando usuarios...</div>;
-  }
-
-  if (error) {
-    return <div className="p-3 text-red-600">{error}</div>;
-  }
-
-  if (users.length === 0) {
-    return (
-      <div className="p-3 text-muted-foreground">
-        No hay usuarios en este proyecto.
-      </div>
-    );
-  }
+  const onUpdateRole = async (userId: string, newRole: Role) => {
+    setActionError(null);
+    try {
+      await axiosInstance.patch(`/projects/${projectId}/users/${userId}`, {
+        role: newRole,
+      });
+      await refetch();
+    } catch (e: any) {
+      setActionError(e?.message ?? "Error al actualizar el rol");
+    }
+  };
 
   const onDelete = async () => {
     if (!selectedUserId) return;
@@ -47,36 +45,47 @@ const ProjectUserList = ({ projectId, canManage = false }: ProjectUserListProps)
     }
   };
 
+  if (loading) return <div className="p-3">Cargando usuarios...</div>;
+  if (error) return <div className="p-3 text-red-600">{error}</div>;
+  if (users.length === 0) {
+    return (
+      <div className="p-3 text-muted-foreground">
+        No hay usuarios en este proyecto.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
       {actionError && <div className="text-red-600 text-sm">{actionError}</div>}
+
       {users.map((u) => (
         <div
           key={u.id}
           className="flex items-center justify-between border rounded-md p-3"
         >
-          <div>
-            <div className="font-medium">{u.name ?? u.username ?? u.email}</div>
-            <div className="text-sm text-muted-foreground">{u.email}</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700">
-              {u.role}
-            </span>
-            {canManage && (
-              <Button
-                variant="outline"
-                color="danger"
-                loading={actionLoading && selectedUserId === u.id}
-                onClick={() => {
-                  setSelectedUserId(u.id);
-                  setConfirmOpen(true);
-                }}
-              >
-                Eliminar
-              </Button>
-            )}
-          </div>
+          <ProjectUserRow
+            userId={u.id}
+            name={u.name ?? u.username ?? u.email}
+            email={u.email}
+            initialRole={u.role as Role}
+            isAdmin={canManage}
+            onConfirm={onUpdateRole}
+          />
+
+          {canManage && (
+            <Button
+              variant="outline"
+              color="danger"
+              loading={actionLoading && selectedUserId === u.id}
+              onClick={() => {
+                setSelectedUserId(u.id);
+                setConfirmOpen(true);
+              }}
+            >
+              Eliminar
+            </Button>
+          )}
         </div>
       ))}
 
@@ -93,4 +102,4 @@ const ProjectUserList = ({ projectId, canManage = false }: ProjectUserListProps)
   );
 };
 
-export default ProjectUserList; 
+export default ProjectUserList;

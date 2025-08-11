@@ -31,4 +31,4 @@ export function useProjectUsers(projectId: string) {
   return { users, loading, error, refetch: fetchUsers };
 }
 
-export default useProjectUsers; 
+export default useProjectUsers;

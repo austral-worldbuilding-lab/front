@@ -34,9 +34,9 @@ const ProjectPage = () => {
 
   if (projectLoading) {
     return (
-        <div className="flex items-center justify-center h-screen">
-          <Loader size="large" text="Cargando proyecto..."/>
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <Loader size="large" text="Cargando proyecto..." />
+      </div>
     );
   }
 
@@ -45,18 +45,20 @@ const ProjectPage = () => {
   }
 
   return (
-      <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
+    <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
       <div className="absolute top-10 left-10">
         <Link to={`/app/project/`}>
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
       </div>
+
       <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 mb-10">
         <img src={logo} alt="logo" className="w-50 h-auto" />
         <h1 className="text-xl sm:text-2xl font-bold text-center break-words">
           Proyecto: {project?.name}
         </h1>
       </div>
+
       <div className="flex flex-col items-start justify-start max-w-lg w-full">
         <div className="flex gap-3 mb-10">
           <Button
@@ -66,6 +68,7 @@ const ProjectPage = () => {
           >
             Ver Mandalas
           </Button>
+
           <Button
             variant="outline"
             onClick={() => navigate(`/app/project/${projectId}/invite`)}
@@ -75,6 +78,7 @@ const ProjectPage = () => {
             Invitar
           </Button>
         </div>
+
         <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
           <div className="flex justify-between items-start">
             <h2 className="text-lg font-bold mb-4">Archivos del proyecto</h2>
@@ -85,8 +89,8 @@ const ProjectPage = () => {
 
         <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
           <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
+          {/* TODO: calcular canManage en base al rol del usuario autenticado */}
           <ProjectUserList projectId={projectId} canManage={true} />
-           {/*TODO ana: calcular canManage en base a rol del usuario*/}
         </div>
       </div>
     </div>
