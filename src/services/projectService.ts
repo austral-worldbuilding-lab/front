@@ -15,6 +15,11 @@ export const getProjects = async (page : number, limit : number): Promise<Projec
   return response.data.data;
 }
 
+export const getProject = async (id: string): Promise<Project> => {
+    const response = await axiosInstance.get<{ data: Project }>(`/project/${id}`);
+    return response.data.data;
+}
+
 export const createProject = async (project: CreateProject): Promise<Project> => {
 
   const response = await axiosInstance.post("/project", project);
@@ -56,3 +61,17 @@ export const createTag = async (
 
   return response.data.data;
 };
+
+export const deleteTagService = async (
+    projectId: string,
+    tagId: string
+): Promise<void> => {
+  const response = await axiosInstance.delete(
+      `/project/${projectId}/tags/${tagId}`
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Error deleting tag.");
+  }
+};
+

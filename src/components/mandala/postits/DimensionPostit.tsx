@@ -5,9 +5,11 @@ import { isDarkColor } from "@/utils/colorUtils";
 
 interface EditablePostitCardProps {
     postit: Postit;
-    color: string;
+    color?: string;
     onUpdate: (updates: Partial<Postit>) => Promise<boolean>;
     onDelete: () => Promise<boolean>;
+    onCreateChild?: () => void;
+    onEdit?: () => void;
     width?: number;
     height?: number;
     padding?: number;
@@ -18,9 +20,11 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
        color,
        onUpdate,
        onDelete,
+       onCreateChild,
+       onEdit,
        width = 80,
        height = 80,
-       padding = 5,
+       padding = 8,
     }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingContent, setEditingContent] = useState(postit.content);
@@ -29,7 +33,8 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-    const textColor = isDarkColor(color) ? "white" : "black";
+    const fixedColor = color ?? "#facc15";
+    const textColor = isDarkColor(fixedColor) ? "white" : "black";
 
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
@@ -68,12 +73,26 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
         setShowMenu(false);
     };
 
+    const handleCreateChild = () => {
+        if (onCreateChild) {
+            onCreateChild();
+            setShowMenu(false);
+        }
+    };
+    const handleEdit = () => {
+        if (onEdit) {
+            onEdit();
+            setShowMenu(false);
+        }
+    };
+
+
     return (
         <>
             <div
                 className="relative text-sm whitespace-pre-line break-words overflow-hidden rounded-[4px]"
                 style={{
-                    backgroundColor: color,
+                    backgroundColor: fixedColor,
                     color: textColor,
                     width,
                     height,
@@ -99,7 +118,7 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                             width: width,
                             height: height,
                             padding: padding,
-                            backgroundColor: color,
+                            backgroundColor: fixedColor,
                             color: textColor,
                             boxSizing: "border-box",
                             fontSize: 11,
@@ -138,7 +157,11 @@ const DimensionPostit: React.FC<EditablePostitCardProps> = ({
                         className="fixed z-50"
                         style={{ left: menuPosition.x, top: menuPosition.y }}
                     >
-                        <MandalaMenu onDelete={handleDelete} isContextMenu />
+                        <MandalaMenu
+                            onDelete={handleDelete}
+                            onCreateChild={handleCreateChild}
+                            onEdit={handleEdit}
+                            isContextMenu />
                     </div>
                 </>
             )}

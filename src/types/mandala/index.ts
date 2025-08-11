@@ -25,12 +25,13 @@ export interface Postit {
   coordinates: PostitCoordinates;
   dimension: string;
   section: string;
-  tag: Tag;
-  parentId?: string | null;
+  tags: Tag[];
+  childrens: Postit[];
 }
 
 export interface Tag {
-  label: string;
+  id: string;
+  name: string;
   value?: string;
   color: string;
 }
@@ -116,4 +117,11 @@ export interface BackendTag {
   name: string;
   color: string;
   projectId: string;
+}
+
+export interface MessageDTO {
+  id: string;
+  content: string;
+  isUser: boolean;
+  createdAt: Date;
 }

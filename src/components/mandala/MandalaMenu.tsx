@@ -1,16 +1,22 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { MoreVertical, Plus } from "lucide-react";
+import {MoreVertical, Pencil, Plus, Trash2} from "lucide-react";
 
 interface MandalaMenuProps {
   onDelete: () => void;
   onCreateChild?: () => void;
+  onEdit?: () => void;
   isContextMenu?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const MandalaMenu = ({
   onDelete,
   onCreateChild,
+    onEdit,
   isContextMenu = false,
+  open,
+  onOpenChange,
 }: MandalaMenuProps) => {
   if (isContextMenu) {
     return (
@@ -24,18 +30,28 @@ const MandalaMenu = ({
             Crear Hijo
           </button>
         )}
-        <button
-          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left"
+          {onEdit && (
+              <button
+                  className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
+                  onClick={onEdit}
+              >
+                  <Pencil size={14} />
+                  Editar
+              </button>
+          )}
+          <button
+          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
           onClick={onDelete}
         >
-          Eliminar
+            <Trash2 size={14} />
+            Eliminar
         </button>
       </div>
     );
   }
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={onOpenChange}>
       <DropdownMenu.Trigger asChild>
         <button className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-gray-200 active:bg-gray-300">
           <MoreVertical className="w-4 h-4" />
@@ -56,10 +72,11 @@ const MandalaMenu = ({
           </DropdownMenu.Item>
         )}
         <DropdownMenu.Item
-          className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600"
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
           onSelect={onDelete}
         >
-          Eliminar
+            <Trash2 size={14} />
+            Eliminar
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

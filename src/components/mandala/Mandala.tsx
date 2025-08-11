@@ -27,17 +27,17 @@ const Mandala: React.FC<MandalaProps> = ({
     )}, ${a.toFixed(2)})`;
   }
 
-  const maxRadius = 600;
   const config = mandala.mandala.configuration;
+  const scaleCount = config?.scales?.length || 1;
+  const maxRadius = 150 * scaleCount;
 
   const levels =
     config?.scales?.map((name, index) => {
-      const t = (index + 1) / config.scales.length;
       return {
         id: `level-${index}`,
         name,
-        radius: t * 600,
-        color: getInterpolatedLevelColor(index, config.scales.length),
+        radius: 150 * (index + 1),
+        color: getInterpolatedLevelColor(index, scaleCount),
       };
     }) ?? Levels;
 
