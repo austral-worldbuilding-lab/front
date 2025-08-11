@@ -14,6 +14,7 @@ import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
 import ProjectListPage from "./pages/app/project/ProjectListPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
+import InviteUserPage from "./pages/app/project/InviteUserPage";
 import RootRedirect from "@/components/common/RootRedirect.tsx";
 
 
@@ -63,6 +64,10 @@ function App() {
           <Route
               path="project/:projectId/mandala/:mandalaId/dimension/:dimensionName"
               element={<DimensionPage />}
+          />
+          <Route
+            path="project/:projectId/invite"
+            element={<InviteUserPage />}
           />
         </Route>
 
