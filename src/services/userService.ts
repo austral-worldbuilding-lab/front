@@ -31,3 +31,7 @@ export async function getProjectUsers(projectId: string): Promise<ProjectUser[]>
     const list = Array.isArray(raw) ? raw : raw?.data ?? raw?.users;
     return (list ?? []) as ProjectUser[];
 }
+
+export async function removeProjectUser(projectId: string, userId: string): Promise<void> {
+    await axiosInstance.delete(`/project/${projectId}/users/${userId}`);
+}
