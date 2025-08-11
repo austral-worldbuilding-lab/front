@@ -1,34 +1,52 @@
+import { useState } from "react";
 import useProjectUsers from "@/hooks/useProjectUsers";
-import ProjectUserRow from "./ProjectUserRow";
+import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/common/ConfirmationDialog";
+import { removeProjectUser } from "@/services/userService";
 import axiosInstance from "@/lib/axios";
-
-export type Role = "admin" | "member";
+import ProjectUserRow, { Role } from "./ProjectUserRow";
 
 interface ProjectUserListProps {
   projectId: string;
-  isAdmin?: boolean;
+  canManage: boolean;
 }
 
-export default function ProjectUserList({
-  projectId,
-  isAdmin,
-}: ProjectUserListProps) {
-  const { users, loading, error } = useProjectUsers(projectId);
+const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
+  const { users, loading, error, refetch } = useProjectUsers(projectId);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const onUpdateRole = async (userId: string, newRole: Role) => {
-    await axiosInstance.patch(`/projects/${projectId}/users/${userId}`, {
-      role: newRole,
-    });
+    setActionError(null);
+    try {
+      await axiosInstance.patch(`/projects/${projectId}/users/${userId}`, {
+        role: newRole,
+      });
+      await refetch();
+    } catch (e: any) {
+      setActionError(e?.message ?? "Error al actualizar el rol");
+    }
   };
 
-  if (loading) {
-    return <div className="p-3">Cargando usuarios...</div>;
-  }
+  const onDelete = async () => {
+    if (!selectedUserId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      await removeProjectUser(projectId, selectedUserId);
+      await refetch();
+    } catch (e: any) {
+      setActionError(e?.message ?? "Error al eliminar el usuario");
+    } finally {
+      setActionLoading(false);
+      setSelectedUserId(null);
+    }
+  };
 
-  if (error) {
-    return <div className="p-3 text-red-600">{error}</div>;
-  }
-
+  if (loading) return <div className="p-3">Cargando usuarios...</div>;
+  if (error) return <div className="p-3 text-red-600">{error}</div>;
   if (users.length === 0) {
     return (
       <div className="p-3 text-muted-foreground">
@@ -39,17 +57,49 @@ export default function ProjectUserList({
 
   return (
     <div className="space-y-2">
+      {actionError && <div className="text-red-600 text-sm">{actionError}</div>}
+
       {users.map((u) => (
-        <ProjectUserRow
+        <div
           key={u.id}
-          userId={u.id}
-          name={u.name ?? u.username ?? u.email}
-          email={u.email}
-          initialRole={u.role as Role}
-          isAdmin={isAdmin}
-          onConfirm={onUpdateRole}
-        />
+          className="flex items-center justify-between border rounded-md p-3"
+        >
+          <ProjectUserRow
+            userId={u.id}
+            name={u.name ?? u.username ?? u.email}
+            email={u.email}
+            initialRole={u.role as Role}
+            isAdmin={canManage}
+            onConfirm={onUpdateRole}
+          />
+
+          {canManage && (
+            <Button
+              variant="outline"
+              color="danger"
+              loading={actionLoading && selectedUserId === u.id}
+              onClick={() => {
+                setSelectedUserId(u.id);
+                setConfirmOpen(true);
+              }}
+            >
+              Eliminar
+            </Button>
+          )}
+        </div>
       ))}
+
+      <ConfirmationDialog
+        isOpen={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Eliminar usuario"
+        description="Esta acción eliminará al usuario del proyecto. ¿Continuar?"
+        confirmText="Eliminar"
+        isDanger
+        onConfirm={onDelete}
+      />
     </div>
   );
-}
+};
+
+export default ProjectUserList;
