@@ -1,0 +1,20 @@
+[
+  {
+    "id": "0001",
+    "isUser": false,
+    "content": "¡Hola! ¿En qué puedo ayudarte?",
+    "createdAt": "2025-08-10T12:00:00.000Z"
+  },
+  {
+    "id": "0002",
+    "isUser": true,
+    "content": "No entiendo la diferencia entre salud y ecología en el contexto de mi proyecto.",
+    "createdAt": "2025-08-10T12:00:10.000Z"
+  },
+  {
+    "id": "0003",
+    "isUser": false,
+    "content": "Según los archivos que cargaste al proyecto, te daré ejemplos concretos de las dimensiones Salud y Ecología. ¿Quieres también que genere post-its?.",
+    "createdAt": "2025-08-10T12:00:10.000Z"
+  }
+]

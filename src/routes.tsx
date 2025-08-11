@@ -15,6 +15,7 @@ import ProjectPage from "./pages/app/project/ProjectPage";
 import ProjectListPage from "./pages/app/project/ProjectListPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 import InviteUserPage from "./pages/app/project/InviteUserPage";
+import RootRedirect from "@/components/common/RootRedirect.tsx";
 
 
 // Layout component for all protected routes
@@ -22,18 +23,13 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>{children}</ProtectedRoute>
 );
 
-// const projectId = "e2e9e2d5-e3c7-47e4-9f12-4f6f40062eee";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirect root to /mandala */}
-        {/* TODO: This is temporary, change this path when we have a home page */}
-        <Route
-          path="/"
-          element={<Navigate to={`/app/project/`} replace />}
-        />
+        <Route path="/" element={<RootRedirect />} />
+
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

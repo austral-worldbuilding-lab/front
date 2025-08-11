@@ -1,10 +1,12 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import ToggleBadge from "@/components/ui/toggle-badge";
 import { Sparkles } from "lucide-react";
 import Message from "./Message";
+import {MessageDTO} from "@/types/mandala";
+import {getMessages} from "@/services/chatService.ts";
 
 interface QuestionMachineSidebarProps {
   sections?: string[];
@@ -24,6 +26,13 @@ const QuestionMachineSidebar: React.FC<QuestionMachineSidebarProps> = ({
     {}
   );
   const [activeScales, setActiveScales] = useState<Record<string, boolean>>({});
+  const [messages, setMessages] = useState<MessageDTO[]>([]);
+
+  useEffect(() => {
+    getMessages()
+        .then(setMessages)
+        .catch((e) => console.error("Error cargando chat:", e));
+  }, []);
 
   const handleSectionToggle = (section: string) => {
     setActiveSections((prev) => ({
@@ -109,8 +118,23 @@ const QuestionMachineSidebar: React.FC<QuestionMachineSidebarProps> = ({
             <TabsContent value="chat" className="flex-1 p-4">
               <div className="h-full flex flex-col">
                 <div className="flex-1 border rounded-lg p-4 mb-4">
-                  <p className="text-gray-500">El chat aparecerá aquí...</p>
-                </div>
+                  {messages.length === 0 ? (
+                      <p className="text-gray-500">No hay mensajes para mostrar…</p>
+                  ) : (
+                      <div className="flex flex-col gap-2">
+                        {messages.map((m) => (
+                            <div
+                                key={m.id}
+                                className={`flex ${m.isUser ? "justify-end" : "justify-start"}`}
+                            >
+                              <Message
+                                  isUser={m.isUser}
+                                  message={m.content}
+                              />
+                            </div>
+                        ))}
+                      </div>
+                  )}                </div>
                 <div className="flex gap-2">
                   <input
                     type="text"

@@ -118,3 +118,10 @@ export interface BackendTag {
   color: string;
   projectId: string;
 }
+
+export interface MessageDTO {
+  id: string;
+  content: string;
+  isUser: boolean;
+  createdAt: Date;
+}
