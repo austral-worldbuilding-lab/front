@@ -85,7 +85,7 @@ const ProjectPage = () => {
 
         <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
           <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
-          <ProjectUserList projectId={projectId} />
+          <ProjectUserList projectId={projectId} isAdmin />
         </div>
       </div>
     </div>

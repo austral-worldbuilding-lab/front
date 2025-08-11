@@ -1,11 +1,25 @@
 import useProjectUsers from "@/hooks/useProjectUsers";
+import ProjectUserRow from "./ProjectUserRow";
+import axiosInstance from "@/lib/axios";
+
+export type Role = "admin" | "member";
 
 interface ProjectUserListProps {
   projectId: string;
+  isAdmin?: boolean;
 }
 
-const ProjectUserList = ({ projectId }: ProjectUserListProps) => {
+export default function ProjectUserList({
+  projectId,
+  isAdmin,
+}: ProjectUserListProps) {
   const { users, loading, error } = useProjectUsers(projectId);
+
+  const onUpdateRole = async (userId: string, newRole: Role) => {
+    await axiosInstance.patch(`/projects/${projectId}/users/${userId}`, {
+      role: newRole,
+    });
+  };
 
   if (loading) {
     return <div className="p-3">Cargando usuarios...</div>;
@@ -26,23 +40,16 @@ const ProjectUserList = ({ projectId }: ProjectUserListProps) => {
   return (
     <div className="space-y-2">
       {users.map((u) => (
-        <div
+        <ProjectUserRow
           key={u.id}
-          className="flex items-center justify-between border rounded-md p-3"
-        >
-          <div>
-            <div className="font-medium">{u.name ?? u.username ?? u.email}</div>
-            <div className="text-sm text-muted-foreground">{u.email}</div>
-          </div>
-          <div>
-            <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700">
-              {u.role}
-            </span>
-          </div>
-        </div>
+          userId={u.id}
+          name={u.name ?? u.username ?? u.email}
+          email={u.email}
+          initialRole={u.role as Role}
+          isAdmin={isAdmin}
+          onConfirm={onUpdateRole}
+        />
       ))}
     </div>
   );
-};
-
-export default ProjectUserList; 
+}
