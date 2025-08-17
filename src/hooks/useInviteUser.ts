@@ -3,11 +3,12 @@ import {
   createInvitation,
   CreateInvitationDto,
   InvitationResponse,
+  Role,
 } from "@/services/invitationService";
 import { useAuth } from "./useAuth";
 
 type Result = {
-  invite: (email: string) => Promise<InvitationResponse | void>;
+  invite: (email: string, role: Role) => Promise<InvitationResponse | void>;
   loading: boolean;
   error: string | null;
   success: boolean;
@@ -22,7 +23,7 @@ export default function useInviteUser(projectId?: string): Result {
   const { user } = useAuth();
 
   const invite = useCallback(
-    async (email: string) => {
+    async (email: string, role: Role) => {
       if (!projectId) {
         setError("Falta projectId");
         return;
@@ -37,6 +38,7 @@ export default function useInviteUser(projectId?: string): Result {
           email: email.trim(),
           projectId,
           invitedById,
+          role,
         };
         const resp = await createInvitation(payload);
         setSuccess(true);

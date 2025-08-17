@@ -9,13 +9,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Badge } from "../ui/badge";
-
-export type Role = "admin" | "member";
-
-const RoleLabel: Record<Role, string> = {
-  admin: "Admin",
-  member: "Miembro",
-};
+import { Role, ROLES } from "@/services/invitationService";
 
 export default function ProjectUserRow({
   userId,
@@ -96,15 +90,18 @@ export default function ProjectUserRow({
             <SelectTrigger className="h-8 w-[160px]">
               <SelectValue placeholder="Seleccionar rol" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="admin">{RoleLabel.admin}</SelectItem>
-              <SelectItem value="member">{RoleLabel.member}</SelectItem>
+            <SelectContent className="z-[200] !bg-white dark:!bg-neutral-900 [&>*]:!bg-white dark:[&>*]:!bg-neutral-900">
+              {ROLES.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       ) : (
         <Badge variant="secondary" className="text-xs">
-          {RoleLabel[prevRole]}
+          {prevRole.charAt(0).toUpperCase() + prevRole.slice(1)}
         </Badge>
       )}
     </div>
