@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 import { removeProjectUser } from "@/services/userService";
 import axiosInstance from "@/lib/axios";
-import ProjectUserRow, { Role } from "./ProjectUserRow";
+import ProjectUserRow from "./ProjectUserRow";
+import { Role } from "@/services/invitationService";
 
 interface ProjectUserListProps {
   projectId: string;

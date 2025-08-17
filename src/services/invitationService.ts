@@ -18,6 +18,7 @@ export type CreateInvitationDto = {
   email: string;
   projectId: string; // UUID
   invitedById: string; // UUID
+  role: Role;
 };
 
 export type InvitationResponse = {
@@ -25,9 +26,13 @@ export type InvitationResponse = {
   email: string;
   projectId: string;
   invitedById: string;
+  role?: Role;
   status: "pending" | "sent" | "accepted" | "rejected";
   createdAt: string;
 };
+
+export const ROLES = ["owner", "admin", "member", "viewer"] as const;
+export type Role = (typeof ROLES)[number];
 
 export async function createInvitation(
   payload: CreateInvitationDto
@@ -37,20 +42,24 @@ export async function createInvitation(
 }
 
 export async function acceptInvitation(
-    invitationId: string
+  invitationId: string
 ): Promise<{ projectId: string; invitation: Invitation }> {
-    const response = await axiosInstance.post(`/invitation/${invitationId}/accept`, {});
-    const invitation = (response.data && (response.data.data ?? response.data)) as any;
+  const response = await axiosInstance.post(
+    `/invitation/${invitationId}/accept`,
+    {}
+  );
+  const invitation = (response.data &&
+    (response.data.data ?? response.data)) as any;
 
-    const projectId: string | undefined = invitation?.projectId;
+  const projectId: string | undefined = invitation?.projectId;
 
-    if (!projectId) {
-        throw new Error("No se pudo obtener el proyecto de la invitación aceptada");
-    }
+  if (!projectId) {
+    throw new Error("No se pudo obtener el proyecto de la invitación aceptada");
+  }
 
-    return { projectId, invitation };
+  return { projectId, invitation };
 }
 
 export async function rejectInvitation(invitationId: string): Promise<void> {
-    await axiosInstance.post(`/invitation/${invitationId}/reject`, {});
+  await axiosInstance.post(`/invitation/${invitationId}/reject`, {});
 }
