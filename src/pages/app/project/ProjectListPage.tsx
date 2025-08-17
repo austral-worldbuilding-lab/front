@@ -1,7 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
 import Loader from "@/components/common/Loader";
-import { PlusIcon, FolderIcon, ChevronRight, ChevronLeft } from "lucide-react";
+import {PlusIcon, FolderIcon, ChevronRight, ChevronLeft, ArrowLeftIcon} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { createProject } from "@/services/projectService.ts";
@@ -9,7 +9,8 @@ import { useAuthContext } from "@/context/AuthContext.tsx";
 import CreateProjectModal from "@/components/project/CreateProjectModal.tsx";
 
 const ProjectListPage = () => {
-  const { projects, loading, page, setPage, error } = useProjects();
+  const {organizationId} = useParams()
+  const { projects, loading, page, setPage, error } = useProjects(organizationId!);
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const [modalOpen, setModalOpen] = useState(false);
@@ -20,7 +21,7 @@ const ProjectListPage = () => {
     setCreating(true);
     try {
       if (!user) throw new Error("Usuario no autenticado");
-      const project = await createProject({ name: name, userId: user.uid });
+      const project = await createProject({ name: name, userId: user.uid, organizationId: organizationId! });
       setModalOpen(false);
       navigate(`/app/project/${project.id}`);
     } catch (error) {
@@ -34,7 +35,13 @@ const ProjectListPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start pt-12">
-      <div className="w-full max-w-2xl px-4">
+        <div className="absolute top-10 left-10">
+          <Link to={`/app/organization/`}>
+            <ArrowLeftIcon className="w-5 h-5"/>
+          </Link>
+        </div>
+
+        <div className="w-full max-w-2xl px-4">
         <h1 className="text-2xl font-bold mb-6 text-center">Proyectos</h1>
         <Button
           color="primary"
@@ -64,7 +71,7 @@ const ProjectListPage = () => {
                   className="hover:bg-gray-50 transition-colors"
                 >
                   <Link
-                    to={`/app/project/${project.id}`}
+                    to={`/app/organization/${organizationId}/projects/${project.id}`}
                     className="flex items-center gap-3 p-4 text-gray-800 hover:text-blue-600 transition-colors"
                   >
                     <FolderIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />

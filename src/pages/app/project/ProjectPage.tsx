@@ -11,7 +11,7 @@ import useProject from "@/hooks/useProject.ts";
 import ProjectUserList from "@/components/project/ProjectUserList";
 
 const ProjectPage = () => {
-  const { projectId } = useParams();
+  const { projectId, organizationId } = useParams<{ projectId: string; organizationId: string }>();
   const navigate = useNavigate();
 
   const [files, setFiles] = useState<ProjectFile[]>([]);
@@ -47,7 +47,7 @@ const ProjectPage = () => {
   return (
     <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
       <div className="absolute top-10 left-10">
-        <Link to={`/app/project/`}>
+        <Link to={`/app/organization/${organizationId}/projects`}>
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
       </div>
@@ -63,7 +63,7 @@ const ProjectPage = () => {
         <div className="flex gap-3 mb-10">
           <Button
             color="primary"
-            onClick={() => navigate(`/app/project/${projectId}/mandalas`)}
+            onClick={() => navigate(`/app/organization/${organizationId}/projects/${projectId}/mandalas`)}
             icon={<Eye size={16} />}
           >
             Ver Mandalas
@@ -71,7 +71,7 @@ const ProjectPage = () => {
 
           <Button
             variant="outline"
-            onClick={() => navigate(`/app/project/${projectId}/invite`)}
+            onClick={() => navigate(`/app/organization/${organizationId}/projects/${projectId}/invite`)}
             icon={<UserPlus size={16} />}
             aria-label="Invitar miembros al proyecto"
           >

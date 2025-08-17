@@ -99,6 +99,7 @@ export interface Project {
 export interface CreateProject {
   name: string;
   userId: string;
+  organizationId: string;
 }
 
 export interface FilterOption {

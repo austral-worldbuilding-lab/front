@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 const InviteUserPage = () => {
-  const { projectId } = useParams();
+  const { organizationId, projectId } = useParams<{ organizationId: string, projectId: string }>();
   const navigate = useNavigate();
   const { project, loading } = useProject(projectId);
 
@@ -36,7 +36,7 @@ const InviteUserPage = () => {
   return (
     <div className="p-6 min-h-screen flex flex-col items-center relative">
       <div className="absolute top-10 left-10">
-        <Link to={`/app/project/${projectId}`}>
+        <Link to={`/app/organization/${organizationId}/projects/${projectId}`}>
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
       </div>
