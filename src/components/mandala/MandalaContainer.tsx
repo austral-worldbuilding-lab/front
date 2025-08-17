@@ -10,7 +10,7 @@ import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Filter, Sparkles } from "lucide-react";
+import { ArrowLeftIcon, Filter, InfoIcon, Sparkles } from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "@/types/mandala";
@@ -21,6 +21,15 @@ import { useProjectCharacters } from "../../hooks/useProjectCharacters";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
 import BreadcrumbMandala from "@/components/mandala/BreadcrumbMandala.tsx";
 import QuestionMachineSidebar from "./sidebar/QuestionMachineSidebar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import useProject from "@/hooks/useProject";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -104,6 +113,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     }
   };
 
+  const project = useProject(projectId);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center w-screen h-screen">
@@ -137,6 +148,37 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
           <p className="text-lg text-black font-bold">
             {mandala?.mandala.name}
           </p>
+        </div>
+        {/* Botón Info + Diálogo */}
+        <div className="ml-auto pr-4">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label="Información del proyecto"
+              >
+                <InfoIcon className="w-5 h-5 text-primary" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{project.project?.name ?? "Proyecto"}</DialogTitle>
+                <DialogDescription>
+                  {project.project?.description &&
+                  project.project?.description.trim().length > 0 ? (
+                    <p className="text-sm leading-6 whitespace-pre-wrap">
+                      {project.project.description}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">
+                      Este proyecto no tiene descripción.
+                    </p>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <QuestionMachineSidebar
