@@ -1,11 +1,17 @@
 import { Link } from "react-router-dom";
-import {Building2, ChevronLeft, ChevronRight} from "lucide-react";
+import {Building2, ChevronLeft, ChevronRight, PlusIcon} from "lucide-react";
 import Loader from "@/components/common/Loader.tsx";
 import useOrganizations from "@/hooks/useOrganizations.ts";
 import {Button} from "@/components/ui/button.tsx";
+import {useState} from "react";
+import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
+import {useCreateOrganization} from "@/hooks/useCreateOrganization.ts";
 
 const OrganizationListPage = () => {
     const { organizations, loading, error, page, setPage } = useOrganizations();
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const { createOrganization, loading: creating, error: errorMsg } = useCreateOrganization();
 
     if (loading)
         return (
@@ -20,6 +26,14 @@ const OrganizationListPage = () => {
         <div className="min-h-screen flex flex-col items-center pt-12">
             <div className="w-full max-w-2xl px-4">
                 <h1 className="text-2xl font-bold mb-6 text-center">Organizaciones</h1>
+                <Button
+                    color="primary"
+                    className="mb-6"
+                    onClick={() => setModalOpen(true)}
+                    icon={<PlusIcon size={16} />}
+                >
+                    Crear Organización
+                </Button>
 
                 <div className="bg-white rounded-lg shadow-sm border">
                     {organizations.length === 0 ? (
@@ -59,6 +73,15 @@ const OrganizationListPage = () => {
                     />
                 </div>
             </div>
+            <CreateEntityModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onCreate={createOrganization}
+                loading={creating}
+                error={errorMsg}
+                title="Crear Organización"
+                placeholder="Nombre de la organización"
+            />
         </div>
     );
 };
