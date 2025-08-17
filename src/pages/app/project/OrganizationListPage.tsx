@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
-import { Building2 } from "lucide-react";
+import {Building2, ChevronLeft, ChevronRight} from "lucide-react";
 import Loader from "@/components/common/Loader.tsx";
 import useOrganizations from "@/hooks/useOrganizations.ts";
+import {Button} from "@/components/ui/button.tsx";
 
 const OrganizationListPage = () => {
-    const { organizations, loading, error } = useOrganizations();
+    const { organizations, loading, error, page, setPage } = useOrganizations();
 
     if (loading)
         return (
@@ -41,6 +42,21 @@ const OrganizationListPage = () => {
                             ))}
                         </ul>
                     )}
+                </div>
+                <div className="flex justify-center items-center gap-4 mt-6">
+                    <Button
+                        variant="outline"
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
+                        icon={<ChevronLeft size={16}/>}
+                    />
+                    <span>Página {page}</span>
+                    <Button
+                        variant="outline"
+                        onClick={() => setPage(page + 1)}
+                        disabled={organizations.length < 10}
+                        icon={<ChevronRight size={16}/>}
+                    />
                 </div>
             </div>
         </div>

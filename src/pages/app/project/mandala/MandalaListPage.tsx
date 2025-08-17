@@ -63,7 +63,7 @@ const MandalaListPage = () => {
         try {
             const id = await createMandala(name, description, color, useAIMandala, dimensions, scales);
             setIsCreateModalOpen(false);
-            navigate(`/app/project/${projectId}/mandala/${id}`);
+            navigate(`/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`);
         } catch (err: any) {
             const msg = err?.message ?? err?.response?.data?.message ?? "";
             if (msg.includes("Este proyecto no tiene archivos")) {

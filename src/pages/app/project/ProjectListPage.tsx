@@ -23,7 +23,7 @@ const ProjectListPage = () => {
       if (!user) throw new Error("Usuario no autenticado");
       const project = await createProject({ name: name, userId: user.uid, organizationId: organizationId! });
       setModalOpen(false);
-      navigate(`/app/project/${project.id}`);
+      navigate(`/app/organization/${organizationId}/projects/${project.id}`);
     } catch (error) {
       setErrorMsg(
         error instanceof Error ? error.message : "Error al crear proyecto"

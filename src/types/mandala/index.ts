@@ -126,3 +126,8 @@ export interface MessageDTO {
   isUser: boolean;
   createdAt: Date;
 }
+
+export interface Organization {
+  id: string;
+  name: string;
+}

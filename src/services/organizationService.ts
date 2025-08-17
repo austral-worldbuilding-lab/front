@@ -1,12 +1,11 @@
 import axiosInstance from "@/lib/axios";
+import {Organization} from "@/types/mandala";
 
-export interface Organization {
-    id: string;
-    name: string;
-}
 
-export const getOrganizations = async (): Promise<Organization[]> => {
-    const response = await axiosInstance.get<{ data: Organization[] }>("/organization");
+export const getOrganizations = async (page: number, limit: number): Promise<Organization[]> => {
+    const response = await axiosInstance.get<{ data: Organization[] }>(
+        `/organization?page=${page}&limit=${limit}`
+    );
 
     if (response.status !== 200) {
         throw new Error("Error al cargar organizaciones");
