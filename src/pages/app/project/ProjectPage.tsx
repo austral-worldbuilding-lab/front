@@ -57,6 +57,20 @@ const ProjectPage = () => {
         <h1 className="text-xl sm:text-2xl font-bold text-center break-words">
           Proyecto: {project?.name}
         </h1>
+
+        {/* Descripción del proyecto */}
+        <div className="w-full">
+          <h2 className="text-base font-semibold mb-1">Descripción</h2>
+          {project?.description && project.description.trim().length > 0 ? (
+            <p className="text-sm leading-6 break-words whitespace-pre-wrap">
+              {project.description}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              Este proyecto no tiene descripción.
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col items-start justify-start max-w-lg w-full">
