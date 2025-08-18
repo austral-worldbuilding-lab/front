@@ -28,7 +28,6 @@ export default function GeneratorTab({
         scales: Object.fromEntries(scales.map((s) => [s, false])),
     });
 
-    // valores seleccionados con fallback a defaults:
     const selected = useMemo(() => {
         const selSections = Object.keys(filters.sections).filter((k) => filters.sections[k]);
         const selScales = Object.keys(filters.scales).filter((k) => filters.scales[k]);
@@ -40,7 +39,6 @@ export default function GeneratorTab({
 
     return (
         <div className="flex-1 min-h-0 flex flex-col">
-            {/* padding del contenedor, sin romper el alto disponible */}
             <div className="px-4 pt-3 flex-1 min-h-0 flex flex-col">
                 <Tabs
                     value={activeTab}
@@ -67,7 +65,6 @@ export default function GeneratorTab({
                         <PostItsPanel
                             mandalaId={mandalaId}
                             selected={selected}
-                            // 🔗 Integramos con el flujo real:
                             tags={tags}
                             onCreate={onCreatePostIt}
                             onNewTag={onNewTag}

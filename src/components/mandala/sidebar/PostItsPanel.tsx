@@ -37,7 +37,6 @@ export default function PostItsPanel({
 
     return (
         <div className="flex-1 min-h-0 flex flex-col gap-3">
-            {/* Área scrollable de alto completo */}
             <div className="flex-1 min-h-0">
                 <div
                     className={`h-full border rounded-lg p-4 overflow-y-auto custom-scrollbar ${
@@ -76,7 +75,7 @@ export default function PostItsPanel({
                 </div>
             </div>
 
-            {/* Filtros + botón Generar (sticky) */}
+            {/* Filtros + botón Generar*/}
             <div className="mt-2">
                 {children}
                 <div className="sticky bottom-0 bg-background pt-3 pb-4">

@@ -21,7 +21,6 @@ export function useQuestionGenerator(mandalaId: string) {
                     { dimensions, scales }
                 );
 
-                // ⬇️ Normalizamos a array de strings (solo la pregunta)
                 const items = (res ?? [])
                     .map((r) => r?.question?.trim())
                     .filter(Boolean) as string[];
