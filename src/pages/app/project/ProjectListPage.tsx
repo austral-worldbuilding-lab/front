@@ -66,6 +66,7 @@ const ProjectListPage = () => {
                       Crear Proyecto
                   </Button>
                   <Button
+                      className="ml-"
                       variant="outline"
                       onClick={() => setDrawerOpen(true)}
                       icon={<Files size={16}/>}
