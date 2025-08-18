@@ -13,7 +13,7 @@ export default function ChatPanel({ mandalaId }: ChatPanelProps) {
     const [input, setInput] = useState("");
 
     useEffect(() => {
-        getMessages(mandalaId).then(setMessages).catch((e) => console.error(e));
+        getMessages().then(setMessages).catch((e) => console.error(e));
     }, [mandalaId]);
 
     return (
