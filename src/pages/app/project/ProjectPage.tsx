@@ -9,9 +9,13 @@ import { getProjectFiles, ProjectFile } from "@/services/filesService.ts";
 import logo from "@/assets/logo.png";
 import useProject from "@/hooks/useProject.ts";
 import ProjectUserList from "@/components/project/ProjectUserList";
+import ShareLinkDialog from "@/components/project/ShareLinkDialog";
 
 const ProjectPage = () => {
-  const { projectId, organizationId } = useParams<{ projectId: string; organizationId: string }>();
+  const { projectId, organizationId } = useParams<{
+    projectId: string;
+    organizationId: string;
+  }>();
   const navigate = useNavigate();
 
   const [files, setFiles] = useState<ProjectFile[]>([]);
@@ -77,7 +81,11 @@ const ProjectPage = () => {
         <div className="flex gap-3 mb-10">
           <Button
             color="primary"
-            onClick={() => navigate(`/app/organization/${organizationId}/projects/${projectId}/mandalas`)}
+            onClick={() =>
+              navigate(
+                `/app/organization/${organizationId}/projects/${projectId}/mandalas`
+              )
+            }
             icon={<Eye size={16} />}
           >
             Ver Mandalas
@@ -85,12 +93,20 @@ const ProjectPage = () => {
 
           <Button
             variant="outline"
-            onClick={() => navigate(`/app/organization/${organizationId}/projects/${projectId}/invite`)}
+            onClick={() =>
+              navigate(
+                `/app/organization/${organizationId}/projects/${projectId}/invite`
+              )
+            }
             icon={<UserPlus size={16} />}
             aria-label="Invitar miembros al proyecto"
           >
             Invitar
           </Button>
+          <ShareLinkDialog
+            projectName={project?.name ?? "Proyecto"}
+            defaultRole="member"
+          />
         </div>
 
         <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
