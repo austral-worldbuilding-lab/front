@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import logo from "@/assets/logo.png";
+import { RETURN_TO_KEY } from "@/components/auth/ProtectedRoute";
 
 const LoginPage = () => {
   const { login, error } = useAuthContext();
@@ -14,7 +15,13 @@ const LoginPage = () => {
   async function handleLogin() {
     const success = await login(email, password);
     if (success) {
-      navigate("/");
+      const returnTo = sessionStorage.getItem(RETURN_TO_KEY);
+      if (returnTo) {
+        sessionStorage.removeItem(RETURN_TO_KEY);
+        navigate(returnTo, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     }
   }
 
