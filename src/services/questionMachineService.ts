@@ -45,3 +45,34 @@ export async function generateQuestionsService(
         throw err;
     }
 }
+
+export interface GeneratePostItsDto {
+    dimensions: string[];
+    scales: string[];
+}
+
+export async function generatePostItsService(
+    mandalaId: string,
+    payload: GeneratePostItsDto
+): Promise<string[]> {
+    if (!mandalaId) throw new Error("mandalaId es requerido");
+    if (!payload?.dimensions || !payload?.scales) {
+        throw new Error('payload inválido: se esperan "dimensions" y "scales"');
+    }
+
+    // El back retorna un array (string u objetos). Normalizamos a string[].
+    const res = await axiosInstance.post<{ data: any[] }>(
+        `/mandala/${encodeURIComponent(mandalaId)}/generate-postits`,
+        payload
+    );
+
+    const raw = res?.data?.data ?? [];
+    return raw
+        .map((x) =>
+            typeof x === "string"
+                ? x
+                : x?.text ?? x?.content ?? x?.value ?? ""
+        )
+        .map((s) => String(s).trim())
+        .filter(Boolean);
+}
