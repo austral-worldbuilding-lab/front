@@ -45,3 +45,48 @@ export async function generateQuestionsService(
         throw err;
     }
 }
+
+/* ────────────────────────────────────────────────────────────
+   MOCK: generatePostItsService
+   ──────────────────────────────────────────────────────────── */
+
+export interface GeneratePostItsDto {
+    dimensions: string[];
+    scales: string[];
+    count?: number;
+}
+
+export interface PostItResponse {
+    items: string[];
+}
+
+export async function generatePostItsService(
+    _mandalaId: string,
+    payload: GeneratePostItsDto
+): Promise<PostItResponse> {
+    if (!payload?.dimensions || !payload?.scales) {
+        throw new Error('payload inválido: se esperan "dimensions" y "scales"');
+    }
+
+    await new Promise((r) => setTimeout(r, 400));
+
+    const { dimensions, scales, count = 6 } = payload;
+
+    const pool = [
+        ...dimensions.slice(0, 6),
+        ...scales.slice(0, 6),
+        "Idea",
+        "Acción",
+        "Tarea",
+        "Insight",
+        "Hallazgo",
+    ].filter(Boolean);
+
+    const items: string[] = Array.from({ length: count }).map((_, i) => {
+        const a = pool[i % pool.length] ?? "Nota";
+        const b = pool[(i + 3) % pool.length] ?? "Contexto";
+        return `Post-It ${i + 1}: ${a} · ${b}`;
+    });
+
+    return { items };
+}
