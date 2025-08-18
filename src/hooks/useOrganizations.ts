@@ -4,6 +4,7 @@ import {Organization} from "@/types/mandala";
 
 const useOrganizations = (initialPage = 1, initialLimit = 10) => {
     const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [nextPageOrgs, setNextPageOrgs] = useState<Organization[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     const [page, setPage] = useState(initialPage);
@@ -15,6 +16,10 @@ const useOrganizations = (initialPage = 1, initialLimit = 10) => {
                 setLoading(true);
                 const data = await getOrganizations(page, limit);
                 setOrganizations(data);
+
+                const nextData = await getOrganizations(page + 1, limit);
+                setNextPageOrgs(nextData);
+
             } catch (err) {
                 setError(err instanceof Error ? err : new Error("Error al cargar organizaciones"));
             } finally {
@@ -25,7 +30,7 @@ const useOrganizations = (initialPage = 1, initialLimit = 10) => {
         fetchOrganizations();
     }, [page, limit]);
 
-    return { organizations, loading, error, page, setPage, limit, setLimit };
+    return { organizations, nextPageOrgs, loading, error, page, setPage, limit, setLimit };
 };
 
 export default useOrganizations;

@@ -3,15 +3,45 @@ import {Building2, ChevronLeft, ChevronRight, PlusIcon} from "lucide-react";
 import Loader from "@/components/common/Loader.tsx";
 import useOrganizations from "@/hooks/useOrganizations.ts";
 import {Button} from "@/components/ui/button.tsx";
-import {useState} from "react";
+import {useState, useEffect } from "react";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import {useCreateOrganization} from "@/hooks/useCreateOrganization.ts";
+import MandalaMenu from "@/components/mandala/MandalaMenu";
+import ConfirmationDialog from "@/components/common/ConfirmationDialog";
+import { useDeleteOrganization } from "@/hooks/useDeleteOrganizations.ts";
 
 const OrganizationListPage = () => {
-    const { organizations, loading, error, page, setPage } = useOrganizations();
+    const { organizations: fetchedOrgs, nextPageOrgs, loading, error, page, setPage } = useOrganizations();
+
+    const [organizations, setOrganizations] = useState(fetchedOrgs);
+    useEffect(() => {
+        setOrganizations(fetchedOrgs);
+    }, [fetchedOrgs]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const { createOrganization, loading: creating, error: errorMsg } = useCreateOrganization();
+
+    const { deleteOrganization } = useDeleteOrganization();
+
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+    const handleDeleteClick = (id: string) => {
+        setSelectedOrgId(id);
+        setConfirmOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedOrgId) return;
+        try {
+            await deleteOrganization(selectedOrgId);
+            setOrganizations((prev) => prev.filter((o) => o.id !== selectedOrgId));
+        } catch (err) {
+            console.error("Error deleting organization", err);
+        } finally {
+            setSelectedOrgId(null);
+        }
+    };
 
     if (loading)
         return (
@@ -41,17 +71,17 @@ const OrganizationListPage = () => {
                     ) : (
                         <ul className="divide-y divide-gray-100">
                             {organizations.map((org) => (
-                                <li
-                                    key={org.id}
-                                    className="hover:bg-gray-50 transition-colors"
-                                >
-                                    <Link
-                                        to={`/app/organization/${org.id}/projects`}
-                                        className="flex items-center gap-3 p-4 text-gray-800 hover:text-blue-600 transition-colors"
-                                    >
-                                        <Building2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                                        <span className="flex-1">{org.name}</span>
-                                    </Link>
+                                <li key={org.id} className="hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-center gap-3 p-4 text-gray-800">
+                                        <Link
+                                            to={`/app/organization/${org.id}/projects`}
+                                            className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
+                                        >
+                                            <Building2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                            <span>{org.name}</span>
+                                        </Link>
+                                        <MandalaMenu onDelete={() => handleDeleteClick(org.id)} />
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -62,14 +92,14 @@ const OrganizationListPage = () => {
                         variant="outline"
                         onClick={() => setPage(page - 1)}
                         disabled={page === 1}
-                        icon={<ChevronLeft size={16}/>}
+                        icon={<ChevronLeft size={16} />}
                     />
                     <span>Página {page}</span>
                     <Button
                         variant="outline"
                         onClick={() => setPage(page + 1)}
-                        disabled={organizations.length < 10}
-                        icon={<ChevronRight size={16}/>}
+                        disabled={nextPageOrgs.length === 0}
+                        icon={<ChevronRight size={16} />}
                     />
                 </div>
             </div>
@@ -81,6 +111,16 @@ const OrganizationListPage = () => {
                 error={errorMsg}
                 title="Crear Organización"
                 placeholder="Nombre de la organización"
+            />
+
+            <ConfirmationDialog
+                isOpen={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="Eliminar organización"
+                description="¿Seguro que deseas eliminar esta organización? Esta acción no se puede deshacer."
+                confirmText="Eliminar"
+                isDanger
+                onConfirm={handleConfirmDelete}
             />
         </div>
     );
