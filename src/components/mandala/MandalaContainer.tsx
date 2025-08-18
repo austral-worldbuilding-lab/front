@@ -30,6 +30,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import useProject from "@/hooks/useProject";
+import ProjectMembersDisplay from "./ProjectMembersDisplay";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -163,7 +164,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                 <InfoIcon className="w-5 h-5 text-primary" />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>{project.project?.name ?? "Proyecto"}</DialogTitle>
                 <DialogDescription>
@@ -179,6 +180,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
                   )}
                 </DialogDescription>
               </DialogHeader>
+              <div className="mt-4">
+                <ProjectMembersDisplay projectId={projectId} />
+              </div>
             </DialogContent>
           </Dialog>
         </div>
