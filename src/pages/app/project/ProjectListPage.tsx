@@ -3,10 +3,11 @@ import useProjects from "@/hooks/useProjects";
 import Loader from "@/components/common/Loader";
 import {PlusIcon, FolderIcon, ChevronRight, ChevronLeft, ArrowLeftIcon} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { createProject } from "@/services/projectService.ts";
 import { useAuthContext } from "@/context/AuthContext.tsx";
-import CreateProjectModal from "@/components/project/CreateProjectModal.tsx";
+import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
+import {getOrganizationById} from "@/services/organizationService.ts";
 
 const ProjectListPage = () => {
   const {organizationId} = useParams()
@@ -16,6 +17,15 @@ const ProjectListPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [orgName, setOrgName] = useState<string>("");
+
+    useEffect(() => {
+        if (organizationId) {
+            getOrganizationById(organizationId)
+                .then((org) => setOrgName(org.name))
+                .catch(() => setOrgName("Organización desconocida"));
+        }
+    }, [organizationId]);
 
   const handleCreateProject = async (name: string) => {
     setCreating(true);
@@ -42,7 +52,7 @@ const ProjectListPage = () => {
         </div>
 
         <div className="w-full max-w-2xl px-4">
-        <h1 className="text-2xl font-bold mb-6 text-center">Proyectos</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Proyectos de: {orgName || ""}</h1>
         <Button
           color="primary"
           className="mb-10"
@@ -100,12 +110,14 @@ const ProjectListPage = () => {
           icon={<ChevronRight size={16} />}
         />
       </div>
-      <CreateProjectModal
+      <CreateEntityModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onCreate={handleCreateProject}
         loading={creating}
         error={errorMsg}
+        title={"Crear Proyecto"}
+        placeholder={"Nombre del proyecto"}
       />
     </div>
   );

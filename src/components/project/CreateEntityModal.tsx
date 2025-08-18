@@ -2,21 +2,25 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "../ui/input";
 
-interface CreateProjectModalProps {
+interface CreateEntityModalProps {
   open: boolean;
   onClose: () => void;
   onCreate: (name: string) => Promise<void>;
   loading: boolean;
   error?: string | null;
+  title: string;
+  placeholder: string;
 }
 
-const CreateProjectModal = ({
+const CreateEntityModal = ({
   open,
   onClose,
   onCreate,
   loading,
   error,
-}: CreateProjectModalProps) => {
+  title,
+  placeholder,
+}: CreateEntityModalProps) => {
   const [name, setName] = useState("");
 
   if (!open) return null;
@@ -29,10 +33,10 @@ const CreateProjectModal = ({
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">
-        <h2 className="text-lg font-bold mb-4">Crear Proyecto</h2>
+        <h2 className="text-lg font-bold mb-4">{title}</h2>
         <Input
-          className="border rounded p-2 w-full mb-4"
-          placeholder="Nombre del proyecto"
+            className="border rounded p-2 w-full mb-4"
+          placeholder={placeholder}
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={loading}
@@ -61,4 +65,4 @@ const CreateProjectModal = ({
   );
 };
 
-export default CreateProjectModal;
+export default CreateEntityModal;
