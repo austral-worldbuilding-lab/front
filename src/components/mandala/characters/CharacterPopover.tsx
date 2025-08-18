@@ -14,7 +14,7 @@ const CharacterPopover: React.FC<CharacterPopoverProps> = ({
   onClose,
 }) => {
   const popoverRef = useRef<HTMLDivElement>(null);
-  const { projectId } = useParams<{ projectId: string }>();
+  const { organizationId, projectId } = useParams<{ organizationId: string, projectId: string }>();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const CharacterPopover: React.FC<CharacterPopoverProps> = ({
   }, [onClose]);
 
   const handleOpenMandala = (mandalaId: string) => {
-    navigate(`/app/project/${projectId}/mandala/${mandalaId}`, {
+    navigate(`/app/organization/${organizationId}/projects/${projectId}/mandala/${mandalaId}`, {
       state: { fromMandala: true },
     });
   };

@@ -17,6 +17,7 @@ import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 import MyInvitationsPage from "@/pages/MyInvitationsPage";
 import InviteUserPage from "./pages/app/project/InviteUserPage";
 import RootRedirect from "@/components/common/RootRedirect.tsx";
+import OrganizationListPage from "@/pages/app/project/OrganizationListPage.tsx";
 
 
 // Layout component for all protected routes
@@ -60,23 +61,24 @@ function App() {
           />
 
           {/* Rutas independientes */}
-          <Route path="project/" element={<ProjectListPage/>} />
-          <Route path="project/:projectId" element={<ProjectPage />} />
+          <Route path="organization/" element={<OrganizationListPage/>} />
+          <Route path="organization/:organizationId/projects" element={<ProjectListPage />} />
+          <Route path="organization/:organizationId/projects/:projectId" element={<ProjectPage />} />
 
           <Route
-            path="project/:projectId/mandalas"
+            path="organization/:organizationId/projects/:projectId/mandalas"
             element={<MandalaListPage />}
           />
           <Route
-            path="project/:projectId/mandala/:mandalaId"
+            path="organization/:organizationId/projects/:projectId/mandala/:mandalaId"
             element={<MandalaPage />}
           />
           <Route
-              path="project/:projectId/mandala/:mandalaId/dimension/:dimensionName"
+              path="organization/:organizationId/projects/:projectId/mandala/:mandalaId/dimension/:dimensionName"
               element={<DimensionPage />}
           />
           <Route
-            path="project/:projectId/invite"
+            path="organization/:organizationId/projects/:projectId/invite"
             element={<InviteUserPage />}
           />
         </Route>

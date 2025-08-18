@@ -100,6 +100,7 @@ export interface Project {
 export interface CreateProject {
   name: string;
   userId: string;
+  organizationId: string;
 }
 
 export interface FilterOption {
@@ -125,4 +126,9 @@ export interface MessageDTO {
   content: string;
   isUser: boolean;
   createdAt: Date;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
 }

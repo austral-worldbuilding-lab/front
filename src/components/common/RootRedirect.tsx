@@ -11,7 +11,7 @@ const RootRedirect: React.FC = () => {
             </div>
         );  }
     if (isAuth()) {
-        return <Navigate to="/app/project" replace />;
+        return <Navigate to="/app/organization" replace />;
     } else {
         return <Navigate to="/login" replace />;
     }

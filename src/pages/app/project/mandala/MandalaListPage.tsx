@@ -12,7 +12,7 @@ import ConfirmationDialog from "../../../../components/common/ConfirmationDialog
 
 
 const MandalaListPage = () => {
-    const { projectId } = useParams<{ projectId: string }>();
+    const { organizationId, projectId } = useParams<{ organizationId: string, projectId: string }>();
     const [page, setPage] = useState(1);
     const limit = 10;
 
@@ -63,7 +63,7 @@ const MandalaListPage = () => {
         try {
             const id = await createMandala(name, description, color, useAIMandala, dimensions, scales);
             setIsCreateModalOpen(false);
-            navigate(`/app/project/${projectId}/mandala/${id}`);
+            navigate(`/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`);
         } catch (err: any) {
             const msg = err?.message ?? err?.response?.data?.message ?? "";
             if (msg.includes("Este proyecto no tiene archivos")) {
@@ -89,7 +89,7 @@ const MandalaListPage = () => {
         <>
             <div className="min-h-screen flex flex-col items-center pt-12 relative">
                 <div className="absolute top-10 left-10">
-                    <Link to={`/app/project/${projectId}`}>
+                    <Link to={`/app/organization/${organizationId}/projects/${projectId}`}>
                         <ArrowLeftIcon className="w-5 h-5"/>
                     </Link>
                 </div>
@@ -121,7 +121,7 @@ const MandalaListPage = () => {
                                         <div
                                             className="flex items-center gap-3 p-4 text-gray-800 hover:bg-gray-50 transition-colors">
                                             <Link
-                                                to={`/app/project/${projectId}/mandala/${mandala.id}`}
+                                                to={`/app/organization/${organizationId}/projects/${projectId}/mandala/${mandala.id}`}
                                                 className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
                                             >
                                                 <GlobeIcon
