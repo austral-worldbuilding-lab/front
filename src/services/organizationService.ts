@@ -27,3 +27,10 @@ export const getOrganizationById = async (id: string): Promise<Organization> => 
     return response.data.data;
 };
 
+export const deleteOrganization = async (id: string): Promise<void> => {
+    const response = await axiosInstance.delete(`/organization/${id}`);
+    if (response.status !== 200) {
+        throw new Error("Error al eliminar organización");
+    }
+};
+
