@@ -46,47 +46,33 @@ export async function generateQuestionsService(
     }
 }
 
-/* ────────────────────────────────────────────────────────────
-   MOCK: generatePostItsService
-   ──────────────────────────────────────────────────────────── */
-
 export interface GeneratePostItsDto {
     dimensions: string[];
     scales: string[];
-    count?: number;
-}
-
-export interface PostItResponse {
-    items: string[];
 }
 
 export async function generatePostItsService(
-    _mandalaId: string,
+    mandalaId: string,
     payload: GeneratePostItsDto
-): Promise<PostItResponse> {
+): Promise<string[]> {
+    if (!mandalaId) throw new Error("mandalaId es requerido");
     if (!payload?.dimensions || !payload?.scales) {
         throw new Error('payload inválido: se esperan "dimensions" y "scales"');
     }
 
-    await new Promise((r) => setTimeout(r, 400));
+    // El back retorna un array (string u objetos). Normalizamos a string[].
+    const res = await axiosInstance.post<{ data: any[] }>(
+        `/mandala/${encodeURIComponent(mandalaId)}/generate-postits`,
+        payload
+    );
 
-    const { dimensions, scales, count = 6 } = payload;
-
-    const pool = [
-        ...dimensions.slice(0, 6),
-        ...scales.slice(0, 6),
-        "Idea",
-        "Acción",
-        "Tarea",
-        "Insight",
-        "Hallazgo",
-    ].filter(Boolean);
-
-    const items: string[] = Array.from({ length: count }).map((_, i) => {
-        const a = pool[i % pool.length] ?? "Nota";
-        const b = pool[(i + 3) % pool.length] ?? "Contexto";
-        return `Post-It ${i + 1}: ${a} · ${b}`;
-    });
-
-    return { items };
+    const raw = res?.data?.data ?? [];
+    return raw
+        .map((x) =>
+            typeof x === "string"
+                ? x
+                : x?.text ?? x?.content ?? x?.value ?? ""
+        )
+        .map((s) => String(s).trim())
+        .filter(Boolean);
 }

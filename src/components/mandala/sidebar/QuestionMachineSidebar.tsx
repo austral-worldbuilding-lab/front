@@ -3,6 +3,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GeneratorTab from "@/components/mandala/sidebar/GeneratorTab.tsx";
 import ChatPanel from "@/components/mandala/sidebar/ChatPanel.tsx";
+import { Tag } from "@/types/mandala";
 
 export interface QuestionMachineSidebarProps {
   mandalaId: string;
@@ -10,17 +11,23 @@ export interface QuestionMachineSidebarProps {
   scales?: string[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  tags: Tag[];
+  onNewTag: (tag: Tag) => void;
+  onCreatePostIt: (content: string, tags: Tag[], postItFatherId?: string) => void;
 }
 
 const DEFAULT_SECTIONS = ["ECOLOGÍA", "GOBIERNO", "ECONOMÍA", "INFRAESTRUCTURA"];
 const DEFAULT_SCALES   = ["MI ESQUINA", "CIUDAD / BARRIO", "PROVINCIA"];
 
 export default function QuestionMachineSidebar({
-                                                 mandalaId,
-                                                 sections = DEFAULT_SECTIONS,
-                                                 scales   = DEFAULT_SCALES,
-                                                 open = true,
-                                                 onOpenChange,
+                                                   mandalaId,
+                                                   sections = DEFAULT_SECTIONS,
+                                                   scales   = DEFAULT_SCALES,
+                                                   open = true,
+                                                   onOpenChange,
+                                                   tags,
+                                                   onNewTag,
+                                                   onCreatePostIt,
                                                }: QuestionMachineSidebarProps) {
   const [activeTopTab, setActiveTopTab] = useState<"generator" | "chat">("generator");
 
@@ -44,7 +51,14 @@ export default function QuestionMachineSidebar({
                   value="generator"
                   className="flex-1 min-h-0 flex flex-col"
               >
-                <GeneratorTab mandalaId={mandalaId} sections={sections} scales={scales} />
+                <GeneratorTab
+                    mandalaId={mandalaId}
+                    sections={sections}
+                    scales={scales}
+                    tags={tags}
+                    onCreatePostIt={onCreatePostIt}
+                    onNewTag={onNewTag}
+                />
               </TabsContent>
 
               <TabsContent value="chat" className="flex-1 min-h-0 flex flex-col">

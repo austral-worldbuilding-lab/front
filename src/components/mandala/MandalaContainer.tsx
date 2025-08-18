@@ -82,7 +82,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
     );
   };
 
-  const handleCreatePostIt = (content: string, tags: Tag[]) => {
+  const handleCreatePostIt = (content: string, tags: Tag[], postItFatherId?: string) => {
     createPostit({
       content: content,
       coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
@@ -90,7 +90,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
       section: "Institución",
       tags: tags || null,
       childrens: [],
-    });
+    },
+    postItFatherId
+    );
   };
 
   const { tags, createTag } = useTags(projectId);
@@ -189,6 +191,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
         open={isSidebarOpen}
         onOpenChange={setIsSidebarOpen}
         mandalaId={mandalaId}
+        tags={tags}
+        onNewTag={handleNewTag}
+        onCreatePostIt={handleCreatePostIt}
       />
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (

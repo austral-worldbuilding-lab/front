@@ -1,5 +1,5 @@
-import {useCallback, useState} from "react";
-import {generatePostItsService} from "@/services/questionMachineService.ts";
+import { useCallback, useState } from "react";
+import { generatePostItsService } from "@/services/questionMachineService";
 
 export function usePostItsGenerator(mandalaId: string) {
     const [items, setItems] = useState<string[]>([]);
@@ -11,14 +11,10 @@ export function usePostItsGenerator(mandalaId: string) {
             setLoading(true);
             setError(null);
             try {
-                const res = await generatePostItsService(mandalaId, { dimensions, scales });
-                const arr = (res?.items ?? res ?? [])
-                    .map((s: string) => s?.trim())
-                    .filter(Boolean);
-                setItems(arr);
+                const list = await generatePostItsService(mandalaId, { dimensions, scales });
+                setItems(list);
             } catch (e: unknown) {
-                const msg = e instanceof Error ? e.message : "No se pudieron generar Post-Its";
-                setError(msg);
+                setError(e instanceof Error ? e.message : "No se pudieron generar Post-Its");
             } finally {
                 setLoading(false);
             }
