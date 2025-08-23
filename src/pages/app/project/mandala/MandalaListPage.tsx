@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import useGetMandalas from "@/hooks/useGetMandalas.ts";
 import Loader from "@/components/common/Loader";
-import {ArrowLeftIcon, ChevronLeft, ChevronRight, GlobeIcon, PlusIcon} from "lucide-react";
+import {ArrowLeftIcon, ChevronLeft, ChevronRight, PlusIcon, User, Users} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CreateModal from "@/components/mandala/characters/modal/CreateModal";
 import {useEffect, useState} from "react";
@@ -124,9 +124,17 @@ const MandalaListPage = () => {
                                                 to={`/app/organization/${organizationId}/projects/${projectId}/mandala/${mandala.id}`}
                                                 className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
                                             >
-                                                <GlobeIcon
-                                                    className="w-5 h-5 flex-shrink-0"
-                                                    style={{color: mandala.configuration.center.color || '#6b7280'}}/>
+                                                {mandala.type === 'character' ? (
+                                                    <User
+                                                        className="w-5 h-5 flex-shrink-0"
+                                                        style={{color: mandala.configuration.center.color || '#6b7280'}}
+                                                    />
+                                                ) : (
+                                                    <Users
+                                                        className="w-5 h-5 flex-shrink-0"
+                                                        style={{color: mandala.configuration.center.color || '#6b7280'}}
+                                                    />
+                                                )}
                                                 <span>{mandala.name || "Mandala sin nombre"}</span>
                                             </Link>
                                             <MandalaMenu 
