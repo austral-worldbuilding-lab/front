@@ -47,6 +47,13 @@ const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
   };
 
   if (loading) return <div className="p-3">Cargando usuarios...</div>;
+  if (error && error.includes("404")) {
+    return (
+        <div className="p-3 text-muted-foreground">
+          No hay otros usuarios en este proyecto.
+        </div>
+    );
+  }
   if (error) return <div className="p-3 text-red-600">{error}</div>;
   if (users.length === 0) {
     return (
