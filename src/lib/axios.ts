@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { auth } from '../config/firebase';
-
+import {signOut} from "firebase/auth";
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -8,6 +8,22 @@ const axiosInstance = axios.create({
         'Content-Type': 'application/json',
     },
 });
+
+axiosInstance.interceptors.response.use(
+    response => response,
+    async error => {
+        if (error.response?.status === 401) {
+            try {
+                await signOut(auth); // Cerrar sesión en firebase
+                localStorage.clear();
+            } catch (e) {
+                console.error("Error during sign out:", e);
+            }
+            window.location.href = "/login";
+        }
+        return Promise.reject(error);
+    }
+)
 
 axiosInstance.interceptors.request.use(
     async (config) => {
@@ -53,4 +69,4 @@ export async function del<T>(
     return axiosInstance.delete<T>(url, config);
 }
 
-export default axiosInstance; 
+export default axiosInstance;
