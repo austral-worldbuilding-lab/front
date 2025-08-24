@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { usePostItsGenerator } from "./usePostItsGenerator";
 import type { Tag } from "@/types/mandala";
-import { PropsWithChildren, useState } from "react";
+import {PropsWithChildren, useMemo, useState} from "react";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
+import useMandala from "@/hooks/useMandala.ts";
 
 export interface PostItsPanelProps extends PropsWithChildren {
     mandalaId: string;
@@ -27,6 +28,7 @@ export default function PostItsPanel({
     // modal de creación real
     const [open, setOpen] = useState(false);
     const [prefill, setPrefill] = useState("");
+    const {mandala} = useMandala(mandalaId);
 
     const openCreateWith = (text: string) => {
         setPrefill(text);
@@ -34,6 +36,15 @@ export default function PostItsPanel({
     };
 
     const isEmpty = !loading && !error && items.length === 0;
+
+    const dimensionColors = useMemo(() => {
+        return (
+            mandala?.mandala.configuration?.dimensions?.reduce((acc, d) => {
+                acc[d.name] = d.color;
+                return acc;
+            }, {} as Record<string, string>) ?? {}
+        );
+    }, [mandala?.mandala.configuration?.dimensions]);
 
     return (
         <div className="flex-1 min-h-0 flex flex-col gap-3">
@@ -49,19 +60,22 @@ export default function PostItsPanel({
 
                     {!loading && !error && items.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            {items.map((text, i) => (
+                            {items.map((item, i) => (
                                 <div key={i} className="relative">
                                     {/* Post-it redondo */}
-                                    <div className="aspect-square rounded-full bg-yellow-300 text-black border border-black/20 shadow-sm flex items-center justify-center text-center p-4">
+                                    <div
+                                        className="aspect-square rounded-full text-black border border-black/20 shadow-sm flex items-center justify-center text-center p-4"
+                                        style={{ backgroundColor: dimensionColors[item.dimension] || "#facc15" }}
+                                    >
                     <span className="text-sm">
-                      {text}
+                      {item.content}
                     </span>
                                     </div>
 
                                     {/* Botón + arriba a la derecha */}
                                     <button
                                         type="button"
-                                        onClick={() => openCreateWith(text)}
+                                        onClick={() => openCreateWith(item.content)}
                                         className="absolute -top-2 -right-2 h-7 w-7 rounded-full border border-black/20 bg-white shadow flex items-center justify-center"
                                         aria-label="Agregar post-it"
                                         title="Agregar post-it"

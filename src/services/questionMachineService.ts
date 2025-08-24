@@ -1,5 +1,6 @@
 import axiosInstance from "@/lib/axios";
-import axios, { AxiosError } from "axios";
+import axios, {AxiosError} from "axios";
+import {GeneratedPostIt} from "@/components/mandala/sidebar/usePostItsGenerator.tsx";
 
 export interface AiQuestionResponse {
     question: string;
@@ -54,25 +55,17 @@ export interface GeneratePostItsDto {
 export async function generatePostItsService(
     mandalaId: string,
     payload: GeneratePostItsDto
-): Promise<string[]> {
+): Promise<GeneratedPostIt[]> {
     if (!mandalaId) throw new Error("mandalaId es requerido");
     if (!payload?.dimensions || !payload?.scales) {
         throw new Error('payload inválido: se esperan "dimensions" y "scales"');
     }
 
     // El back retorna un array (string u objetos). Normalizamos a string[].
-    const res = await axiosInstance.post<{ data: any[] }>(
+    const res = await axiosInstance.post<{ data: GeneratedPostIt[] }>(
         `/mandala/${encodeURIComponent(mandalaId)}/generate-postits`,
         payload
     );
 
-    const raw = res?.data?.data ?? [];
-    return raw
-        .map((x) =>
-            typeof x === "string"
-                ? x
-                : x?.text ?? x?.content ?? x?.value ?? ""
-        )
-        .map((s) => String(s).trim())
-        .filter(Boolean);
+    return res?.data?.data ?? []
 }
