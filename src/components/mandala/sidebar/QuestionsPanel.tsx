@@ -2,13 +2,16 @@ import { PropsWithChildren } from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {useQuestionGenerator} from "@/components/mandala/sidebar/useQuestionGenerator.tsx";
+import {Link} from "react-router-dom";
 
 export interface QuestionsPanelProps extends PropsWithChildren {
     mandalaId: string;
+    organizationId: string;
+    projectId: string;
     selected: { dimensions: string[]; scales: string[] };
 }
 
-export default function QuestionsPanel({ mandalaId, selected, children }: QuestionsPanelProps) {
+export default function QuestionsPanel({ mandalaId, organizationId, projectId, selected, children }: QuestionsPanelProps) {
     const { questions, loading, error, generate } = useQuestionGenerator(mandalaId);
 
     return (
@@ -20,7 +23,21 @@ export default function QuestionsPanel({ mandalaId, selected, children }: Questi
                     {!loading && !error && questions.length === 0 && (
                         <p>No hay preguntas para mostrar.</p>
                     )}
-                    {error && <p className="text-red-600">Error: {error}</p>}
+                    {error && error.includes("500") ? (
+                        <>
+                            <p className="text-muted-foreground">
+                                No hay archivos subidos para este proyecto, por favor sube archivos para generar preguntas.
+                            </p>
+                            <Link
+                                to={`/app/organization/${organizationId}/projects/${projectId}`}
+                                className="mt-4 text-primary inline-block underline"
+                            >
+                                Subir archivos
+                            </Link>
+                        </>
+                    ) : error ? (
+                        <p className="text-red-600">Error: {error}</p>
+                    ) : null}
                     {!loading && questions.length > 0 && (
                         <ul className="space-y-2">
                             {questions.map((q, idx) => (
