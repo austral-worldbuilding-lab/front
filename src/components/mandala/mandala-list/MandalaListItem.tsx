@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { GlobeIcon } from "lucide-react";
+import { User, Users } from "lucide-react";
 import MandalaMenu from "../MandalaMenu";
 import { CompleteApiMandala } from "@/types/mandala";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -53,24 +53,21 @@ const MandalaListItem = ({
 
         {/* Link a la mandala o área seleccionable en modo selección */}
         <Link
-          to={
-            selectionMode
-              ? "#" // Usamos "#" en lugar de undefined para evitar error de tipo
-              : `/app/organization/${organizationId}/projects/${projectId}/mandala/${mandala.id}`
-          }
-          className={`flex-1 flex items-center gap-3 ${
-            !selectionMode
-              ? "hover:text-blue-600 transition-colors"
-              : "cursor-default"
-          }`}
+          to={`/app/organization/${organizationId}/projects/${projectId}/mandala/${mandala.id}`}
+          className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
           onClick={handleItemClick}
         >
-          <GlobeIcon
-            className="w-5 h-5 flex-shrink-0"
-            style={{
-              color: mandala.configuration.center.color || "#6b7280",
-            }}
-          />
+          {mandala.type === "character" ? (
+            <User
+              className="w-5 h-5 flex-shrink-0"
+              style={{ color: mandala.configuration.center.color || "#6b7280" }}
+            />
+          ) : (
+            <Users
+              className="w-5 h-5 flex-shrink-0"
+              style={{ color: mandala.configuration.center.color || "#6b7280" }}
+            />
+          )}
           <span>{mandala.name || "Mandala sin nombre"}</span>
         </Link>
 

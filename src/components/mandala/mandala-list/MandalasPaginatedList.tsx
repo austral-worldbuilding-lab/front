@@ -86,7 +86,7 @@ const MandalasPaginatedList = ({
                 organizationId={organizationId}
                 projectId={projectId}
                 dropdownOpen={dropdownOpen}
-                onOpenChange={(open) =>
+                onOpenChange={(open: boolean) =>
                   setDropdownOpen(open ? mandala.id : null)
                 }
                 onDelete={() => confirmDeleteMandala(mandala.id)}
