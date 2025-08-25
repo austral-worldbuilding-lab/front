@@ -42,8 +42,8 @@ const AllMandalasView: React.FC<AllMandalasViewProps> = ({
                                     )}
                                 </div>
                                 <span className={`px-2 py-1 text-xs rounded-full ${mandala.type === 'unified'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-gray-100 text-gray-800'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-gray-100 text-gray-800'
                                     }`}>
                                     {mandala.type === 'unified' ? 'Unificada' : 'Personaje'}
                                 </span>

@@ -31,9 +31,8 @@ import {
 } from "../ui/dialog";
 import useProject from "@/hooks/useProject";
 import ProjectMembersDisplay from "./ProjectMembersDisplay";
-import useGetMandalas from "@/hooks/useGetMandalas";
 import ViewToggle from "./ViewToggle";
-import AllMandalasView from "./AllMandalasView";
+import MandalaPreview from "./MandalaPreview";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -68,8 +67,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
   } = useMandala(mandalaId);
   const { createMandala } = useCreateMandala(projectId);
 
-  // Obtener todas las mandalas del proyecto para la vista "Todas las mandalas"
-  const { mandalas: allMandalas } = useGetMandalas(projectId, 1, 100);
+  // Extraer ids de mandalas origen desde los postits (campo from: { id, name })
+  const sourceMandalaIds = (() => {
+    const ids = new Set<string>();
+    if (!mandala?.postits) return [] as string[];
+    const stack = [...mandala.postits];
+    while (stack.length) {
+      const p = stack.pop()!;
+      const from = p.from;
+      if (from?.id) ids.add(from.id);
+      if (p.childrens?.length) stack.push(...p.childrens);
+    }
+    return Array.from(ids);
+  })();
 
   const handleCreateCharacter = async (character: {
     name: string;
@@ -352,13 +362,52 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
                       </div>
                     </TransformComponent>
                   ) : (
-                    // Vista de todas las mandalas
-                    <div className="w-full h-full">
-                      <AllMandalasView
-                        mandalas={allMandalas}
-                        projectId={projectId}
-                        organizationId={organizationId}
-                      />
+                    // Vista de todas las mandalas (columna de origen + unificada a la derecha)
+                    <div className="w-full h-full flex gap-8 p-6">
+                      <div className="flex-1 h-full overflow-auto">
+                        <div className="flex flex-col items-center gap-8">
+                          {sourceMandalaIds.map((id) => (
+                            <MandalaPreview key={id} mandalaId={id} />
+                          ))}
+                          {sourceMandalaIds.length === 0 && (
+                            <div className="text-sm text-gray-500">No se encontraron mandalas origen.</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="w-px bg-gray-200" />
+                      <div className="flex-[2] h-full relative">
+                        <TransformComponent
+                          wrapperStyle={{
+                            width: "100%",
+                            height: "100%",
+                            cursor: isPanning ? "grabbing" : "grab",
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                          }}
+                          contentStyle={{ width: "100%", height: "100%", position: "relative" }}
+                        >
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <Mandala mandala={mandala} scale={1} position={{ x: 0, y: 0 }} />
+                            <KonvaContainer
+                              mandala={mandala}
+                              onCharacterUpdate={updateCharacter}
+                              onPostItUpdate={updatePostit}
+                              onPostItChildCreate={() => { }}
+                              onPostItDelete={deletePostit}
+                              onCharacterDelete={async () => false}
+                              onMouseEnter={() => setIsHoveringPostIt(true)}
+                              onMouseLeave={() => setIsHoveringPostIt(false)}
+                              onDragStart={() => setIsDraggingPostIt(true)}
+                              onDragEnd={() => setIsDraggingPostIt(false)}
+                              appliedFilters={appliedFilters}
+                              tags={tags}
+                              onNewTag={handleNewTag}
+                              state={state}
+                            />
+                          </div>
+                        </TransformComponent>
+                      </div>
                     </div>
                   )}
                 </>

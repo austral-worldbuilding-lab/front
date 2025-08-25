@@ -14,8 +14,8 @@ const ViewToggle: React.FC<ViewToggleProps> = ({ viewMode, onViewModeChange }) =
                 size="sm"
                 onClick={() => onViewModeChange('unified')}
                 className={`text-xs px-3 py-1 ${viewMode === 'unified'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
                     }`}
             >
                 Mandala Unificada
@@ -25,8 +25,8 @@ const ViewToggle: React.FC<ViewToggleProps> = ({ viewMode, onViewModeChange }) =
                 size="sm"
                 onClick={() => onViewModeChange('all')}
                 className={`text-xs px-3 py-1 ${viewMode === 'all'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
                     }`}
             >
                 Todas las Mandalas
