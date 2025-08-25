@@ -6,7 +6,8 @@ interface UseMandalaUnificationResult {
   unifyMandalas: (
     mandalaIds: string[],
     organizationId: string,
-    projectId: string
+    projectId: string,
+    name?: string
   ) => Promise<void>;
   loading: boolean;
   error: string | null;
@@ -26,7 +27,8 @@ export const useMandalaUnification = (): UseMandalaUnificationResult => {
   const unifyMandalas = async (
     mandalaIds: string[],
     organizationId: string,
-    projectId: string
+    projectId: string,
+    name?: string
   ): Promise<void> => {
     setLoading(true);
     setError(null);
@@ -38,7 +40,7 @@ export const useMandalaUnification = (): UseMandalaUnificationResult => {
       }
 
       // Llamar al servicio de unificación
-      const unifiedMandalaId = await unifyMandalasService(mandalaIds);
+      const unifiedMandalaId = await unifyMandalasService(mandalaIds, name);
 
       // Redirigir a la nueva mandala unificada
       navigate(

@@ -3,6 +3,7 @@ import { useMandalaUnification } from "@/hooks/useMandalaUnification";
 import MandalaActionButtons from "./MandalaActionButtons";
 import MandalaSelectionBanner from "./MandalaSelectionBanner";
 import ErrorMessage from "@/components/common/ErrorMessage";
+import UnifyMandalasModal from "./UnifyMandalasModal";
 
 interface MandalaListContainerProps {
   organizationId?: string;
@@ -26,6 +27,7 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedMandalas, setSelectedMandalas] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isUnifyModalOpen, setIsUnifyModalOpen] = useState(false);
 
   // Hook para unificación
   const {
@@ -54,19 +56,32 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
     });
   };
 
-  // Procesa la unificación de las mandalas seleccionadas
-  const handleUnifyMandalas = async () => {
-    try {
-      if (selectedMandalas.length < 2) {
-        setError("Debes seleccionar al menos 2 mandalas para unificar");
-        return;
-      }
+  // Abre el modal de unificación
+  const handleOpenUnifyModal = () => {
+    if (selectedMandalas.length < 2) {
+      setError("Debes seleccionar al menos 2 mandalas para unificar");
+      return;
+    }
 
-      await unifyMandalas(selectedMandalas, organizationId || "", projectId);
+    setError(null);
+    setIsUnifyModalOpen(true);
+  };
+
+  // Procesa la unificación de las mandalas seleccionadas con el nombre proporcionado
+  const handleUnifyMandalas = async (name: string) => {
+    try {
+      await unifyMandalas(
+        selectedMandalas,
+        organizationId || "",
+        projectId,
+        name
+      );
+      setIsUnifyModalOpen(false);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Error al unificar las mandalas"
       );
+      throw err;
     }
   };
 
@@ -82,7 +97,7 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
         isUnifying={unifyingMandalas}
         onCreateClick={onCreateClick}
         onToggleSelectionMode={toggleSelectionMode}
-        onUnifyClick={handleUnifyMandalas}
+        onUnifyClick={handleOpenUnifyModal}
       />
 
       {/* Contenido principal (inyectado como children) */}
@@ -102,6 +117,15 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
 
       {/* Mensajes de error */}
       {selectionMode && <ErrorMessage message={error || unifyError} />}
+
+      {/* Modal de unificación */}
+      <UnifyMandalasModal
+        isOpen={isUnifyModalOpen}
+        onOpenChange={setIsUnifyModalOpen}
+        onUnify={handleUnifyMandalas}
+        selectedCount={selectedMandalas.length}
+        isLoading={unifyingMandalas}
+      />
     </>
   );
 };

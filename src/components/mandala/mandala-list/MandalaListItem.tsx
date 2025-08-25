@@ -42,8 +42,8 @@ const MandalaListItem = ({
   return (
     <li className="hover:bg-gray-50 transition-colors">
       <div className="flex items-center gap-3 p-4 text-gray-800 hover:bg-gray-50 transition-colors">
-        {/* Checkbox visible solo en modo selección */}
-        {selectionMode && (
+        {/* Checkbox visible solo en modo selección para las mandalas de tipo personaje */}
+        {selectionMode && mandala.type === "character" && (
           <Checkbox
             checked={isSelected}
             onCheckedChange={onToggleSelection}
@@ -54,8 +54,16 @@ const MandalaListItem = ({
         {/* Link a la mandala o área seleccionable en modo selección */}
         <Link
           to={`/app/organization/${organizationId}/projects/${projectId}/mandala/${mandala.id}`}
-          className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
-          onClick={handleItemClick}
+          className="flex-1 flex items-center gap-3 hover:text-primary transition-colors"
+          onClick={(e) => {
+            if (mandala.type === "character") {
+              handleItemClick(e);
+            }
+            if (selectionMode) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
         >
           {mandala.type === "character" ? (
             <User
