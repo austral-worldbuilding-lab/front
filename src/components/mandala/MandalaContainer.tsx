@@ -283,13 +283,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       Archivos
                     </Button>
                   </div>
-                  <Buttons
-                    onCreatePostIt={handleCreatePostIt}
-                    onCreateCharacter={handleCreateCharacter}
-                    currentMandalaId={mandalaId}
-                    onNewTag={handleNewTag}
-                    tags={tags}
-                  />
+                  {mandala.mandala.type !== "unified" && (
+                    <Buttons
+                      onCreatePostIt={handleCreatePostIt}
+                      onCreateCharacter={handleCreateCharacter}
+                      currentMandalaId={mandalaId}
+                      onNewTag={handleNewTag}
+                      tags={tags}
+                    />
+                  )}
                   <ZoomControls />
                   <TransformComponent
                     wrapperStyle={{
