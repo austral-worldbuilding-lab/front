@@ -2,16 +2,17 @@ const useDragBoundFunc = (
   radius: number,
   postItWidth = 0,
   postItHeight = 0,
-  radiusOffset = 0
+  radiusOffset = 0,
+  scale = 1
 ) => {
   const cx = radius;
   const cy = radius;
   const r = radius;
 
-  const halfDiagonal =
-    Math.sqrt((postItWidth / 2) ** 2 + (postItHeight / 2) ** 2) * 0.95;
-
-  const offset = Math.max(halfDiagonal, radiusOffset);
+  // Calculate the post-it radius considering the current scale
+  const effectivePostItRadius = (Math.max(postItWidth, postItHeight) / 2) * scale;
+  const visualMargin = 2;
+  const offset = Math.max(effectivePostItRadius + visualMargin, radiusOffset);
 
   const dragBoundFunc = (pos: { x: number; y: number }) => {
     const centerPos =
