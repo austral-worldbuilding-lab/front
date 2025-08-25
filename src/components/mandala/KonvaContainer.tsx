@@ -225,6 +225,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onMouseLeave={onMouseLeave}
                 onContextMenu={(e, i) => showContextMenu(e, i, "postit")}
                 mandalaRadius={SCENE_W / 2}
+                isUnifiedMandala={mandala.mandala.type === "unified"}
+                currentMandalaName={mandala.mandala.name}
               />
             );
           })}

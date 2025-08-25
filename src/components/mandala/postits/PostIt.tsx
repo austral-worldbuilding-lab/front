@@ -7,6 +7,7 @@ import { Postit } from "@/types/mandala";
 import { isDarkColor } from "@/utils/colorUtils";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 import { usePostItAnimation } from "@/hooks/usePostItAnimation";
+import MandalaBadge from "./MandalaBadge";
 
 interface PostItProps {
   postit: Postit;
@@ -22,6 +23,8 @@ interface PostItProps {
   onMouseLeave: () => void;
   onContextMenu: (e: KonvaEventObject<PointerEvent>, id: string) => void;
   mandalaRadius: number;
+  isUnifiedMandala?: boolean;
+  currentMandalaName?: string;
   disableDragging?: boolean;
   scale?: number;
 }
@@ -41,6 +44,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     onMouseLeave,
     onContextMenu,
     mandalaRadius,
+    isUnifiedMandala,
+    currentMandalaName,
     disableDragging,
     scale = 1,
   } = props;
@@ -188,6 +193,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             onMouseLeave={onMouseLeave}
             onContextMenu={onContextMenu}
             mandalaRadius={mandalaRadius}
+            isUnifiedMandala={isUnifiedMandala}
+            currentMandalaName={currentMandalaName}
             disableDragging={true}
             scale={scaleChildren}
           />
@@ -286,6 +293,12 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           </Html>
         )}
 
+        {isUnifiedMandala && currentMandalaName && (
+          <MandalaBadge
+            originMandalaName={postit.from?.name}
+            fontSize={fontSize}
+          />
+        )}
         <Html
           divProps={{
             style: {
