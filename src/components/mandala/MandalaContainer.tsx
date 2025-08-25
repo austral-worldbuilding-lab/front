@@ -32,7 +32,7 @@ import {
 import useProject from "@/hooks/useProject";
 import ProjectMembersDisplay from "./ProjectMembersDisplay";
 import ViewToggle from "./ViewToggle";
-import MandalaPreview from "./MandalaPreview";
+import MultiKonvaContainer from "./MultiKonvaContainer";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -362,53 +362,63 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
                       </div>
                     </TransformComponent>
                   ) : (
-                    // Vista de todas las mandalas (columna de origen + unificada a la derecha)
-                    <div className="w-full h-full flex gap-8 p-6">
-                      <div className="flex-1 h-full overflow-auto">
-                        <div className="flex flex-col items-center gap-8">
-                          {sourceMandalaIds.map((id) => (
-                            <MandalaPreview key={id} mandalaId={id} />
-                          ))}
-                          {sourceMandalaIds.length === 0 && (
-                            <div className="text-sm text-gray-500">No se encontraron mandalas origen.</div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="w-px bg-gray-200" />
-                      <div className="flex-[2] h-full relative">
-                        <TransformComponent
-                          wrapperStyle={{
-                            width: "100%",
-                            height: "100%",
-                            cursor: isPanning ? "grabbing" : "grab",
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
+                    // Vista de todas las mandalas dentro de un único canvas Konva
+                    <TransformComponent
+                      wrapperStyle={{
+                        width: "100%",
+                        height: "100%",
+                        cursor: isPanning ? "grabbing" : "grab",
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                      }}
+                      contentStyle={{
+                        width: "100%",
+                        height: "100%",
+                        position: "relative",
+                      }}
+                    >
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <MultiKonvaContainer
+                          unified={mandala}
+                          sourceMandalaIds={sourceMandalaIds}
+                          appliedFilters={appliedFilters}
+                          onPostItUpdate={updatePostit}
+                          onCharacterUpdate={updateCharacter}
+                          onPostItDelete={deletePostit}
+                          onCharacterDelete={(id: string) => handleDeleteCharacter(parseInt(id))}
+                          onPostItChildCreate={(
+                            content: string,
+                            tags: Tag[],
+                            postitFatherId?: string
+                          ) => {
+                            createPostit(
+                              {
+                                content,
+                                coordinates: {
+                                  x: 0,
+                                  y: 0,
+                                  angle: 0,
+                                  percentileDistance: 0,
+                                },
+                                tags,
+                                dimension: "Gobierno",
+                                section: "Institución",
+                                childrens: [],
+                              },
+                              postitFatherId
+                            );
                           }}
-                          contentStyle={{ width: "100%", height: "100%", position: "relative" }}
-                        >
-                          <div className="relative w-full h-full flex items-center justify-center">
-                            <Mandala mandala={mandala} scale={1} position={{ x: 0, y: 0 }} />
-                            <KonvaContainer
-                              mandala={mandala}
-                              onCharacterUpdate={updateCharacter}
-                              onPostItUpdate={updatePostit}
-                              onPostItChildCreate={() => { }}
-                              onPostItDelete={deletePostit}
-                              onCharacterDelete={async () => false}
-                              onMouseEnter={() => setIsHoveringPostIt(true)}
-                              onMouseLeave={() => setIsHoveringPostIt(false)}
-                              onDragStart={() => setIsDraggingPostIt(true)}
-                              onDragEnd={() => setIsDraggingPostIt(false)}
-                              appliedFilters={appliedFilters}
-                              tags={tags}
-                              onNewTag={handleNewTag}
-                              state={state}
-                            />
-                          </div>
-                        </TransformComponent>
+                          state={state}
+                          onMouseEnter={() => setIsHoveringPostIt(true)}
+                          onMouseLeave={() => setIsHoveringPostIt(false)}
+                          onDragStart={() => setIsDraggingPostIt(true)}
+                          onDragEnd={() => setIsDraggingPostIt(false)}
+                          tags={tags}
+                          onNewTag={handleNewTag}
+                        />
                       </div>
-                    </div>
+                    </TransformComponent>
                   )}
                 </>
               )}
