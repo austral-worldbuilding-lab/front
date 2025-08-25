@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import {
   TransformWrapper,
@@ -10,7 +11,13 @@ import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Filter, InfoIcon, Sparkles } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  FileText,
+  Filter,
+  InfoIcon,
+  Sparkles,
+} from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "@/types/mandala";
@@ -33,24 +40,28 @@ import useProject from "@/hooks/useProject";
 import ProjectMembersDisplay from "./ProjectMembersDisplay";
 import ViewToggle from "./ViewToggle";
 import MultiKonvaContainer from "./MultiKonvaContainer";
+import FilesDrawer from "@/components/project/FilesDrawer.tsx";
 
 interface MandalaContainerProps {
   mandalaId: string;
   organizationId: string;
 }
 
-const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organizationId }) => {
+const MandalaContainer: React.FC<MandalaContainerProps> = ({
+  mandalaId,
+  organizationId,
+}) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const [state, setState] = useState<ReactZoomPanPinchState | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const projectId = useParams<{ projectId: string }>().projectId!;
-  const [appliedFilters, setAppliedFilters] = useState<
-    Record<string, string[]>
-  >({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'unified' | 'all'>('unified');
+  const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"unified" | "all">("unified");
+  const [appliedFilters, setAppliedFilters] = useState<Record<string, string[]>>({});
+
+  const projectId = useParams<{ projectId: string }>().projectId!;
   const { characters: projectCharacters, linkCharacter } =
     useProjectCharacters(mandalaId);
 
@@ -74,7 +85,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
     const stack = [...mandala.postits];
     while (stack.length) {
       const p = stack.pop()!;
-      const from = p.from;
+      const from = (p as any).from;
       if (from?.id) ids.add(from.id);
       if (p.childrens?.length) stack.push(...p.childrens);
     }
@@ -101,15 +112,20 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
     );
   };
 
-  const handleCreatePostIt = (content: string, tags: Tag[], postItFatherId?: string) => {
-    createPostit({
-      content: content,
-      coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
-      dimension: "Gobierno",
-      section: "Institución",
-      tags: tags || null,
-      childrens: [],
-    },
+  const handleCreatePostIt = (
+    content: string,
+    tags: Tag[],
+    postItFatherId?: string
+  ) => {
+    createPostit(
+      {
+        content: content,
+        coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
+        dimension: "Gobierno",
+        section: "Institución",
+        tags: tags || null,
+        childrens: [],
+      },
       postItFatherId
     );
   };
@@ -157,7 +173,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
       <BreadcrumbMandala />
       <div className="w-full bg-white flex items-center relative overflow-hidden">
         <Button
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            navigate(
+              `/app/organization/${organizationId}/projects/${projectId}/mandalas`
+            )
+          }
           className="flex items-center gap-2 cursor-pointer"
           variant="text"
           color="primary"
@@ -205,6 +225,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
           </Dialog>
         </div>
       </div>
+
       <QuestionMachineSidebar
         sections={
           mandala?.mandala.configuration.dimensions.map((dim) => dim.name) || []
@@ -218,7 +239,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
         tags={tags}
         onNewTag={handleNewTag}
         onCreatePostIt={handleCreatePostIt}
+        dimensionsMandala={mandala?.mandala.configuration.dimensions || []}
       />
+
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (
           <>
@@ -249,11 +272,20 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
             >
               {() => (
                 <>
+                  {/* Controles superiores izquierdos */}
                   <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
                     <div className="flex flex-col gap-2">
                       <CharacterDropdown
-                        characters={projectCharacters}
-                        onAdd={linkCharacter}
+                        characters={
+                          mandala.mandala.type === "character"
+                            ? projectCharacters
+                            : mandala.mandala.configuration.center.characters
+                        }
+                        onAdd={
+                          mandala.mandala.type === "character"
+                            ? linkCharacter
+                            : undefined
+                        }
                       />
                       <Button
                         variant="filled"
@@ -265,9 +297,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
                       </Button>
                     </div>
                   </div>
+
+                  {/* Controles superiores derechos */}
                   <div className="absolute top-4 right-4 z-20 flex items-center gap-4">
                     {/* Toggle de vista - solo visible para mandalas unificadas */}
-                    {mandala?.mandala.type === 'unified' && (
+                    {mandala?.mandala.type === "unified" && (
                       <ViewToggle
                         viewMode={viewMode}
                         onViewModeChange={setViewMode}
@@ -281,24 +315,103 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
                     >
                       Filtros
                     </Button>
+                    <Button
+                      variant="filled"
+                      color="primary"
+                      icon={<FileText size={16} />}
+                      onClick={() => setIsFilesDrawerOpen(true)}
+                    >
+                      Archivos
+                    </Button>
                   </div>
-                  {/* Solo mostrar botones y controles en vista unificada */}
-                  {viewMode === 'unified' && (
-                    <>
-                      <Buttons
-                        onCreatePostIt={handleCreatePostIt}
-                        onCreateCharacter={handleCreateCharacter}
-                        currentMandalaId={mandalaId}
-                        onNewTag={handleNewTag}
-                        tags={tags}
-                      />
-                      <ZoomControls />
-                    </>
-                  )}
 
-                  {/* Contenido principal - alternar entre vistas */}
-                  {viewMode === 'unified' ? (
-                    // Vista de mandala unificada
+                  {/* Mostrar botones/controles:
+                      - siempre para mandalas NO unificadas
+                      - para unificadas, solo en vista 'unified' */}
+                  {(
+                    mandala.mandala.type !== "unified" ||
+                    viewMode === "unified"
+                  ) && (
+                      <>
+                        <Buttons
+                          onCreatePostIt={handleCreatePostIt}
+                          onCreateCharacter={handleCreateCharacter}
+                          currentMandalaId={mandalaId}
+                          onNewTag={handleNewTag}
+                          tags={tags}
+                        />
+                        <ZoomControls />
+                      </>
+                    )}
+
+                  {/* Contenido principal - alternar entre vistas en unificadas */}
+                  {mandala.mandala.type === "unified" && viewMode === "all" ? (
+                    // Vista "all": todas las mandalas en un único canvas Konva
+                    <TransformComponent
+                      wrapperStyle={{
+                        width: "100%",
+                        height: "100%",
+                        cursor: isPanning ? "grabbing" : "grab",
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                      }}
+                      contentStyle={{
+                        width: "100%",
+                        height: "100%",
+                        position: "relative",
+                      }}
+                    >
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <MultiKonvaContainer
+                          unified={mandala}
+                          sourceMandalaIds={sourceMandalaIds}
+                          appliedFilters={
+                            /* en vista all se pueden aplicar filtros también */
+                            // si querés desactivarlos aquí, pasa {}.
+                            // dejamos los aplicados para preservar ambos commits.
+                            (appliedFilters)
+                          }
+                          onPostItUpdate={updatePostit}
+                          onCharacterUpdate={updateCharacter}
+                          onPostItDelete={deletePostit}
+                          onCharacterDelete={(id: string) =>
+                            handleDeleteCharacter(parseInt(id))
+                          }
+                          onPostItChildCreate={(
+                            content: string,
+                            tags: Tag[],
+                            postitFatherId?: string
+                          ) => {
+                            createPostit(
+                              {
+                                content,
+                                coordinates: {
+                                  x: 0,
+                                  y: 0,
+                                  angle: 0,
+                                  percentileDistance: 0,
+                                },
+                                tags,
+                                dimension: "Gobierno",
+                                section: "Institución",
+                                childrens: [],
+                              },
+                              postitFatherId
+                            );
+                          }}
+                          state={state}
+                          onMouseEnter={() => setIsHoveringPostIt(true)}
+                          onMouseLeave={() => setIsHoveringPostIt(false)}
+                          onDragStart={() => setIsDraggingPostIt(true)}
+                          onDragEnd={() => setIsDraggingPostIt(false)}
+                          tags={tags}
+                          onNewTag={handleNewTag}
+                        />
+                      </div>
+                    </TransformComponent>
+                  ) : (
+                    // Vista unificada "normal" o cualquier mandala no unificada
                     <TransformComponent
                       wrapperStyle={{
                         width: "100%",
@@ -361,64 +474,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
                         />
                       </div>
                     </TransformComponent>
-                  ) : (
-                    // Vista de todas las mandalas dentro de un único canvas Konva
-                    <TransformComponent
-                      wrapperStyle={{
-                        width: "100%",
-                        height: "100%",
-                        cursor: isPanning ? "grabbing" : "grab",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                      }}
-                      contentStyle={{
-                        width: "100%",
-                        height: "100%",
-                        position: "relative",
-                      }}
-                    >
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <MultiKonvaContainer
-                          unified={mandala}
-                          sourceMandalaIds={sourceMandalaIds}
-                          appliedFilters={appliedFilters}
-                          onPostItUpdate={updatePostit}
-                          onCharacterUpdate={updateCharacter}
-                          onPostItDelete={deletePostit}
-                          onCharacterDelete={(id: string) => handleDeleteCharacter(parseInt(id))}
-                          onPostItChildCreate={(
-                            content: string,
-                            tags: Tag[],
-                            postitFatherId?: string
-                          ) => {
-                            createPostit(
-                              {
-                                content,
-                                coordinates: {
-                                  x: 0,
-                                  y: 0,
-                                  angle: 0,
-                                  percentileDistance: 0,
-                                },
-                                tags,
-                                dimension: "Gobierno",
-                                section: "Institución",
-                                childrens: [],
-                              },
-                              postitFatherId
-                            );
-                          }}
-                          state={state}
-                          onMouseEnter={() => setIsHoveringPostIt(true)}
-                          onMouseLeave={() => setIsHoveringPostIt(false)}
-                          onDragStart={() => setIsDraggingPostIt(true)}
-                          onDragEnd={() => setIsDraggingPostIt(false)}
-                          tags={tags}
-                          onNewTag={handleNewTag}
-                        />
-                      </div>
-                    </TransformComponent>
                   )}
                 </>
               )}
@@ -426,6 +481,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
           </>
         )}
       </div>
+
+      <FilesDrawer
+        open={isFilesDrawerOpen}
+        onClose={() => setIsFilesDrawerOpen(false)}
+        title="Archivos de la mandala"
+        scope="mandala"
+        id={mandalaId}
+      />
     </div>
   );
 };

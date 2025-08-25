@@ -58,11 +58,8 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  type?: 'character' | 'unified';
-  configuration: {
-    dimensions: { name: string; color: string }[];
-    scales: string[];
-  };
+  type?: "character" | "unified";
+  configuration: MandalaConfiguration;
   parentId: string;
 }
 
@@ -70,6 +67,7 @@ export interface MandalaCenter {
   name: string;
   description: string;
   color: string;
+  characters: Character[];
 }
 
 export interface MandalaDimension {
@@ -86,7 +84,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
-  type: 'character' | 'unified';
+  type: "character" | "unified";
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];
@@ -135,4 +133,11 @@ export interface MessageDTO {
 export interface Organization {
   id: string;
   name: string;
+}
+export interface FileItem {
+  id: string;
+  file_name: string;
+  file_type: string;
+  source_scope: string;
+  full_path: string;
 }

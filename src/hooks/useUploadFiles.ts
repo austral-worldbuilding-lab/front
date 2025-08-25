@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
 import axios from 'axios';
-import { createProjectFiles } from '@/services/filesService';
+import {createFiles, FileScope} from '@/services/filesService.ts';
 import { useQueryClient } from '@tanstack/react-query';
-import { fileKeys } from './useProjectFiles';
+import { fileKeys } from './useFiles.ts';
+import {FileItem} from "@/types/mandala";
 
 export const ACCEPTED_TYPES = [
   'application/pdf',
@@ -11,16 +12,12 @@ export const ACCEPTED_TYPES = [
   'image/jpeg',
 ];
 
-interface ProjectFile {
-  file_name: string;
-  file_type: string;
-}
 
 interface PresignedUrl {
   url: string;
 }
 
-export const useUploadFiles = (projectId: string, onUploadComplete?: () => void) => {
+export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: () => void) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,12 +41,15 @@ export const useUploadFiles = (projectId: string, onUploadComplete?: () => void)
       setLoading(true);
       setStatus(null);
 
-      const payload: ProjectFile[] = selectedFiles.map((file) => ({
+      const payload: FileItem[] = selectedFiles.map((file) => ({
         file_name: file.name,
         file_type: file.type,
+        source_scope: scope,
+        id: '',
+        full_path: '',
       }));
 
-      const urls = await createProjectFiles(projectId, payload);
+      const urls = await createFiles(scope, id, payload);
 
       await Promise.all(
         urls.map((urlObj: PresignedUrl, index: number) => {
@@ -62,17 +62,17 @@ export const useUploadFiles = (projectId: string, onUploadComplete?: () => void)
         })
       );
 
-      setStatus('Files uploaded successfully!');
+      setStatus('Archivos cargados exitosamente');
       setSelectedFiles([]);
       
-      queryClient.invalidateQueries({ queryKey: fileKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
       
       if (onUploadComplete) {
         onUploadComplete();
       }
     } catch (error) {
       console.error('Upload error:', error);
-      setStatus('An error occurred during upload.');
+      setStatus('Un error ocurrió al cargar los archivos');
     } finally {
       setLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

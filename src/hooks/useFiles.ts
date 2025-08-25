@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getProjectFiles, deleteFile, createProjectFiles, ProjectFile } from "@/services/filesService";
+import {getFiles, deleteFile, createFiles, FileScope} from "@/services/filesService.ts";
+import {FileItem} from "@/types/mandala";
 
 export const fileKeys = {
   all: ["files"] as const,
-  byProject: (projectId: string) => [...fileKeys.all, projectId] as const,
+  byScope: (scope: FileScope, id: string) => [...fileKeys.all, scope, id] as const,
 };
 
-export function useProjectFiles(projectId: string) {
+export function useFiles(scope: FileScope, id: string) {
   const queryClient = useQueryClient();
 
   const {
@@ -15,29 +16,31 @@ export function useProjectFiles(projectId: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: fileKeys.byProject(projectId),
+    queryKey: fileKeys.byScope(scope, id),
     queryFn: async () => {
-      if (!projectId) return [];
-      return await getProjectFiles(projectId);
+      if (!id) return [];
+      return await getFiles(scope, id);
     },
-    enabled: !!projectId,
+    enabled: !!id,
   });
 
   const deleteFileMutation = useMutation({
     mutationFn: async (fileName: string) => {
-      return await deleteFile(projectId, fileName);
+      if (!id) throw new Error("No se puede borrar archivo sin ID");
+      return await deleteFile(scope, id, fileName);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: fileKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
     },
   });
 
+
   const createFilesMutation = useMutation({
-    mutationFn: async (files: ProjectFile[]) => {
-      return await createProjectFiles(projectId, files);
+    mutationFn: async (files: FileItem[]) => {
+      return await createFiles(scope, id, files);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: fileKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
     },
   });
 
@@ -45,7 +48,7 @@ export function useProjectFiles(projectId: string) {
     return deleteFileMutation.mutateAsync(fileName);
   };
 
-  const addFiles = async (files: ProjectFile[]) => {
+  const addFiles = async (files: FileItem[]) => {
     return createFilesMutation.mutateAsync(files);
   };
 
@@ -59,4 +62,4 @@ export function useProjectFiles(projectId: string) {
     isDeleting: deleteFileMutation.isPending,
     isCreating: createFilesMutation.isPending,
   };
-} 
+}

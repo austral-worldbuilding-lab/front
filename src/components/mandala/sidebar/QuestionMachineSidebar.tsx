@@ -16,6 +16,7 @@ export interface QuestionMachineSidebarProps {
   tags: Tag[];
   onNewTag: (tag: Tag) => void;
   onCreatePostIt: (content: string, tags: Tag[], postItFatherId?: string) => void;
+  dimensionsMandala: { name: string; color: string }[];
 }
 
 const DEFAULT_SECTIONS = ["ECOLOGÍA", "GOBIERNO", "ECONOMÍA", "INFRAESTRUCTURA"];
@@ -32,6 +33,7 @@ export default function QuestionMachineSidebar({
                                                    tags,
                                                    onNewTag,
                                                    onCreatePostIt,
+                                                   dimensionsMandala
                                                }: QuestionMachineSidebarProps) {
   const [activeTopTab, setActiveTopTab] = useState<"generator" | "chat">("generator");
 
@@ -64,6 +66,7 @@ export default function QuestionMachineSidebar({
                     tags={tags}
                     onCreatePostIt={onCreatePostIt}
                     onNewTag={onNewTag}
+                    dimensionsMandala={dimensionsMandala}
                 />
               </TabsContent>
 

@@ -1,8 +1,16 @@
 import { useCallback, useState } from "react";
 import { generatePostItsService } from "@/services/questionMachineService";
 
+export interface GeneratedPostIt {
+    id: string;
+    content: string;
+    dimension: string;
+    section: string;
+    tags: any[];
+}
+
 export function usePostItsGenerator(mandalaId: string) {
-    const [items, setItems] = useState<string[]>([]);
+    const [items, setItems] = useState<GeneratedPostIt[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -11,8 +19,8 @@ export function usePostItsGenerator(mandalaId: string) {
             setLoading(true);
             setError(null);
             try {
-                const list = await generatePostItsService(mandalaId, { dimensions, scales });
-                setItems(list);
+                const res = await generatePostItsService(mandalaId, { dimensions, scales });
+                setItems(res);
             } catch (e: unknown) {
                 setError(e instanceof Error ? e.message : "No se pudieron generar Post-Its");
             } finally {
