@@ -37,7 +37,10 @@ interface MandalaContainerProps {
   organizationId: string;
 }
 
-const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organizationId}) => {
+const MandalaContainer: React.FC<MandalaContainerProps> = ({
+  mandalaId,
+  organizationId,
+}) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
@@ -84,16 +87,21 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
     );
   };
 
-  const handleCreatePostIt = (content: string, tags: Tag[], postItFatherId?: string) => {
-    createPostit({
-      content: content,
-      coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
-      dimension: "Gobierno",
-      section: "Institución",
-      tags: tags || null,
-      childrens: [],
-    },
-    postItFatherId
+  const handleCreatePostIt = (
+    content: string,
+    tags: Tag[],
+    postItFatherId?: string
+  ) => {
+    createPostit(
+      {
+        content: content,
+        coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
+        dimension: "Gobierno",
+        section: "Institución",
+        tags: tags || null,
+        childrens: [],
+      },
+      postItFatherId
     );
   };
 
@@ -258,13 +266,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
                       Filtros
                     </Button>
                   </div>
-                  <Buttons
-                    onCreatePostIt={handleCreatePostIt}
-                    onCreateCharacter={handleCreateCharacter}
-                    currentMandalaId={mandalaId}
-                    onNewTag={handleNewTag}
-                    tags={tags}
-                  />
+                  {mandala.mandala.type !== "unified" && (
+                    <Buttons
+                      onCreatePostIt={handleCreatePostIt}
+                      onCreateCharacter={handleCreateCharacter}
+                      currentMandalaId={mandalaId}
+                      onNewTag={handleNewTag}
+                      tags={tags}
+                    />
+                  )}
                   <ZoomControls />
                   <TransformComponent
                     wrapperStyle={{
