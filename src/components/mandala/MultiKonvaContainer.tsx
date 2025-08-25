@@ -38,6 +38,7 @@ interface MultiKonvaContainerProps {
 
 const GAP = 400; // Gap between mandalas - increased significantly
 const PREVIEW_SCALE = 0.4; // Scale for preview mandalas - reduced for better spacing
+const PREVIEW_Y_NUDGE = -355; // Manual vertical nudge (in px) for left column alignment
 
 // Component for mandala background using original components
 const MandalaBackground: React.FC<{
@@ -396,7 +397,16 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     const totalGap = gap * 2; // Extra padding on both sides
 
     const totalWidth = leftColumnWidth + totalGap + rightColumnWidth;
-    const totalHeight = Math.max(unifiedSize, sourceMandalas.length * (previewSize + gap) - gap);
+    // Compute per-source sizes (unscaled and scaled) to align precisely
+    const sourceComputed = sourceMandalas.map((s) => {
+        const scalesLen = s.mandala!.mandala.configuration?.scales?.length || 1;
+        const unscaledSize = 2 * 150 * scalesLen; // canvasSize for that mandala
+        const scaledSize = unscaledSize * previewScale;
+        return { id: s.id!, mandala: s.mandala!, unscaledSize, scaledSize };
+    });
+    const totalLeftHeight =
+        (sourceComputed.reduce((acc, it) => acc + it.scaledSize, 0)) + (sourceComputed.length > 0 ? (sourceComputed.length - 1) * gap : 0);
+    const totalHeight = Math.max(unifiedSize, totalLeftHeight);
 
     // Position unified mandala on the right
     const unifiedX = leftColumnWidth + totalGap + rightColumnWidth / 2;
@@ -404,7 +414,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
 
     // Position preview mandalas on the left
     const previewX = leftColumnWidth / 2;
-    const previewStartY = (totalHeight - (sourceMandalas.length * (previewSize + gap) - gap)) / 2;
+    // Center the preview mandalas vertically with the unified mandala using per-mandala scaled heights
+    const previewStartY = unifiedY - totalLeftHeight / 2 + PREVIEW_Y_NUDGE;
 
     if (!unified || !state) return <div />;
 
