@@ -3,11 +3,12 @@ import { useUploadFiles, ACCEPTED_TYPES } from "@/hooks/useUploadFiles";
 import { CloudUpload, Upload } from "lucide-react";
 
 interface FileUploaderProps {
-  projectId: string;
-  onUploadComplete: () => void;
+    scope: 'organization' | 'project' | 'mandala';
+    id: string;
+    onUploadComplete?: () => void;
 }
 
-const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
+const FileLoader = ({ scope, id, onUploadComplete }: FileUploaderProps) => {
   const {
     fileInputRef,
     selectedFiles,
@@ -15,7 +16,7 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
     loading,
     handleFileChange,
     uploadFiles,
-  } = useUploadFiles(projectId, onUploadComplete);
+  } = useUploadFiles(scope, id, onUploadComplete);
 
   const handleTriggerFileSelect = () => {
     fileInputRef.current?.click();
@@ -32,7 +33,6 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
         className="hidden"
       />
 
-      <div className="flex items-start gap-2">
         <Button
           type="button"
           variant="outline"
@@ -43,33 +43,33 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
           Elegir archivos
         </Button>
 
-        <Button
-          onClick={uploadFiles}
-          loading={loading}
-          color="primary"
-          disabled={selectedFiles.length === 0}
-          icon={<CloudUpload size={16} />}
-        >
-          Subir archivos
-        </Button>
+        {selectedFiles.length > 0 && (
+            <>
+              <div className="text-sm text-gray-600">
+                {selectedFiles.length <= 5 ? (
+                    <ul className="list-disc pl-5">
+                      {selectedFiles.map((file, idx) => (
+                          <li key={idx}>{file.name}</li>
+                      ))}
+                    </ul>
+                ) : (
+                    <p>{selectedFiles.length} files selected</p>
+                )}
+              </div>
+
+              <Button
+                  onClick={uploadFiles}
+                  loading={loading}
+                  color="primary"
+                  icon={<CloudUpload size={16} />}
+              >
+                Subir archivos
+              </Button>
+            </>
+        )}
+
+        {status && <p className="text-sm text-gray-700">{status}</p>}
       </div>
-
-      {selectedFiles.length > 0 && (
-        <div className="text-sm text-gray-600">
-          {selectedFiles.length <= 5 ? (
-            <ul className="list-disc pl-5">
-              {selectedFiles.map((file, idx) => (
-                <li key={idx}>{file.name}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>{selectedFiles.length} files selected</p>
-          )}
-        </div>
-      )}
-
-      {status && <p className="text-sm text-gray-700">{status}</p>}
-    </div>
   );
 };
 

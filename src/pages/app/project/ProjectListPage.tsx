@@ -1,18 +1,18 @@
 import {Link, useNavigate, useParams} from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
 import Loader from "@/components/common/Loader";
-import {PlusIcon, FolderIcon, ChevronRight, ChevronLeft, ArrowLeftIcon, Files} from "lucide-react";
+import {PlusIcon, FolderIcon, ChevronRight, ChevronLeft, ArrowLeftIcon, FileText} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {useEffect, useState} from "react";
 import { createProject } from "@/services/projectService.ts";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import {getOrganizationById} from "@/services/organizationService.ts";
-import OrganizationFilesDrawer from "@/components/project/OrganizationFilesDrawer.tsx";
+import FilesDrawer from "@/components/project/FilesDrawer.tsx";
 
 const ProjectListPage = () => {
   const {organizationId} = useParams()
-  const { projects, loading, page, setPage, error } = useProjects(organizationId!);
+    const { projects, loading, page, setPage, error } = useProjects(organizationId!);
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const [modalOpen, setModalOpen] = useState(false);
@@ -69,7 +69,7 @@ const ProjectListPage = () => {
                       className="ml-2"
                       variant="outline"
                       onClick={() => setDrawerOpen(true)}
-                      icon={<Files size={16}/>}
+                      icon={<FileText size={16}/>}
                   >
                       Archivos de la organización
                   </Button>
@@ -129,10 +129,14 @@ const ProjectListPage = () => {
                   title={"Crear Proyecto"}
                   placeholder={"Nombre del proyecto"}/>
           </div>
-          <OrganizationFilesDrawer
+          <FilesDrawer
               open={drawerOpen}
               onClose={() => setDrawerOpen(false)}
-              organizationId={organizationId!}/></>
+              title="Archivos de la organización"
+              scope="organization"
+              id={organizationId!}
+          />
+      </>
   );
 };
 
