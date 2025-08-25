@@ -1,200 +1,163 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import useGetMandalas from "@/hooks/useGetMandalas.ts";
-import Loader from "@/components/common/Loader";
-import {ArrowLeftIcon, ChevronLeft, ChevronRight, PlusIcon, User, Users} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
+import { useDeleteMandala } from "@/hooks/useDeleteMandala.ts";
 import CreateModal from "@/components/mandala/characters/modal/CreateModal";
-import {useEffect, useState} from "react";
-import {useCreateMandala} from "@/hooks/useCreateMandala.ts";
-import {useDeleteMandala} from "@/hooks/useDeleteMandala.ts";
-import MandalaMenu from "@/components/mandala/MandalaMenu.tsx";
-import ConfirmationDialog from "../../../../components/common/ConfirmationDialog";
+import MandalaPageHeader from "@/components/mandala/mandala-list/MandalaPageHeader";
+import MandalasPaginatedList from "@/components/mandala/mandala-list/MandalasPaginatedList";
+import MandalaListContainer from "@/components/mandala/mandala-list/MandalaListContainer";
 
-
+/**
+ * Página principal que muestra el listado de mandalas con funcionalidades de:
+ * - Creación de mandalas
+ * - Eliminación de mandalas
+ * - Selección y unificación de mandalas
+ */
 const MandalaListPage = () => {
-    const { organizationId, projectId } = useParams<{ organizationId: string, projectId: string }>();
-    const [page, setPage] = useState(1);
-    const limit = 10;
+  const { organizationId, projectId } = useParams<{
+    organizationId: string;
+    projectId: string;
+  }>();
+  const navigate = useNavigate();
 
-    const { mandalas: fetchedMandalas, loading: mandalasLoading } = useGetMandalas(projectId || "", page, limit);
-    const [mandalas, setMandalas] = useState(fetchedMandalas);
+  // Estado para paginación y datos
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-    const navigate = useNavigate();
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const { deleteMandala } = useDeleteMandala();
-    const { createMandala } = useCreateMandala(projectId || "");
+  // Carga de datos
+  const { mandalas: fetchedMandalas, loading: mandalasLoading } =
+    useGetMandalas(projectId || "", page, limit);
+  const [mandalas, setMandalas] = useState(fetchedMandalas);
+  const { mandalas: nextPageMandalas = [] } = useGetMandalas(
+    projectId || "",
+    page + 1,
+    limit
+  );
 
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [mandalaToDelete, setMandalaToDelete] = useState<string | null>(null);
-    const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  // Hooks para operaciones CRUD
+  const { deleteMandala } = useDeleteMandala();
+  const { createMandala } = useCreateMandala(projectId || "");
 
-    const confirmDeleteMandala = (id: string) => {
-        setMandalaToDelete(id);
-        setDialogOpen(true);
-        setDropdownOpen(null);
-    };
+  // Estado para el modal de creación
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        setMandalas(fetchedMandalas);
-    }, [fetchedMandalas]);
+  // Sincronización de datos
+  useEffect(() => {
+    setMandalas(fetchedMandalas);
+  }, [fetchedMandalas]);
 
-    if (!projectId) {
-        return <div className="p-6 text-red-500">Error: Project ID not found</div>;
+  if (!projectId) {
+    return <div className="p-6 text-red-500">Error: Project ID not found</div>;
+  }
+
+  /**
+   * Maneja la creación de una nueva mandala
+   */
+  const handleCreateMandala = async (character: {
+    name: string;
+    description: string;
+    useAIMandala: boolean;
+    color: string;
+    dimensions: { name: string; color?: string }[];
+    scales: string[];
+  }) => {
+    const { name, description, color, useAIMandala, dimensions, scales } =
+      character;
+
+    if (!name.trim()) {
+      setError("El nombre no puede estar vacío");
+      return;
     }
 
-    const handleCreateMandala = async (character: {
-        name: string;
-        description: string;
-        useAIMandala: boolean;
-        color: string;
-        dimensions: { name: string; color?: string }[],
-        scales: string[];
-    }) => {
-        const { name, description, color, useAIMandala, dimensions, scales } = character;
+    setError(null);
 
-        if (!name.trim()) {
-            setError("El nombre no puede estar vacío");
-            return;
-        }
+    try {
+      const id = await createMandala(
+        name,
+        description,
+        color,
+        useAIMandala,
+        dimensions,
+        scales
+      );
+      setIsCreateModalOpen(false);
+      navigate(
+        `/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`
+      );
+    } catch (err: unknown) {
+      const errorObj = err as {
+        message?: string;
+        response?: { data?: { message?: string } };
+      };
+      const msg = errorObj?.message ?? errorObj?.response?.data?.message ?? "";
+      if (msg.includes("Este proyecto no tiene archivos")) {
+        setError(
+          "Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA."
+        );
+      } else {
+        setError("Ocurrió un error al crear la mandala");
+      }
+    }
+  };
 
-        setError(null);
+  /**
+   * Maneja la eliminación de una mandala
+   */
+  const handleDeleteMandala = async (id: string) => {
+    try {
+      await deleteMandala(id);
+      setMandalas((prev) => prev.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error("Error deleting mandala", err);
+    }
+  };
 
-        try {
-            const id = await createMandala(name, description, color, useAIMandala, dimensions, scales);
-            setIsCreateModalOpen(false);
-            navigate(`/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`);
-        } catch (err: any) {
-            const msg = err?.message ?? err?.response?.data?.message ?? "";
-            if (msg.includes("Este proyecto no tiene archivos")) {
-                setError("Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA.");
-            } else {
-                setError("Ocurrió un error al crear la mandala");
-            }
-        }
-    };
+  return (
+    <div className="min-h-screen flex flex-col items-center pt-12 relative">
+      <MandalaPageHeader
+        title="Mandalas"
+        organizationId={organizationId}
+        projectId={projectId}
+      >
+        {/* Contenedor que maneja la lógica de selección */}
+        <MandalaListContainer
+          organizationId={organizationId}
+          projectId={projectId || ""}
+          onCreateClick={() => setIsCreateModalOpen(true)}
+        >
+          {/* Lista paginada de mandalas */}
+          <MandalasPaginatedList
+            mandalas={mandalas}
+            loading={mandalasLoading}
+            organizationId={organizationId || ""}
+            projectId={projectId}
+            onDeleteMandala={handleDeleteMandala}
+            nextPageMandalas={nextPageMandalas}
+            page={page}
+            onPageChange={setPage}
+          />
+        </MandalaListContainer>
+      </MandalaPageHeader>
 
-    const handleDeleteMandala = async (id: string) => {
-        try {
-            await deleteMandala(id);
-            setMandalas((prev) => prev.filter((m) => m.id !== id));
-        } catch (err) {
-            console.error("Error deleting mandala", err);
-        }
-    };
+      {/* Modal de creación */}
+      <CreateModal
+        isOpen={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onCreateCharacter={handleCreateMandala}
+        title="Crear Mandala"
+        createButtonText="Crear Mandala"
+      />
 
-    const { mandalas: nextPageMandalas = [] } = useGetMandalas(projectId || "", page + 1, limit);
-
-    return (
-        <>
-            <div className="min-h-screen flex flex-col items-center pt-12 relative">
-                <div className="absolute top-10 left-10">
-                    <Link to={`/app/organization/${organizationId}/projects/${projectId}`}>
-                        <ArrowLeftIcon className="w-5 h-5"/>
-                    </Link>
-                </div>
-                <div className="w-full max-w-2xl px-4">
-                    <h1 className="text-2xl font-bold mb-2 text-center">Mandalas</h1>
-                    <Button
-                        color="primary"
-                        className="mb-4"
-                        onClick={() => setIsCreateModalOpen(true)}
-                        icon={<PlusIcon size={16}/>}
-                    >
-                        Crear Mandala
-                    </Button>
-                    <div className="bg-white rounded-lg shadow-sm border ">
-                        {mandalasLoading ? (
-                            <div className="flex justify-center items-center min-h-[100px]">
-                                <Loader size="medium" text="Cargando mandalas..."/>
-                            </div>) : mandalas.length === 0 ? (
-                            <p className="p-4 text-gray-600 text-center">
-                                No hay mandalas creadas aún
-                            </p>
-                        ) : (
-                            <ul className="divide-y divide-gray-100">
-                                {mandalas.map((mandala) => (
-                                    <li
-                                        key={mandala.id}
-                                        className="hover:bg-gray-50 transition-colors"
-                                    >
-                                        <div
-                                            className="flex items-center gap-3 p-4 text-gray-800 hover:bg-gray-50 transition-colors">
-                                            <Link
-                                                to={`/app/organization/${organizationId}/projects/${projectId}/mandala/${mandala.id}`}
-                                                className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
-                                            >
-                                                {mandala.type === 'character' ? (
-                                                    <User
-                                                        className="w-5 h-5 flex-shrink-0"
-                                                        style={{color: mandala.configuration.center.color || '#6b7280'}}
-                                                    />
-                                                ) : (
-                                                    <Users
-                                                        className="w-5 h-5 flex-shrink-0"
-                                                        style={{color: mandala.configuration.center.color || '#6b7280'}}
-                                                    />
-                                                )}
-                                                <span>{mandala.name || "Mandala sin nombre"}</span>
-                                            </Link>
-                                            <MandalaMenu 
-                                                open={dropdownOpen === mandala.id}
-                                                onOpenChange={(open) => setDropdownOpen(open ? mandala.id : null)}
-                                                onDelete={() => confirmDeleteMandala(mandala.id)}
-                                            />
-                                        </div>
-
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                </div>
-                <div className="flex justify-center items-center gap-4 mt-6 mb-10">
-                    <Button
-                        variant="outline"
-                        onClick={() => setPage(page - 1)}
-                        disabled={page === 1}
-                        icon={<ChevronLeft size={16}/>}/>
-                    <span>Página {page}</span>
-                    <Button
-                        variant="outline"
-                        onClick={() => setPage(page + 1)}
-                        disabled={nextPageMandalas.length === 0}
-                        icon={<ChevronRight size={16}/>}/>
-                </div>
-                <ConfirmationDialog
-                    isOpen={dialogOpen}
-                    onOpenChange={(open) => {
-                        setDialogOpen(open);
-                        if (!open) {
-                            setDropdownOpen(null);
-                        }
-                    }}
-                    title="Confirmar eliminación"
-                    description="¿Estás seguro que querés eliminar esta mandala? Esta acción no se puede deshacer."
-                    cancelText="Cancelar"
-                    confirmText="Eliminar Mandala"
-                    isDanger={true}
-                    onConfirm={() => {
-                        if (mandalaToDelete) {
-                            handleDeleteMandala(mandalaToDelete);
-                            setMandalaToDelete(null);
-                        }
-                    }}
-                />
-                <CreateModal
-                    isOpen={isCreateModalOpen}
-                    onOpenChange={setIsCreateModalOpen}
-                    onCreateCharacter={handleCreateMandala}
-                    title="Crear Mandala"
-                    createButtonText="Crear Mandala"/>
-                {error && (
-                    <p className="text-red-500 text-sm mt-4 text-center max-w-md">{error}</p>
-                )}
-            </div>
-        </>
-    );
+      {/* Mensaje de error de creación */}
+      {error && !isCreateModalOpen && (
+        <p className="text-red-500 text-sm mt-4 text-center max-w-md">
+          {error}
+        </p>
+      )}
+    </div>
+  );
 };
 
 export default MandalaListPage;

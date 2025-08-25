@@ -5,10 +5,13 @@ import { usePostItsGenerator } from "./usePostItsGenerator";
 import type { Tag } from "@/types/mandala";
 import {PropsWithChildren, useMemo, useState} from "react";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
+import {Link} from "react-router-dom";
 import useMandala from "@/hooks/useMandala.ts";
 
 export interface PostItsPanelProps extends PropsWithChildren {
     mandalaId: string;
+    organizationId: string;
+    projectId: string;
     selected: { dimensions: string[]; scales: string[] };
     tags?: Tag[];
     onCreate: (content: string, tags: Tag[], postItFatherId?: string) => void;
@@ -17,6 +20,8 @@ export interface PostItsPanelProps extends PropsWithChildren {
 
 export default function PostItsPanel({
                                          mandalaId,
+                                         organizationId,
+                                         projectId,
                                          selected,
                                          children,
                                          tags = [],
@@ -55,7 +60,21 @@ export default function PostItsPanel({
                     }`}
                 >
                     {loading && <p>Generando…</p>}
-                    {error && <p className="text-red-600">Error: {error}</p>}
+                    {error && error.includes("500") ? (
+                        <>
+                            <p className="text-muted-foreground">
+                                No hay archivos subidos para este proyecto, por favor sube archivos para generar preguntas.
+                            </p>
+                            <Link
+                                to={`/app/organization/${organizationId}/projects/${projectId}`}
+                                className="mt-4 text-primary inline-block underline"
+                            >
+                                Subir archivos
+                            </Link>
+                        </>
+                    ) : error ? (
+                        <p className="text-red-600">Error: {error}</p>
+                    ) : null}
                     {isEmpty && <p>No hay Post-Its para mostrar.</p>}
 
                     {!loading && !error && items.length > 0 && (

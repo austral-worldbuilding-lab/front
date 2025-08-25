@@ -6,6 +6,7 @@ import useMandala from "@/hooks/useMandala.ts";
 
 const MandalaPage = () => {
   const { mandalaId } = useParams();
+  const { organizationId } = useParams();
   const { mandala } = useMandala(mandalaId!);
   const location = useLocation();
   const { addMandala, resetHistory } = useMandalaHistory();
@@ -24,7 +25,7 @@ const MandalaPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mandalaId, location.key, mandala?.mandala?.id]);
 
-  return <MandalaContainer mandalaId={mandalaId!} />;
+  return <MandalaContainer mandalaId={mandalaId!} organizationId={organizationId!} />;
 };
 
 export default MandalaPage;

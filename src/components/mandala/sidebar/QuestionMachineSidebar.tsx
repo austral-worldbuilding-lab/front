@@ -7,6 +7,8 @@ import { Tag } from "@/types/mandala";
 
 export interface QuestionMachineSidebarProps {
   mandalaId: string;
+  organizationId: string;
+  projectId: string
   sections?: string[];
   scales?: string[];
   open?: boolean;
@@ -21,6 +23,8 @@ const DEFAULT_SCALES   = ["MI ESQUINA", "CIUDAD / BARRIO", "PROVINCIA"];
 
 export default function QuestionMachineSidebar({
                                                    mandalaId,
+                                                   organizationId,
+                                                   projectId,
                                                    sections = DEFAULT_SECTIONS,
                                                    scales   = DEFAULT_SCALES,
                                                    open = true,
@@ -53,6 +57,8 @@ export default function QuestionMachineSidebar({
               >
                 <GeneratorTab
                     mandalaId={mandalaId}
+                    organizationId={organizationId}
+                    projectId={projectId}
                     sections={sections}
                     scales={scales}
                     tags={tags}

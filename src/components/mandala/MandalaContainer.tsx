@@ -34,9 +34,10 @@ import ProjectMembersDisplay from "./ProjectMembersDisplay";
 
 interface MandalaContainerProps {
   mandalaId: string;
+  organizationId: string;
 }
 
-const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
+const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organizationId}) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
@@ -195,6 +196,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId }) => {
         open={isSidebarOpen}
         onOpenChange={setIsSidebarOpen}
         mandalaId={mandalaId}
+        organizationId={organizationId}
+        projectId={projectId}
         tags={tags}
         onNewTag={handleNewTag}
         onCreatePostIt={handleCreatePostIt}
