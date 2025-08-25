@@ -68,8 +68,10 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const scaleFather = 0.4 * scale;
   const scaleChildren = 0.25 * scale;
   const fontSize = postItW / 10;
-  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
+  
+  const currentScale = isOpen ? scaleFather : scale;
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH, 0, currentScale);
 
   const orbit = useMemo(() => {
     return postItW * 0.37 * scale;
