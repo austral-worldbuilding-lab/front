@@ -56,11 +56,8 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  type?: 'character' | 'unified';
-  configuration: {
-    dimensions: { name: string; color: string }[];
-    scales: string[];
-  };
+  type?: "character" | "unified";
+  configuration: MandalaConfiguration;
   parentId: string;
 }
 
@@ -68,6 +65,7 @@ export interface MandalaCenter {
   name: string;
   description: string;
   color: string;
+  characters: Character[];
 }
 
 export interface MandalaDimension {
@@ -84,7 +82,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
-  type: 'character' | 'unified';
+  type: "character" | "unified";
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];

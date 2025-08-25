@@ -10,10 +10,16 @@ import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { useNavigate, useParams } from "react-router-dom";
-import {ArrowLeftIcon, FileText, Filter, InfoIcon, Sparkles} from "lucide-react";
+import {
+  ArrowLeftIcon,
+  FileText,
+  Filter,
+  InfoIcon,
+  Sparkles,
+} from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
-import { Tag} from "@/types/mandala";
+import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useTags } from "@/hooks/useTags";
@@ -56,7 +62,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     useProjectCharacters(mandalaId);
 
   const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
-
 
   const navigate = useNavigate();
   const {
@@ -252,8 +257,16 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
                     <div className="flex flex-col gap-2">
                       <CharacterDropdown
-                        characters={projectCharacters}
-                        onAdd={linkCharacter}
+                        characters={
+                          mandala.mandala.type === "character"
+                            ? projectCharacters
+                            : mandala.mandala.configuration.center.characters
+                        }
+                        onAdd={
+                          mandala.mandala.type === "character"
+                            ? linkCharacter
+                            : undefined
+                        }
                       />
                       <Button
                         variant="filled"
@@ -267,7 +280,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   </div>
                   <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                     <Button
-                        variant="filled"
+                      variant="filled"
                       color="primary"
                       icon={<Filter size={16} />}
                       onClick={() => setIsFiltersOpen(true)}
@@ -275,10 +288,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       Filtros
                     </Button>
                     <Button
-                        variant="filled"
-                        color="primary"
-                        icon={<FileText size={16} />}
-                        onClick={() => setIsFilesDrawerOpen(true)}
+                      variant="filled"
+                      color="primary"
+                      icon={<FileText size={16} />}
+                      onClick={() => setIsFilesDrawerOpen(true)}
                     >
                       Archivos
                     </Button>
@@ -362,11 +375,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         )}
       </div>
       <FilesDrawer
-          open={isFilesDrawerOpen}
-          onClose={() => setIsFilesDrawerOpen(false)}
-          title="Archivos de la mandala"
-          scope="mandala"
-          id={mandalaId}
+        open={isFilesDrawerOpen}
+        onClose={() => setIsFilesDrawerOpen(false)}
+        title="Archivos de la mandala"
+        scope="mandala"
+        id={mandalaId}
       />
     </div>
   );
