@@ -83,6 +83,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
+  type: 'character' | 'unified';
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];

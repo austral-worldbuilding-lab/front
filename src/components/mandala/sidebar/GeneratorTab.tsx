@@ -7,6 +7,8 @@ import type { Tag } from "@/types/mandala";
 
 export interface GeneratorTabProps {
     mandalaId: string;
+    organizationId: string;
+    projectId: string;
     sections: string[];
     scales: string[];
     tags: Tag[];
@@ -16,6 +18,8 @@ export interface GeneratorTabProps {
 
 export default function GeneratorTab({
                                          mandalaId,
+                                         organizationId,
+                                         projectId,
                                          sections,
                                          scales,
                                          tags,
@@ -51,7 +55,7 @@ export default function GeneratorTab({
                     </TabsList>
 
                     <TabsContent value="questions" className="flex flex-col flex-1 min-h-0">
-                        <QuestionsPanel mandalaId={mandalaId} selected={selected}>
+                        <QuestionsPanel mandalaId={mandalaId} organizationId={organizationId} projectId={projectId} selected={selected}>
                             <FiltersPanel
                                 sections={sections}
                                 scales={scales}
@@ -64,6 +68,8 @@ export default function GeneratorTab({
                     <TabsContent value="postits" className="flex flex-col flex-1 min-h-0">
                         <PostItsPanel
                             mandalaId={mandalaId}
+                            organizationId={organizationId}
+                            projectId={projectId}
                             selected={selected}
                             tags={tags}
                             onCreate={onCreatePostIt}
