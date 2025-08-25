@@ -3,18 +3,21 @@ import axios from "axios";
 
 interface MandalaUnificationResponse {
   data: {
-    id: string;
-    message: string;
+    mandala: {
+      id: string;
+    };
   };
 }
 
 /**
  * Unifica múltiples mandalas en una nueva
  * @param mandalaIds - Array de IDs de mandalas para unificar
+ * @param name - Nombre para la mandala unificada
  * @returns ID de la nueva mandala unificada
  */
 export const unifyMandalasService = async (
-  mandalaIds: string[]
+  mandalaIds: string[],
+  name: string = "Mandala unificado"
 ): Promise<string> => {
   try {
     if (mandalaIds.length < 2) {
@@ -22,15 +25,14 @@ export const unifyMandalasService = async (
     }
 
     const response = await axiosInstance.post<MandalaUnificationResponse>(
-      "/mandala/unify",
-      { mandalaIds }
+      "/mandala/overlap",
+      { mandalas: mandalaIds, color: "#8c8c8c", name }
     );
 
     if (response.status !== 201) {
       throw new Error("Error al unificar las mandalas");
     }
-
-    return response.data.data.id;
+    return response.data.data.mandala.id;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const errorMsg =
