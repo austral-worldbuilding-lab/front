@@ -14,6 +14,7 @@ export interface GeneratorTabProps {
     tags: Tag[];
     onNewTag: (tag: Tag) => void;
     onCreatePostIt: (content: string, tags: Tag[], postItFatherId?: string) => void;
+    dimensionsMandala: { name: string; color: string }[];
 }
 
 export default function GeneratorTab({
@@ -25,6 +26,7 @@ export default function GeneratorTab({
                                          tags,
                                          onCreatePostIt,
                                          onNewTag,
+                                         dimensionsMandala,
                                      }: GeneratorTabProps) {
     const [activeTab, setActiveTab] = useState<"questions" | "postits">("questions");
     const [filters, setFilters] = useState<FiltersState>({
@@ -74,6 +76,7 @@ export default function GeneratorTab({
                             tags={tags}
                             onCreate={onCreatePostIt}
                             onNewTag={onNewTag}
+                            dimensions={dimensionsMandala}
                         >
                             <FiltersPanel
                                 sections={sections}

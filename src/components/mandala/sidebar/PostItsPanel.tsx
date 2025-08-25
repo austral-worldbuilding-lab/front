@@ -6,7 +6,6 @@ import type { Tag } from "@/types/mandala";
 import {PropsWithChildren, useMemo, useState} from "react";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import {Link} from "react-router-dom";
-import useMandala from "@/hooks/useMandala.ts";
 
 export interface PostItsPanelProps extends PropsWithChildren {
     mandalaId: string;
@@ -16,6 +15,7 @@ export interface PostItsPanelProps extends PropsWithChildren {
     tags?: Tag[];
     onCreate: (content: string, tags: Tag[], postItFatherId?: string) => void;
     onNewTag?: (tag: Tag) => void;
+    dimensions: {name: string, color: string}[];
 }
 
 export default function PostItsPanel({
@@ -27,13 +27,13 @@ export default function PostItsPanel({
                                          tags = [],
                                          onCreate = () => {},
                                          onNewTag = () => {},
+                                         dimensions = [],
                                      }: PostItsPanelProps) {
     const { items, loading, error, generate } = usePostItsGenerator(mandalaId);
 
     // modal de creación real
     const [open, setOpen] = useState(false);
     const [prefill, setPrefill] = useState("");
-    const {mandala} = useMandala(mandalaId);
 
     const openCreateWith = (text: string) => {
         setPrefill(text);
@@ -44,12 +44,12 @@ export default function PostItsPanel({
 
     const dimensionColors = useMemo(() => {
         return (
-            mandala?.mandala.configuration?.dimensions?.reduce((acc, d) => {
+            dimensions?.reduce((acc, d) => {
                 acc[d.name] = d.color;
                 return acc;
             }, {} as Record<string, string>) ?? {}
         );
-    }, [mandala?.mandala.configuration?.dimensions]);
+    }, [dimensions]);
 
     return (
         <div className="flex-1 min-h-0 flex flex-col gap-3">

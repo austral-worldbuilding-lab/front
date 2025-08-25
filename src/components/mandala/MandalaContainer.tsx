@@ -201,6 +201,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
         tags={tags}
         onNewTag={handleNewTag}
         onCreatePostIt={handleCreatePostIt}
+        dimensionsMandala={mandala?.mandala.configuration.dimensions || []}
       />
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (
