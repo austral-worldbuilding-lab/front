@@ -1,84 +1,95 @@
 import React from "react";
 import {
-    Breadcrumb,
-    BreadcrumbList,
-    BreadcrumbItem,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-    BreadcrumbEllipsis,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+  BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
-import { useMandalaHistory } from "@/hooks/useMandalaHistory";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  parseMandalaHistory,
+  buildMandalaHistoryQuery,
+} from "@/utils/mandalaHistory";
 
 const BreadcrumbMandala: React.FC = () => {
-    const { history } = useMandalaHistory();
-    const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { organizationId, projectId } = useParams();
+  const { ids, names } = parseMandalaHistory(location.search);
 
-    return (
-        <Breadcrumb>
-            <BreadcrumbList>
-                {history.length <= 3
-                    ? history.map((item, idx) => (
-                        <React.Fragment key={item.id}>
-                            <BreadcrumbItem>
-                                {idx === history.length - 1 ? (
-                                    <BreadcrumbPage>{item.name}</BreadcrumbPage>
-                                ) : (
-                                    <button
-                                        className="hover:text-foreground transition-colors"
-                                        onClick={() =>
-                                            navigate(`/mandala/${item.id}`, {
-                                                state: { fromMandala: true },
-                                            })
-                                        }
-                                    >
-                                        {item.name}
-                                    </button>
-                                )}
-                            </BreadcrumbItem>
-                            {idx < history.length - 1 && <BreadcrumbSeparator />}
-                        </React.Fragment>
-                    ))
-                    : (
-                        <>
-                            <BreadcrumbItem>
-                                <button
-                                    className="hover:text-foreground transition-colors"
-                                    onClick={() =>
-                                        navigate(`/mandala/${history[0].id}`, {
-                                            state: { fromMandala: true },
-                                        })
-                                    }
-                                >
-                                    {history[0].name}
-                                </button>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbEllipsis />
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <button
-                                    className="hover:text-foreground transition-colors"
-                                    onClick={() =>
-                                        navigate(`/mandala/${history[history.length - 2].id}`, {
-                                            state: { fromMandala: true },
-                                        })
-                                    }
-                                >
-                                    {history[history.length - 2].name}
-                                </button>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>
-                                    {history[history.length - 1].name}
-                                </BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </>
-                    )}
-            </BreadcrumbList>
-        </Breadcrumb>
+  if (ids.length === 0) return null;
+
+  const handleNavigate = (idx: number) => {
+    const newIds = ids.slice(0, idx + 1);
+    const newNames = names.slice(0, idx + 1);
+    const search = buildMandalaHistoryQuery(newIds, newNames);
+    navigate(
+      `/app/organization/${organizationId}/projects/${projectId}/mandala/${
+        newIds[newIds.length - 1]
+      }?${search}`
     );
+  };
+
+  return (
+    <Breadcrumb className="mt-4 mx-4 h-8 flex items-center">
+      <BreadcrumbList>
+        {ids.length <= 3 ? (
+          ids.map((id, idx) => (
+            <React.Fragment key={id}>
+              <BreadcrumbItem>
+                {idx === ids.length - 1 ? (
+                  <BreadcrumbPage>{names[idx]}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <button
+                      className="hover:text-foreground underline transition-colors cursor-pointer"
+                      onClick={() => handleNavigate(idx)}
+                    >
+                      {names[idx]}
+                    </button>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+              {idx < ids.length - 1 && <BreadcrumbSeparator />}
+            </React.Fragment>
+          ))
+        ) : (
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <button
+                  className="hover:text-foreground transition-colors"
+                  onClick={() => handleNavigate(0)}
+                >
+                  {names[0]}
+                </button>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbEllipsis />
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <button
+                  className="hover:text-foreground transition-colors"
+                  onClick={() => handleNavigate(ids.length - 2)}
+                >
+                  {names[ids.length - 2]}
+                </button>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{names[ids.length - 1]}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </>
+        )}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
 };
 
 export default BreadcrumbMandala;
