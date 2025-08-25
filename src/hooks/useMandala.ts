@@ -19,6 +19,13 @@ const useMandala = (mandalaId: string) => {
     setLoading(true);
     setError(null);
 
+    // Return early if mandalaId is empty to avoid Firebase errors
+    if (!mandalaId || mandalaId.trim() === '') {
+      setMandala(null);
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = subscribeMandala(
       projectId!,
       mandalaId,
@@ -96,21 +103,21 @@ const useMandala = (mandalaId: string) => {
   );
 
   const deleteCharacter = useCallback(
-      async (index: number) => {
-        try {
-          const updatedCharacters = [...(mandala?.characters ?? [])];
-          updatedCharacters.splice(index, 1);
-          await updateMandalaCharacters(projectId!, mandalaId, updatedCharacters);
-          setMandala((prev) =>
-              prev ? { ...prev, characters: updatedCharacters } : prev
-          );
-          return true;
-        } catch (err) {
-          setError(err instanceof Error ? err : new Error("Unknown error occurred"));
-          return false;
-        }
-      },
-      [mandala, mandalaId]
+    async (index: number) => {
+      try {
+        const updatedCharacters = [...(mandala?.characters ?? [])];
+        updatedCharacters.splice(index, 1);
+        await updateMandalaCharacters(projectId!, mandalaId, updatedCharacters);
+        setMandala((prev) =>
+          prev ? { ...prev, characters: updatedCharacters } : prev
+        );
+        return true;
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Unknown error occurred"));
+        return false;
+      }
+    },
+    [mandala?.characters, mandalaId, projectId]
   );
 
   return {

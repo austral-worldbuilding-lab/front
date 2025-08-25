@@ -27,6 +27,8 @@ export interface Postit {
   section: string;
   tags: Tag[];
   childrens: Postit[];
+  // Optional provenance info when a postit comes from another mandala
+  from?: { id: string; name: string }
 }
 
 export interface Tag {
