@@ -59,7 +59,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"unified" | "all">("unified");
-  const [appliedFilters, setAppliedFilters] = useState<Record<string, string[]>>({});
+  const [appliedFilters, setAppliedFilters] = useState<
+    Record<string, string[]>
+  >({});
 
   const projectId = useParams<{ projectId: string }>().projectId!;
   const { characters: projectCharacters, linkCharacter } =
@@ -207,7 +209,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                 <DialogTitle>{project.project?.name ?? "Proyecto"}</DialogTitle>
                 <DialogDescription>
                   {project.project?.description &&
-                    project.project?.description.trim().length > 0 ? (
+                  project.project?.description.trim().length > 0 ? (
                     <p className="text-sm leading-6 whitespace-pre-wrap">
                       {project.project.description}
                     </p>
@@ -298,15 +300,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     </div>
                   </div>
 
-                  {/* Controles superiores derechos */}
-                  <div className="absolute top-4 right-4 z-20 flex items-center gap-4">
-                    {/* Toggle de vista - solo visible para mandalas unificadas */}
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
                     {mandala?.mandala.type === "unified" && (
                       <ViewToggle
                         viewMode={viewMode}
                         onViewModeChange={setViewMode}
                       />
                     )}
+                  </div>
+
+                  {/* Controles superiores derechos */}
+                  <div className="absolute top-4 right-4 z-20 flex items-center gap-4">
+                    {/* Toggle de vista - solo visible para mandalas unificadas */}
+
                     <Button
                       variant="filled"
                       color="primary"
@@ -328,21 +334,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   {/* Mostrar botones/controles:
                       - siempre para mandalas NO unificadas
                       - para unificadas, solo en vista 'unified' */}
-                  {(
-                    mandala.mandala.type !== "unified" ||
-                    viewMode === "unified"
-                  ) && (
-                      <>
-                        <Buttons
-                          onCreatePostIt={handleCreatePostIt}
-                          onCreateCharacter={handleCreateCharacter}
-                          currentMandalaId={mandalaId}
-                          onNewTag={handleNewTag}
-                          tags={tags}
-                        />
-                        <ZoomControls />
-                      </>
-                    )}
+                  {(mandala.mandala.type !== "unified" ||
+                    viewMode === "unified") && (
+                    <>
+                      <Buttons
+                        onCreatePostIt={handleCreatePostIt}
+                        onCreateCharacter={handleCreateCharacter}
+                        currentMandalaId={mandalaId}
+                        onNewTag={handleNewTag}
+                        tags={tags}
+                      />
+                      <ZoomControls />
+                    </>
+                  )}
 
                   {/* Contenido principal - alternar entre vistas en unificadas */}
                   {mandala.mandala.type === "unified" && viewMode === "all" ? (
@@ -370,7 +374,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                             /* en vista all se pueden aplicar filtros también */
                             // si querés desactivarlos aquí, pasa {}.
                             // dejamos los aplicados para preservar ambos commits.
-                            (appliedFilters)
+                            appliedFilters
                           }
                           onPostItUpdate={updatePostit}
                           onCharacterUpdate={updateCharacter}
