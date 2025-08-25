@@ -56,6 +56,7 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
+  type?: 'character' | 'unified';
   configuration: {
     dimensions: { name: string; color: string }[];
     scales: string[];

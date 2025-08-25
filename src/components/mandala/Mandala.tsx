@@ -62,7 +62,7 @@ const Mandala: React.FC<MandalaProps> = ({
         <MandalaConcentric levels={levels} />
 
         {/* Person in the center */}
-        <MandalaPerson />
+        <MandalaPerson type={mandala.mandala.type} />
 
         {/* Sectors, lines, points, names, and questions */}
         <MandalaSectors

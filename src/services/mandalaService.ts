@@ -22,6 +22,7 @@ export const subscribeMandala = (
       mandala: {
         id: data.mandala?.id || "",
         name: data.mandala?.name || "",
+        type: data.mandala?.type || "character",
         configuration: data.mandala?.configuration || {
           dimensions: [],
           scales: [],
@@ -51,8 +52,8 @@ export const createPostit = async (
       section: postit.section,
       coordinates: postit.coordinates,
       tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
-        parentId: postitFatherId ?? undefined,
-      };
+      parentId: postitFatherId ?? undefined,
+    };
 
     await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
   } catch (error) {
@@ -220,9 +221,9 @@ export const deleteMandalaService = async (mandalaId: string) => {
 }
 
 export const updateMandalaCharacters = async (
-    projectId: string,
-    mandalaId: string,
-    updatedCharacters: Character[]
+  projectId: string,
+  mandalaId: string,
+  updatedCharacters: Character[]
 ) => {
   const mandalaRef = doc(db, projectId, mandalaId);
   const mandalaSnap = await getDoc(mandalaRef);
@@ -236,12 +237,12 @@ export const updateMandalaCharacters = async (
   return true;
 };
 export const updatePostItTags = async (
-    mandalaId: string,
-    postitId: string,
-    payload: {
-      content: string;
-      tags: Tag[];
-    }
+  mandalaId: string,
+  postitId: string,
+  payload: {
+    content: string;
+    tags: Tag[];
+  }
 ): Promise<void> => {
   await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
 };
