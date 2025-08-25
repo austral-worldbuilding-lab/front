@@ -1,11 +1,8 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import FileList from "@/components/project/FileList";
-import FileLoader from "@/components/project/FileLoader";
 import Loader from "@/components/common/Loader.tsx";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, Eye, UserPlus } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getProjectFiles, ProjectFile } from "@/services/filesService.ts";
+import { ArrowLeftIcon, Eye, UserPlus, FileText } from "lucide-react";
+import { useState } from "react";
 import logo from "@/assets/logo.png";
 import useProject from "@/hooks/useProject.ts";
 import ProjectUserList from "@/components/project/ProjectUserList";
@@ -18,35 +15,27 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import InviteUserForm from "@/components/project/InviteUserForm.tsx";
+import FilesDrawer from "@/components/project/FilesDrawer";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
-    projectId: string;
     organizationId: string;
+    projectId: string;
   }>();
+  console.log("ProjectPage params:", { projectId, organizationId });
   const navigate = useNavigate();
 
-  const [files, setFiles] = useState<ProjectFile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const { project, loading: projectLoading } = useProject(projectId);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteSuccess, setInviteSuccess] = useState(false);
   const [conflictOpen, setConflictOpen] = useState(false);
   const [conflictMsg, setConflictMsg] = useState<string | undefined>(undefined);
 
-  const fetchFiles = () => {
-    if (!projectId) return;
-    setLoading(true);
-    getProjectFiles(projectId)
-      .then((result) => setFiles(result || []))
-      .catch(() => setError("Error getting files"))
-      .finally(() => setLoading(false));
-  };
+  if (!projectId) {
+    return <div>Error: Project ID not found</div>;
+  }
 
-  useEffect(() => {
-    fetchFiles();
-  }, [projectId]);
 
   if (projectLoading) {
     return (
@@ -56,9 +45,6 @@ const ProjectPage = () => {
     );
   }
 
-  if (!projectId) {
-    return <div>Error: Project ID not found</div>;
-  }
 
   return (
     <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
@@ -74,20 +60,29 @@ const ProjectPage = () => {
           Proyecto: {project?.name}
         </h1>
 
-        {/* Descripción del proyecto */}
-        <div className="w-full">
-          <h2 className="text-base font-semibold mb-1">Descripción</h2>
-          {project?.description && project.description.trim().length > 0 ? (
-            <p className="text-sm leading-6 break-words whitespace-pre-wrap">
-              {project.description}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">
-              Este proyecto no tiene descripción.
-            </p>
-          )}
+          <div className="w-full flex justify-between items-start gap-4">
+            <div className="flex-1">
+              <h2 className="text-base font-semibold mb-1">Descripción</h2>
+              {project?.description && project.description.trim().length > 0 ? (
+                  <p className="text-sm leading-6 break-words whitespace-pre-wrap">
+                    {project.description}
+                  </p>
+              ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    Este proyecto no tiene descripción.
+                  </p>
+              )}
+            </div>
+
+            <Button
+                variant="outline"
+                onClick={() => setDrawerOpen(true)}
+                icon={<FileText size={16} />}
+            >
+              Archivos del proyecto
+            </Button>
+          </div>
         </div>
-      </div>
 
       <div className="flex flex-col items-start justify-start max-w-lg w-full">
         <div className="flex gap-3 mb-10">
@@ -117,23 +112,20 @@ const ProjectPage = () => {
           />
         </div>
 
-        <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white">
-          <div className="flex justify-between items-start">
-            <h2 className="text-lg font-bold mb-4">Archivos del proyecto</h2>
-            <FileLoader onUploadComplete={fetchFiles} projectId={projectId} />
+          <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
+            <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
+            <ProjectUserList projectId={projectId} canManage={true} />
           </div>
-          <FileList files={files} loading={loading} error={error} />
         </div>
 
-        <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
-          <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
-          {/* TODO: calcular canManage en base al rol del usuario autenticado */}
-          <ProjectUserList projectId={projectId} canManage={true} />
-        </div>
-      </div>
-
-
-      {/* MODAL INVITAR USUARIO */}
+      <FilesDrawer
+          id={projectId!}
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          title="Archivos del proyecto"
+          scope="project"
+      />
+  {/* MODAL INVITAR USUARIO */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent>
           <DialogHeader>

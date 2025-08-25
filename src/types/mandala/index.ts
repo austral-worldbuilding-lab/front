@@ -133,3 +133,10 @@ export interface Organization {
   id: string;
   name: string;
 }
+export interface FileItem {
+  id: string;
+  file_name: string;
+  file_type: string;
+  source_scope: string;
+  full_path: string;
+}

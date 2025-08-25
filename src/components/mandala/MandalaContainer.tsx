@@ -10,10 +10,10 @@ import ZoomControls from "./ZoomControls";
 import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Filter, InfoIcon, Sparkles } from "lucide-react";
+import {ArrowLeftIcon, FileText, Filter, InfoIcon, Sparkles} from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
-import { Tag } from "@/types/mandala";
+import { Tag} from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useTags } from "@/hooks/useTags";
@@ -31,6 +31,7 @@ import {
 } from "../ui/dialog";
 import useProject from "@/hooks/useProject";
 import ProjectMembersDisplay from "./ProjectMembersDisplay";
+import FilesDrawer from "@/components/project/FilesDrawer.tsx";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -53,6 +54,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { characters: projectCharacters, linkCharacter } =
     useProjectCharacters(mandalaId);
+
+  const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
+
 
   const navigate = useNavigate();
   const {
@@ -261,14 +265,22 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       </Button>
                     </div>
                   </div>
-                  <div className="absolute top-4 right-4 z-20">
+                  <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                     <Button
-                      variant="filled"
+                        variant="filled"
                       color="primary"
                       icon={<Filter size={16} />}
                       onClick={() => setIsFiltersOpen(true)}
                     >
                       Filtros
+                    </Button>
+                    <Button
+                        variant="filled"
+                        color="primary"
+                        icon={<FileText size={16} />}
+                        onClick={() => setIsFilesDrawerOpen(true)}
+                    >
+                      Archivos
                     </Button>
                   </div>
                   <Buttons
@@ -347,6 +359,13 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
           </>
         )}
       </div>
+      <FilesDrawer
+          open={isFilesDrawerOpen}
+          onClose={() => setIsFilesDrawerOpen(false)}
+          title="Archivos de la mandala"
+          scope="mandala"
+          id={mandalaId}
+      />
     </div>
   );
 };
