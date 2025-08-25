@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 interface CharacterItemProps {
   character: { id: string; name: string; color: string };
-  onAdd: (id: string) => void;
+  onAdd?: (id: string) => void;
 }
 
 const CharacterItem: React.FC<CharacterItemProps> = ({ character, onAdd }) => {
@@ -28,16 +28,18 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character, onAdd }) => {
         />
         <span className="text-sm font-medium">{character.name}</span>
       </div>
-      <Button
-        onClick={(e) => {
-          e.stopPropagation();
-          onAdd(character.id);
-        }}
-        variant="filled"
-        color="primary"
-        size="sm"
-        icon={<Plus size={16} />}
-      ></Button>
+      {onAdd && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd(character.id);
+          }}
+          variant="filled"
+          color="primary"
+          size="sm"
+          icon={<Plus size={16} />}
+        ></Button>
+      )}
     </div>
   );
 };
