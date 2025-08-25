@@ -37,7 +37,10 @@ interface MandalaContainerProps {
   organizationId: string;
 }
 
-const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organizationId}) => {
+const MandalaContainer: React.FC<MandalaContainerProps> = ({
+  mandalaId,
+  organizationId,
+}) => {
   const [isPanning, setIsPanning] = useState(false);
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
@@ -84,16 +87,21 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
     );
   };
 
-  const handleCreatePostIt = (content: string, tags: Tag[], postItFatherId?: string) => {
-    createPostit({
-      content: content,
-      coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
-      dimension: "Gobierno",
-      section: "Institución",
-      tags: tags || null,
-      childrens: [],
-    },
-    postItFatherId
+  const handleCreatePostIt = (
+    content: string,
+    tags: Tag[],
+    postItFatherId?: string
+  ) => {
+    createPostit(
+      {
+        content: content,
+        coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
+        dimension: "Gobierno",
+        section: "Institución",
+        tags: tags || null,
+        childrens: [],
+      },
+      postItFatherId
     );
   };
 
@@ -140,7 +148,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({ mandalaId, organiza
       <BreadcrumbMandala />
       <div className="w-full bg-white flex items-center relative overflow-hidden">
         <Button
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            navigate(
+              `/app/organization/${organizationId}/projects/${projectId}/mandalas`
+            )
+          }
           className="flex items-center gap-2 cursor-pointer"
           variant="text"
           color="primary"
