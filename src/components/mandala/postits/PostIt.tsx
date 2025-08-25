@@ -293,11 +293,9 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           </Html>
         )}
 
-        {(isUnifiedMandala || currentMandalaName) && (
+        {isUnifiedMandala && currentMandalaName && (
           <MandalaBadge
-            originMandalaName={
-              isUnifiedMandala ? postit.from?.name : currentMandalaName
-            }
+            originMandalaName={postit.from?.name}
             fontSize={fontSize}
           />
         )}
