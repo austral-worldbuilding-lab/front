@@ -2,8 +2,8 @@ import React from "react";
 import { Button } from "../ui/button";
 
 interface ViewToggleProps {
-  viewMode: "unified" | "all";
-  onViewModeChange: (mode: "unified" | "all") => void;
+  viewMode: "overlap" | "all";
+  onViewModeChange: (mode: "overlap" | "all") => void;
 }
 
 const ViewToggle: React.FC<ViewToggleProps> = ({
@@ -13,11 +13,11 @@ const ViewToggle: React.FC<ViewToggleProps> = ({
   return (
     <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
       <Button
-        variant={viewMode === "unified" ? "filled" : "ghost"}
+        variant={viewMode === "overlap" ? "filled" : "ghost"}
         size="sm"
-        onClick={() => onViewModeChange("unified")}
+        onClick={() => onViewModeChange("overlap")}
         className={`text-xs px-3 py-1 ${
-          viewMode === "unified"
+          viewMode === "overlap"
             ? "bg-primary text-white shadow-sm"
             : "text-gray-600 hover:text-gray-800"
         }`}
