@@ -106,10 +106,14 @@ const ProjectPage = () => {
           >
             Invitar
           </Button>
-          <ShareLinkDialog
-              projectName={project?.name ?? "Proyecto"}
-              defaultRole="member"
-          />
+          {projectId && organizationId && (
+            <ShareLinkDialog
+                projectId={projectId}
+                organizationId={organizationId}
+                projectName={project?.name ?? "Proyecto"}
+                defaultRole="member"
+            />
+          )}
         </div>
 
           <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">

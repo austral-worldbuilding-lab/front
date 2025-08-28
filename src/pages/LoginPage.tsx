@@ -1,6 +1,6 @@
 import { CustomInput } from "@/components/ui/CustomInput.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import logo from "@/assets/logo.png";
@@ -11,10 +11,21 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   async function handleLogin() {
     const success = await login(email, password);
     if (success) {
+      const inviteToken = searchParams.get("invite");
+      if (inviteToken) {
+        const params = new URLSearchParams(searchParams);
+        params.delete("invite");
+        const extra = params.toString();
+        const suffix = extra ? `?${extra}` : "";
+        navigate(`/invite/${inviteToken}${suffix}`, { replace: true });
+        return;
+      }
+
       const returnTo = sessionStorage.getItem(RETURN_TO_KEY);
       if (returnTo) {
         sessionStorage.removeItem(RETURN_TO_KEY);

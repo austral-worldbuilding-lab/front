@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Share2, Link as LinkIcon, Globe2, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Share2, Link as LinkIcon, Globe2, Check, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -20,36 +20,62 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
-import { Role, ROLES } from "@/services/invitationService";
+import { Role, ROLES, createInviteLink } from "@/services/invitationService";
 
 interface ShareLinkDialogProps {
+  projectId: string;
+  organizationId: string;
   projectName?: string;
   defaultRole?: Role;
 }
 
 export default function ShareLinkDialog({
+  projectId,
+  organizationId,
   projectName = "Proyecto",
   defaultRole = "member",
 }: ShareLinkDialogProps) {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<Role>(defaultRole);
   const [copied, setCopied] = useState(false);
-
-  const shareUrl = useMemo(
-    () => (typeof window !== "undefined" ? window.location.href : ""),
-    []
-  );
+  const [inviteUrl, setInviteUrl] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) setCopied(false);
+    if (!open) {
+      setCopied(false);
+      setError(null);
+    }
   }, [open]);
 
-  const copyLink = async () => {
+  useEffect(() => {
+    if (open && projectId && organizationId) {
+      generateInviteLink();
+    }
+  }, [open, role, projectId, organizationId]);
+
+  const generateInviteLink = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      const { inviteUrl } = await createInviteLink(projectId, role, organizationId);
+      setInviteUrl(inviteUrl);
+    } catch (err: any) {
+      setError(err?.message || "Error al generar el link");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyLink = async () => {
+    if (!inviteUrl) return;
+    
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
     } catch {
-      // Handle error
+      setError("Error al copiar el link");
     }
   };
 
@@ -114,10 +140,15 @@ export default function ShareLinkDialog({
                   </span>
                 </div>
 
+                {error && (
+                  <div className="mt-2 text-sm text-red-600">{error}</div>
+                )}
+
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <Select
                     value={role}
                     onValueChange={(v) => setRole(v as Role)}
+                    disabled={loading}
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Role" />
@@ -135,8 +166,13 @@ export default function ShareLinkDialog({
                     onClick={copyLink}
                     variant="outline"
                     className="shrink-0"
+                    disabled={loading || !inviteUrl}
                   >
-                    {copied ? (
+                    {loading ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Generando...
+                      </span>
+                    ) : copied ? (
                       <span className="inline-flex items-center gap-2">
                         <Check className="w-4 h-4" /> Copiado
                       </span>

@@ -63,3 +63,27 @@ export async function acceptInvitation(
 export async function rejectInvitation(invitationId: string): Promise<void> {
   await axiosInstance.post(`/invitation/${invitationId}/reject`, {});
 }
+
+export async function acceptInvitationByToken(token: string): Promise<{ projectId: string; organizationId?: string }> {
+  const response = await axiosInstance.get(`/invitation/join/${token}`);
+  const data = response.data.data;
+  return { 
+    projectId: data.projectId,
+    organizationId: data.organizationId 
+  };
+}
+
+export async function createInviteLink(
+  projectId: string, 
+  role: string,
+  organizationId: string,
+  expiresAt?: string
+): Promise<{ inviteUrl: string; token: string }> {
+  const response = await axiosInstance.post('/invitation/create-link', {
+    projectId,
+    role,
+    organizationId,
+    expiresAt
+  });
+  return response.data.data;
+}
