@@ -109,7 +109,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     bringToFront,
     toAbsolute,
     toRelative,
-    clamp,
     getDimensionAndSectionFromCoordinates,
   } = useKonvaUtils(mandala.postits, SCENE_W / 2);
 
@@ -121,14 +120,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       }, {} as Record<string, string>) ?? {}
     );
   }, [mandala.mandala.configuration?.dimensions]);
-
-  const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
-    const node = e.target;
-    node.position({
-      x: clamp(node.x(), SCENE_W - 100),
-      y: clamp(node.y(), SCENE_H - 100),
-    });
-  };
 
   const handleOnDragEndPostIt = async (
     e: KonvaEventObject<DragEvent>,
@@ -206,7 +197,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   onDragStart();
                   bringToFront(i);
                 }}
-                onDragMove={handleDragMove}
                 onDragEnd={(e) => {
                   handleOnDragEndPostIt(e, p.id!, p);
                 }}
