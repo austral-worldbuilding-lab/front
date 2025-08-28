@@ -46,11 +46,6 @@ export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
     [SCENE_H, SCENE_W]
   );
 
-  const clamp = useCallback(
-    (v: number, max: number) => Math.max(0, Math.min(v, max)),
-    []
-  );
-
   const bringToFront = useCallback((index: number) => {
     setZOrder((prev) => {
       const filtered = prev.filter((i) => i !== index);
@@ -91,7 +86,6 @@ export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
     bringToFront,
     toAbsolute,
     toRelative,
-    clamp,
     getDimensionAndSectionFromCoordinates,
     toAbsolutePostit,
     toRelativePostit,
