@@ -52,6 +52,15 @@ export default function PostItsPanel({
         }
     }, [items, mandalaId]);
 
+    // Eliminar post-it de localStorage cuando se crea uno nuevo
+    const deletePostItFromLocal = (content: string) => {
+        const key = `mandala-postits-${mandalaId}`;
+        const stored = getLocalQueue<any>(key);
+        const filtered = stored.filter((item: any) => item.content !== content);
+        localStorage.setItem(key, JSON.stringify(filtered.slice(-20)));
+        setItems(filtered.slice(-20));
+    }
+
     const openCreateWith = (text: string) => {
         setPrefill(text);
         setOpen(true);
@@ -145,7 +154,10 @@ export default function PostItsPanel({
                 isOpen={open}
                 onOpenChange={setOpen}
                 tags={tags}
-                onCreate={onCreate}
+                onCreate={() => {
+                    onCreate(prefill, tags);
+                    deletePostItFromLocal(prefill);
+                }}
                 onNewTag={onNewTag}
                 defaultContent={prefill}
             />
