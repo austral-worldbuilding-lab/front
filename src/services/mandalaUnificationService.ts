@@ -30,7 +30,7 @@ export const unifyMandalasService = async (
     if (response.status !== 201) {
       throw new Error("Error al unificar las mandalas");
     }
-    return response.data.data.mandala.id;
+    return response.data.data.id;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const errorMsg =
