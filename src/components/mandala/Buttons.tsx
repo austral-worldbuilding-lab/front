@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { PersonStanding, StickyNote } from "lucide-react";
 import CreateModal from "./characters/modal/CreateModal";
@@ -19,6 +19,7 @@ interface ButtonsProps {
   }) => void;
   tags: Tag[];
   currentMandalaId?: string;
+  loading?: boolean;
 }
 
 const Buttons = ({
@@ -27,9 +28,23 @@ const Buttons = ({
   onNewTag,
   tags,
   currentMandalaId,
+  loading = false,
 }: ButtonsProps) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
+  const [wasCreating, setWasCreating] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      setWasCreating(true);
+    } else if (wasCreating && !loading) {
+      const timer = setTimeout(() => {
+        setIsCreateModalOpen(false);
+        setWasCreating(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, wasCreating]);
 
   const handleCreateCharacter = (character: {
     name: string;
@@ -71,6 +86,7 @@ const Buttons = ({
         onCreateCharacter={handleCreateCharacter}
         title="Crear nuevo personaje"
         createButtonText="Crear personaje"
+        loading={loading}
       />
       <NewPostItModal
         isOpen={isPostItModalOpen}
