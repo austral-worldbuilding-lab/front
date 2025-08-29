@@ -5,6 +5,9 @@ import CreateModal from "./characters/modal/CreateModal";
 import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
 
+
+const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
+
 interface ButtonsProps {
   onCreatePostIt: (content: string, tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
@@ -41,7 +44,7 @@ const Buttons = ({
       const timer = setTimeout(() => {
         setIsCreateModalOpen(false);
         setWasCreating(false);
-      }, 500);
+      }, MODAL_CLOSE_DELAY);
       return () => clearTimeout(timer);
     }
   }, [loading, wasCreating]);

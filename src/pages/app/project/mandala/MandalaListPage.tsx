@@ -8,6 +8,9 @@ import MandalaPageHeader from "@/components/mandala/mandala-list/MandalaPageHead
 import MandalasPaginatedList from "@/components/mandala/mandala-list/MandalasPaginatedList";
 import MandalaListContainer from "@/components/mandala/mandala-list/MandalaListContainer";
 
+
+const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
+
 /**
  * Página principal que muestra el listado de mandalas con funcionalidades de:
  * - Creación de mandalas
@@ -56,7 +59,7 @@ const MandalaListPage = () => {
       const timer = setTimeout(() => {
         setIsCreateModalOpen(false);
         setWasCreating(false);
-      }, 500);
+      }, MODAL_CLOSE_DELAY);
       return () => clearTimeout(timer);
     }
   }, [isCreatingMandala, wasCreating]);

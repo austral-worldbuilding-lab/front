@@ -16,6 +16,8 @@ import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 import Loader from "@/components/common/Loader";
 
+const MESSAGE_ROTATION_INTERVAL = 5000; // 5 segundos
+
 const initialDimensions: Item[] = Sectors.map((sector) => {
   return {
     id: sector.id,
@@ -95,7 +97,7 @@ const CreateModal = ({
       setCurrentMessageIndex((prevIndex) => 
         (prevIndex + 1) % messages.length
       );
-    }, 5000);
+    }, MESSAGE_ROTATION_INTERVAL);
 
     return () => clearInterval(interval);
   }, [loading, messages.length]);
@@ -130,9 +132,19 @@ const CreateModal = ({
 
   };
 
+  // Handlers para eventos del modal durante loading
+  const handleOpenChange = loading ? () => {} : onOpenChange;
+  const handlePointerDownOutside = loading ? (e: Event) => e.preventDefault() : undefined;
+  const handleEscapeKeyDown = loading ? (e: KeyboardEvent) => e.preventDefault() : undefined;
+
   return (
-    <Dialog open={isOpen} onOpenChange={loading ? () => {} : onOpenChange}>
-      <DialogContent className="max-w-md" showCloseButton={!loading} onPointerDownOutside={loading ? (e) => e.preventDefault() : undefined} onEscapeKeyDown={loading ? (e) => e.preventDefault() : undefined}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className="max-w-md" 
+        showCloseButton={!loading} 
+        onPointerDownOutside={handlePointerDownOutside} 
+        onEscapeKeyDown={handleEscapeKeyDown}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
             {loading ? "Creando Mandala" : title}
