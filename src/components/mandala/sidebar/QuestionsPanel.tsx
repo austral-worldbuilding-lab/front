@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {useQuestionGenerator} from "@/components/mandala/sidebar/useQuestionGenerator.tsx";
 import {Link} from "react-router-dom";
-import {getLocalQueue, pushToLocalQueue} from "@/utils/localQueue.ts";
+import {getLocalQueue} from "@/utils/localQueue.ts";
 
 export interface QuestionsPanelProps extends PropsWithChildren {
     mandalaId: string;
