@@ -58,7 +58,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"unified" | "all">("unified");
+  const [viewMode, setViewMode] = useState<"overlap" | "all">("overlap");
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
@@ -301,7 +301,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   </div>
 
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
-                    {mandala?.mandala.type === "unified" && (
+                    {mandala?.mandala.type === "overlap" && (
                       <ViewToggle
                         viewMode={viewMode}
                         onViewModeChange={setViewMode}
@@ -334,8 +334,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   {/* Mostrar botones/controles:
                       - siempre para mandalas NO unificadas
                       - para unificadas, solo en vista 'unified' */}
-                  {(mandala.mandala.type !== "unified" ||
-                    viewMode === "unified") && (
+                  {(mandala.mandala.type !== "overlap" ||
+                    viewMode === "overlap") && (
                     <>
                       <Buttons
                         onCreatePostIt={handleCreatePostIt}
@@ -349,7 +349,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   )}
 
                   {/* Contenido principal - alternar entre vistas en unificadas */}
-                  {mandala.mandala.type === "unified" && viewMode === "all" ? (
+                  {mandala.mandala.type === "overlap" && viewMode === "all" ? (
                     // Vista "all": todas las mandalas en un único canvas Konva
                     <TransformComponent
                       wrapperStyle={{
