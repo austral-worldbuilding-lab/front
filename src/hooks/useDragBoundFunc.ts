@@ -5,16 +5,17 @@ const useDragBoundFunc = (
   radiusOffset = 0,
   scale = 1
 ) => {
-  const cx = radius;
-  const cy = radius;
-  const r = radius;
+  const cx = radius; 
+  const cy = radius; 
+  const r = radius;  
   const VISUAL_MARGIN = 2;
 
   const dragBoundFunc = (pos: { x: number; y: number }) => {
-    const centerPos = pos;
+    const postItCenterX = pos.x;
+    const postItCenterY = pos.y;
 
-    const dx = centerPos.x - cx;
-    const dy = centerPos.y - cy;
+    const dx = postItCenterX - cx;
+    const dy = postItCenterY - cy;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     const scaledHalfWidth = (postItWidth / 2) * scale;

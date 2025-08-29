@@ -139,7 +139,7 @@ const MandalaCanvas: React.FC<{
     const canvasSize = maxRadius * 2;
 
     const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(mandala.postits, maxRadius);
-    const { toAbsolute, toRelative, clamp, getDimensionAndSectionFromCoordinates, zOrder, bringToFront } =
+    const { toAbsolute, toRelative, getDimensionAndSectionFromCoordinates, zOrder, bringToFront } =
         useKonvaUtils(mandala.postits, maxRadius);
 
     const {
@@ -213,14 +213,6 @@ const MandalaCanvas: React.FC<{
                                         onDragStart?.();
                                         bringToFront(i);
                                     }
-                                }}
-                                onDragMove={(e) => {
-                                    if (readOnly) return;
-                                    const node = e.target;
-                                    node.position({
-                                        x: clamp(node.x(), canvasSize - 100),
-                                        y: clamp(node.y(), canvasSize - 100)
-                                    });
                                 }}
                                 onDragEnd={async (e) => {
                                     if (readOnly || !onPostItUpdate) return;

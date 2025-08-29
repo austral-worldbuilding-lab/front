@@ -14,7 +14,7 @@ interface PostItProps {
   color: string;
   position: { x: number; y: number };
   onDragStart: () => void;
-  onDragMove: (e: KonvaEventObject<DragEvent>) => void;
+  onDragMove?: (e: KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: KonvaEventObject<DragEvent>) => void;
   onDblClick: () => void;
   onContentChange: (newValue: string, id: string) => void;
@@ -186,7 +186,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             color={color}
             position={childPositions[i]}
             onDragStart={onDragStart}
-            onDragMove={onDragMove}
+            {...(onDragMove && { onDragMove })}
             onDragEnd={onDragEnd}
             onDblClick={onDblClick}
             onContentChange={onContentChange}
@@ -221,7 +221,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           onDragStart();
           setIsDragging(true);
         }}
-        onDragMove={onDragMove}
+        {...(onDragMove && { onDragMove })}
         onDragEnd={(e) => {
           onDragEnd(e);
           setTimeout(() => setIsDragging(false), 100);
