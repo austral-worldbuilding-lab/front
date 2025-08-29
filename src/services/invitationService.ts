@@ -77,13 +77,17 @@ export async function createInviteLink(
   projectId: string, 
   role: string,
   organizationId: string,
-  expiresAt?: string
+  expiresAt?: string,
+  email?: string,
+  sendEmail?: boolean
 ): Promise<{ inviteUrl: string; token: string }> {
   const response = await axiosInstance.post('/invitation/create-link', {
     projectId,
     role,
     organizationId,
-    expiresAt
+    expiresAt,
+    email,
+    sendEmail
   });
   return response.data.data;
 }

@@ -135,9 +135,11 @@ const ProjectPage = () => {
           <DialogHeader>
             <DialogTitle>Invitar miembros</DialogTitle>
           </DialogHeader>
-          <InviteUserForm
-              projectId={projectId}
-              onSuccess={() => {
+          {projectId && organizationId && (
+            <InviteUserForm
+                projectId={projectId}
+                organizationId={organizationId}
+                onSuccess={() => {
                 setInviteOpen(false);
                 setInviteSuccess(true);
               }}
@@ -148,7 +150,13 @@ const ProjectPage = () => {
                   setConflictOpen(true);
                 }
               }}
-          />
+            />
+          )}
+          {(!projectId || !organizationId) && (
+            <div className="text-red-600 text-sm">
+              Error: No se pueden enviar invitaciones. Faltan datos del proyecto.
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -156,9 +164,9 @@ const ProjectPage = () => {
       <Dialog open={inviteSuccess} onOpenChange={setInviteSuccess}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Invitación enviada</DialogTitle>
+            <DialogTitle>Invitación creada</DialogTitle>
           </DialogHeader>
-          <div>Se envió la invitación correctamente.</div>
+          <div>Se generó el link de invitación. El usuario podrá unirse al proyecto usando este enlace.</div>
           <DialogFooter>
             <Button onClick={() => setInviteSuccess(false)}>OK</Button>
           </DialogFooter>
