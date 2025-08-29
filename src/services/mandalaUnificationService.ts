@@ -3,9 +3,7 @@ import axios from "axios";
 
 interface MandalaUnificationResponse {
   data: {
-    mandala: {
-      id: string;
-    };
+    id: string;
   };
 }
 
