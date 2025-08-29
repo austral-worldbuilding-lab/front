@@ -279,14 +279,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     <div className="flex flex-col gap-2">
                       <CharacterDropdown
                         characters={
-                          mandala.mandala.type === "character"
-                            ? projectCharacters
-                            : mandala.mandala.configuration.center.characters
+                          mandala.mandala.type === "overlap"
+                            ? mandala.mandala.configuration.center.characters
+                            : projectCharacters
                         }
                         onAdd={
-                          mandala.mandala.type === "character"
-                            ? linkCharacter
-                            : undefined
+                          mandala.mandala.type === "overlap"
+                            ? undefined
+                            : linkCharacter
                         }
                       />
                       <Button
