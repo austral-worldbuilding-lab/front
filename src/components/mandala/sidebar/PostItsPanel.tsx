@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { usePostItsGenerator } from "./usePostItsGenerator";
 import type { Tag } from "@/types/mandala";
-import {PropsWithChildren, useMemo, useState} from "react";
+import {PropsWithChildren, useEffect, useMemo, useState} from "react";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import {Link} from "react-router-dom";
+import {getLocalQueue} from "@/utils/localQueue.ts";
 
 export interface PostItsPanelProps extends PropsWithChildren {
     mandalaId: string;
@@ -29,11 +30,27 @@ export default function PostItsPanel({
                                          onNewTag = () => {},
                                          dimensions = [],
                                      }: PostItsPanelProps) {
-    const { items, loading, error, generate } = usePostItsGenerator(mandalaId);
+    const { items, setItems, loading, error, generate } = usePostItsGenerator(mandalaId);
 
     // modal de creación real
     const [open, setOpen] = useState(false);
     const [prefill, setPrefill] = useState("");
+
+    // Cargar post-its guardados en localStorage al montar
+    useEffect(() => {
+        const stored = getLocalQueue<any>(`mandala-postits-${mandalaId}`);
+        if (stored.length > 0) setItems(stored);
+    }, [mandalaId, setItems]);
+
+    // Guardar post-its en localStorage cuando cambian
+    useEffect(() => {
+        if (items.length > 0) {
+            localStorage.setItem(
+                `mandala-postits-${mandalaId}`,
+                JSON.stringify(items.slice(-20))
+            );
+        }
+    }, [items, mandalaId]);
 
     const openCreateWith = (text: string) => {
         setPrefill(text);
@@ -50,6 +67,7 @@ export default function PostItsPanel({
             }, {} as Record<string, string>) ?? {}
         );
     }, [dimensions]);
+
 
     return (
         <div className="flex-1 min-h-0 flex flex-col gap-3">

@@ -1,8 +1,9 @@
-import { PropsWithChildren } from "react";
+import {PropsWithChildren, useEffect} from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {useQuestionGenerator} from "@/components/mandala/sidebar/useQuestionGenerator.tsx";
 import {Link} from "react-router-dom";
+import {getLocalQueue, pushToLocalQueue} from "@/utils/localQueue.ts";
 
 export interface QuestionsPanelProps extends PropsWithChildren {
     mandalaId: string;
@@ -12,7 +13,22 @@ export interface QuestionsPanelProps extends PropsWithChildren {
 }
 
 export default function QuestionsPanel({ mandalaId, organizationId, projectId, selected, children }: QuestionsPanelProps) {
-    const { questions, loading, error, generate } = useQuestionGenerator(mandalaId);
+    const { questions, setQuestions, loading, error, generate } = useQuestionGenerator(mandalaId);
+
+    // Cargar preguntas guardadas en localStorage al montar
+    useEffect(() => {
+        setQuestions(getLocalQueue<string>(`mandala-questions-${mandalaId}`));
+    }, [mandalaId]);
+
+    // Guardar preguntas en localStorage cuando cambian
+    useEffect(() => {
+        if (questions.length > 0) {
+            localStorage.setItem(
+                `mandala-questions-${mandalaId}`,
+                JSON.stringify(questions.slice(-20))
+            );
+        }
+    }, [questions, mandalaId]);
 
     return (
         <div className="flex-1 min-h-0 flex flex-col gap-3">
