@@ -24,7 +24,7 @@ import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
 import FiltersModal from "./filters/FiltersModal";
 import { useTags } from "@/hooks/useTags";
-import { useProjectCharacters } from "../../hooks/useProjectCharacters";
+import { useProjectCharacters } from "@/hooks/useProjectCharacters.ts";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
 import BreadcrumbMandala from "@/components/mandala/BreadcrumbMandala.tsx";
 import QuestionMachineSidebar from "./sidebar/QuestionMachineSidebar";
@@ -78,7 +78,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     deletePostit,
     deleteCharacter,
   } = useMandala(mandalaId);
-  const { createMandala } = useCreateMandala(projectId);
+  const { createMandala, loading: isCreatingCharacter } = useCreateMandala(projectId);
 
   // Extraer ids de mandalas origen desde los postits (campo from: { id, name })
   const sourceMandalaIds = (() => {
@@ -343,6 +343,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                         currentMandalaId={mandalaId}
                         onNewTag={handleNewTag}
                         tags={tags}
+                        loading={isCreatingCharacter}
                       />
                       <ZoomControls />
                     </>
