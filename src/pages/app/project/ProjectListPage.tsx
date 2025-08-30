@@ -57,27 +57,52 @@ const ProjectListPage = () => {
 
               <div className="w-full max-w-2xl px-4">
                   <h1 className="text-2xl font-bold mb-6 text-center">Proyectos de: {orgName || ""}</h1>
-                  <Button
-                      color="primary"
-                      className="mb-10"
-                      onClick={() => setModalOpen(true)}
-                      icon={<PlusIcon size={16}/>}
-                  >
-                      Crear Proyecto
-                  </Button>
-                  <Button
-                      className="ml-2"
-                      variant="outline"
-                      onClick={() => setDrawerOpen(true)}
-                      icon={<FileText size={16}/>}
-                  >
-                      Archivos de la organización
-                  </Button>
+                  {!error?.message?.includes("403") && !error?.message?.includes("Request failed with status code 403") && (
+                      <>
+                          <Button
+                              color="primary"
+                              className="mb-10"
+                              onClick={() => setModalOpen(true)}
+                              icon={<PlusIcon size={16}/>}
+                          >
+                              Crear Proyecto
+                          </Button>
+                          <Button
+                              className="ml-2"
+                              variant="outline"
+                              onClick={() => setDrawerOpen(true)}
+                              icon={<FileText size={16}/>}
+                          >
+                              Archivos de la organización
+                          </Button>
+                      </>
+                  )}
                   <div className="bg-white rounded-lg shadow-sm border">
                       {loading && <Loader size="medium" text="Cargando proyectos..."/>}
                       {error && (
-                          <div className="p-4 text-red-500">
-                              Error al cargar los proyectos: {error.message}
+                          <div className="flex flex-col items-center justify-center p-8">
+                              <div className="text-center max-w-md">
+                                  <h2 className="text-lg font-semibold text-red-600 mb-3">Error al cargar proyectos</h2>
+                                  <p className="text-gray-600 mb-4">
+                                      {error.message?.includes("403") || error.message === "Request failed with status code 403"
+                                          ? "No tienes permisos para ver todos los proyectos de esta organización. Solo puedes acceder a los proyectos donde has sido invitado específicamente."
+                                          : error.message || "Error al cargar los proyectos"}
+                                  </p>
+                                  <div className="flex gap-2 justify-center flex-wrap">
+                                      <Button 
+                                          variant="outline" 
+                                          onClick={() => window.history.back()}
+                                      >
+                                          Volver atrás
+                                      </Button>
+                                      <Button 
+                                          variant="outline" 
+                                          onClick={() => navigate("/app/organization/")}
+                                      >
+                                          Mis organizaciones
+                                      </Button>
+                                  </div>
+                              </div>
                           </div>
                       )}
                       {!error && !loading && projects.length === 0 && (
