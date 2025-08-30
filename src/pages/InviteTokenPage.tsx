@@ -54,7 +54,9 @@ const InviteTokenPage = () => {
         } else if (error.response?.status === 404) {
           setError("La invitación no existe o ha expirado");
         } else if (error.response?.status === 409) {
-          setError("Ya eres miembro de este proyecto");
+          setError("Ya eres miembro de este proyecto. Puedes acceder directamente desde tus organizaciones.");
+        } else if (error.response?.status === 403) {
+          setError("No tienes permisos para acceder a esta invitación.");
         } else {
           setError(error.response?.data?.message || "Error al procesar la invitación");
         }
@@ -81,10 +83,10 @@ const InviteTokenPage = () => {
           <h1 className="text-xl font-semibold text-red-600 mb-4">Error</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => navigate("/app/project")}
+            onClick={() => navigate("/app/organization/")}
             className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover"
           >
-            Ir a mis proyectos
+            Ir a mis organizaciones
           </button>
         </div>
       </div>

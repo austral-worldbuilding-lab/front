@@ -62,7 +62,11 @@ export default function ShareLinkDialog({
       const { inviteUrl } = await createInviteLink(projectId, role, organizationId);
       setInviteUrl(inviteUrl);
     } catch (err: any) {
-      setError(err?.message || "Error al generar el link");
+      if (err?.response?.status === 403) {
+        setError("No tienes permisos para generar links de invitación. Solo los propietarios del proyecto pueden crear invitaciones.");
+      } else {
+        setError(err?.response?.data?.message || err?.message || "Error al generar el link");
+      }
     } finally {
       setLoading(false);
     }

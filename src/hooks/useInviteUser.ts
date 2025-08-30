@@ -46,8 +46,14 @@ export default function useInviteUser(projectId?: string, organizationId?: strin
         
         setSuccess(true);
         return result;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al crear la invitación");
+      } catch (err: any) {
+        if (err?.response?.status === 403) {
+          setError("No tienes permisos para enviar invitaciones. Solo los propietarios del proyecto pueden invitar usuarios.");
+        } else if (err?.response?.status === 409) {
+          setError("Ya existe una invitación pendiente para este usuario o ya es miembro del proyecto.");
+        } else {
+          setError(err?.response?.data?.message || err?.message || "Error al crear la invitación");
+        }
         throw err;
       } finally {
         setLoading(false);
