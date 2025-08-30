@@ -15,6 +15,7 @@ import ProjectPage from "./pages/app/project/ProjectPage";
 import ProjectListPage from "./pages/app/project/ProjectListPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 import MyInvitationsPage from "@/pages/MyInvitationsPage";
+import InviteTokenPage from "@/pages/InviteTokenPage";
 import RootRedirect from "@/components/common/RootRedirect.tsx";
 import OrganizationListPage from "@/pages/app/project/OrganizationListPage.tsx";
 
@@ -35,6 +36,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
+        <Route path="/invite/:token" element={<InviteTokenPage />} />
+
         <Route
           path="/my-invitations"
           element={
@@ -54,10 +57,7 @@ function App() {
           }
         >
           {/* Redirect /app to mandala */}
-          <Route
-            index
-            element={<Navigate to={`/app/project`} replace />}
-          />
+          <Route index element={<Navigate to={`/app/organization/`} replace />} />
 
           {/* Rutas independientes */}
           <Route path="organization/" element={<OrganizationListPage/>} />
@@ -76,7 +76,6 @@ function App() {
               path="organization/:organizationId/projects/:projectId/mandala/:mandalaId/dimension/:dimensionName"
               element={<DimensionPage />}
           />
-
         </Route>
 
         {/* 404 route */}

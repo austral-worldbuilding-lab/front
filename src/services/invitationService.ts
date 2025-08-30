@@ -41,6 +41,11 @@ export async function createInvitation(
   return res.data;
 }
 
+interface AcceptInvitationResponse {
+  projectId?: string;
+  [key: string]: unknown;
+}
+
 export async function acceptInvitation(
   invitationId: string
 ): Promise<{ projectId: string; invitation: Invitation }> {
@@ -49,7 +54,7 @@ export async function acceptInvitation(
     {}
   );
   const invitation = (response.data &&
-    (response.data.data ?? response.data)) as any;
+    (response.data.data ?? response.data)) as AcceptInvitationResponse;
 
   const projectId: string | undefined = invitation?.projectId;
 
@@ -57,9 +62,37 @@ export async function acceptInvitation(
     throw new Error("No se pudo obtener el proyecto de la invitación aceptada");
   }
 
-  return { projectId, invitation };
+  return { projectId, invitation: invitation as unknown as Invitation };
 }
 
 export async function rejectInvitation(invitationId: string): Promise<void> {
   await axiosInstance.post(`/invitation/${invitationId}/reject`, {});
+}
+
+export async function acceptInvitationByToken(token: string): Promise<{ projectId: string; organizationId?: string }> {
+  const response = await axiosInstance.get(`/invitation/join/${token}`);
+  const data = response.data.data;
+  return { 
+    projectId: data.projectId,
+    organizationId: data.organizationId 
+  };
+}
+
+export async function createInviteLink(
+  projectId: string, 
+  role: string,
+  organizationId: string,
+  expiresAt?: string,
+  email?: string,
+  sendEmail?: boolean
+): Promise<{ inviteUrl: string; token: string }> {
+  const response = await axiosInstance.post('/invitation/create-link', {
+    projectId,
+    role,
+    organizationId,
+    expiresAt,
+    email,
+    sendEmail
+  });
+  return response.data.data;
 }
