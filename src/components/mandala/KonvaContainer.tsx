@@ -12,7 +12,7 @@ import { Tag } from "@/types/mandala";
 import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 
-import {useEditPostIt} from "@/hooks/useEditPostit.ts";
+import { useEditPostIt } from "@/hooks/useEditPostit.ts";
 import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
 
 export interface KonvaContainerProps {
@@ -67,10 +67,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const SCENE_W = maxRadius * 2;
   const SCENE_H = maxRadius * 2;
 
-  const {
-    toAbsolutePostit,
-    toRelativePostit,
-  } = useKonvaUtils(mandala.postits, maxRadius);
+  const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(
+    mandala.postits,
+    maxRadius
+  );
 
   const {
     contextMenu,
@@ -80,20 +80,20 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     handleCreateChild,
     handleEditPostIt,
   } = useContextMenu(
-      onPostItDelete,
-      onCharacterDelete,
-      setEditableIndex,
-      setEditingContent,
-      (id) => {
-        setSelectedPostItId(id);
-        setIsChildPostItModalOpen(true);
-      },
-      (id) => {
-        const postit = mandala.postits.find((p) => p.id === id);
-        if (postit) {
-          openEditModal(mandala.id, postit);
-        }
+    onPostItDelete,
+    onCharacterDelete,
+    setEditableIndex,
+    setEditingContent,
+    (id) => {
+      setSelectedPostItId(id);
+      setIsChildPostItModalOpen(true);
+    },
+    (id) => {
+      const postit = mandala.postits.find((p) => p.id === id);
+      if (postit) {
+        openEditModal(mandala.id, postit);
       }
+    }
   );
 
   const {
@@ -109,7 +109,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     bringToFront,
     toAbsolute,
     toRelative,
-    clamp,
     getDimensionAndSectionFromCoordinates,
   } = useKonvaUtils(mandala.postits, SCENE_W / 2);
 
@@ -121,14 +120,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       }, {} as Record<string, string>) ?? {}
     );
   }, [mandala.mandala.configuration?.dimensions]);
-
-  const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
-    const node = e.target;
-    node.position({
-      x: clamp(node.x(), SCENE_W - 100),
-      y: clamp(node.y(), SCENE_H - 100),
-    });
-  };
 
   const handleOnDragEndPostIt = async (
     e: KonvaEventObject<DragEvent>,
@@ -206,7 +197,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   onDragStart();
                   bringToFront(i);
                 }}
-                onDragMove={handleDragMove}
                 onDragEnd={(e) => {
                   handleOnDragEndPostIt(e, p.id!, p);
                 }}
@@ -225,6 +215,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onMouseLeave={onMouseLeave}
                 onContextMenu={(e, i) => showContextMenu(e, i, "postit")}
                 mandalaRadius={SCENE_W / 2}
+                isUnifiedMandala={mandala.mandala.type === "overlap"}
+                currentMandalaName={mandala.mandala.name}
               />
             );
           })}
@@ -272,7 +264,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             onCreateChild={
               contextMenu.type === "postit" ? handleCreateChild : undefined
             }
-            onEdit={contextMenu.type === "postit" ? handleEditPostIt : undefined}
+            onEdit={
+              contextMenu.type === "postit" ? handleEditPostIt : undefined
+            }
             isContextMenu={true}
           />
         </div>
@@ -291,19 +285,18 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         }}
       />
       {editingPostit && (
-          <EditPostItModal
-              isOpen={isEditModalOpen}
-              onOpenChange={(open) => {
-                if (!open) closeEditModal();
-              }}
-              tags={tags}
-              onUpdate={handleUpdate}
-              initialContent={editingPostit.content}
-              initialTags={editingPostit.tags}
-              onNewTag={onNewTag}
-          />
+        <EditPostItModal
+          isOpen={isEditModalOpen}
+          onOpenChange={(open) => {
+            if (!open) closeEditModal();
+          }}
+          tags={tags}
+          onUpdate={handleUpdate}
+          initialContent={editingPostit.content}
+          initialTags={editingPostit.tags}
+          onNewTag={onNewTag}
+        />
       )}
-
     </div>
   );
 };

@@ -20,7 +20,7 @@ export function usePostItsGenerator(mandalaId: string) {
             setError(null);
             try {
                 const res = await generatePostItsService(mandalaId, { dimensions, scales });
-                setItems(res);
+                setItems(prev => [...prev, ...res].slice(-20)); // Limita a 20
             } catch (e: unknown) {
                 setError(e instanceof Error ? e.message : "No se pudieron generar Post-Its");
             } finally {
@@ -30,5 +30,5 @@ export function usePostItsGenerator(mandalaId: string) {
         [mandalaId]
     );
 
-    return { items, loading, error, generate };
+    return { items, setItems, loading, error, generate };
 }

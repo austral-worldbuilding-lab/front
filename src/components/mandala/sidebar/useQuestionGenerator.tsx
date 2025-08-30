@@ -15,7 +15,7 @@ export function useQuestionGenerator(mandalaId: string) {
             setLoading(true);
             setError(null);
             try {
-                // ⬇️ El servicio retorna AiQuestionResponse[]
+                // El servicio retorna AiQuestionResponse[]
                 const res: AiQuestionResponse[] = await generateQuestionsService(
                     mandalaId,
                     { dimensions, scales }
@@ -25,7 +25,10 @@ export function useQuestionGenerator(mandalaId: string) {
                     .map((r) => r?.question?.trim())
                     .filter(Boolean) as string[];
 
-                setQuestions(items);
+                setQuestions(prev => {
+                    const merged = [...prev, ...items].slice(-20);
+                    return merged;
+                });
             } catch (e: unknown) {
                 const msg = e instanceof Error ? e.message : "No se pudieron generar preguntas";
                 setError(msg);
@@ -36,6 +39,6 @@ export function useQuestionGenerator(mandalaId: string) {
         [mandalaId]
     );
 
-    return { questions, loading, error, generate };
+    return { questions, setQuestions, loading, error, generate };
 }
 

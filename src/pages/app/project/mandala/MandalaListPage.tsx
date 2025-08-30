@@ -8,6 +8,9 @@ import MandalaPageHeader from "@/components/mandala/mandala-list/MandalaPageHead
 import MandalasPaginatedList from "@/components/mandala/mandala-list/MandalasPaginatedList";
 import MandalaListContainer from "@/components/mandala/mandala-list/MandalaListContainer";
 
+
+const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
+
 /**
  * Página principal que muestra el listado de mandalas con funcionalidades de:
  * - Creación de mandalas
@@ -37,16 +40,29 @@ const MandalaListPage = () => {
 
   // Hooks para operaciones CRUD
   const { deleteMandala } = useDeleteMandala();
-  const { createMandala } = useCreateMandala(projectId || "");
+  const { createMandala, loading: isCreatingMandala } = useCreateMandala(projectId || "");
 
   // Estado para el modal de creación
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [wasCreating, setWasCreating] = useState(false);
 
   // Sincronización de datos
   useEffect(() => {
     setMandalas(fetchedMandalas);
   }, [fetchedMandalas]);
+
+  useEffect(() => {
+    if (isCreatingMandala) {
+      setWasCreating(true);
+    } else if (wasCreating && !isCreatingMandala) {
+      const timer = setTimeout(() => {
+        setIsCreateModalOpen(false);
+        setWasCreating(false);
+      }, MODAL_CLOSE_DELAY);
+      return () => clearTimeout(timer);
+    }
+  }, [isCreatingMandala, wasCreating]);
 
   if (!projectId) {
     return <div className="p-6 text-red-500">Error: Project ID not found</div>;
@@ -82,7 +98,6 @@ const MandalaListPage = () => {
         dimensions,
         scales
       );
-      setIsCreateModalOpen(false);
       navigate(
         `/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`
       );
@@ -148,10 +163,11 @@ const MandalaListPage = () => {
         onCreateCharacter={handleCreateMandala}
         title="Crear Mandala"
         createButtonText="Crear Mandala"
+        loading={isCreatingMandala}
       />
 
       {/* Mensaje de error de creación */}
-      {error && !isCreateModalOpen && (
+      {error && !isCreateModalOpen && !isCreatingMandala && (
         <p className="text-red-500 text-sm mt-4 text-center max-w-md">
           {error}
         </p>

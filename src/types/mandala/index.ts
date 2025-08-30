@@ -28,7 +28,7 @@ export interface Postit {
   tags: Tag[];
   childrens: Postit[];
   // Optional provenance info when a postit comes from another mandala
-  from?: { id: string; name: string }
+  from?: { id: string; name: string };
 }
 
 export interface Tag {
@@ -58,7 +58,7 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  type?: "character" | "unified";
+  type?: "character" | "overlap";
   configuration: MandalaConfiguration;
   parentId: string;
 }
@@ -84,7 +84,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
-  type: "character" | "unified";
+  type: "CHARACTER" | "OVERLAP";
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];

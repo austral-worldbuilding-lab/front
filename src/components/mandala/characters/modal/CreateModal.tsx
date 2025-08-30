@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,9 @@ import ColorSelector from "./ColorSelector";
 import { Sparkles } from "lucide-react";
 import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
+import Loader from "@/components/common/Loader";
+
+const MESSAGE_ROTATION_INTERVAL = 5000; // 5 segundos
 
 const initialDimensions: Item[] = Sectors.map((sector) => {
   return {
@@ -43,6 +46,7 @@ interface CreateModalProps {
   }) => void | Promise<void>;
   title?: string;
   createButtonText?: string;
+  loading?: boolean;
 }
 
 const CreateModal = ({
@@ -51,6 +55,7 @@ const CreateModal = ({
   onCreateCharacter,
   title = "New Character",
   createButtonText = "Create Character",
+  loading = false,
 }: CreateModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -58,6 +63,57 @@ const CreateModal = ({
   const [mandalaType, setMandalaType] = useState("empty");
   const [dimensions, setDimensions] = useState<Item[]>(initialDimensions);
   const [scales, setScales] = useState<Item[]>(initialScales);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  // Mensajes para mandala con IA
+  const aiMessages = [
+    "Generando mandala con IA en base a los archivos subidos...",
+    "Analizando contenido de los archivos...",
+    "Procesando información con inteligencia artificial...",
+    "Creando estructura de la mandala...",
+    "Generando personajes y dimensiones...",
+    "Finalizando la mandala personalizada...",
+  ];
+
+  // Mensajes para mandala normal
+  const normalMessages = [
+    "Creando nueva mandala...",
+    "Configurando estructura inicial...",
+    "Preparando dimensiones y escalas...",
+    "Guardando información del personaje...",
+    "Finalizando configuración...",
+  ];
+
+  const messages = mandalaType === "ai" ? aiMessages : normalMessages;
+
+  // Cambio de mensaje cada 5 segundos
+  useEffect(() => {
+    if (!loading) {
+      setCurrentMessageIndex(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prevIndex) => 
+        (prevIndex + 1) % messages.length
+      );
+    }, MESSAGE_ROTATION_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [loading, messages.length]);
+
+
+  useEffect(() => {
+    if (!isOpen) {
+      setName("");
+      setDescription("");
+      setSelectedColor(colors[0]);
+      setMandalaType("empty");
+      setDimensions(initialDimensions);
+      setScales(initialScales);
+      setCurrentMessageIndex(0);
+    }
+  }, [isOpen]);
 
   const handleCreateCharacter = () => {
     const processedDimensions = dimensions.map((d) => ({
@@ -73,25 +129,39 @@ const CreateModal = ({
       dimensions: processedDimensions,
       scales: scales.map((s) => s.value),
     });
-    setName("");
-    setDescription("");
-    setSelectedColor(colors[0]);
-    setMandalaType("empty");
-    onOpenChange(false);
-    setDimensions(dimensions);
-    setScales(scales);
+
   };
 
+  // Handlers para eventos del modal durante loading
+  const handleOpenChange = loading ? () => {} : onOpenChange;
+  const handlePointerDownOutside = loading ? (e: Event) => e.preventDefault() : undefined;
+  const handleEscapeKeyDown = loading ? (e: KeyboardEvent) => e.preventDefault() : undefined;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className="max-w-md" 
+        showCloseButton={!loading} 
+        onPointerDownOutside={handlePointerDownOutside} 
+        onEscapeKeyDown={handleEscapeKeyDown}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            {title}
+            {loading ? "Creando Mandala" : title}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center p-8 space-y-6">
+            <Loader size="large" showText={false} />
+            <div className="text-center">
+              <p className="text-sm font-medium text-primary animate-pulse">
+                {messages[currentMessageIndex]}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6 py-4">
           <CustomInput
             id="name"
             label="Nombre"
@@ -155,25 +225,29 @@ const CreateModal = ({
               />
             </div>
           )}
-        </div>
+          </div>
+        )}
 
-        <DialogFooter className="flex sm:justify-between">
-          <Button
-            variant="outline"
-            color="tertiary"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="filled"
-            color="primary"
-            onClick={handleCreateCharacter}
-            disabled={!name || dimensions.length === 0 || scales.length === 0}
-          >
-            {createButtonText}
-          </Button>
-        </DialogFooter>
+        {!loading && (
+          <DialogFooter className="flex sm:justify-between">
+            <Button
+              variant="outline"
+              color="tertiary"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="filled"
+              color="primary"
+              onClick={handleCreateCharacter}
+              disabled={!name || dimensions.length === 0 || scales.length === 0}
+              loading={loading}
+            >
+              {createButtonText}
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
