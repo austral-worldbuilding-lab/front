@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GeneratorTab from "@/components/mandala/sidebar/GeneratorTab.tsx";
 import ChatPanel from "@/components/mandala/sidebar/ChatPanel.tsx";
 import { Tag } from "@/types/mandala";
+import { PanelLeftClose } from "lucide-react";
 
 export interface QuestionMachineSidebarProps {
   mandalaId: string;
@@ -37,9 +38,26 @@ export default function QuestionMachineSidebar({
                                                }: QuestionMachineSidebarProps) {
   const [activeTopTab, setActiveTopTab] = useState<"generator" | "chat">("generator");
 
+  // Función para cerrar manualmente
+  const handleManualClose = () => {
+    if (onOpenChange) {
+      onOpenChange(false);
+    }
+  };
+
   return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="left" className="w-[500px] px-4 py-[20px]">
+      <Sheet open={open} modal={false}>
+        <SheetContent 
+          side="left" 
+          className="w-[500px] px-4 py-[20px]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          closeIcon={
+            <PanelLeftClose 
+              className="size-6 cursor-pointer text-[#797979]" 
+              onClick={handleManualClose}
+            />
+          }
+        >
           <div className="h-full flex flex-col">
             <Tabs
                 value={activeTopTab}

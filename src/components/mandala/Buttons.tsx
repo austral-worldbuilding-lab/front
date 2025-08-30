@@ -46,9 +46,14 @@ const Buttons = ({
       });
     }
   };
+
+
   return (
     <>
-      <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-20 bg-white rounded-lg p-2 shadow">
+      <div 
+        className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-[100] bg-white rounded-lg p-2 shadow"
+        data-floating-buttons
+      >
         <Button
           onClick={() => setPostItModalOpen(true)}
           variant="filled"
