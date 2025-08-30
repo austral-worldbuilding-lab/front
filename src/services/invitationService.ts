@@ -41,6 +41,11 @@ export async function createInvitation(
   return res.data;
 }
 
+interface AcceptInvitationResponse {
+  projectId?: string;
+  [key: string]: unknown;
+}
+
 export async function acceptInvitation(
   invitationId: string
 ): Promise<{ projectId: string; invitation: Invitation }> {
@@ -49,7 +54,7 @@ export async function acceptInvitation(
     {}
   );
   const invitation = (response.data &&
-    (response.data.data ?? response.data)) as any;
+    (response.data.data ?? response.data)) as AcceptInvitationResponse;
 
   const projectId: string | undefined = invitation?.projectId;
 
@@ -57,7 +62,7 @@ export async function acceptInvitation(
     throw new Error("No se pudo obtener el proyecto de la invitación aceptada");
   }
 
-  return { projectId, invitation };
+  return { projectId, invitation: invitation as unknown as Invitation };
 }
 
 export async function rejectInvitation(invitationId: string): Promise<void> {
