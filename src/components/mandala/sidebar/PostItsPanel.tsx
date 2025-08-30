@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { usePostItsGenerator } from "./usePostItsGenerator";
 import type { Tag } from "@/types/mandala";
-import {PropsWithChildren, useEffect, useMemo, useState} from "react";
+import {PropsWithChildren, useEffect, useMemo, useRef, useState} from "react";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import {Link} from "react-router-dom";
 import {getLocalQueue} from "@/utils/localQueue.ts";
@@ -31,6 +31,7 @@ export default function PostItsPanel({
                                          dimensions = [],
                                      }: PostItsPanelProps) {
     const { items, setItems, loading, error, generate } = usePostItsGenerator(mandalaId);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     // modal de creación real
     const [open, setOpen] = useState(false);
@@ -51,6 +52,13 @@ export default function PostItsPanel({
             );
         }
     }, [items, mandalaId]);
+
+    // Scroll automático al fondo cuando cambian las preguntas
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [items, loading]);
 
     // Eliminar post-it de localStorage cuando se crea uno nuevo
     const deletePostItFromLocal = (content: string) => {
@@ -82,6 +90,7 @@ export default function PostItsPanel({
         <div className="flex-1 min-h-0 flex flex-col gap-3">
             <div className="flex-1 min-h-0">
                 <div
+                    ref={scrollRef}
                     className={`h-full border rounded-lg p-4 overflow-y-auto custom-scrollbar ${
                         isEmpty ? "grid" : ""
                     }`}

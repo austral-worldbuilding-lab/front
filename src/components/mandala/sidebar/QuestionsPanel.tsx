@@ -1,9 +1,9 @@
-import {PropsWithChildren, useEffect} from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {useQuestionGenerator} from "@/components/mandala/sidebar/useQuestionGenerator.tsx";
 import {Link} from "react-router-dom";
 import {getLocalQueue} from "@/utils/localQueue.ts";
+import { PropsWithChildren, useEffect, useRef } from "react";
 
 export interface QuestionsPanelProps extends PropsWithChildren {
     mandalaId: string;
@@ -14,6 +14,7 @@ export interface QuestionsPanelProps extends PropsWithChildren {
 
 export default function QuestionsPanel({ mandalaId, organizationId, projectId, selected, children }: QuestionsPanelProps) {
     const { questions, setQuestions, loading, error, generate } = useQuestionGenerator(mandalaId);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     // Cargar preguntas guardadas en localStorage al montar
     useEffect(() => {
@@ -30,11 +31,21 @@ export default function QuestionsPanel({ mandalaId, organizationId, projectId, s
         }
     }, [questions, mandalaId]);
 
+    // Scroll automático al fondo cuando cambian las preguntas
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [questions, loading]);
+
     return (
         <div className="flex-1 min-h-0 flex flex-col gap-3">
             {/* resultados scrollables */}
             <div className="flex-1 min-h-0">
-                <div className="h-full border rounded-lg p-4 overflow-y-auto custom-scrollbar">
+                <div
+                    ref={scrollRef}
+                    className="h-full border rounded-lg p-4 overflow-y-auto custom-scrollbar"
+                >
                     {loading && <p>Generando…</p>}
                     {!loading && !error && questions.length === 0 && (
                         <p>No hay preguntas para mostrar.</p>
