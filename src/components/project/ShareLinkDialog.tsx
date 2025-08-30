@@ -23,11 +23,13 @@ import { Label } from "../ui/label";
 import { Role, ROLES } from "@/services/invitationService";
 
 interface ShareLinkDialogProps {
+  className?: string;
   projectName?: string;
   defaultRole?: Role;
 }
 
 export default function ShareLinkDialog({
+  className,
   projectName = "Proyecto",
   defaultRole = "member",
 }: ShareLinkDialogProps) {
@@ -60,7 +62,7 @@ export default function ShareLinkDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="md" aria-label="Compartir">
+        <Button variant="outline" size="md" aria-label="Compartir" className={className}>
           <Share2 className="w-4 h-4 mr-2" />
           Compartir link
         </Button>

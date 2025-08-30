@@ -1,7 +1,7 @@
 import {Link, useNavigate, useParams} from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
 import Loader from "@/components/common/Loader";
-import {PlusIcon, FolderIcon, ChevronRight, ChevronLeft, ArrowLeftIcon, FileText} from "lucide-react";
+import {PlusIcon, FolderIcon, ChevronRight, ChevronLeft, ArrowLeftIcon, FileText, UserPlus} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {useEffect, useState} from "react";
 import { createProject } from "@/services/projectService.ts";
@@ -9,6 +9,7 @@ import { useAuthContext } from "@/context/AuthContext.tsx";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import {getOrganizationById} from "@/services/organizationService.ts";
 import FilesDrawer from "@/components/project/FilesDrawer.tsx";
+import ShareLinkDialog from "@/components/project/ShareLinkDialog";
 
 const ProjectListPage = () => {
   const {organizationId} = useParams()
@@ -59,7 +60,7 @@ const ProjectListPage = () => {
                   <h1 className="text-2xl font-bold mb-6 text-center">Proyectos de: {orgName || ""}</h1>
                   <Button
                       color="primary"
-                      className="mb-10"
+                      className="mb-2"
                       onClick={() => setModalOpen(true)}
                       icon={<PlusIcon size={16}/>}
                   >
@@ -73,6 +74,19 @@ const ProjectListPage = () => {
                   >
                       Archivos de la organización
                   </Button>
+                  <Button
+                      className="ml-2 mr-2"
+                      variant="outline"
+                      icon={<UserPlus size={16} />}
+                      aria-label="Invitar miembros al proyecto"
+                  >
+                        Invitar
+                    </Button>
+                  <ShareLinkDialog
+                      className="mb-4"
+                      projectName={orgName ?? "Organización"}
+                      defaultRole="member"
+                  />
                   <div className="bg-white rounded-lg shadow-sm border">
                       {loading && <Loader size="medium" text="Cargando proyectos..."/>}
                       {error && (
