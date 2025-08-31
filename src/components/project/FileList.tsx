@@ -1,25 +1,28 @@
-import {FileText, Trash2} from "lucide-react";
-import {useState} from "react";
+import {Download, Trash2} from "lucide-react";
+import {useEffect, useState} from "react";
 import ConfirmationDialog from "../common/ConfirmationDialog";
 import {useParams} from "react-router-dom";
 import {useFiles} from "../../hooks/useFiles.ts";
-import {FileItem} from "@/types/mandala";
+import {FileItem, SelectedFile} from "@/types/mandala";
 import {FileScope} from "@/services/filesService.ts";
 
-interface ProjectFilesListProps {
+interface FilesListProps {
     scope: FileScope;
     id: string,
     files?: FileItem[],
     loading?: boolean,
-    error?: Error
+    error?: Error,
+    open: boolean
 }
 
-export default function ProjectFilesList({scope, id: propProjectId, files, loading, error}: ProjectFilesListProps) {
+export default function FilesList({scope, id, files, loading, error, open}: FilesListProps) {
     const [fileToDelete, setFileToDelete] = useState<FileItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const {projectId: paramProjectId} = useParams<{ projectId: string }>();
+    const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
-    const projectId = propProjectId || paramProjectId;
+
+    const {projectId: paramProjectId} = useParams<{ projectId: string }>();
+    const projectId = scope === "project" ? id || paramProjectId : undefined;
     const {removeFile, isDeleting} = useFiles(scope, projectId!);
 
     const handleDeleteClick = (file: FileItem) => {
@@ -32,11 +35,61 @@ export default function ProjectFilesList({scope, id: propProjectId, files, loadi
 
         try {
             await removeFile(fileToDelete.file_name);
+
+            setSelectedFiles(prev => prev.filter(f => f !== fileToDelete.file_name));
+
+            const stored = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
+            const updated = stored.filter((f: string) => f !== fileToDelete.file_name);
+            localStorage.setItem("selectedFiles", JSON.stringify(updated));
+
             setIsDialogOpen(false);
             setFileToDelete(null);
         } catch (err) {
             console.error("Error deleting file:", err);
         }
+    };
+
+    const handleDownload = async (file: FileItem) => {
+        const response = await fetch(file.url);
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = file.file_name;
+        link.click();
+    };
+
+
+    useEffect(() => {
+        if (open) {
+            const stored: SelectedFile[] = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
+            const contextFiles = stored.filter(f => f.parentId === id && f.scope === scope);
+            setSelectedFiles(contextFiles.map(f => f.fileName));
+        }
+    }, [open, id, scope]);
+
+    const toggleFile = (file: FileItem) => {
+        setSelectedFiles(prev => {
+            const stored: SelectedFile[] = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
+
+            const exists = stored.some(f =>
+                f.fileName === file.file_name &&
+                f.scope === scope &&
+                f.parentId === id
+            );
+
+            let updated: SelectedFile[];
+            if (prev.includes(file.file_name)) {
+                updated = stored.filter(f =>
+                    !(f.fileName === file.file_name && f.scope === scope && f.parentId === id)
+                );
+            } else {
+                updated = exists ? stored : [...stored, { fileName: file.file_name, scope, parentId: id }];
+            }
+
+            localStorage.setItem("selectedFiles", JSON.stringify(updated));
+
+            return updated.filter(f => f.scope === scope && f.parentId === id).map(f => f.fileName);
+        });
     };
 
     const groupedFiles: Record<string, FileItem[]> = {};
@@ -68,22 +121,45 @@ export default function ProjectFilesList({scope, id: propProjectId, files, loadi
                                 </h3>
                                 <ul className="space-y-1">
                                     {groupedFiles[scopeKey].map((file, index) => (
-                                        <li
-                                            key={index}
-                                            className="flex items-center justify-between gap-2 text-sm text-gray-800"
+                                        <li key={index} className="flex items-center justify-between gap-2 text-sm text-gray-800
+             bg-gray-50 hover:bg-blue-50 rounded-md px-2 py-1 transition-colors"
                                         >
                                             <div className="flex items-center gap-2">
-                                                <FileText className="w-4 h-4 text-gray-500"/>
-                                                <span>{file.file_name}</span>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedFiles.includes(file.file_name)}
+                                                    onChange={() => toggleFile(file)}
+                                                />
+                                                <a
+                                                    href={file.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    {file.file_name}
+                                                </a>
                                             </div>
 
-                                            <button
-                                                onClick={() => handleDeleteClick(file)}
-                                                className="text-red-500 hover:text-red-700"
-                                                disabled={isDeleting}
-                                            >
-                                                <Trash2 className="w-4 h-4"/>
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleDownload(file)}
+                                                    className="text-gray-600 hover:text-blue-600"
+                                                    title="Descargar"
+                                                >
+                                                    <Download className="w-4 h-4"/>
+                                                </button>
+
+                                                {scopeKey === scope && (
+                                                    <button
+                                                        onClick={() => handleDeleteClick(file)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                        disabled={isDeleting}
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 className="w-4 h-4"/>
+                                                    </button>
+                                                )}
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>

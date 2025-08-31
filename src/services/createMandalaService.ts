@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios.ts";
-import {CompleteApiMandala} from "@/types/mandala";
+import {CompleteApiMandala, SelectedFile} from "@/types/mandala";
 import axios from "axios";
 
 export interface CreateMandalaDto {
@@ -15,6 +15,7 @@ export interface CreateMandalaDto {
     dimensions: { name: string; color?: string }[]
     scales: string[];
     parentId?: string | null;
+    selectedFiles?: string[];
 }
 
 
@@ -22,6 +23,21 @@ export async function createMandalaService(payload: CreateMandalaDto): Promise<s
     const endpoint = payload.useAIMandala ? "/mandala/generate" : "/mandala";
 
     try {
+        if (payload.useAIMandala) {
+            const stored: SelectedFile[] = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
+
+            const projectFiles = stored
+                .filter(f => f.scope === "project" && f.parentId === payload.projectId)
+                .map(f => f.fileName);
+
+            payload = {
+                ...payload,
+                selectedFiles: payload.selectedFiles
+                    ? [...payload.selectedFiles, ...projectFiles]
+                    : projectFiles
+            };
+        }
+
         const response = await axiosInstance.post(endpoint, payload);
 
         if (response.status !== 201) {

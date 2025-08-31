@@ -12,6 +12,7 @@ export const getFiles = async (scope: FileScope, id: string): Promise<FileItem[]
         const mappedFiles = response.data.data.map(file => ({
             ...file,
             source_scope: file.source_scope === 'org' ? 'organization' : file.source_scope,
+            url: file.url,
         }));
 
         return mappedFiles;
