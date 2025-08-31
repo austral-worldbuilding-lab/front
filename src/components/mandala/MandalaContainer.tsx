@@ -78,7 +78,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     deletePostit,
     deleteCharacter,
   } = useMandala(mandalaId);
-  const { createMandala, loading: isCreatingCharacter } = useCreateMandala(projectId);
+  const { createMandala, loading: isCreatingCharacter } =
+    useCreateMandala(projectId);
 
   // Extraer ids de mandalas origen desde los postits (campo from: { id, name })
   const sourceMandalaIds = (() => {
@@ -279,12 +280,12 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     <div className="flex flex-col gap-2">
                       <CharacterDropdown
                         characters={
-                          mandala.mandala.type === "overlap"
+                          mandala.mandala.type === "OVERLAP"
                             ? mandala.mandala.configuration.center.characters
                             : projectCharacters
                         }
                         onAdd={
-                          mandala.mandala.type === "overlap"
+                          mandala.mandala.type === "OVERLAP"
                             ? undefined
                             : linkCharacter
                         }
@@ -301,7 +302,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   </div>
 
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
-                    {mandala?.mandala.type === "overlap" && (
+                    {mandala?.mandala.type === "OVERLAP" && (
                       <ViewToggle
                         viewMode={viewMode}
                         onViewModeChange={setViewMode}
@@ -334,7 +335,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   {/* Mostrar botones/controles:
                       - siempre para mandalas NO unificadas
                       - para unificadas, solo en vista 'unified' */}
-                  {(mandala.mandala.type !== "overlap" ||
+                  {(mandala.mandala.type !== "OVERLAP" ||
                     viewMode === "overlap") && (
                     <>
                       <Buttons
@@ -350,7 +351,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   )}
 
                   {/* Contenido principal - alternar entre vistas en unificadas */}
-                  {mandala.mandala.type === "overlap" && viewMode === "all" ? (
+                  {mandala.mandala.type === "OVERLAP" && viewMode === "all" ? (
                     // Vista "all": todas las mandalas en un único canvas Konva
                     <TransformComponent
                       wrapperStyle={{
