@@ -2,11 +2,11 @@ import { User, Users } from "lucide-react";
 import React from "react";
 
 interface MandalaPersonProps {
-  type?: "character" | "overlap";
+  type?: "CHARACTER" | "OVERLAP";
 }
 
-const MandalaPerson: React.FC<MandalaPersonProps> = ({ type = "overlap" }) => {
-  const isUnified = type === "overlap";
+const MandalaPerson: React.FC<MandalaPersonProps> = ({ type = "OVERLAP" }) => {
+  const isUnified = type === "OVERLAP";
 
   return (
     <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-60">
