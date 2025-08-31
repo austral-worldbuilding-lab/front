@@ -281,7 +281,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       <CharacterDropdown
                         characters={
                           mandala.mandala.type === "OVERLAP"
-                            ? mandala.mandala.configuration.center.characters
+                            ? (mandala.mandala.configuration.center.characters || []).map(char => ({
+                                id: char.from.id,
+                                name: char.from.name,
+                                color: char.color
+                              }))
                             : projectCharacters
                         }
                         onAdd={
