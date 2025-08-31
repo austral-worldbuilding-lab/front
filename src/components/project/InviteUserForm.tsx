@@ -13,16 +13,18 @@ import {
 
 type Props = {
   projectId: string;
+  organizationId: string;
   onSuccess?: () => void;
-  onError?: (status?: number, message?: string) => void; // 👈 nuevo
+  onError?: (status?: number, message?: string) => void;
 };
 
 export default function InviteUserForm({
   projectId,
+  organizationId,
   onSuccess,
   onError,
 }: Props) {
-  const { invite, loading, error, success, reset } = useInviteUser(projectId);
+  const { invite, loading, error, success, reset } = useInviteUser(projectId, organizationId);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("member");
 

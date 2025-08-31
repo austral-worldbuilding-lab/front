@@ -195,7 +195,7 @@ const MandalaCanvas: React.FC<{
                 transformOrigin: 'center',
             }}
         >
-            <Stage width={canvasSize} height={canvasSize}>
+            <Stage width={canvasSize} height={canvasSize} listening={!readOnly}>
                 <Layer>
                     {/* Post-its */}
                     {zOrder.map((i) => {
@@ -348,16 +348,11 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     appliedFilters,
     onPostItUpdate,
     onCharacterUpdate,
-    onPostItDelete,
-    onCharacterDelete,
-    onPostItChildCreate,
     state,
     onMouseEnter,
     onMouseLeave,
     onDragStart,
     onDragEnd,
-    tags,
-    onNewTag,
 }) => {
     // Call hooks at the top level for each source mandala (max 5 for now)
     const source1 = useMandala(sourceMandalaIds[0] || '');
@@ -456,19 +451,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
                         offsetX={previewX - previewSize / 2}
                         offsetY={offsetY}
                         scale={previewScale}
-                        readOnly={false}
+                        readOnly
                         appliedFilters={appliedFilters}
-                        onPostItUpdate={onPostItUpdate}
-                        onCharacterUpdate={onCharacterUpdate}
-                        onPostItDelete={onPostItDelete}
-                        onCharacterDelete={onCharacterDelete}
-                        onPostItChildCreate={onPostItChildCreate}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        onDragStart={onDragStart}
-                        onDragEnd={onDragEnd}
-                        tags={tags}
-                        onNewTag={onNewTag}
                         state={state}
                     />
                 );

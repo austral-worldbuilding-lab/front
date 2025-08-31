@@ -2,14 +2,14 @@ import axiosInstance from "@/lib/axios";
 import { Invitation } from "@/types/invitation";
 import { PaginatedResponse } from "@/types/api";
 
-export async function getMyInvitationsPaginated(
+export async function getMyOrganizationInvitationsPaginated(
   page = 1,
   limit = 10,
   status: "PENDING" | "ACCEPTED" | "REJECTED" | undefined = "PENDING"
 ): Promise<PaginatedResponse<Invitation>> {
   const statusQuery = status ? `&status=${status}` : "";
   const response = await axiosInstance.get<PaginatedResponse<Invitation>>(
-    `/invitation?page=${page}&limit=${limit}${statusQuery}`
+    `/organization-invitation?page=${page}&limit=${limit}${statusQuery}`
   );
   return response.data;
 }
@@ -34,10 +34,13 @@ export type InvitationResponse = {
 export const ROLES = ["owner", "admin", "member", "viewer"] as const;
 export type Role = (typeof ROLES)[number];
 
-export async function createInvitation(
+export async function createOrganizationInvitation(
   payload: CreateInvitationDto
 ): Promise<InvitationResponse> {
-  const res = await axiosInstance.post("/invitation", payload);
+  const res = await axiosInstance.post("/organization-invitation", {
+    ...payload,
+    organizationId: payload.projectId,
+  });
   return res.data;
 }
 
@@ -46,11 +49,11 @@ interface AcceptInvitationResponse {
   [key: string]: unknown;
 }
 
-export async function acceptInvitation(
+export async function acceptOrganizationInvitation(
   invitationId: string
 ): Promise<{ projectId: string; invitation: Invitation }> {
   const response = await axiosInstance.post(
-    `/invitation/${invitationId}/accept`,
+    `/organization-invitation/${invitationId}/accept`,
     {}
   );
   const invitation = (response.data &&
@@ -65,34 +68,44 @@ export async function acceptInvitation(
   return { projectId, invitation: invitation as unknown as Invitation };
 }
 
-export async function rejectInvitation(invitationId: string): Promise<void> {
-  await axiosInstance.post(`/invitation/${invitationId}/reject`, {});
+export async function rejectOrganizationInvitation(
+  invitationId: string
+): Promise<void> {
+  await axiosInstance.post(
+    `/organization-invitation/${invitationId}/reject`,
+    {}
+  );
 }
 
-export async function acceptInvitationByToken(token: string): Promise<{ projectId: string; organizationId?: string }> {
-  const response = await axiosInstance.get(`/invitation/join/${token}`);
+export async function acceptOrganizationInvitationByToken(
+  token: string
+): Promise<{ projectId: string; organizationId?: string }> {
+  const response = await axiosInstance.get(
+    `/organization-invitation/join/${token}`
+  );
   const data = response.data.data;
-  return { 
+  return {
     projectId: data.projectId,
-    organizationId: data.organizationId 
+    organizationId: data.organizationId,
   };
 }
 
-export async function createInviteLink(
-  projectId: string, 
-  role: string,
+export async function createOrganizationInviteLink(
   organizationId: string,
+  role: string,
   expiresAt?: string,
   email?: string,
   sendEmail?: boolean
 ): Promise<{ inviteUrl: string; token: string }> {
-  const response = await axiosInstance.post('/invitation/create-link', {
-    projectId,
-    role,
-    organizationId,
-    expiresAt,
-    email,
-    sendEmail
-  });
+  const response = await axiosInstance.post(
+    "/organization-invitation/create-link",
+    {
+      role,
+      organizationId,
+      expiresAt,
+      email,
+      sendEmail,
+    }
+  );
   return response.data.data;
 }

@@ -215,7 +215,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onMouseLeave={onMouseLeave}
                 onContextMenu={(e, i) => showContextMenu(e, i, "postit")}
                 mandalaRadius={SCENE_W / 2}
-                isUnifiedMandala={mandala.mandala.type === "overlap"}
+                isUnifiedMandala={mandala.mandala.type === "OVERLAP"}
                 currentMandalaName={mandala.mandala.name}
               />
             );

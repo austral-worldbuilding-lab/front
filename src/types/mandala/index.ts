@@ -58,7 +58,7 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  type?: "character" | "overlap";
+  type?: "CHARACTER" | "OVERLAP";
   configuration: MandalaConfiguration;
   parentId: string;
 }

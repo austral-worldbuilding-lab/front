@@ -15,15 +15,15 @@ import ProjectPage from "./pages/app/project/ProjectPage";
 import ProjectListPage from "./pages/app/project/ProjectListPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 import MyInvitationsPage from "@/pages/MyInvitationsPage";
+import InviteTokenPage from "@/pages/InviteTokenPage";
 import RootRedirect from "@/components/common/RootRedirect.tsx";
 import OrganizationListPage from "@/pages/app/project/OrganizationListPage.tsx";
-
+import OrganizationInviteTokenPage from "./pages/OrganizationInviteTokenPage";
 
 // Layout component for all protected routes
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>{children}</ProtectedRoute>
 );
-
 
 function App() {
   return (
@@ -35,8 +35,14 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
+        <Route path="/invite/:token" element={<InviteTokenPage />} />
         <Route
-          path="/my-invitations"
+          path="/organization-invite/:token"
+          element={<OrganizationInviteTokenPage />}
+        />
+
+        <Route
+          path="/my-invitations"  
           element={
             <ProtectedLayout>
               <MyInvitationsPage />
@@ -56,13 +62,19 @@ function App() {
           {/* Redirect /app to mandala */}
           <Route
             index
-            element={<Navigate to={`/app/project`} replace />}
+            element={<Navigate to={`/app/organization/`} replace />}
           />
 
           {/* Rutas independientes */}
-          <Route path="organization/" element={<OrganizationListPage/>} />
-          <Route path="organization/:organizationId/projects" element={<ProjectListPage />} />
-          <Route path="organization/:organizationId/projects/:projectId" element={<ProjectPage />} />
+          <Route path="organization/" element={<OrganizationListPage />} />
+          <Route
+            path="organization/:organizationId/projects"
+            element={<ProjectListPage />}
+          />
+          <Route
+            path="organization/:organizationId/projects/:projectId"
+            element={<ProjectPage />}
+          />
 
           <Route
             path="organization/:organizationId/projects/:projectId/mandalas"
@@ -73,10 +85,9 @@ function App() {
             element={<MandalaPage />}
           />
           <Route
-              path="organization/:organizationId/projects/:projectId/mandala/:mandalaId/dimension/:dimensionName"
-              element={<DimensionPage />}
+            path="organization/:organizationId/projects/:projectId/mandala/:mandalaId/dimension/:dimensionName"
+            element={<DimensionPage />}
           />
-
         </Route>
 
         {/* 404 route */}

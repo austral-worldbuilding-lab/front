@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Share2, Link as LinkIcon, Globe2, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Share2, Link as LinkIcon, Globe2, Check, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -20,54 +21,121 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Label } from "../ui/label";
-import { Role, ROLES } from "@/services/invitationService";
+
+// Services
+import {
+  Role,
+  ROLES,
+  createInviteLink as createProjectInviteLink,
+} from "@/services/invitationService";
+import { createOrganizationInviteLink } from "@/services/organizationInvitationService";
 
 interface ShareLinkDialogProps {
-  projectName?: string;
+  projectId: string;
+  organizationId: string;
+  className?: string;
+  projectName?: string; // usado como display name cuando no es organización
   defaultRole?: Role;
+  isOrganization?: boolean;
 }
 
 export default function ShareLinkDialog({
+  projectId,
+  organizationId,
+  className,
   projectName = "Proyecto",
   defaultRole = "member",
+  isOrganization = false,
 }: ShareLinkDialogProps) {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<Role>(defaultRole);
   const [copied, setCopied] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const shareUrl = useMemo(
-    () => (typeof window !== "undefined" ? window.location.href : ""),
-    []
-  );
+  const displayName = isOrganization ? "Organización" : projectName;
 
   useEffect(() => {
-    if (!open) setCopied(false);
+    if (!open) {
+      setCopied(false);
+      setError(null);
+      setInviteUrl("");
+    }
   }, [open]);
 
-  const copyLink = async () => {
+  useEffect(() => {
+    if (!open) return;
+    if (isOrganization) {
+      if (organizationId) void generateInviteLink();
+    } else {
+      if (projectId && organizationId) void generateInviteLink();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, role, projectId, organizationId, isOrganization]);
+
+  const generateInviteLink = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-    } catch {
-      // Handle error
+      let result: { inviteUrl: string };
+
+      if (isOrganization) {
+        // Organización: usa services de organización
+        result = await createOrganizationInviteLink(organizationId, role);
+      } else {
+        // Proyecto: usa services de proyecto
+        result = await createProjectInviteLink(projectId, role, organizationId);
+      }
+
+      setInviteUrl(result.inviteUrl);
+    } catch (err: any) {
+      if (err?.response?.status === 403) {
+        setError(
+          isOrganization
+            ? "No tenés permisos para generar links de invitación. Solo los propietarios de la organización pueden crear invitaciones."
+            : "No tenés permisos para generar links de invitación. Solo los propietarios del proyecto pueden crear invitaciones."
+        );
+      } else {
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Error al generar el link"
+        );
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const done = () => {
-    setOpen(false);
+  const copyLink = async () => {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+    } catch {
+      setError("Error al copiar el link");
+    }
   };
+
+  const done = () => setOpen(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="md" aria-label="Compartir">
+        <Button
+          variant="outline"
+          size="md"
+          aria-label="Compartir"
+          className={className}
+        >
           <Share2 className="w-4 h-4 mr-2" />
           Compartir link
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Compartí {projectName}</DialogTitle>
+          <DialogTitle>Compartí {displayName}</DialogTitle>
           <DialogDescription>
             Generá y compartí un enlace. Cualquiera con el link tendrá el rol
             que elijas abajo.
@@ -114,10 +182,15 @@ export default function ShareLinkDialog({
                   </span>
                 </div>
 
+                {error && (
+                  <div className="mt-2 text-sm text-red-600">{error}</div>
+                )}
+
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <Select
                     value={role}
                     onValueChange={(v) => setRole(v as Role)}
+                    disabled={loading}
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Role" />
@@ -135,8 +208,14 @@ export default function ShareLinkDialog({
                     onClick={copyLink}
                     variant="outline"
                     className="shrink-0"
+                    disabled={loading || !inviteUrl}
                   >
-                    {copied ? (
+                    {loading ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />{" "}
+                        Generando...
+                      </span>
+                    ) : copied ? (
                       <span className="inline-flex items-center gap-2">
                         <Check className="w-4 h-4" /> Copiado
                       </span>
