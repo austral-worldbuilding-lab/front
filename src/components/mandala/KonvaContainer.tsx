@@ -191,6 +191,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               <PostIt
                 key={`static-${p.id}`}
                 postit={p}
+                zindex={i}
                 color={dimensionColors[p.dimension] || "#cccccc"}
                 position={{ x, y }}
                 onDragStart={() => {
