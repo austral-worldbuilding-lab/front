@@ -32,7 +32,7 @@ const MandalaListPage = () => {
   const { mandalas: fetchedMandalas, loading: mandalasLoading, refetch } =
     useGetMandalas(projectId || "", page, limit);
   const [mandalas, setMandalas] = useState(fetchedMandalas);
-  const { mandalas: nextPageMandalas = [] } = useGetMandalas(
+  const { mandalas: nextPageMandalas = [], refetch: refetchNextPage } = useGetMandalas(
     projectId || "",
     page + 1,
     limit
@@ -125,6 +125,8 @@ const MandalaListPage = () => {
       await deleteMandala(id);
       // Hacer refetch para actualizar la lista y evitar problemas de paginación
       await refetch();
+      // También refetch de la página siguiente para actualizar el estado del botón de paginación
+      await refetchNextPage();
     } catch (err) {
       console.error("Error deleting mandala", err);
     }
