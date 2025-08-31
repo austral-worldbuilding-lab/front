@@ -1,6 +1,7 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import GeneratorTab from "@/components/mandala/sidebar/GeneratorTab.tsx";
 import { Tag } from "@/types/mandala";
+import { PanelLeftClose } from "lucide-react";
 
 export interface QuestionMachineSidebarProps {
   mandalaId: string;
@@ -41,12 +42,24 @@ export default function QuestionMachineSidebar({
   onCreatePostIt,
   dimensionsMandala,
 }: QuestionMachineSidebarProps) {
+  const handleManualClose = () => {
+    if (onOpenChange) {
+      onOpenChange(false);
+    }
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} modal={false}>
       <SheetContent
         side="left"
         className="w-[500px] px-4 py-[40px]"
         onOpenAutoFocus={(e) => e.preventDefault()}
+        closeIcon={
+          <PanelLeftClose
+            className="size-6 cursor-pointer text-[#797979]"
+            onClick={handleManualClose}
+          />
+        }
       >
         <div className="h-full flex flex-col">
           <GeneratorTab
@@ -65,4 +78,3 @@ export default function QuestionMachineSidebar({
     </Sheet>
   );
 }
-
