@@ -37,7 +37,10 @@ export type Role = (typeof ROLES)[number];
 export async function createOrganizationInvitation(
   payload: CreateInvitationDto
 ): Promise<InvitationResponse> {
-  const res = await axiosInstance.post("/organization-invitation", payload);
+  const res = await axiosInstance.post("/organization-invitation", {
+    ...payload,
+    organizationId: payload.projectId,
+  });
   return res.data;
 }
 

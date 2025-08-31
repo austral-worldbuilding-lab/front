@@ -42,7 +42,7 @@ function App() {
         />
 
         <Route
-          path="/my-invitations"
+          path="/my-invitations"  
           element={
             <ProtectedLayout>
               <MyInvitationsPage />
