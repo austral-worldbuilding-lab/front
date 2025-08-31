@@ -9,7 +9,7 @@ import {DialogFooter} from "../../ui/dialog";
 interface NewTagModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onCreate: (tag: { id: string, label: string; value: string; color: string }) => void;
+    onCreate: (tag: { id: string, name: string; value: string; color: string }) => void;
     existingTags:  string[];
 }
 
@@ -31,7 +31,7 @@ const NewTagModal = ({ isOpen, onOpenChange, onCreate, existingTags }: NewTagMod
             return;
         }
 
-        onCreate({ id: name, label: name, value: normalizedName, color });
+        onCreate({ id: name, name: name, value: normalizedName, color });
         setName("");
         setColor(colors[0]);
         onOpenChange(false);

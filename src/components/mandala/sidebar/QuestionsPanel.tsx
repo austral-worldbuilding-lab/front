@@ -97,6 +97,7 @@ export default function QuestionsPanel({
             className="w-full h-11 text-base"
             onClick={() => generate(selected.dimensions, selected.scales)}
             icon={<Sparkles size={16} />}
+            disabled={loading}
           >
             Generar Preguntas
           </Button>
