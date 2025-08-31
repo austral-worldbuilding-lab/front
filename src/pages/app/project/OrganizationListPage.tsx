@@ -50,7 +50,23 @@ const OrganizationListPage = () => {
             </div>
         );
 
-    if (error) return <div className="text-red-500 p-4">{error.message}</div>;
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen p-4">
+                <div className="text-center max-w-md">
+                    <h1 className="text-xl font-semibold text-red-600 mb-4">Error</h1>
+                    <p className="text-gray-600 mb-6">
+                        {error.message === "403" || error.message?.includes("403") 
+                            ? "No tienes permisos para acceder a las organizaciones." 
+                            : error.message || "Error al cargar las organizaciones"}
+                    </p>
+                    <Button onClick={() => window.location.reload()}>
+                        Reintentar
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex flex-col items-center pt-12">
