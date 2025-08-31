@@ -108,6 +108,7 @@ const ProjectListPage = () => {
                   projectId={projects[0]?.id ?? ""}
                   organizationId={organizationId ?? ""}
                   defaultRole="member"
+                  isOrganization
                 />
               </>
             )}
