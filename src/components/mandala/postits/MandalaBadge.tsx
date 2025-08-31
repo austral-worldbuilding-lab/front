@@ -4,21 +4,26 @@ import { Html } from "react-konva-utils";
 interface MandalaBadgeProps {
   originMandalaName?: string;
   fontSize: number;
+  zindex?: number;
 }
 
-const MandalaBadge: React.FC<MandalaBadgeProps> = ({ originMandalaName, fontSize }) => {
+const MandalaBadge: React.FC<MandalaBadgeProps> = ({
+  originMandalaName,
+  fontSize,
+  zindex,
+}) => {
   const badgeData = useMemo(() => {
     if (!originMandalaName) return null;
     const initials = originMandalaName
-      .split(' ')
+      .split(" ")
       .slice(0, 2)
-      .map(word => word.charAt(0).toUpperCase())
-      .join('');
+      .map((word) => word.charAt(0).toUpperCase())
+      .join("");
 
     return {
       name: originMandalaName,
       color: "#f3f4f6",
-      initials: initials
+      initials: initials,
     };
   }, [originMandalaName]);
 
@@ -29,10 +34,10 @@ const MandalaBadge: React.FC<MandalaBadgeProps> = ({ originMandalaName, fontSize
       divProps={{
         style: {
           pointerEvents: "none",
-          zIndex: 1,
+          zIndex: zindex ? zindex + 1 : 100,
           position: "absolute",
           top: -8,
-          right: -8,
+          left: -8,
         },
       }}
     >
@@ -52,7 +57,7 @@ const MandalaBadge: React.FC<MandalaBadgeProps> = ({ originMandalaName, fontSize
         }}
         title={`Mandala: ${badgeData.name}`}
       >
-        {badgeData.initials}
+        {badgeData.name}
       </div>
     </Html>
   );
