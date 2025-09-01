@@ -22,11 +22,16 @@ const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
   const onUpdateRole = async (userId: string, newRole: Role) => {
     setActionError(null);
     try {
-      await axiosInstance.patch(`/projects/${projectId}/users/${userId}`, {
+      await axiosInstance.put(`/project/${projectId}/users/${userId}/role`, {
         role: newRole,
       });
       await refetch();
     } catch (e: any) {
+      console.log(e.response.data.statusCode);
+      if (e.response.status == 409) {
+        setActionError("Debe haber al menos un dueño en un proyecto.");
+        return;
+      }
       setActionError(e?.message ?? "Error al actualizar el rol");
     }
   };
@@ -49,9 +54,9 @@ const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
   if (loading) return <div className="p-3">Cargando usuarios...</div>;
   if (error && error.includes("404")) {
     return (
-        <div className="p-3 text-muted-foreground">
-          No hay otros usuarios en este proyecto.
-        </div>
+      <div className="p-3 text-muted-foreground">
+        No hay otros usuarios en este proyecto.
+      </div>
     );
   }
   if (error) return <div className="p-3 text-red-600">{error}</div>;
