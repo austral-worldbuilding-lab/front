@@ -27,16 +27,17 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
             >
                 <SheetHeader className="flex justify-between items-center mb-2">
                     <SheetTitle className="text-lg font-bold">{title}</SheetTitle>
-                    <p className="flex items-start gap-1 text-sm italic text-gray-500 mt-1">
-                        <Info className="w-6 h-4 mt-0.5"/>
-                        Los siguientes archivos darán contexto a la IA a la hora de generar mandalas, postits o
-                        preguntas. Selecciónalos adecuadamente.
-                    </p>
                 </SheetHeader>
 
                 <div className="mb-1">
                     <FileLoader onUploadComplete={refetch} scope={scope} id={id}/>
                 </div>
+
+                <p className="flex items-start gap-1 text-sm italic text-gray-500 mt-1">
+                    <Info className="w-6 h-4 mt-0.5"/>
+                    Los siguientes archivos darán contexto a la IA a la hora de generar mandalas, postits o
+                    preguntas. Selecciónalos adecuadamente.
+                </p>
 
                 <div className="flex-1 overflow-y-auto">
                     {isLoading ? (
@@ -48,6 +49,7 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
                             loading={isLoading}
                             error={error ?? undefined}
                             scope={scope}
+                            open={open}
                         />
                     )}
                 </div>

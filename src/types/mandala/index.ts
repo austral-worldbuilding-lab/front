@@ -143,4 +143,11 @@ export interface FileItem {
   file_type: string;
   source_scope: string;
   full_path: string;
+  url: string;
+}
+
+export interface SelectedFile {
+  fileName: string;
+  scope: string;
+  parentId: string;
 }

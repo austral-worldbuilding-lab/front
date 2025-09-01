@@ -47,6 +47,7 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
         source_scope: scope,
         id: '',
         full_path: '',
+        url: '',
       }));
 
       const urls = await createFiles(scope, id, payload);

@@ -22,7 +22,6 @@ const ProjectPage = () => {
     organizationId: string;
     projectId: string;
   }>();
-  console.log("ProjectPage params:", { projectId, organizationId });
   const navigate = useNavigate();
 
   const { project, loading: projectLoading } = useProject(projectId);
