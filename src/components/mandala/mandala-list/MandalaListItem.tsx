@@ -3,6 +3,7 @@ import { SquaresIntersect, User, Users } from "lucide-react";
 import MandalaMenu from "../MandalaMenu";
 import { CompleteApiMandala } from "@/types/mandala";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 interface MandalaListItemProps {
   mandala: CompleteApiMandala;
@@ -37,6 +38,38 @@ const MandalaListItem = ({
       e.preventDefault();
       onToggleSelection?.();
     }
+  };
+
+  // Función para renderizar badges de personajes para mandalas OVERLAP
+  const renderCharacterBadges = () => {
+    if (mandala.type !== "OVERLAP" || !mandala.configuration.center.characters) {
+      return null;
+    }
+
+    const characters = mandala.configuration.center.characters;
+    if (!characters.length) {
+      return null;
+    }
+
+    return (
+      <>
+        {characters.map((character, index) => (
+          <Badge
+            key={`${character.from.id}-${index}`}
+            variant="outline"
+            className="text-xs px-2 py-1 border-2 font-medium"
+            style={{
+              borderColor: character.color,
+              color: character.color,
+              backgroundColor: `${character.color}08`, // Fondo muy sutil del color
+            }}
+            title={`Personaje de: ${character.from.name}`} // Tooltip informativo
+          >
+            {character.from.name}
+          </Badge>
+        ))}
+      </>
+    );
   };
 
   return (
@@ -81,7 +114,10 @@ const MandalaListItem = ({
               style={{ color: mandala.configuration.center.color || "#6b7280" }}
             />
           )}
-          <span>{mandala.name || "Mandala sin nombre"}</span>
+          <div className="flex flex-1 items-center gap-3 flex-wrap">
+            <span className="flex-shrink-0">{mandala.name || "Mandala sin nombre"}</span>
+            {renderCharacterBadges()}
+          </div>
         </Link>
 
         {/* Menú de opciones - visible solo cuando no está en modo selección */}
