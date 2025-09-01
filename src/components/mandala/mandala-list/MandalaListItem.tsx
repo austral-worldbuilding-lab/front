@@ -42,7 +42,10 @@ const MandalaListItem = ({
 
   // Función para renderizar badges de personajes para mandalas OVERLAP
   const renderCharacterBadges = () => {
-    if (mandala.type !== "OVERLAP" || !mandala.configuration.center.characters) {
+    if (
+      mandala.type !== "OVERLAP" ||
+      !mandala.configuration.center.characters
+    ) {
       return null;
     }
 
@@ -55,17 +58,17 @@ const MandalaListItem = ({
       <>
         {characters.map((character, index) => (
           <Badge
-            key={`${character.from.id}-${index}`}
+            key={`${character.id}-${index}`}
             variant="outline"
-            className="text-xs px-2 py-1 border-2 font-medium"
+            className="text-xs px-2 py-1 border-2 font-medium rounded-full"
             style={{
               borderColor: character.color,
               color: character.color,
               backgroundColor: `${character.color}08`, // Fondo muy sutil del color
             }}
-            title={`Personaje de: ${character.from.name}`} // Tooltip informativo
+            title={`Personaje de: ${character.name}`} // Tooltip informativo
           >
-            {character.from.name}
+            {character.name}
           </Badge>
         ))}
       </>
@@ -115,7 +118,9 @@ const MandalaListItem = ({
             />
           )}
           <div className="flex flex-1 items-center gap-3 flex-wrap">
-            <span className="flex-shrink-0">{mandala.name || "Mandala sin nombre"}</span>
+            <span className="flex-shrink-0">
+              {mandala.name || "Mandala sin nombre"}
+            </span>
             {renderCharacterBadges()}
           </div>
         </Link>

@@ -282,7 +282,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                         characters={
                           mandala.mandala.type === "OVERLAP" ||
                           mandala.mandala.type === "OVERLAP_SUMMARY"
-                            ? mandala.mandala.configuration.center.characters
+                            ? mandala.mandala.configuration.center.characters ??
+                              []
                             : projectCharacters
                         }
                         onAdd={
