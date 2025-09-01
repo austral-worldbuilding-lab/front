@@ -1,10 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  SquaresIntersect,
-  SquaresIntersectIcon,
-  User,
-  Users,
-} from "lucide-react";
+import { SquaresIntersect, User, Users } from "lucide-react";
 import MandalaMenu from "../MandalaMenu";
 import { CompleteApiMandala } from "@/types/mandala";
 import { Checkbox } from "@/components/ui/checkbox";
