@@ -10,6 +10,11 @@ export const ACCEPTED_TYPES = [
   'text/plain',
   'image/png',
   'image/jpeg',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/mp4',
+  'video/mp4',
+  'video/quicktime',
 ];
 
 
@@ -21,18 +26,26 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [videoWarning, setVideoWarning] = useState<string | null>(null);
+
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files;
     if (files) {
-      const fileArray = Array.from(files).filter((file) =>
-        ACCEPTED_TYPES.includes(file.type)
-      );
+      const fileArray: File[] = [];
+      for (const file of Array.from(files)) {
+        if (file.type.startsWith("video/")) {
+          setVideoWarning(`Del video seleccionado se utilizará únicamente el audio, el cual será extraido como base de contexto para la IA.`);
+        }
+        fileArray.push(file);
+      }
       setSelectedFiles(fileArray);
     }
   };
+
 
   const uploadFiles = async () => {
     if (selectedFiles.length === 0) return;
@@ -87,5 +100,7 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
     loading,
     handleFileChange,
     uploadFiles,
+    videoWarning,
+    setVideoWarning
   };
 };
