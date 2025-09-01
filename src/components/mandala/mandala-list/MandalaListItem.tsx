@@ -1,5 +1,10 @@
 import { Link } from "react-router-dom";
-import { User, Users } from "lucide-react";
+import {
+  SquaresIntersect,
+  SquaresIntersectIcon,
+  User,
+  Users,
+} from "lucide-react";
 import MandalaMenu from "../MandalaMenu";
 import { CompleteApiMandala } from "@/types/mandala";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -67,6 +72,11 @@ const MandalaListItem = ({
         >
           {mandala.type === "CHARACTER" ? (
             <User
+              className="w-5 h-5 flex-shrink-0"
+              style={{ color: mandala.configuration.center.color || "#6b7280" }}
+            />
+          ) : mandala.type === "OVERLAP_SUMMARY" ? (
+            <SquaresIntersect
               className="w-5 h-5 flex-shrink-0"
               style={{ color: mandala.configuration.center.color || "#6b7280" }}
             />

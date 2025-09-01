@@ -8,7 +8,6 @@ import MandalaPageHeader from "@/components/mandala/mandala-list/MandalaPageHead
 import MandalasPaginatedList from "@/components/mandala/mandala-list/MandalasPaginatedList";
 import MandalaListContainer from "@/components/mandala/mandala-list/MandalaListContainer";
 
-
 const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
 
 /**
@@ -29,18 +28,20 @@ const MandalaListPage = () => {
   const limit = 10;
 
   // Carga de datos
-  const { mandalas: fetchedMandalas, loading: mandalasLoading, refetch } =
-    useGetMandalas(projectId || "", page, limit);
+  const {
+    mandalas: fetchedMandalas,
+    loading: mandalasLoading,
+    refetch,
+  } = useGetMandalas(projectId || "", page, limit);
   const [mandalas, setMandalas] = useState(fetchedMandalas);
-  const { mandalas: nextPageMandalas = [], refetch: refetchNextPage } = useGetMandalas(
-    projectId || "",
-    page + 1,
-    limit
-  );
+  const { mandalas: nextPageMandalas = [], refetch: refetchNextPage } =
+    useGetMandalas(projectId || "", page + 1, limit);
 
   // Hooks para operaciones CRUD
   const { deleteMandala } = useDeleteMandala();
-  const { createMandala, loading: isCreatingMandala } = useCreateMandala(projectId || "");
+  const { createMandala, loading: isCreatingMandala } = useCreateMandala(
+    projectId || ""
+  );
 
   // Estado para el modal de creación
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -144,6 +145,7 @@ const MandalaListPage = () => {
           organizationId={organizationId}
           projectId={projectId || ""}
           onCreateClick={() => setIsCreateModalOpen(true)}
+          mandalasExists={mandalas.length > 0}
         >
           {/* Lista paginada de mandalas */}
           <MandalasPaginatedList
