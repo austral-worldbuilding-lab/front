@@ -47,6 +47,16 @@ export interface Character {
   section?: string;
 }
 
+// Character específico para mandalas OVERLAP que incluye información de origen
+export interface OverlapCharacter {
+  description?: string;
+  color: string;
+  from: {
+    id: string;
+    name: string;
+  };
+}
+
 export interface Mandala {
   id: string;
   mandala: MandalData;
@@ -67,7 +77,7 @@ export interface MandalaCenter {
   name: string;
   description: string;
   color: string;
-  characters: Character[];
+  characters?: OverlapCharacter[]; // Opcional para manejar characters de OVERLAP mandalas
 }
 
 export interface MandalaDimension {
