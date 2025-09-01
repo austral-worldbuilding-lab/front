@@ -14,6 +14,7 @@ import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 
 import { useEditPostIt } from "@/hooks/useEditPostit.ts";
 import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
+import ComparisonPostIt from "./postits/ComparisonPostIt";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -187,6 +188,46 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             const p = mandala.postits[i];
             if (!shouldShowPostIt(p, appliedFilters)) return null;
             const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
+            const mandalaType = mandala.mandala.type;
+
+            if (mandalaType === "OVERLAP_SUMMARY") {
+              return (
+                <ComparisonPostIt
+                  key={`static-${p.id}`}
+                  postit={p}
+                  zindex={i}
+                  type={p.type || "UNICO"}
+                  position={{ x, y }}
+                  onDragStart={() => {
+                    onDragStart();
+                    bringToFront(i);
+                  }}
+                  onDragEnd={(e) => {
+                    handleOnDragEndPostIt(e, p.id!, p);
+                  }}
+                  onDblClick={() => {
+                    setEditableIndex(i);
+                    bringToFront(i);
+                  }}
+                  onContentChange={(newValue, id) => {
+                    onPostItUpdate(id, { content: newValue });
+                  }}
+                  onBlur={() => {
+                    window.getSelection()?.removeAllRanges();
+                    setEditableIndex(null);
+                  }}
+                  onMouseEnter={onMouseEnter}
+                  onMouseLeave={onMouseLeave}
+                  onContextMenu={(e) => showContextMenu(e, p.id!, "postit")}
+                  mandalaRadius={SCENE_W / 2}
+                  currentMandalaName={mandala.mandala.name}
+                  characters={
+                    mandala.mandala.configuration?.center?.characters ?? []
+                  }
+                />
+              );
+            }
+
             return (
               <PostIt
                 key={`static-${p.id}`}

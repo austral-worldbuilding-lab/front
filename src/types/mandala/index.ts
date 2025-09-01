@@ -29,6 +29,8 @@ export interface Postit {
   childrens: Postit[];
   // Optional provenance info when a postit comes from another mandala
   from?: { id: string; name: string };
+  fromSummary?: string[];
+  type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";
 }
 
 export interface Tag {
@@ -42,19 +44,10 @@ export interface Character {
   id: string;
   name: string;
   color: string;
+  description: string;
   position: { x: number; y: number };
   dimension?: string;
   section?: string;
-}
-
-// Character específico para mandalas OVERLAP que incluye información de origen
-export interface OverlapCharacter {
-  description?: string;
-  color: string;
-  from: {
-    id: string;
-    name: string;
-  };
 }
 
 export interface Mandala {
@@ -68,7 +61,7 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  type?: "CHARACTER" | "OVERLAP";
+  type?: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
   configuration: MandalaConfiguration;
   parentId: string;
 }
@@ -77,7 +70,7 @@ export interface MandalaCenter {
   name: string;
   description: string;
   color: string;
-  characters?: OverlapCharacter[]; // Opcional para manejar characters de OVERLAP mandalas
+  characters?: Character[];
 }
 
 export interface MandalaDimension {
@@ -94,7 +87,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
-  type: "CHARACTER" | "OVERLAP";
+  type: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];

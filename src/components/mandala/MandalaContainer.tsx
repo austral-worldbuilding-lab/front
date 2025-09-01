@@ -280,28 +280,29 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     <div className="flex flex-col gap-2">
                       <CharacterDropdown
                         characters={
-                          mandala.mandala.type === "OVERLAP"
-                            ? (mandala.mandala.configuration.center.characters || []).map(char => ({
-                                id: char.from.id,
-                                name: char.from.name,
-                                color: char.color
-                              }))
+                          mandala.mandala.type === "OVERLAP" ||
+                          mandala.mandala.type === "OVERLAP_SUMMARY"
+                            ? mandala.mandala.configuration.center.characters ??
+                              []
                             : projectCharacters
                         }
                         onAdd={
-                          mandala.mandala.type === "OVERLAP"
+                          mandala.mandala.type === "OVERLAP" ||
+                          mandala.mandala.type === "OVERLAP_SUMMARY"
                             ? undefined
                             : linkCharacter
                         }
                       />
-                      <Button
-                        variant="filled"
-                        color="primary"
-                        onClick={() => setIsSidebarOpen(true)}
-                        icon={<Sparkles size={16} />}
-                      >
-                        Herramientas IA
-                      </Button>
+                      {mandala.mandala.type === "CHARACTER" && (
+                        <Button
+                          variant="filled"
+                          color="primary"
+                          onClick={() => setIsSidebarOpen(true)}
+                          icon={<Sparkles size={16} />}
+                        >
+                          Herramientas IA
+                        </Button>
+                      )}
                     </div>
                   </div>
 
@@ -339,17 +340,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   {/* Mostrar botones/controles:
                       - siempre para mandalas NO unificadas
                       - para unificadas, solo en vista 'unified' */}
-                  {(mandala.mandala.type !== "OVERLAP" ||
+                  {(mandala.mandala.type === "CHARACTER" ||
                     viewMode === "overlap") && (
                     <>
-                      <Buttons
-                        onCreatePostIt={handleCreatePostIt}
-                        onCreateCharacter={handleCreateCharacter}
-                        currentMandalaId={mandalaId}
-                        onNewTag={handleNewTag}
-                        tags={tags}
-                        loading={isCreatingCharacter}
-                      />
+                      {mandala.mandala.type !== "OVERLAP_SUMMARY" && (
+                        <Buttons
+                          onCreatePostIt={handleCreatePostIt}
+                          onCreateCharacter={handleCreateCharacter}
+                          currentMandalaId={mandalaId}
+                          onNewTag={handleNewTag}
+                          tags={tags}
+                          loading={isCreatingCharacter}
+                        />
+                      )}
                       <ZoomControls />
                     </>
                   )}

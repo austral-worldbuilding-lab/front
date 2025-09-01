@@ -2,7 +2,7 @@ import { User, Users } from "lucide-react";
 import React from "react";
 
 interface MandalaPersonProps {
-  type?: "CHARACTER" | "OVERLAP";
+  type?: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
 }
 
 const MandalaPerson: React.FC<MandalaPersonProps> = ({ type = "OVERLAP" }) => {

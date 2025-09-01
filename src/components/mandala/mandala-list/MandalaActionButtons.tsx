@@ -1,14 +1,17 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MergeIcon, PlusIcon, XIcon } from "lucide-react";
+import { MergeIcon, PlusIcon, SquaresIntersect, XIcon } from "lucide-react";
 
 interface MandalaActionButtonsProps {
   selectionMode: boolean;
   selectedCount: number;
   isUnifying: boolean;
+  isComparing: boolean;
+  mandalasExists: boolean;
   onCreateClick: () => void;
   onToggleSelectionMode: () => void;
   onUnifyClick: () => void;
+  onCompareClick: () => void;
 }
 
 /**
@@ -19,9 +22,12 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
   selectionMode,
   selectedCount,
   isUnifying,
+  isComparing,
+  mandalasExists,
   onCreateClick,
   onToggleSelectionMode,
   onUnifyClick,
+  onCompareClick,
 }) => {
   return (
     <div className="flex flex-row w-full justify-between items-center">
@@ -39,42 +45,58 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
 
       <div className="flex gap-2">
         {/* Botón para activar/desactivar modo selección */}
-        {!selectionMode ? (
-          <Button
-            color="primary"
-            variant="outline"
-            className="mb-4"
-            onClick={onToggleSelectionMode}
-            icon={<MergeIcon size={16} />}
-          >
-            Unificar Mandalas
-          </Button>
-        ) : (
+        {mandalasExists && (
           <>
-            {/* Botón para cancelar selección */}
-            <Button
-              color="danger"
-              variant="outline"
-              className="mb-4"
-              onClick={onToggleSelectionMode}
-              icon={<XIcon size={16} />}
-            >
-              Cancelar
-            </Button>
-
-            {/* Botón para unificar mandalas seleccionadas */}
-            {selectedCount >= 2 && (
+            {!selectionMode ? (
               <Button
                 color="primary"
-                className="mb-4"
-                onClick={onUnifyClick}
-                icon={<MergeIcon size={16} />}
-                disabled={isUnifying}
+                variant="ghost"
+                className="mb-4 text-gray-500 hover:text-gray-700"
+                onClick={onToggleSelectionMode}
               >
-                {isUnifying
-                  ? "Unificando..."
-                  : `Unificar Mandalas (${selectedCount})`}
+                Seleccionar
               </Button>
+            ) : (
+              <>
+                {/* Botón para cancelar selección */}
+                <Button
+                  color="danger"
+                  variant="outline"
+                  className="mb-4"
+                  onClick={onToggleSelectionMode}
+                  icon={<XIcon size={16} />}
+                >
+                  Cancelar
+                </Button>
+
+                {/* Botón para unificar mandalas seleccionadas */}
+                {selectedCount >= 2 && (
+                  <div className="flex gap-2">
+                    <Button
+                      color="primary"
+                      className="mb-4"
+                      onClick={onUnifyClick}
+                      icon={<MergeIcon size={16} />}
+                      disabled={isUnifying}
+                    >
+                      {isUnifying
+                        ? "Unificando..."
+                        : `Unificar Mandalas (${selectedCount})`}
+                    </Button>
+                    <Button
+                      color="secondary"
+                      className="mb-4"
+                      onClick={onCompareClick}
+                      icon={<SquaresIntersect size={16} />}
+                      disabled={isComparing}
+                    >
+                      {isComparing
+                        ? "Comparando mandalas..."
+                        : `Comparar Mandalas (${selectedCount})`}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

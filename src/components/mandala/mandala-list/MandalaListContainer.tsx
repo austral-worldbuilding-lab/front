@@ -4,12 +4,15 @@ import MandalaActionButtons from "./MandalaActionButtons";
 import MandalaSelectionBanner from "./MandalaSelectionBanner";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import UnifyMandalasModal from "./UnifyMandalasModal";
+import CompareMandalasModal from "./CompareMandalasModal";
+import { useMandalaComparison } from "@/hooks/useMandalaComparison";
 
 interface MandalaListContainerProps {
   organizationId?: string;
   projectId: string;
   children: React.ReactNode;
   onCreateClick: () => void;
+  mandalasExists: boolean;
 }
 
 /**
@@ -22,19 +25,27 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
   projectId,
   children,
   onCreateClick,
+  mandalasExists,
 }) => {
   // Estado de selección
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedMandalas, setSelectedMandalas] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isUnifyModalOpen, setIsUnifyModalOpen] = useState(false);
-
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   // Hook para unificación
   const {
     unifyMandalas,
     loading: unifyingMandalas,
     error: unifyError,
   } = useMandalaUnification();
+
+  // Hook para comparación
+  const {
+    compareMandalas,
+    loading: comparingMandalas,
+    error: compareError,
+  } = useMandalaComparison();
 
   // Activa o desactiva el modo de selección
   const toggleSelectionMode = () => {
@@ -67,6 +78,29 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
     setIsUnifyModalOpen(true);
   };
 
+  // Abre el modal de comparación
+  const handleOpenCompareModal = () => {
+    setIsCompareModalOpen(true);
+  };
+
+  // Procesa la comparación de las mandalas seleccionadas
+  const handleCompareMandalas = async (name: string) => {
+    try {
+      await compareMandalas(
+        selectedMandalas,
+        organizationId || "",
+        projectId,
+        name
+      );
+      setIsCompareModalOpen(false);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Error al comparar las mandalas"
+      );
+      throw err;
+    }
+  };
+
   // Procesa la unificación de las mandalas seleccionadas con el nombre proporcionado
   const handleUnifyMandalas = async (name: string) => {
     try {
@@ -95,9 +129,12 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
         selectionMode={selectionMode}
         selectedCount={selectedMandalas.length}
         isUnifying={unifyingMandalas}
+        isComparing={comparingMandalas}
+        mandalasExists={mandalasExists}
         onCreateClick={onCreateClick}
         onToggleSelectionMode={toggleSelectionMode}
         onUnifyClick={handleOpenUnifyModal}
+        onCompareClick={handleOpenCompareModal}
       />
 
       {/* Contenido principal (inyectado como children) */}
@@ -116,7 +153,9 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
       })}
 
       {/* Mensajes de error */}
-      {selectionMode && <ErrorMessage message={error || unifyError} />}
+      {selectionMode && (
+        <ErrorMessage message={error || unifyError || compareError} />
+      )}
 
       {/* Modal de unificación */}
       <UnifyMandalasModal
@@ -125,6 +164,15 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
         onUnify={handleUnifyMandalas}
         selectedCount={selectedMandalas.length}
         isLoading={unifyingMandalas}
+      />
+
+      {/* Modal de comparación */}
+      <CompareMandalasModal
+        isOpen={isCompareModalOpen}
+        onOpenChange={setIsCompareModalOpen}
+        onCompare={handleCompareMandalas}
+        selectedCount={selectedMandalas.length}
+        isLoading={comparingMandalas}
       />
     </>
   );
