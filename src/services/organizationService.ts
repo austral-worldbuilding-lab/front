@@ -33,4 +33,3 @@ export const deleteOrganization = async (id: string): Promise<void> => {
         throw new Error("Error al eliminar organización");
     }
 };
-

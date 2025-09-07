@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useNavigate, useParams } from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
 import Loader from "@/components/common/Loader";
@@ -9,7 +8,6 @@ import {
   ChevronLeft,
   ArrowLeftIcon,
   FileText,
-  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -18,28 +16,7 @@ import { useAuthContext } from "@/context/AuthContext.tsx";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import { getOrganizationById } from "@/services/organizationService.ts";
 import FilesDrawer from "@/components/project/FilesDrawer.tsx";
-import ShareLinkDialog from "@/components/project/ShareLinkDialog";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
-  createOrganizationInviteLink,
-} from "@/services/organizationInvitationService";
-import { Role, ROLES } from "@/services/invitationService";
+import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
 
 const ProjectListPage = () => {
   const { organizationId } = useParams();
@@ -53,15 +30,6 @@ const ProjectListPage = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string>("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<Role>("member");
-  const [inviteLoading, setInviteLoading] = useState(false);
-  const [inviteError, setInviteError] = useState<string | null>(null);
-  const [inviteSuccess, setInviteSuccess] = useState(false);
-  const [conflictOpen, setConflictOpen] = useState(false);
-  const [conflictMsg, setConflictMsg] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (organizationId) {
@@ -91,47 +59,6 @@ const ProjectListPage = () => {
     }
   };
 
-  const handleInviteSubmit = async () => {
-    if (!organizationId) {
-      setInviteError("Falta el ID de la organización.");
-      return;
-    }
-    if (!inviteEmail) {
-      setInviteError("Ingresá un email.");
-      return;
-    }
-    setInviteLoading(true);
-    setInviteError(null);
-    try {
-      await createOrganizationInviteLink(
-        organizationId,
-        inviteRole,
-        undefined,
-        inviteEmail,
-        true
-      );
-      setInviteOpen(false);
-      setInviteSuccess(true);
-      setInviteEmail("");
-      setInviteRole("member");
-    } catch (err: any) {
-      if (err?.response?.status === 409) {
-        setInviteOpen(false);
-        setConflictMsg("Ya existe una invitación pendiente para ese usuario.");
-        setConflictOpen(true);
-      } else if (err?.response?.status === 403) {
-        setInviteError("No tenés permisos para invitar en esta organización.");
-      } else {
-        setInviteError(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Error al enviar invitación"
-        );
-      }
-    } finally {
-      setInviteLoading(false);
-    }
-  };
 
   return (
     <>
@@ -167,20 +94,8 @@ const ProjectListPage = () => {
                 >
                   Archivos de la organización
                 </Button>
-                <Button
-                  className="ml-2 mr-2"
-                  variant="outline"
-                  icon={<UserPlus size={16} />}
-                  aria-label="Invitar miembros a la organización"
-                  onClick={() => {
-                    setInviteError(null);
-                    setInviteOpen(true);
-                  }}
-                >
-                  Invitar
-                </Button>
-                <ShareLinkDialog
-                  className="mb-4"
+                <UnifiedInvitationDialog
+                  className="ml-2 mb-4"
                   projectName={orgName ?? "Organización"}
                   projectId={projects[0]?.id ?? ""}
                   organizationId={organizationId ?? ""}
@@ -280,94 +195,6 @@ const ProjectListPage = () => {
         id={organizationId!}
       />
 
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invitar a la organización</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-3">
-            <div className="grid gap-2">
-              <Label htmlFor="invite-email">Email</Label>
-              <Input
-                id="invite-email"
-                type="email"
-                placeholder="usuario@ejemplo.com"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                disabled={inviteLoading}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Rol</Label>
-              <Select
-                value={inviteRole}
-                onValueChange={(v) => setInviteRole(v as Role)}
-                disabled={inviteLoading}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Rol" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLES.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {inviteError && (
-              <div className="text-sm text-red-600">{inviteError}</div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setInviteOpen(false)}
-              disabled={inviteLoading}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleInviteSubmit} disabled={inviteLoading}>
-              {inviteLoading ? "Enviando..." : "Enviar invitación"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={inviteSuccess} onOpenChange={setInviteSuccess}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invitación creada</DialogTitle>
-          </DialogHeader>
-          <div>
-            Se envió la invitación por email. La persona podrá unirse a la
-            organización desde el enlace recibido.
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setInviteSuccess(false)}>OK</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={conflictOpen} onOpenChange={setConflictOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invitación existente</DialogTitle>
-          </DialogHeader>
-          <div>
-            {conflictMsg ||
-              "Ya existe una invitación para ese usuario en esta organización."}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setConflictOpen(false)}>Entendido</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
