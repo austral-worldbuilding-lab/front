@@ -154,7 +154,8 @@ export default function UnifiedInvitationDialog({
       setEmailSent(true);
       setEmail("");
     } catch (err: unknown) {
-      if (err?.response?.status === 403) {
+      const error = err as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      if (error?.response?.status === 403) {
         setError(
           isOrganization
             ? "No tenés permisos para enviar invitaciones. Solo los propietarios de la organización pueden invitar usuarios."
