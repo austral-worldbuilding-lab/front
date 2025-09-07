@@ -122,7 +122,7 @@ const OrganizationListPage = () => {
             <CreateEntityModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
-                onCreate={createOrganization}
+                onCreate={({ name }) => createOrganization(name)}
                 loading={creating}
                 error={errorMsg}
                 title="Crear Organización"
