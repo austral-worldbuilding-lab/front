@@ -105,6 +105,7 @@ export interface Project {
 export interface CreateProject {
   name: string;
   userId: string;
+  description?: string;
   organizationId: string;
 }
 
