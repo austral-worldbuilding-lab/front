@@ -6,6 +6,8 @@ import { removeProjectUser } from "@/services/userService";
 import axiosInstance from "@/lib/axios";
 import ProjectUserRow from "./ProjectUserRow";
 import { Role } from "@/services/invitationService";
+import { useAuthContext } from "@/context/AuthContext";
+import { isRoleDemotion } from "@/utils/roleUtils";
 
 interface ProjectUserListProps {
   projectId: string;
@@ -14,25 +16,38 @@ interface ProjectUserListProps {
 
 const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
   const { users, loading, error, refetch } = useProjectUsers(projectId);
+  const { user } = useAuthContext();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  
+  const currentUserId = user?.uid;
 
   const onUpdateRole = async (userId: string, newRole: Role) => {
     setActionError(null);
+    
+    const targetUser = users.find(u => u.id === userId);
+    const isCurrentUser = currentUserId === userId;
+    
+    if (isCurrentUser && targetUser && isRoleDemotion(targetUser.role as Role, newRole)) {
+      setActionError("No puedes reducir tu propio rol de administrador. Solicita a otro administrador que cambie tu rol.");
+      return;
+    }
+    
     try {
       await axiosInstance.put(`/project/${projectId}/users/${userId}/role`, {
         role: newRole,
       });
       await refetch();
-    } catch (e: any) {
-      console.log(e.response.data.statusCode);
-      if (e.response.status == 409) {
+    } catch (e: unknown) {
+      const error = e as { response?: { status?: number; data?: { statusCode?: number; message?: string } }; message?: string };
+      console.log(error.response?.data?.statusCode);
+      if (error.response?.status === 409) {
         setActionError("Debe haber al menos un dueño en un proyecto.");
         return;
       }
-      setActionError(e?.message ?? "Error al actualizar el rol");
+      setActionError(error?.response?.data?.message || error?.message || "Error al actualizar el rol");
     }
   };
 
@@ -43,8 +58,9 @@ const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
     try {
       await removeProjectUser(projectId, selectedUserId);
       await refetch();
-    } catch (e: any) {
-      setActionError(e?.message ?? "Error al eliminar el usuario");
+    } catch (e: unknown) {
+      const error = e as { message?: string };
+      setActionError(error?.message ?? "Error al eliminar el usuario");
     } finally {
       setActionLoading(false);
       setSelectedUserId(null);
@@ -83,6 +99,7 @@ const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
             email={u.email}
             initialRole={u.role as Role}
             isAdmin={canManage}
+            isCurrentUser={currentUserId === u.id}
             onConfirm={onUpdateRole}
           />
 
