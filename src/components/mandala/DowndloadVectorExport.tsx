@@ -7,7 +7,7 @@ type Props = { mandala: MandalaData };
 
 const DownloadVectorExport: React.FC<Props> = ({ mandala }) => {
     const svgRef = useRef<SVGSVGElement>(null);
-    const { downloadSVG, downloadPDF } = useSvgExport(svgRef);
+    const { downloadSVG } = useSvgExport(svgRef);
 
     return (
         <div className="flex items-center gap-8">
