@@ -15,6 +15,7 @@ import { Sparkles } from "lucide-react";
 import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 import Loader from "@/components/common/Loader";
+import posthog from "posthog-js";
 
 const MESSAGE_ROTATION_INTERVAL = 5000; // 5 segundos
 
@@ -94,14 +95,11 @@ const CreateModal = ({
     }
 
     const interval = setInterval(() => {
-      setCurrentMessageIndex((prevIndex) => 
-        (prevIndex + 1) % messages.length
-      );
+      setCurrentMessageIndex((prevIndex) => (prevIndex + 1) % messages.length);
     }, MESSAGE_ROTATION_INTERVAL);
 
     return () => clearInterval(interval);
   }, [loading, messages.length]);
-
 
   useEffect(() => {
     if (!isOpen) {
@@ -121,6 +119,10 @@ const CreateModal = ({
       color: d.color,
     }));
 
+    if (mandalaType === "ai") {
+      posthog.capture("mandala_generada_con_ai_clickeada");
+    }
+
     onCreateCharacter({
       name,
       description,
@@ -129,20 +131,23 @@ const CreateModal = ({
       dimensions: processedDimensions,
       scales: scales.map((s) => s.value),
     });
-
   };
 
   // Handlers para eventos del modal durante loading
   const handleOpenChange = loading ? () => {} : onOpenChange;
-  const handlePointerDownOutside = loading ? (e: Event) => e.preventDefault() : undefined;
-  const handleEscapeKeyDown = loading ? (e: KeyboardEvent) => e.preventDefault() : undefined;
+  const handlePointerDownOutside = loading
+    ? (e: Event) => e.preventDefault()
+    : undefined;
+  const handleEscapeKeyDown = loading
+    ? (e: KeyboardEvent) => e.preventDefault()
+    : undefined;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent 
-        className="max-w-md" 
-        showCloseButton={!loading} 
-        onPointerDownOutside={handlePointerDownOutside} 
+      <DialogContent
+        className="max-w-md"
+        showCloseButton={!loading}
+        onPointerDownOutside={handlePointerDownOutside}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         <DialogHeader>
@@ -162,47 +167,47 @@ const CreateModal = ({
           </div>
         ) : (
           <div className="space-y-6 py-4">
-          <CustomInput
-            id="name"
-            label="Nombre"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full"
-          />
-          <div className="grid  sm:grid-cols-2 gap-4">
-            <TagInput
-              label="Dimensiones"
-              initialItems={initialDimensions}
-              onChange={setDimensions}
-              tooltip="Las dimensiones representan los sectores de la mandala. Se pueden agregar, eliminar o editar."
+            <CustomInput
+              id="name"
+              label="Nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full"
             />
+            <div className="grid  sm:grid-cols-2 gap-4">
+              <TagInput
+                label="Dimensiones"
+                initialItems={initialDimensions}
+                onChange={setDimensions}
+                tooltip="Las dimensiones representan los sectores de la mandala. Se pueden agregar, eliminar o editar."
+              />
 
-            <TagInput
-              label="Escalas"
-              initialItems={initialScales}
-              onChange={setScales}
-              colorPicker={false}
-              tooltip="Las escalas representan los niveles de la mandala. Se pueden agergar, eliminar o editar."
-            />
-          </div>
+              <TagInput
+                label="Escalas"
+                initialItems={initialScales}
+                onChange={setScales}
+                colorPicker={false}
+                tooltip="Las escalas representan los niveles de la mandala. Se pueden agergar, eliminar o editar."
+              />
+            </div>
 
-          <div className="flex justify-between gap-2">
-            <RadioGroup
-              value={mandalaType}
-              onValueChange={setMandalaType}
-              className="flex flex-col gap-2"
-            >
-              <label className="flex items-center gap-3 cursor-pointer">
-                <RadioGroupItem value="empty" />
-                <span className="text-black">Mandala vacía</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <RadioGroupItem value="ai" />
-                <span className="text-black flex items-center gap-2">
-                  Generada con IA <Sparkles className="w-4 h-4" />
-                </span>
-              </label>
-            </RadioGroup>
+            <div className="flex justify-between gap-2">
+              <RadioGroup
+                value={mandalaType}
+                onValueChange={setMandalaType}
+                className="flex flex-col gap-2"
+              >
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <RadioGroupItem value="empty" />
+                  <span className="text-black">Mandala vacía</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <RadioGroupItem value="ai" />
+                  <span className="text-black flex items-center gap-2">
+                    Generada con IA <Sparkles className="w-4 h-4" />
+                  </span>
+                </label>
+              </RadioGroup>
 
               <ColorSelector
                 className="w-1/2"
@@ -210,21 +215,21 @@ const CreateModal = ({
                 setSelectedColor={setSelectedColor}
                 colors={colors}
               />
-          </div>
-
-          {mandalaType === "ai" && (
-            <div className="space-y-2">
-              <CustomInput
-                id="description"
-                label="Descripcion (opcional)"
-                about= "Esta descripción será útil para que la IA genere la mandala con más precisión"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                as="textarea"
-                style={{ maxHeight: 160 }}
-              />
             </div>
-          )}
+
+            {mandalaType === "ai" && (
+              <div className="space-y-2">
+                <CustomInput
+                  id="description"
+                  label="Descripcion (opcional)"
+                  about="Esta descripción será útil para que la IA genere la mandala con más precisión"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  as="textarea"
+                  style={{ maxHeight: 160 }}
+                />
+              </div>
+            )}
           </div>
         )}
 
