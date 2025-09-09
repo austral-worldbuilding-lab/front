@@ -39,12 +39,14 @@ const ProjectListPage = () => {
     }
   }, [organizationId]);
 
-  const handleCreateProject = async (name: string) => {
+  const handleCreateProject = async (data: { name: string; description?: string }) => {
+    const { name, description } = data;
     setCreating(true);
     try {
       if (!user) throw new Error("Usuario no autenticado");
       const project = await createProject({
         name: name,
+        description: description || "",
         userId: user.uid,
         organizationId: organizationId!,
       });
@@ -178,13 +180,14 @@ const ProjectListPage = () => {
           />
         </div>
         <CreateEntityModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onCreate={handleCreateProject}
-          loading={creating}
-          error={errorMsg}
-          title={"Crear Proyecto"}
-          placeholder={"Nombre del proyecto"}
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onCreate={handleCreateProject}
+            loading={creating}
+            error={errorMsg}
+            title="Crear Proyecto"
+            placeholder="Nombre del proyecto"
+            showQuestions={true}
         />
       </div>
       <FilesDrawer

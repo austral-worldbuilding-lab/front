@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import {useRef, useState} from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -12,7 +12,7 @@ import useMandala from "@/hooks/useMandala";
 import Loader from "../common/Loader";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeftIcon,
+  ArrowLeftIcon, Download,
   FileText,
   Filter,
   InfoIcon,
@@ -41,6 +41,9 @@ import ProjectMembersDisplay from "./ProjectMembersDisplay";
 import ViewToggle from "./ViewToggle";
 import MultiKonvaContainer from "./MultiKonvaContainer";
 import FilesDrawer from "@/components/project/FilesDrawer.tsx";
+import {useSvgExport} from "@/hooks/useSvgExport";
+import {MandalaSVG} from "@/components/mandala/MandalaSVG.tsx";
+import {useKonvaUtils} from "@/hooks/useKonvaUtils.ts";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -80,6 +83,24 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   } = useMandala(mandalaId);
   const { createMandala, loading: isCreatingCharacter } =
     useCreateMandala(projectId);
+
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const { downloadSVG } = useSvgExport(svgRef);
+
+  const scaleCount = mandala?.mandala.configuration?.scales?.length ?? 1;
+  const maxRadius = 150 * scaleCount;
+  const { toAbsolutePostit, toAbsolute } = useKonvaUtils(mandala?.postits ?? [], maxRadius);
+
+  const postsAbs = (mandala?.postits ?? []).map(p => {
+    const a = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
+    return { id: p.id, content: p.content, dimension: p.dimension, ax: a.x, ay: a.y };
+  });
+
+  const charsAbs = (mandala?.characters ?? []).map(c => {
+    const a = toAbsolute(c.position.x, c.position.y);
+    return { id: c.id, name: c.name, color: c.color, ax: a.x, ay: a.y };
+  });
+
 
   // Extraer ids de mandalas origen desde los postits (campo from: { id, name })
   const sourceMandalaIds = (() => {
@@ -335,6 +356,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     >
                       Archivos
                     </Button>
+                    <Button
+                        variant="filled"
+                        color="primary"
+                        icon={<Download size={16} />}
+                        onClick={() => downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)}
+                    >
+                      SVG
+                    </Button>
                   </div>
 
                   {/* Mostrar botones/controles:
@@ -491,6 +520,17 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                 </>
               )}
             </TransformWrapper>
+            {/* SVG oculta para exportación */}
+            <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}>
+              {mandala && (
+                  <MandalaSVG
+                      ref={svgRef}
+                      mandala={mandala}
+                      postsAbs={postsAbs}
+                      charsAbs={charsAbs}
+                  />
+              )}
+            </div>
           </>
         )}
       </div>
