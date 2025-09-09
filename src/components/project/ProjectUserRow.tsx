@@ -10,6 +10,7 @@ import {
 } from "../ui/select";
 import { Badge } from "../ui/badge";
 import { Role, ROLES } from "@/services/invitationService";
+import { getAvailableRoles } from "@/utils/roleUtils";
 
 export default function ProjectUserRow({
   userId,
@@ -17,6 +18,7 @@ export default function ProjectUserRow({
   email,
   initialRole,
   isAdmin,
+  isCurrentUser = false,
   onConfirm,
 }: {
   userId: string;
@@ -24,6 +26,7 @@ export default function ProjectUserRow({
   email: string;
   initialRole: Role;
   isAdmin?: boolean;
+  isCurrentUser?: boolean;
   onConfirm?: (userId: string, newRole: Role) => Promise<void> | void;
 }) {
   const [prevRole, setPrevRole] = useState<Role>(initialRole);
@@ -31,6 +34,7 @@ export default function ProjectUserRow({
   const [saving, setSaving] = useState(false);
 
   const dirty = draftRole !== prevRole;
+  const availableRoles = getAvailableRoles(initialRole, isCurrentUser);
 
   const handleCancel = () => setDraftRole(prevRole);
 
@@ -91,9 +95,19 @@ export default function ProjectUserRow({
               <SelectValue placeholder="Seleccionar rol" />
             </SelectTrigger>
             <SelectContent className="z-[200] !bg-white dark:!bg-neutral-900 [&>*]:!bg-white dark:[&>*]:!bg-neutral-900">
-              {ROLES.map((r) => (
+              {availableRoles.map((r) => (
                 <SelectItem key={r} value={r}>
                   {r.charAt(0).toUpperCase() + r.slice(1)}
+                </SelectItem>
+              ))}
+              {ROLES.filter(r => !availableRoles.includes(r)).map((r) => (
+                <SelectItem 
+                  key={r} 
+                  value={r} 
+                  disabled 
+                  className="opacity-50 cursor-not-allowed"
+                >
+                  {r.charAt(0).toUpperCase() + r.slice(1)} (No disponible)
                 </SelectItem>
               ))}
             </SelectContent>
