@@ -31,8 +31,10 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
   const isDragging = useRef(false);
   const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, 0, 0, 12);
 
-  const handleClick = () => {
-    if (!isDragging.current) {
+  const handleClick = (e: KonvaEventObject<PointerEvent>) => {
+    // Solo mostrar el popover en clic izquierdo (button = 0)
+    // Esto previene que se abra en Windows cuando se hace clic derecho
+    if (!isDragging.current && e.evt.button === 0) {
       setShowPopover(true);
     }
   };

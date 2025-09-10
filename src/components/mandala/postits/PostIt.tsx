@@ -7,13 +7,14 @@ import { Postit } from "@/types/mandala";
 import { isDarkColor } from "@/utils/colorUtils";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 import { usePostItAnimation } from "@/hooks/usePostItAnimation";
+import MandalaBadge from "./MandalaBadge";
 
 interface PostItProps {
   postit: Postit;
   color: string;
   position: { x: number; y: number };
   onDragStart: () => void;
-  onDragMove: (e: KonvaEventObject<DragEvent>) => void;
+  onDragMove?: (e: KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: KonvaEventObject<DragEvent>) => void;
   onDblClick: () => void;
   onContentChange: (newValue: string, id: string) => void;
@@ -22,13 +23,17 @@ interface PostItProps {
   onMouseLeave: () => void;
   onContextMenu: (e: KonvaEventObject<PointerEvent>, id: string) => void;
   mandalaRadius: number;
+  isUnifiedMandala?: boolean;
+  currentMandalaName?: string;
   disableDragging?: boolean;
   scale?: number;
+  zindex?: number;
 }
 
 const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const {
     postit,
+    zindex,
     color,
     position,
     onDragStart,
@@ -41,6 +46,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     onMouseLeave,
     onContextMenu,
     mandalaRadius,
+    isUnifiedMandala,
+    currentMandalaName,
     disableDragging,
     scale = 1,
   } = props;
@@ -63,8 +70,16 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const scaleFather = 0.4 * scale;
   const scaleChildren = 0.25 * scale;
   const fontSize = postItW / 10;
-  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, postItW, postItH);
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
+
+  const currentScale = isOpen ? scaleFather : scale;
+  const { dragBoundFunc } = useDragBoundFunc(
+    mandalaRadius,
+    postItW,
+    postItH,
+    0,
+    currentScale
+  );
 
   const orbit = useMemo(() => {
     return postItW * 0.37 * scale;
@@ -142,14 +157,14 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   }, [isEditing]);
 
   return (
-    <Group>
+    <Group zIndex={zindex}>
       {/* Círculo transparente HTML (fondo) */}
       {!isDragging && children.length !== 0 && (
         <Html
           divProps={{
             style: {
               pointerEvents: "none",
-              zIndex: -1,
+              zIndex: zindex ? zindex - 1 : -1,
             },
           }}
         >
@@ -179,7 +194,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             color={color}
             position={childPositions[i]}
             onDragStart={onDragStart}
-            onDragMove={onDragMove}
+            {...(onDragMove && { onDragMove })}
             onDragEnd={onDragEnd}
             onDblClick={onDblClick}
             onContentChange={onContentChange}
@@ -188,8 +203,11 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             onMouseLeave={onMouseLeave}
             onContextMenu={onContextMenu}
             mandalaRadius={mandalaRadius}
+            isUnifiedMandala={isUnifiedMandala}
+            currentMandalaName={currentMandalaName}
             disableDragging={true}
             scale={scaleChildren}
+            zindex={zindex}
           />
         ))}
 
@@ -212,7 +230,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           onDragStart();
           setIsDragging(true);
         }}
-        onDragMove={onDragMove}
+        {...(onDragMove && { onDragMove })}
         onDragEnd={(e) => {
           onDragEnd(e);
           setTimeout(() => setIsDragging(false), 100);
@@ -264,7 +282,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             divProps={{
               style: {
                 pointerEvents: "none",
-                zIndex: 0,
+                zIndex: zindex ? zindex - 1 : 0,
               },
             }}
           >
@@ -286,11 +304,18 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           </Html>
         )}
 
+        {isUnifiedMandala && currentMandalaName && (
+          <MandalaBadge
+            originMandalaName={postit.from?.name}
+            fontSize={fontSize}
+            zindex={zindex}
+          />
+        )}
         <Html
           divProps={{
             style: {
               pointerEvents: isEditing ? "auto" : "none",
-              zIndex: disableDragging ? 0 : 1,
+              zIndex: disableDragging ? 0 : zindex ? zindex - 1 : 1,
             },
           }}
         >

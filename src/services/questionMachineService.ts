@@ -1,5 +1,7 @@
 import axiosInstance from "@/lib/axios";
-import axios, { AxiosError } from "axios";
+import axios, {AxiosError} from "axios";
+import {GeneratedPostIt} from "@/components/mandala/sidebar/usePostItsGenerator.tsx";
+import {SelectedFile} from "@/types/mandala";
 
 export interface AiQuestionResponse {
     question: string;
@@ -10,6 +12,7 @@ export interface AiQuestionResponse {
 export interface GenerateQuestionsDto {
     dimensions: string[];
     scales: string[];
+    selectedFiles?: string[];
 }
 
 /**
@@ -24,11 +27,24 @@ export async function generateQuestionsService(
     if (!payload?.dimensions || !payload?.scales) {
         throw new Error('payload inválido: se esperan "dimensions" y "scales"');
     }
+    const selectedFiles: SelectedFile[] = JSON.parse(
+        localStorage.getItem("selectedFiles") || "[]"
+    );
+    const mandalaFiles = selectedFiles
+        .filter(f => f.scope === "mandala" && f.parentId === mandalaId)
+        .map(f => f.fileName);
+
+    const payloadWithFiles = {
+        ...payload,
+        selectedFiles: payload.selectedFiles
+            ? [...payload.selectedFiles, ...mandalaFiles]
+            : mandalaFiles
+    };
 
     try {
         const res = await axiosInstance.post<{ data: AiQuestionResponse[] }>(
             `/mandala/${encodeURIComponent(mandalaId)}/generate-questions`,
-            payload
+            payloadWithFiles
         );
         return res.data.data; // ← sin normalizar, tal cual lo envía el back
     } catch (err) {
@@ -44,4 +60,42 @@ export async function generateQuestionsService(
         }
         throw err;
     }
+}
+
+export interface GeneratePostItsDto {
+    dimensions: string[];
+    scales: string[];
+    selectedFiles?: SelectedFile[];
+}
+
+export async function generatePostItsService(
+    mandalaId: string,
+    payload: GeneratePostItsDto
+): Promise<GeneratedPostIt[]> {
+    if (!mandalaId) throw new Error("mandalaId es requerido");
+    if (!payload?.dimensions || !payload?.scales) {
+        throw new Error('payload inválido: se esperan "dimensions" y "scales"');
+    }
+    const selectedFiles: SelectedFile[] = JSON.parse(
+        localStorage.getItem("selectedFiles") || "[]"
+    );
+
+    const mandalaFiles = selectedFiles
+        .filter(f => f.scope === "mandala" && f.parentId === mandalaId)
+        .map(f => f.fileName);
+
+    const payloadWithFiles = {
+        ...payload,
+        selectedFiles: payload.selectedFiles
+            ? [...payload.selectedFiles, ...mandalaFiles]
+            : mandalaFiles
+    };
+
+    // El back retorna un array (string u objetos). Normalizamos a string[].
+    const res = await axiosInstance.post<{ data: GeneratedPostIt[] }>(
+        `/mandala/${encodeURIComponent(mandalaId)}/generate-postits`,
+        payloadWithFiles
+    );
+
+    return res?.data?.data ?? []
 }

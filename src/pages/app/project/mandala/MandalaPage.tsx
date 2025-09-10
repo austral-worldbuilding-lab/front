@@ -1,30 +1,39 @@
 import MandalaContainer from "@/components/mandala/MandalaContainer";
-import { useParams, useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { useMandalaHistory } from "@/hooks/useMandalaHistory";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import useMandala from "@/hooks/useMandala.ts";
+import { parseMandalaHistory, buildMandalaHistoryQuery } from "@/utils/mandalaHistory";
+import React from "react";
 
 const MandalaPage = () => {
-  const { mandalaId } = useParams();
-  const { mandala } = useMandala(mandalaId!);
+  const { mandalaId, organizationId, projectId } = useParams();
   const location = useLocation();
-  const { addMandala, resetHistory } = useMandalaHistory();
+  const navigate = useNavigate();
+  const { mandala } = useMandala(mandalaId!);
 
-  useEffect(() => {
-    if (!mandalaId) return;
-    if (location.state?.fromMandala) {
-      if (mandala && mandala.mandala) {
-        addMandala(mandala.mandala.id, mandala.mandala.name);
-      }
-    } else {
-      if (mandala && mandala.mandala) {
-        resetHistory(mandala.mandala.id, mandala.mandala.name);
-      }
+  // Parsear historial actual de la URL
+  const { ids, names } = parseMandalaHistory(location.search);
+
+  // Si el mandala actual no está al final del historial, agregarlo
+  React.useEffect(() => {
+    if (!mandalaId || !mandala?.mandala) return;
+    if (ids[ids.length - 1] !== mandalaId) {
+      const newIds = [...ids, mandalaId];
+      const newNames = [...names, mandala.mandala.name];
+      const search = buildMandalaHistoryQuery(newIds, newNames);
+      navigate(
+          `/app/organization/${organizationId}/projects/${projectId}/mandala/${mandalaId}?${search}`,
+          { replace: true }
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mandalaId, location.key, mandala?.mandala?.id]);
+    // eslint-disable-next-line
+  }, [mandalaId, mandala?.mandala?.id]);
 
-  return <MandalaContainer mandalaId={mandalaId!} />;
+  return (
+      <MandalaContainer
+          mandalaId={mandalaId!}
+          organizationId={organizationId!}
+      />
+  );
 };
 
 export default MandalaPage;

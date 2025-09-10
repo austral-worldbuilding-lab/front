@@ -3,6 +3,7 @@ import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { PanelLeftClose } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import {ReactNode} from "react";
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -46,9 +47,11 @@ function SheetContent({
   className,
   children,
   side = "right",
+  closeIcon,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left";
+  closeIcon?: ReactNode;
 }) {
   return (
     <SheetPortal>
@@ -71,7 +74,7 @@ function SheetContent({
       >
         {children}
         <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
-          <PanelLeftClose className="size-6 cursor-pointer text-[#797979]" />
+          {closeIcon ?? <PanelLeftClose className="size-6 cursor-pointer text-[#797979]" />}
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>

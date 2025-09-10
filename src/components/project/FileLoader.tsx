@@ -1,13 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useUploadFiles, ACCEPTED_TYPES } from "@/hooks/useUploadFiles";
 import { CloudUpload, Upload } from "lucide-react";
+import {useState} from "react";
+import ConfirmationDialog from "@/components/common/ConfirmationDialog.tsx";
 
 interface FileUploaderProps {
-  projectId: string;
-  onUploadComplete: () => void;
+    scope: 'organization' | 'project' | 'mandala';
+    id: string;
+    onUploadComplete?: () => void;
 }
 
-const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
+const FileLoader = ({ scope, id, onUploadComplete }: FileUploaderProps) => {
   const {
     fileInputRef,
     selectedFiles,
@@ -15,11 +18,21 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
     loading,
     handleFileChange,
     uploadFiles,
-  } = useUploadFiles(projectId, onUploadComplete);
+    videoWarning,
+    setVideoWarning
+  } = useUploadFiles(scope, id, onUploadComplete);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleTriggerFileSelect = () => {
-    fileInputRef.current?.click();
+  fileInputRef.current?.click();
   };
+
+
+  const handleConfirmUpload = () => {
+        uploadFiles();
+        setVideoWarning(null);
+    };
 
   return (
     <div className="mb-4 space-y-4">
@@ -32,7 +45,6 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
         className="hidden"
       />
 
-      <div className="flex items-start gap-2">
         <Button
           type="button"
           variant="outline"
@@ -43,33 +55,48 @@ const FileLoader = ({ projectId, onUploadComplete }: FileUploaderProps) => {
           Elegir archivos
         </Button>
 
-        <Button
-          onClick={uploadFiles}
-          loading={loading}
-          color="primary"
-          disabled={selectedFiles.length === 0}
-          icon={<CloudUpload size={16} />}
-        >
-          Subir archivos
-        </Button>
+        {selectedFiles.length > 0 && (
+            <>
+              <div className="text-sm text-gray-600">
+                {selectedFiles.length <= 5 ? (
+                    <ul className="list-disc pl-5">
+                      {selectedFiles.map((file, idx) => (
+                          <li key={idx}>{file.name}</li>
+                      ))}
+                    </ul>
+                ) : (
+                    <p>{selectedFiles.length} files selected</p>
+                )}
+              </div>
+
+              <Button
+                  onClick={() => {
+                      if (videoWarning) {
+                          setDialogOpen(true);
+                      } else {
+                          uploadFiles();
+                      }
+                  }}
+                  loading={loading}
+                  color="primary"
+                  icon={<CloudUpload size={16} />}
+              >
+                  Subir archivos
+              </Button>
+            </>
+        )}
+
+        {status && <p className="text-sm text-gray-700">{status}</p>}
+        <ConfirmationDialog
+            isOpen={dialogOpen}
+            onOpenChange={setDialogOpen}
+            title="Advertencia"
+            description={videoWarning || "Del video seleccionado se utilizará únicamente el audio, el cual será extraido como base de contexto para la IA."}
+            confirmText="Entendido"
+            cancelText="Cancelar"
+            onConfirm={handleConfirmUpload}
+        />
       </div>
-
-      {selectedFiles.length > 0 && (
-        <div className="text-sm text-gray-600">
-          {selectedFiles.length <= 5 ? (
-            <ul className="list-disc pl-5">
-              {selectedFiles.map((file, idx) => (
-                <li key={idx}>{file.name}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>{selectedFiles.length} files selected</p>
-          )}
-        </div>
-      )}
-
-      {status && <p className="text-sm text-gray-700">{status}</p>}
-    </div>
   );
 };
 

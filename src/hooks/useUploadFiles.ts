@@ -1,41 +1,51 @@
 import { useRef, useState } from 'react';
 import axios from 'axios';
-import { createProjectFiles } from '@/services/filesService';
+import {createFiles, FileScope} from '@/services/filesService.ts';
 import { useQueryClient } from '@tanstack/react-query';
-import { fileKeys } from './useProjectFiles';
+import { fileKeys } from './useFiles.ts';
+import {FileItem} from "@/types/mandala";
 
 export const ACCEPTED_TYPES = [
   'application/pdf',
   'text/plain',
   'image/png',
   'image/jpeg',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/mp4',
+  'video/mp4',
+  'video/quicktime',
 ];
 
-interface ProjectFile {
-  file_name: string;
-  file_type: string;
-}
 
 interface PresignedUrl {
   url: string;
 }
 
-export const useUploadFiles = (projectId: string, onUploadComplete?: () => void) => {
+export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: () => void) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [videoWarning, setVideoWarning] = useState<string | null>(null);
+
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const handleFileChange = () => {
     const files = fileInputRef.current?.files;
     if (files) {
-      const fileArray = Array.from(files).filter((file) =>
-        ACCEPTED_TYPES.includes(file.type)
-      );
+      const fileArray: File[] = [];
+      for (const file of Array.from(files)) {
+        if (file.type.startsWith("video/")) {
+          setVideoWarning(`Del video seleccionado se utilizará únicamente el audio, el cual será extraido como base de contexto para la IA.`);
+        }
+        fileArray.push(file);
+      }
       setSelectedFiles(fileArray);
     }
   };
+
 
   const uploadFiles = async () => {
     if (selectedFiles.length === 0) return;
@@ -44,12 +54,16 @@ export const useUploadFiles = (projectId: string, onUploadComplete?: () => void)
       setLoading(true);
       setStatus(null);
 
-      const payload: ProjectFile[] = selectedFiles.map((file) => ({
+      const payload: FileItem[] = selectedFiles.map((file) => ({
         file_name: file.name,
         file_type: file.type,
+        source_scope: scope,
+        id: '',
+        full_path: '',
+        url: '',
       }));
 
-      const urls = await createProjectFiles(projectId, payload);
+      const urls = await createFiles(scope, id, payload);
 
       await Promise.all(
         urls.map((urlObj: PresignedUrl, index: number) => {
@@ -62,17 +76,17 @@ export const useUploadFiles = (projectId: string, onUploadComplete?: () => void)
         })
       );
 
-      setStatus('Files uploaded successfully!');
+      setStatus('Archivos cargados exitosamente');
       setSelectedFiles([]);
       
-      queryClient.invalidateQueries({ queryKey: fileKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
       
       if (onUploadComplete) {
         onUploadComplete();
       }
     } catch (error) {
       console.error('Upload error:', error);
-      setStatus('An error occurred during upload.');
+      setStatus('Un error ocurrió al cargar los archivos');
     } finally {
       setLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -86,5 +100,7 @@ export const useUploadFiles = (projectId: string, onUploadComplete?: () => void)
     loading,
     handleFileChange,
     uploadFiles,
+    videoWarning,
+    setVideoWarning
   };
 };

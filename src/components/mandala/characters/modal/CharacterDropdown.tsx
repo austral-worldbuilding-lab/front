@@ -11,7 +11,7 @@ interface Character {
 
 interface CharacterDropdownProps {
   characters: Character[];
-  onAdd: (characterId: string) => void;
+  onAdd?: (characterId: string) => void;
 }
 
 const CharacterDropdown: React.FC<CharacterDropdownProps> = ({

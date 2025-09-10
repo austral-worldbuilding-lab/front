@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ interface NewPostItModalProps {
   onCreate: (content: string, tags: Tag[], postItFatherId?: string) => void;
   onNewTag: (tag: Tag) => void;
   postItFatherId?: string;
+  defaultContent?: string;
 }
 
 const NewPostItModal = ({
@@ -29,6 +30,7 @@ const NewPostItModal = ({
   onCreate,
   onNewTag,
   postItFatherId,
+  defaultContent = "",
 }: NewPostItModalProps) => {
   const [content, setContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
@@ -36,6 +38,10 @@ const NewPostItModal = ({
   const isValid = content.trim() !== "";
   const { projectId } = useParams<{ projectId: string }>();
   const { deleteTag } = useTags(projectId!);
+
+  useEffect(() => {
+    if (isOpen) setContent((defaultContent ?? "").trim());
+  }, [isOpen, defaultContent]);
 
   const handleCreate = () => {
     if (isValid) {

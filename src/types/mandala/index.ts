@@ -27,6 +27,10 @@ export interface Postit {
   section: string;
   tags: Tag[];
   childrens: Postit[];
+  // Optional provenance info when a postit comes from another mandala
+  from?: { id: string; name: string };
+  fromSummary?: string[];
+  type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";
 }
 
 export interface Tag {
@@ -40,6 +44,7 @@ export interface Character {
   id: string;
   name: string;
   color: string;
+  description: string;
   position: { x: number; y: number };
   dimension?: string;
   section?: string;
@@ -56,10 +61,8 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  configuration: {
-    dimensions: { name: string; color: string }[];
-    scales: string[];
-  };
+  type?: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
+  configuration: MandalaConfiguration;
   parentId: string;
 }
 
@@ -67,6 +70,7 @@ export interface MandalaCenter {
   name: string;
   description: string;
   color: string;
+  characters?: Character[];
 }
 
 export interface MandalaDimension {
@@ -83,6 +87,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
+  type: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];
@@ -94,11 +99,14 @@ export interface CompleteApiMandala {
 export interface Project {
   id: string;
   name: string;
+  description?: string;
 }
 
 export interface CreateProject {
   name: string;
   userId: string;
+  description?: string;
+  organizationId: string;
 }
 
 export interface FilterOption {
@@ -124,4 +132,23 @@ export interface MessageDTO {
   content: string;
   isUser: boolean;
   createdAt: Date;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+}
+export interface FileItem {
+  id: string;
+  file_name: string;
+  file_type: string;
+  source_scope: string;
+  full_path: string;
+  url: string;
+}
+
+export interface SelectedFile {
+  fileName: string;
+  scope: string;
+  parentId: string;
 }

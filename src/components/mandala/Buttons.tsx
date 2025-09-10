@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { PersonStanding, StickyNote } from "lucide-react";
 import CreateModal from "./characters/modal/CreateModal";
 import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
+
+
+const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
 
 interface ButtonsProps {
   onCreatePostIt: (content: string, tags: Tag[]) => void;
@@ -19,6 +22,7 @@ interface ButtonsProps {
   }) => void;
   tags: Tag[];
   currentMandalaId?: string;
+  loading?: boolean;
 }
 
 const Buttons = ({
@@ -27,9 +31,23 @@ const Buttons = ({
   onNewTag,
   tags,
   currentMandalaId,
+  loading = false,
 }: ButtonsProps) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
+  const [wasCreating, setWasCreating] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      setWasCreating(true);
+    } else if (wasCreating && !loading) {
+      const timer = setTimeout(() => {
+        setIsCreateModalOpen(false);
+        setWasCreating(false);
+      }, MODAL_CLOSE_DELAY);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, wasCreating]);
 
   const handleCreateCharacter = (character: {
     name: string;
@@ -46,9 +64,14 @@ const Buttons = ({
       });
     }
   };
+
+
   return (
     <>
-      <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-20 bg-white rounded-lg p-2 shadow">
+      <div 
+        className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-[100] bg-white rounded-lg p-2 shadow"
+        data-floating-buttons
+      >
         <Button
           onClick={() => setPostItModalOpen(true)}
           variant="filled"
@@ -71,6 +94,7 @@ const Buttons = ({
         onCreateCharacter={handleCreateCharacter}
         title="Crear nuevo personaje"
         createButtonText="Crear personaje"
+        loading={loading}
       />
       <NewPostItModal
         isOpen={isPostItModalOpen}

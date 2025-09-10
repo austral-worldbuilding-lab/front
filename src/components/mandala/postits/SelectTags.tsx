@@ -43,7 +43,7 @@ const SelectTags = ({ tags, value, onChange, onNewTag, onDeleteTag }: SelectTags
 
   return (
       <>
-        <Popover modal open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <div
                 onClick={() => setOpen(true)}
@@ -143,7 +143,7 @@ const SelectTags = ({ tags, value, onChange, onNewTag, onDeleteTag }: SelectTags
             onCreate={(newTag) => {
               const tagWithName: Tag = {
                 id: newTag.id,
-                name: newTag.label,
+                name: newTag.name,
                 value: newTag.value,
                 color: newTag.color,
               };

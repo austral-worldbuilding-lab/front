@@ -5,6 +5,8 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+export const RETURN_TO_KEY = "returnToUrl";
+
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
   const { isAuth, isLoading } = useAuthContext();
@@ -14,6 +16,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!isAuth()) {
+    const fullUrl = location.pathname + location.search + location.hash;
+    sessionStorage.setItem(RETURN_TO_KEY, fullUrl);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

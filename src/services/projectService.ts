@@ -7,9 +7,9 @@ export interface CreateMandalaDto {
 }
 
 
-export const getProjects = async (page : number, limit : number): Promise<Project[]> => {
+export const getProjects = async (organizationId: string, page : number, limit : number): Promise<Project[]> => {
   const response = await axiosInstance.get<{ data: Project[] }>(
-    `/project?page=${page}&limit=${limit}`
+      `/organization/${organizationId}/projects?page=${page}&limit=${limit}`
   );
 
   return response.data.data;
