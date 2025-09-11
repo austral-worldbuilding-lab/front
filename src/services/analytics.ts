@@ -14,9 +14,7 @@ export interface AiRequestEventClient {
   user_id: string;
   project_id: string;
   mandala_id?: string;
-  ai_model: string;
   request_type: 'generate_postits' | 'generate_questions' | 'generate_summary';
-  prompt_tokens?: number;
   dimensions_count?: number;
   scales_count?: number;
   tags_count?: number;
@@ -27,13 +25,10 @@ export interface AiResponseEventClient {
   request_id: string;
   user_id: string;
   project_id: string;
-  ai_model: string;
   response_type: 'postits' | 'questions' | 'summary';
   success: boolean;
   error_type?: string;
   latency_ms: number;
-  completion_tokens?: number;
-  total_tokens?: number;
   results_count?: number;
 }
 
@@ -119,9 +114,7 @@ class AnalyticsService {
         user_id: event.user_id,
         project_id: event.project_id,
         mandala_id: event.mandala_id || null,
-        ai_model: event.ai_model,
         request_type: event.request_type,
-        prompt_tokens: event.prompt_tokens || 0,
         dimensions_count: event.dimensions_count || 0,
         scales_count: event.scales_count || 0,
         tags_count: event.tags_count || 0,
@@ -143,13 +136,10 @@ class AnalyticsService {
         request_id: event.request_id,
         user_id: event.user_id,
         project_id: event.project_id,
-        ai_model: event.ai_model,
         response_type: event.response_type,
         success: event.success,
         error_type: event.error_type || null,
         latency_ms: event.latency_ms,
-        completion_tokens: event.completion_tokens || 0,
-        total_tokens: event.total_tokens || 0,
         results_count: event.results_count || 0,
         timestamp: Date.now()
       });
