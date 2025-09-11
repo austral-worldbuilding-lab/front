@@ -1,72 +1,76 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { auth } from '../config/firebase';
-import {signOut} from "firebase/auth";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { auth } from "../config/firebase";
+import { signOut } from "firebase/auth";
 
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 axiosInstance.interceptors.response.use(
-    response => response,
-    async error => {
-        if (error.response?.status === 401) {
-            try {
-                await signOut(auth); // Cerrar sesión en firebase
-                localStorage.clear();
-            } catch (e) {
-                console.error("Error during sign out:", e);
-            }
-            window.location.href = "/login";
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      try {
+        if (window.location.pathname === "/app/organization") {
+          await signOut(auth); // Cerrar sesión en firebase
+          localStorage.clear();
+          window.location.href = "/login";
+        } else {
+          window.location.href = "/app/organization";
         }
-        return Promise.reject(error);
+      } catch (e) {
+        console.error("Error during sign out:", e);
+      }
     }
-)
+    return Promise.reject(error);
+  }
+);
 
 axiosInstance.interceptors.request.use(
-    async (config) => {
-        const user = auth.currentUser;
-        if (user) {
-            const token = await user.getIdToken();
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+  async (config) => {
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 export async function get<T>(
-    url: string,
-    config?: AxiosRequestConfig
+  url: string,
+  config?: AxiosRequestConfig
 ): Promise<AxiosResponse<T>> {
-    return axiosInstance.get<T>(url, config);
+  return axiosInstance.get<T>(url, config);
 }
 
 export async function post<T, U>(
-    url: string,
-    data: U,
-    config?: AxiosRequestConfig
+  url: string,
+  data: U,
+  config?: AxiosRequestConfig
 ): Promise<AxiosResponse<T>> {
-    return axiosInstance.post<T>(url, data, config);
+  return axiosInstance.post<T>(url, data, config);
 }
 
 export async function put<T, U>(
-    url: string,
-    data: U,
-    config?: AxiosRequestConfig
+  url: string,
+  data: U,
+  config?: AxiosRequestConfig
 ): Promise<AxiosResponse<T>> {
-    return axiosInstance.put<T>(url, data, config);
+  return axiosInstance.put<T>(url, data, config);
 }
 
 export async function del<T>(
-    url: string,
-    config?: AxiosRequestConfig
+  url: string,
+  config?: AxiosRequestConfig
 ): Promise<AxiosResponse<T>> {
-    return axiosInstance.delete<T>(url, config);
+  return axiosInstance.delete<T>(url, config);
 }
 
 export default axiosInstance;
