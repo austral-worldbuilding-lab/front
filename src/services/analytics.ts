@@ -62,6 +62,17 @@ export interface UserEngagementEvent {
   project_id?: string;
 }
 
+export interface PostitConvertedEvent {
+  request_id: string;
+  user_id: string;
+  project_id: string;
+  mandala_id: string;
+  candidate_index: number;
+  dimension?: string;
+  scale?: string;
+  object_id?: string;
+}
+
 class AnalyticsService {
   private analytics: Analytics | null;
   private isEnabled: boolean = false;
@@ -291,6 +302,21 @@ class AnalyticsService {
   getCurrentUserId(): string | null {
     return this.currentUserId;
   }
+
+  trackPostitConverted(converted: PostitConvertedEvent): void {
+  if (!this.isEnabled || !this.analytics) return;
+  logEvent(this.analytics, 'postit_converted', {
+    request_id: converted.request_id,
+    user_id: converted.user_id,
+    project_id: converted.project_id,
+    mandala_id: converted.mandala_id,
+    candidate_index: converted.candidate_index,
+    dimension: converted.dimension ?? null,
+    scale: converted.scale ?? null,
+    object_id: converted.object_id ?? null,
+    timestamp: Date.now(),
+  });
+}
 }
 
 export const analyticsService = new AnalyticsService();
@@ -308,5 +334,6 @@ export const useAnalytics = () => {
     createTimer: () => analyticsService.createTimer(),
     setUserProperties: (properties: Record<string, string | number | boolean>) => 
       analyticsService.setUserProperties(properties),
+    trackPostitConverted: (e: PostitConvertedEvent) => analyticsService.trackPostitConverted(e),
   };
 };
