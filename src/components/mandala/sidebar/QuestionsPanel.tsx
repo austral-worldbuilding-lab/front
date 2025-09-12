@@ -20,13 +20,13 @@ export default function QuestionsPanel({
   children,
 }: QuestionsPanelProps) {
   const { questions, setQuestions, loading, error, generate } =
-    useQuestionGenerator(mandalaId);
+    useQuestionGenerator(mandalaId, projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Cargar preguntas guardadas en localStorage al montar
   useEffect(() => {
     setQuestions(getLocalQueue<string>(`mandala-questions-${mandalaId}`));
-  }, [mandalaId]);
+  }, [mandalaId, setQuestions]);
 
   // Guardar preguntas en localStorage cuando cambian
   useEffect(() => {
