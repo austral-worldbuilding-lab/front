@@ -18,11 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-// Initialize Analytics (only in browser)
 const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
-
-// Initialize Realtime Database
 const database = getDatabase(app);
 
 export { app, auth, db, analytics, database };
