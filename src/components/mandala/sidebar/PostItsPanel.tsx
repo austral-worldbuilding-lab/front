@@ -31,7 +31,7 @@ export default function PostItsPanel({
   dimensions = [],
 }: PostItsPanelProps) {
   const { items, setItems, loading, error, generate } =
-    usePostItsGenerator(mandalaId);
+    usePostItsGenerator(mandalaId, projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // modal de creación real

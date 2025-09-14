@@ -1,20 +1,12 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Loader from "@/components/common/Loader.tsx";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, Eye, UserPlus, FileText } from "lucide-react";
+import { ArrowLeftIcon, Eye, FileText } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
 import useProject from "@/hooks/useProject.ts";
 import ProjectUserList from "@/components/project/ProjectUserList";
-import ShareLinkDialog from "@/components/project/ShareLinkDialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import InviteUserForm from "@/components/project/InviteUserForm.tsx";
+import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
 import FilesDrawer from "@/components/project/FilesDrawer";
 
 const ProjectPage = () => {
@@ -26,10 +18,6 @@ const ProjectPage = () => {
 
   const { project, loading: projectLoading } = useProject(projectId);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteSuccess, setInviteSuccess] = useState(false);
-  const [conflictOpen, setConflictOpen] = useState(false);
-  const [conflictMsg, setConflictMsg] = useState<string | undefined>(undefined);
 
 
   if (projectLoading) {
@@ -89,23 +77,15 @@ const ProjectPage = () => {
               Ver Mandalas
             </Button>
 
-            <Button
-                variant="outline"
-                onClick={() => setInviteOpen(true)}
-                icon={<UserPlus size={16} />}
-                aria-label="Invitar miembros al proyecto"
-            >
-              Invitar
-            </Button>
-            {projectId && organizationId && (
-                <ShareLinkDialog
-                    projectId={projectId}
-                    organizationId={organizationId}
-                    projectName={project?.name ?? "Proyecto"}
-                    defaultRole="member"
-                />
-            )}
-          </div>
+          {projectId && organizationId && (
+            <UnifiedInvitationDialog
+                projectId={projectId}
+                organizationId={organizationId}
+                projectName={project?.name ?? "Proyecto"}
+                defaultRole="member"
+            />
+          )}
+        </div>
 
           <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
             <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
@@ -113,78 +93,14 @@ const ProjectPage = () => {
           </div>
         </div>
 
-        <FilesDrawer
-            id={projectId!}
-            open={drawerOpen}
-            onClose={() => setDrawerOpen(false)}
-            title="Archivos del proyecto"
-            scope="project"
-        />
-        {/* MODAL INVITAR USUARIO */}
-        <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invitar miembros</DialogTitle>
-            </DialogHeader>
-            {projectId && organizationId && (
-                <InviteUserForm
-                    projectId={projectId}
-                    organizationId={organizationId}
-                    onSuccess={() => {
-                      setInviteOpen(false);
-                      setInviteSuccess(true);
-                    }}
-                    onError={(status) => {
-                      if (status === 409) {
-                        setInviteOpen(false);
-                        setConflictMsg(
-                            "Ya existe una invitación pendiente para ese usuario."
-                        );
-                        setConflictOpen(true);
-                      }
-                    }}
-                />
-            )}
-            {(!projectId || !organizationId) && (
-                <div className="text-red-600 text-sm">
-                  Error: No se pueden enviar invitaciones. Faltan datos del proyecto.
-                </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* MODAL ÉXITO */}
-        <Dialog open={inviteSuccess} onOpenChange={setInviteSuccess}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invitación creada</DialogTitle>
-            </DialogHeader>
-            <div>
-              Se generó el link de invitación. El usuario podrá unirse al proyecto
-              usando este enlace.
-            </div>
-            <DialogFooter>
-              <Button onClick={() => setInviteSuccess(false)}>OK</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* MODAL CONFLICTO */}
-        <Dialog open={conflictOpen} onOpenChange={setConflictOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invitación existente</DialogTitle>
-            </DialogHeader>
-            <div>
-              {conflictMsg ||
-                  "Ya existe una invitación para ese usuario en este proyecto."}
-            </div>
-            <DialogFooter>
-              <Button onClick={() => setConflictOpen(false)}>Entendido</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <FilesDrawer
+          id={projectId!}
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          title="Archivos del proyecto"
+          scope="project"
+      />
+    </div>
   );
 };
 
