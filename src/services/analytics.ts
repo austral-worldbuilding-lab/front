@@ -50,6 +50,7 @@ export interface MandalaInteractionEventClient {
   mandala_type: 'CHARACTER' | 'OVERLAP' | 'OVERLAP_SUMMARY';
   object_id?: string;
   collaboration_session_active: boolean;
+  ai_assisted: boolean
 }
 
 export interface UserEngagementEvent {

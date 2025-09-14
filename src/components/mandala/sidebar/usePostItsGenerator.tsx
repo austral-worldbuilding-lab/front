@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { generatePostItsService } from "@/services/questionMachineService";
-import { useAnalytics } from "@/services/analytics";
 import { useAuth } from "@/hooks/useAuth";
+import { useAnalytics } from "@/services/analytics";
 import { v4 as uuid } from "uuid";
 
 export interface GeneratedPostIt {
