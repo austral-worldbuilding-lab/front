@@ -61,7 +61,6 @@ export function usePostItsGenerator(mandalaId: string, projectId: string) {
                     project_id: projectId,
                     response_type: "postits",
                     success: false,
-                    error_type: e?.code || "unknown_error",
                     latency_ms: timer(),
                 });
             } finally {
