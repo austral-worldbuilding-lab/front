@@ -1,12 +1,14 @@
 // PostItsPanel.tsx
 import { Button } from "@/components/ui/button";
 import { Plus, Sparkles } from "lucide-react";
-import { usePostItsGenerator } from "./usePostItsGenerator";
+import { GeneratedPostIt, usePostItsGenerator } from "./usePostItsGenerator";
 import type { Tag } from "@/types/mandala";
 import { PropsWithChildren, useEffect, useMemo, useRef, useState } from "react";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import { Link } from "react-router-dom";
 import { getLocalQueue } from "@/utils/localQueue.ts";
+import { useAuth } from "@/hooks/useAuth";
+import { useAnalytics } from "@/services/analytics";
 
 export interface PostItsPanelProps extends PropsWithChildren {
   mandalaId: string;
@@ -37,6 +39,11 @@ export default function PostItsPanel({
   // modal de creación real
   const [open, setOpen] = useState(false);
   const [prefill, setPrefill] = useState("");
+  const { trackPostitConverted } = useAnalytics();
+  const { backendUser } = useAuth();
+  const [selectedCandidate, setSelectedCandidate] = useState<{
+    request_id?: string; candidate_index?: number; dimension?: string; scale?: string; content?: string;
+  } | null>(null);
 
   // Cargar post-its guardados en localStorage al montar
   useEffect(() => {
@@ -70,8 +77,15 @@ export default function PostItsPanel({
     setItems(filtered.slice(-20));
   };
 
-  const openCreateWith = (text: string) => {
-    setPrefill(text);
+  const openCreateWith = (candidate: GeneratedPostIt) => {
+    setSelectedCandidate({
+      request_id: candidate.request_id,
+      candidate_index: candidate.candidate_index,
+      dimension: candidate.dimension,
+      scale: candidate.section,
+      content: candidate.content,
+    });
+    setPrefill(candidate.content);
     setOpen(true);
   };
 
@@ -136,7 +150,7 @@ export default function PostItsPanel({
                   {/* Botón + arriba a la derecha */}
                   <button
                     type="button"
-                    onClick={() => openCreateWith(item.content)}
+                    onClick={() => openCreateWith(item)}
                     className="absolute -top-2 -right-2 h-7 w-7 rounded-full border border-black/20 bg-white shadow flex items-center justify-center"
                     aria-label="Agregar post-it"
                     title="Agregar post-it"
@@ -172,7 +186,20 @@ export default function PostItsPanel({
         tags={tags}
         onCreate={() => {
           onCreate(prefill, tags);
+          const candidate = selectedCandidate;
+          if (candidate?.request_id != null && candidate?.candidate_index != null) {
+            trackPostitConverted({
+              request_id: candidate.request_id,
+              user_id: backendUser?.firebaseUid ?? "",
+              project_id: projectId,
+              mandala_id: mandalaId,
+              candidate_index: candidate.candidate_index,
+              dimension: candidate.dimension,
+              scale: candidate.scale,
+            });
+          }
           deletePostItFromLocal(prefill);
+          setSelectedCandidate(null);
         }}
         onNewTag={onNewTag}
         defaultContent={prefill}
