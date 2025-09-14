@@ -11,14 +11,16 @@ import SelectTags from "./SelectTags";
 import { Tag } from "@/types/mandala";
 import { useParams } from "react-router-dom";
 import { useTags } from "@/hooks/useTags";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Loader2 } from "lucide-react";
+import { useCreateImage } from "@/hooks/useCreateImage";
 
 interface NewImageModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   tags: Tag[];
-  onCreate: (imageFile: File, tags: Tag[]) => void;
+  onCreate?: (imageFile: File, tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
+  onUploadComplete?: () => void;
 }
 
 const NewImageModal = ({
@@ -27,6 +29,7 @@ const NewImageModal = ({
   tags,
   onCreate,
   onNewTag,
+  onUploadComplete,
 }: NewImageModalProps) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -34,6 +37,7 @@ const NewImageModal = ({
 
   const { projectId } = useParams<{ projectId: string }>();
   const { deleteTag } = useTags(projectId!);
+  const { isUploading, error, uploadImage } = useCreateImage();
 
   // Reset the form when the modal is opened/closed
   useEffect(() => {
@@ -58,10 +62,23 @@ const NewImageModal = ({
     }
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (selectedImage) {
-      onCreate(selectedImage, selectedTags);
-      onOpenChange(false);
+      if (onCreate) {
+        onCreate(selectedImage, selectedTags);
+        onOpenChange(false);
+        return;
+      }
+
+      // Use the new upload functionality
+      const success = await uploadImage(selectedImage, selectedTags);
+
+      if (success) {
+        if (onUploadComplete) {
+          onUploadComplete();
+        }
+        onOpenChange(false);
+      }
     }
   };
 
@@ -139,11 +156,18 @@ const NewImageModal = ({
           </div>
         </div>
 
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-800 rounded-md p-3 text-sm">
+            {error}
+          </div>
+        )}
+
         <DialogFooter className="flex sm:justify-between">
           <Button
             variant="outline"
             color="tertiary"
             onClick={() => onOpenChange(false)}
+            disabled={isUploading}
           >
             Cancelar
           </Button>
@@ -151,9 +175,16 @@ const NewImageModal = ({
             variant="filled"
             color="primary"
             onClick={handleCreate}
-            disabled={!selectedImage}
+            disabled={!selectedImage || isUploading}
           >
-            Agregar Imagen
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Subiendo...
+              </>
+            ) : (
+              "Agregar Imagen"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
