@@ -22,15 +22,28 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <PostHogProvider
-      apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
-      options={{
-        api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-        defaults: "2025-05-24",
-        capture_exceptions: true,
-        debug: import.meta.env.MODE === "development",
-      }}
-    >
+    {import.meta.env.VITE_PUBLIC_ENVIRONMENT === "production" ? (
+      <PostHogProvider
+        apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
+        options={{
+          api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+          defaults: "2025-05-24",
+          capture_exceptions: true,
+          debug: import.meta.env.MODE === "development",
+        }}
+      >
+        <PostItAnimationProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <TooltipProvider>
+                <Routes />
+              </TooltipProvider>
+            </AuthProvider>
+            {/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
+          </QueryClientProvider>
+        </PostItAnimationProvider>
+      </PostHogProvider>
+    ) : (
       <PostItAnimationProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
@@ -41,6 +54,6 @@ createRoot(document.getElementById("root")!).render(
           {/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
         </QueryClientProvider>
       </PostItAnimationProvider>
-    </PostHogProvider>
+    )}
   </StrictMode>
 );
