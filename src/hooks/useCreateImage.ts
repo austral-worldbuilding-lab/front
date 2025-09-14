@@ -21,6 +21,8 @@ export const useCreateImage = (): UseCreateImageReturn => {
       return false;
     }
 
+    console.log("Tags:", tags);
+
     setError(null);
 
     try {
