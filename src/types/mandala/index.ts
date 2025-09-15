@@ -146,6 +146,7 @@ export interface MessageDTO {
 export interface Organization {
   id: string;
   name: string;
+  accessType?: 'full' | 'limited';
 }
 export interface FileItem {
   id: string;
