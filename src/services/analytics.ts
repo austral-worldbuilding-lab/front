@@ -1,9 +1,5 @@
 /**
  * Analytics Service - Firebase Analytics Integration
- * 
- * Rastrea eventos de uso de la aplicación: interacciones de IA, colaboración, 
- * navegación y engagement de usuarios. Envía métricas a Firebase Analytics
- * para análisis de comportamiento, optimización de features y business intelligence.
  */
 
 import { analytics } from '@/config/firebase';
@@ -89,9 +85,6 @@ class AnalyticsService {
     }
   }
 
-  /**
-   * Initialize analytics with user information
-   */
   initialize(userId: string, userProperties?: Record<string, any>): void {
     if (!this.isEnabled || !this.analytics) return;
 
