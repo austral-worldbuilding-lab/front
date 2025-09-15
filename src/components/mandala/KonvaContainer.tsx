@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { Stage, Layer } from "react-konva";
-import { Character, Mandala as MandalaData, Postit } from "@/types/mandala";
+import { Character, Mandala as MandalaData, MandalaImage, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
+import MandalaImageComponent from "./images/MandalaImage";
 import MandalaMenu from "./MandalaMenu";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils";
 import { useContextMenu } from "@/hooks/useContextMenu.ts";
@@ -31,6 +32,8 @@ export interface KonvaContainerProps {
     updates: Partial<Character>
   ) => Promise<boolean | void>;
   onCharacterDelete: (id: string) => Promise<boolean>;
+  onImageUpdate: (id: string, updates: Partial<MandalaImage>) => Promise<boolean>;
+  onImageDelete: (id: string) => Promise<boolean>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onDragStart: () => void;
@@ -48,6 +51,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onPostItChildCreate,
   onCharacterUpdate,
   onCharacterDelete,
+  onImageUpdate,
+  onImageDelete,
   onMouseEnter,
   onMouseLeave,
   onDragStart,
@@ -94,7 +99,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       if (postit) {
         openEditModal(mandala.id, postit);
       }
-    }
+    },
+    onImageDelete
   );
 
   const {
@@ -169,6 +175,28 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         section,
       });
     }
+  };
+
+  const handleOnDragEndImage = async (
+    e: KonvaEventObject<DragEvent>,
+    image: MandalaImage
+  ) => {
+    onDragEnd();
+    const nx = e.target.x(),
+      ny = e.target.y();
+    const rel = toRelative(nx, ny);
+    const { dimension, section } = getDimensionAndSectionFromCoordinates(
+      rel.x,
+      rel.y,
+      mandala.mandala.configuration?.dimensions.map((d) => d.name) || [],
+      mandala.mandala.configuration?.scales || []
+    );
+
+    await onImageUpdate(image.id, {
+      coordinates: { x: rel.x, y: rel.y },
+      dimension,
+      section,
+    });
   };
 
   if (!mandala || !state) return <div>No mandala found</div>;
@@ -283,6 +311,27 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onContextMenu={(e) =>
                   showContextMenu(e, character.id, "character")
                 }
+              />
+            );
+          })}
+
+          {mandala.images?.map((image) => {
+            const { x, y } = toAbsolute(
+              image.coordinates.x,
+              image.coordinates.y
+            );
+
+            return (
+              <MandalaImageComponent
+                key={`image-${image.id}`}
+                image={image}
+                position={{ x, y }}
+                onDragStart={onDragStart}
+                onDragEnd={(e) => handleOnDragEndImage(e, image)}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                onContextMenu={(e) => showContextMenu(e, image.id, "image")}
+                mandalaRadius={SCENE_W / 2}
               />
             );
           })}
