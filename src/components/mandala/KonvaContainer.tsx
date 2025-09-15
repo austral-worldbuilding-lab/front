@@ -16,6 +16,8 @@ import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 import { useEditPostIt } from "@/hooks/useEditPostit.ts";
 import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
 import ComparisonPostIt from "./postits/ComparisonPostIt";
+import { useProjectAccess } from "@/hooks/useProjectAccess";
+import { useParams } from "react-router-dom";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -62,6 +64,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   onNewTag,
   state,
 }) => {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { hasAccess, userRole } = useProjectAccess(projectId || "");
+  const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
@@ -359,6 +364,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               contextMenu.type === "postit" ? handleEditPostIt : undefined
             }
             isContextMenu={true}
+            canEdit={canEdit}
           />
         </div>
       )}

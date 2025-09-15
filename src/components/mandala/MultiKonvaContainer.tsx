@@ -16,6 +16,8 @@ import { useEditPostIt } from "@/hooks/useEditPostit";
 import EditPostItModal from "./postits/EditPostitModal";
 import NewPostItModal from "./postits/NewPostItModal";
 import MandalaMenu from "./MandalaMenu";
+import {useParams} from "react-router-dom";
+import {useProjectAccess} from "../../hooks/useProjectAccess";
 
 
 interface MultiKonvaContainerProps {
@@ -130,6 +132,9 @@ const MandalaCanvas: React.FC<{
     onNewTag?: (tag: Tag) => void;
     state?: ReactZoomPanPinchState | null;
 }> = ({ mandala, offsetX, offsetY, scale, readOnly, appliedFilters, onPostItUpdate, onCharacterUpdate, onPostItDelete, onCharacterDelete, onPostItChildCreate, onMouseEnter, onMouseLeave, onDragStart, onDragEnd, tags, onNewTag, state }) => {
+    const { projectId } = useParams<{ projectId: string }>();
+    const { hasAccess, userRole } = useProjectAccess(projectId || "");
+    const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
     const [, setEditableIndex] = useState<number | null>(null);
     const [, setEditingContent] = useState<string | null>(null);
     const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
@@ -307,6 +312,7 @@ const MandalaCanvas: React.FC<{
                         }
                         onEdit={contextMenu.type === "postit" ? handleEditPostIt : undefined}
                         isContextMenu={true}
+                        canEdit={canEdit}
                     />
                 </div>
             )}
