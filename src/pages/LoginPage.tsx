@@ -26,6 +26,16 @@ const LoginPage = () => {
         return;
       }
 
+      const orgInviteToken = searchParams.get("orgInvite");
+      if (orgInviteToken) {
+        const params = new URLSearchParams(searchParams);
+        params.delete("orgInvite");
+        const extra = params.toString();
+        const suffix = extra ? `?${extra}` : "";
+        navigate(`/organization-invite/${orgInviteToken}${suffix}`, { replace: true });
+        return;
+      }
+
       const returnTo = sessionStorage.getItem(RETURN_TO_KEY);
       if (returnTo) {
         sessionStorage.removeItem(RETURN_TO_KEY);
@@ -99,7 +109,10 @@ const LoginPage = () => {
 
           <p className="text-sm">
             ¿No tienes una cuenta?{" "}
-            <Link to="/register" className="text-primary-500">
+            <Link 
+              to={`/register${searchParams.toString() ? `?${searchParams.toString()}` : ""}`} 
+              className="text-primary-500"
+            >
               Registrarse
             </Link>
           </p>
