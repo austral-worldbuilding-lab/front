@@ -1,6 +1,6 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Character, FilterSection, Mandala, Postit, Tag } from "../types/mandala";
+import { Character, FilterSection, Mandala, MandalaImage, Postit, Tag } from "../types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -32,6 +32,7 @@ export const subscribeMandala = (
       updatedAt: data.updatedAt ? data.updatedAt.toDate() : new Date(),
       postits: data.postits || [],
       characters: data.characters || [],
+      images: data.images || [],
     };
 
     callback(mandala);
@@ -245,5 +246,61 @@ export const updatePostItTags = async (
   }
 ): Promise<void> => {
   await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
+};
+
+export const updateImage = async (
+  projectId: string,
+  mandalaId: string,
+  imageId: string,
+  updatedData: Partial<MandalaImage>
+): Promise<boolean> => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  if (!mandalaSnap.exists()) throw new Error("Mandala not found");
+
+  const data = mandalaSnap.data();
+  const images: MandalaImage[] = data.images || [];
+
+  const updatedImages = images.map((img) => {
+    if (img.id === imageId) {
+      return { ...img, ...updatedData };
+    }
+    return img;
+  });
+
+  const wasUpdated = JSON.stringify(images) !== JSON.stringify(updatedImages);
+  if (!wasUpdated) throw new Error("Image ID not found");
+
+  await updateDoc(mandalaRef, {
+    images: updatedImages,
+    updatedAt: new Date(),
+  });
+
+  return true;
+};
+
+export const deleteImage = async (
+  projectId: string,
+  mandalaId: string,
+  imageId: string
+): Promise<boolean> => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  if (!mandalaSnap.exists()) throw new Error("Mandala not found");
+
+  const data = mandalaSnap.data();
+  const images: MandalaImage[] = data.images || [];
+
+  const updatedImages = images.filter((img) => img.id !== imageId);
+
+  const wasDeleted = JSON.stringify(images) !== JSON.stringify(updatedImages);
+  if (!wasDeleted) throw new Error("Image ID not found");
+
+  await updateDoc(mandalaRef, {
+    images: updatedImages,
+    updatedAt: new Date(),
+  });
+
+  return true;
 };
 
