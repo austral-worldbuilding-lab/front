@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getAnalytics} from "firebase/analytics";
+import { getAnalytics, type Analytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
@@ -18,11 +18,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+let analytics: Analytics | null = null;
+if (typeof window !== 'undefined') {
+    try {
+        analytics = getAnalytics(app);
+    } catch (error) {
+        // asegura que la app no se caiga si no se pueden levantar las analytics
+        analytics = null;
+    }
+}
 
-// Initialize Analytics (only in browser)
-const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
-
-// Initialize Realtime Database
 const database = getDatabase(app);
 
 export { app, auth, db, analytics, database };
