@@ -1,11 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
-import { Character, Mandala, Postit } from "../types/mandala";
+import { Character, Mandala, MandalaImage, Postit } from "../types/mandala";
 import {
   subscribeMandala,
   createPostit as createPostitService,
   updatePostit as updatePostitService,
   deletePostit as deletePostitService,
-  updateCharacter as updateCharacterService, updateMandalaCharacters,
+  updateCharacter as updateCharacterService, 
+  updateMandalaCharacters,
+  updateImage as updateImageService,
+  deleteImage as deleteImageService,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
 
@@ -120,6 +123,34 @@ const useMandala = (mandalaId: string) => {
     [mandala?.characters, mandalaId, projectId]
   );
 
+  const updateImage = useCallback(
+    async (id: string, imageData: Partial<MandalaImage>) => {
+      try {
+        return await updateImageService(projectId!, mandalaId, id, imageData);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
+  const deleteImage = useCallback(
+    async (id: string) => {
+      try {
+        return await deleteImageService(projectId!, mandalaId, id);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
   return {
     mandala,
     loading,
@@ -129,6 +160,8 @@ const useMandala = (mandalaId: string) => {
     deletePostit,
     updateCharacter,
     deleteCharacter,
+    updateImage,
+    deleteImage,
   };
 };
 
