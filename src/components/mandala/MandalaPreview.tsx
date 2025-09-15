@@ -9,7 +9,7 @@ interface MandalaPreviewProps {
 }
 
 const MandalaPreview: React.FC<MandalaPreviewProps> = ({ mandalaId }) => {
-    const { mandala, updateCharacter, updatePostit, deletePostit } = useMandala(mandalaId);
+    const { mandala, updateCharacter, updatePostit, deletePostit, updateImage, deleteImage } = useMandala(mandalaId);
     const [state, setState] = useState<ReactZoomPanPinchState | null>(null);
     const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
     const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
@@ -44,6 +44,8 @@ const MandalaPreview: React.FC<MandalaPreviewProps> = ({ mandalaId }) => {
                                 onPostItChildCreate={() => { }}
                                 onPostItDelete={deletePostit}
                                 onCharacterDelete={async () => false}
+                                onImageUpdate={updateImage}
+                                onImageDelete={deleteImage}
                                 onMouseEnter={() => setIsHoveringPostIt(true)}
                                 onMouseLeave={() => setIsHoveringPostIt(false)}
                                 onDragStart={() => setIsDraggingPostIt(true)}

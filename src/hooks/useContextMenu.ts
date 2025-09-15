@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { KonvaEventObject } from "konva/lib/Node";
 
-type ContextMenuType = "postit" | "character" | null;
+type ContextMenuType = "postit" | "character" | "image" | null;
 
 interface ContextMenuState {
   visible: boolean;
@@ -9,6 +9,7 @@ interface ContextMenuState {
   y: number;
   postItId: string | null;
   characterId: string | null;
+  imageId: string | null;
   type: ContextMenuType;
 }
 
@@ -18,7 +19,8 @@ export function useContextMenu(
   setEditableIndex: (i: number | null) => void,
   setEditingContent: (content: string | null) => void,
   onPostItCreateChild?: (id: string) => void,
-  onPostItEdit?: (id: string) => void
+  onPostItEdit?: (id: string) => void,
+  onImageDelete?: (id: string) => Promise<boolean>
 ) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
@@ -26,6 +28,7 @@ export function useContextMenu(
     y: 0,
     postItId: null,
     characterId: null,
+    imageId: null,
     type: null,
   });
 
@@ -47,6 +50,7 @@ export function useContextMenu(
       y: pointer.y,
       postItId: type === "postit" ? id : null,
       characterId: type === "character" ? id : null,
+      imageId: type === "image" ? id : null,
       type,
     });
   };
@@ -58,6 +62,7 @@ export function useContextMenu(
       y: 0,
       postItId: null,
       characterId: null,
+      imageId: null,
       type: null,
     });
   };
@@ -90,11 +95,26 @@ export function useContextMenu(
     }
   };
 
+  const handleDeleteImage = async () => {
+    if (contextMenu.imageId !== null && onImageDelete) {
+      try {
+        const success = await onImageDelete(contextMenu.imageId);
+        if (success) {
+          hideContextMenu();
+        }
+      } catch (error) {
+        console.error("Error al eliminar imagen:", error);
+      }
+    }
+  };
+
   const handleDelete = async () => {
     if (contextMenu.type === "postit") {
       await handleDeletePostIt();
     } else if (contextMenu.type === "character") {
       await handleDeleteCharacter();
+    } else if (contextMenu.type === "image") {
+      await handleDeleteImage();
     }
   };
 

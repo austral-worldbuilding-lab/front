@@ -117,7 +117,8 @@ const Buttons = ({
         onOpenChange={setImageModalOpen}
         tags={tags}
         onNewTag={onNewTag}
-        onCreate={onUploadImage || (() => {})}
+        onCreate={onUploadImage}
+        onUploadComplete={() => setImageModalOpen(false)}
       />
     </>
   );

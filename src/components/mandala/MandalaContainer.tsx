@@ -81,6 +81,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     updateCharacter,
     deletePostit,
     deleteCharacter,
+    updateImage,
+    deleteImage,
   } = useMandala(mandalaId);
   const { createMandala, loading: isCreatingCharacter } =
     useCreateMandala(projectId);
@@ -110,6 +112,12 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     const a = toAbsolute(c.position.x, c.position.y);
     return { id: c.id, name: c.name, color: c.color, ax: a.x, ay: a.y };
   });
+
+  const imagesAbs = (mandala?.images ?? []).map(img => {
+    const a = toAbsolute(img.coordinates.x, img.coordinates.y);
+    return { id: img.id, url: img.url, ax: a.x, ay: a.y };
+  });
+
 
   // Extraer ids de mandalas origen desde los postits (campo from: { id, name })
   const sourceMandalaIds = (() => {
@@ -490,6 +498,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           mandala={mandala}
                           onCharacterUpdate={updateCharacter}
                           onPostItUpdate={updatePostit}
+                          onImageUpdate={updateImage}
+                          onImageDelete={deleteImage}
                           onPostItChildCreate={(
                             content: string,
                             tags: Tag[],
@@ -541,12 +551,13 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
               }}
             >
               {mandala && (
-                <MandalaSVG
-                  ref={svgRef}
-                  mandala={mandala}
-                  postsAbs={postsAbs}
-                  charsAbs={charsAbs}
-                />
+                  <MandalaSVG
+                      ref={svgRef}
+                      mandala={mandala}
+                      postsAbs={postsAbs}
+                      charsAbs={charsAbs}
+                      imagesAbs={imagesAbs}
+                  />
               )}
             </div>
           </>

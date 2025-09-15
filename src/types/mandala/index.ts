@@ -50,12 +50,21 @@ export interface Character {
   section?: string;
 }
 
+export interface MandalaImage {
+  id: string;
+  url: string;
+  coordinates: { x: number; y: number };
+  dimension: string;
+  section: string;
+}
+
 export interface Mandala {
   id: string;
   mandala: MandalData;
   updatedAt: Date;
   postits: Postit[];
   characters: Character[];
+  images?: MandalaImage[];
 }
 
 export interface MandalData {
@@ -151,4 +160,11 @@ export interface SelectedFile {
   fileName: string;
   scope: string;
   parentId: string;
+}
+
+export interface Provocation {
+    id: string;
+    question: string;
+    title: string;
+    description: string;
 }
