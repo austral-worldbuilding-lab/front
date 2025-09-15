@@ -75,37 +75,37 @@ const ProjectListPage = () => {
           <h1 className="text-2xl font-bold mb-6 text-center">
             Proyectos de: {orgName || ""}
           </h1>
-          {!error?.message?.includes("403") &&
-            !error?.message?.includes(
-              "Request failed with status code 403"
-            ) && (
-              <>
+          <div className="flex gap-2 mb-4">
+            {!error?.message?.includes("403") &&
+              !error?.message?.includes("Request failed with status code 403") && (
                 <Button
                   color="primary"
-                  className="mb-2"
                   onClick={() => setModalOpen(true)}
                   icon={<PlusIcon size={16} />}
                 >
                   Crear Proyecto
                 </Button>
-                <Button
-                  className="ml-2"
-                  variant="outline"
-                  onClick={() => setDrawerOpen(true)}
-                  icon={<FileText size={16} />}
-                >
-                  Archivos de la organización
-                </Button>
+              )}
+
+            <Button
+              variant="outline"
+              onClick={() => setDrawerOpen(true)}
+              icon={<FileText size={16} />}
+            >
+              Archivos de la organización
+            </Button>
+
+            {!error?.message?.includes("403") &&
+              !error?.message?.includes("Request failed with status code 403") && (
                 <UnifiedInvitationDialog
-                  className="ml-2 mb-4"
                   projectName={orgName ?? "Organización"}
                   projectId={projects[0]?.id ?? ""}
                   organizationId={organizationId ?? ""}
                   defaultRole="member"
                   isOrganization
                 />
-              </>
-            )}
+              )}
+          </div>
           <div className="bg-white rounded-lg shadow-sm border">
             {loading && <Loader size="medium" text="Cargando proyectos..." />}
             {error && (

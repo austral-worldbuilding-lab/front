@@ -20,7 +20,14 @@ interface Props {
 const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
     const { projectId } = useParams<{ projectId: string }>();
     const { hasAccess, userRole } = useProjectAccess(projectId || "");
-    const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
+    
+    let canEdit = false;
+    if (scope === "project") {
+        canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
+    } else if (scope === "organization") {
+        canEdit = true;
+    }
+    
     const { files, isLoading, error, refetch } = useFiles(scope, id);
 
     return (
