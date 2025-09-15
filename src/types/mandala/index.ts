@@ -161,3 +161,10 @@ export interface SelectedFile {
   scope: string;
   parentId: string;
 }
+
+export interface Provocation {
+    id: string;
+    question: string;
+    title: string;
+    description: string;
+}

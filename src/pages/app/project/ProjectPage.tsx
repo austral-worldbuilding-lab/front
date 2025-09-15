@@ -1,13 +1,18 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Loader from "@/components/common/Loader.tsx";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, Eye, FileText } from "lucide-react";
+import {ArrowLeftIcon, Eye, FileText, Sparkles} from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
 import useProject from "@/hooks/useProject.ts";
 import ProjectUserList from "@/components/project/ProjectUserList";
 import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
 import FilesDrawer from "@/components/project/FilesDrawer";
+import ProvocationBox from "@/components/project/ProvocationBox.tsx";
+import ProvocationCard from "@/components/project/ProvocationCard.tsx";
+import {Provocation} from "@/types/mandala";
+import useProvocations from "@/hooks/useProvocations.ts";
+
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -17,7 +22,13 @@ const ProjectPage = () => {
   const navigate = useNavigate();
 
   const { project, loading: projectLoading } = useProject(projectId);
+  const { provocations, generateAI, createManual } = useProvocations(projectId!);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [provBoxOpen, setProvBoxOpen] = useState(false);
+  const [selectedProvocation, setSelectedProvocation] = useState<Provocation | null>(null);
+  const [creating, setCreating] = useState(false);
+
 
 
   if (projectLoading) {
@@ -77,6 +88,11 @@ const ProjectPage = () => {
               Ver Mandalas
             </Button>
 
+            <Button color="secondary" onClick={() => setProvBoxOpen(true)}>
+               Generar provocaciones <Sparkles className="w-4 h-4" />
+            </Button>
+
+
           {projectId && organizationId && (
             <UnifiedInvitationDialog
                 projectId={projectId}
@@ -93,15 +109,39 @@ const ProjectPage = () => {
           </div>
         </div>
 
-      <FilesDrawer
-          id={projectId!}
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          title="Archivos del proyecto"
-          scope="project"
-      />
-    </div>
-  );
+            <FilesDrawer
+                id={projectId!}
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                title="Archivos del proyecto"
+                scope="project"
+            />
+
+            {selectedProvocation && (
+                <ProvocationCard
+                    provocation={selectedProvocation}
+                    onClose={() => setSelectedProvocation(null)}
+                />
+            )}
+
+            <ProvocationBox
+                open={provBoxOpen}
+                onClose={() => setProvBoxOpen(false)}
+                provocations={provocations}
+                onSelect={setSelectedProvocation}
+                onGenerateAI={generateAI}
+                onCreateManual={() => setCreating(true)}
+            />
+
+            {creating && (
+                <ProvocationCard
+                    provocation={null}
+                    onClose={() => setCreating(false)}
+                    onSave={createManual}
+                />
+            )}
+        </div>
+    );
 };
 
 export default ProjectPage;
