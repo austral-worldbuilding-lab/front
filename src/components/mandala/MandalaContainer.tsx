@@ -113,11 +113,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     return { id: c.id, name: c.name, color: c.color, ax: a.x, ay: a.y };
   });
 
-  const imagesAbs = (mandala?.images ?? []).map(img => {
+  const imagesAbs = (mandala?.images ?? []).map((img) => {
     const a = toAbsolute(img.coordinates.x, img.coordinates.y);
     return { id: img.id, url: img.url, ax: a.x, ay: a.y };
   });
-
 
   // Extraer ids de mandalas origen desde los postits (campo from: { id, name })
   const sourceMandalaIds = (() => {
@@ -316,21 +315,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   {/* Controles superiores izquierdos */}
                   <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
                     <div className="flex flex-col gap-2">
-                      <CharacterDropdown
-                        characters={
-                          mandala.mandala.type === "OVERLAP" ||
-                          mandala.mandala.type === "OVERLAP_SUMMARY"
-                            ? mandala.mandala.configuration.center.characters ??
-                              []
-                            : projectCharacters
-                        }
-                        onAdd={
-                          mandala.mandala.type === "OVERLAP" ||
-                          mandala.mandala.type === "OVERLAP_SUMMARY"
-                            ? undefined
-                            : linkCharacter
-                        }
-                      />
                       {mandala.mandala.type === "CHARACTER" && (
                         <Button
                           variant="filled"
@@ -383,6 +367,24 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     >
                       SVG
                     </Button>
+                  </div>
+
+                  <div className="absolute bottom-26 right-4 z-20">
+                    <CharacterDropdown
+                      characters={
+                        mandala.mandala.type === "OVERLAP" ||
+                        mandala.mandala.type === "OVERLAP_SUMMARY"
+                          ? mandala.mandala.configuration.center.characters ??
+                            []
+                          : projectCharacters
+                      }
+                      onAdd={
+                        mandala.mandala.type === "OVERLAP" ||
+                        mandala.mandala.type === "OVERLAP_SUMMARY"
+                          ? undefined
+                          : linkCharacter
+                      }
+                    />
                   </div>
 
                   {/* Mostrar botones/controles:
@@ -551,13 +553,13 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
               }}
             >
               {mandala && (
-                  <MandalaSVG
-                      ref={svgRef}
-                      mandala={mandala}
-                      postsAbs={postsAbs}
-                      charsAbs={charsAbs}
-                      imagesAbs={imagesAbs}
-                  />
+                <MandalaSVG
+                  ref={svgRef}
+                  mandala={mandala}
+                  postsAbs={postsAbs}
+                  charsAbs={charsAbs}
+                  imagesAbs={imagesAbs}
+                />
               )}
             </div>
           </>
