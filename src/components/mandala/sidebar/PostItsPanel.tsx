@@ -34,9 +34,13 @@ export default function PostItsPanel({
   dimensions = [],
 }: PostItsPanelProps) {
   const { hasAccess, userRole } = useProjectAccess(projectId);
-  const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
-  const { items, setItems, loading, error, generate } =
-    usePostItsGenerator(mandalaId, projectId);
+  const canEdit =
+    !!hasAccess &&
+    (userRole === null || ["owner", "admin", "member"].includes(userRole));
+  const { items, setItems, loading, error, generate } = usePostItsGenerator(
+    mandalaId,
+    projectId
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // modal de creación real
@@ -45,7 +49,11 @@ export default function PostItsPanel({
   const { trackPostitConverted } = useAnalytics();
   const { backendUser } = useAuth();
   const [selectedCandidate, setSelectedCandidate] = useState<{
-    request_id?: string; candidate_index?: number; dimension?: string; scale?: string; content?: string;
+    request_id?: string;
+    candidate_index?: number;
+    dimension?: string;
+    scale?: string;
+    content?: string;
   } | null>(null);
 
   // Cargar post-its guardados en localStorage al montar
@@ -144,7 +152,7 @@ export default function PostItsPanel({
                     className="aspect-square rounded-full text-black border border-black/20 shadow-sm flex items-center justify-center text-center p-4"
                     style={{
                       backgroundColor:
-                        dimensionColors[item.dimension] || "#facc15",
+                        dimensionColors[item.dimension] || "#e3e3e3",
                     }}
                   >
                     <span className="text-sm">{item.content}</span>
@@ -194,7 +202,10 @@ export default function PostItsPanel({
         onCreate={() => {
           onCreate(prefill, tags);
           const candidate = selectedCandidate;
-          if (candidate?.request_id != null && candidate?.candidate_index != null) {
+          if (
+            candidate?.request_id != null &&
+            candidate?.candidate_index != null
+          ) {
             trackPostitConverted({
               request_id: candidate.request_id,
               user_id: backendUser?.firebaseUid ?? "",
