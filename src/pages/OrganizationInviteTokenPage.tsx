@@ -35,9 +35,7 @@ const OrganizationInviteTokenPage = () => {
       try {
         setLoading(true);
 
-        const { organizationId } = await acceptOrganizationInvitationByToken(
-          token
-        );
+        const { organizationId } = await acceptOrganizationInvitationByToken(token);
         const orgId = organizationId || searchParams.get("org");
 
         if (orgId) {

@@ -28,10 +28,11 @@ export type MandalaSVGProps = {
     // Posiciones absolutas (idénticas a Konva)
     postsAbs?: Array<{ id?: string; content: string; dimension: string; ax: number; ay: number }>;
     charsAbs?: Array<{ id?: string; name: string; color?: string; ax: number; ay: number }>;
+    imagesAbs?: Array<{ id?: string; url: string; ax: number; ay: number }>;
 };
 
 export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
-    ({ mandala, embeddedFontCss, postsAbs, charsAbs }, ref) => {
+    ({ mandala, embeddedFontCss, postsAbs, charsAbs, imagesAbs }, ref) => {
         // Datos base iguales a la UI
         const scales = mandala.mandala.configuration?.scales ?? [];
         const dimensions = mandala.mandala.configuration?.dimensions ?? [];
@@ -95,7 +96,7 @@ export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
 
         return (
             <svg
-                ref={ref as any}
+                ref={ref}
                 viewBox={`${-LABEL_PAD} ${-LABEL_PAD} ${canvasSize + 2 * LABEL_PAD} ${canvasSize + 2 * LABEL_PAD}`}
                 width="100%"
                 height="100%"
@@ -194,6 +195,21 @@ export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
                     <g key={c.id ?? `c-${i}`}>
                         <circle cx={c.ax} cy={c.ay} r={12} fill={c.color || "#E6F0FF"} stroke="#8CB4FF"/>
                         <text x={c.ax} y={c.ay - 35} fontSize={14} fontWeight={700} textAnchor="middle">{c.name}</text>
+                    </g>
+                ))}
+
+                {/* Imágenes */}
+                {(imagesAbs ?? []).map((img, i) => (
+                    <g key={img.id ?? `img-${i}`}>
+                        <image
+                            href={img.url}
+                            x={img.ax - 40}
+                            y={img.ay - 40}
+                            width={80}
+                            height={80}
+                            preserveAspectRatio="xMidYMid meet"
+                            style={{ filter: "drop-shadow(2px 2px 4px rgba(0,0,0,0.3))" }}
+                        />
                     </g>
                 ))}
             </svg>

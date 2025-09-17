@@ -1,12 +1,15 @@
 // PostItsPanel.tsx
 import { Button } from "@/components/ui/button";
 import { Plus, Sparkles } from "lucide-react";
-import { usePostItsGenerator } from "./usePostItsGenerator";
+import { GeneratedPostIt, usePostItsGenerator } from "./usePostItsGenerator";
 import type { Tag } from "@/types/mandala";
 import { PropsWithChildren, useEffect, useMemo, useRef, useState } from "react";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import { Link } from "react-router-dom";
 import { getLocalQueue } from "@/utils/localQueue.ts";
+import { useAuth } from "@/hooks/useAuth";
+import { useAnalytics } from "@/services/analytics";
+import { useProjectAccess } from "@/hooks/useProjectAccess";
 
 export interface PostItsPanelProps extends PropsWithChildren {
   mandalaId: string;
@@ -30,13 +33,28 @@ export default function PostItsPanel({
   onNewTag = () => {},
   dimensions = [],
 }: PostItsPanelProps) {
-  const { items, setItems, loading, error, generate } =
-    usePostItsGenerator(mandalaId);
+  const { hasAccess, userRole } = useProjectAccess(projectId);
+  const canEdit =
+    !!hasAccess &&
+    (userRole === null || ["owner", "admin", "member"].includes(userRole));
+  const { items, setItems, loading, error, generate } = usePostItsGenerator(
+    mandalaId,
+    projectId
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // modal de creación real
   const [open, setOpen] = useState(false);
   const [prefill, setPrefill] = useState("");
+  const { trackPostitConverted } = useAnalytics();
+  const { backendUser } = useAuth();
+  const [selectedCandidate, setSelectedCandidate] = useState<{
+    request_id?: string;
+    candidate_index?: number;
+    dimension?: string;
+    scale?: string;
+    content?: string;
+  } | null>(null);
 
   // Cargar post-its guardados en localStorage al montar
   useEffect(() => {
@@ -70,8 +88,15 @@ export default function PostItsPanel({
     setItems(filtered.slice(-20));
   };
 
-  const openCreateWith = (text: string) => {
-    setPrefill(text);
+  const openCreateWith = (candidate: GeneratedPostIt) => {
+    setSelectedCandidate({
+      request_id: candidate.request_id,
+      candidate_index: candidate.candidate_index,
+      dimension: candidate.dimension,
+      scale: candidate.section,
+      content: candidate.content,
+    });
+    setPrefill(candidate.content);
     setOpen(true);
   };
 
@@ -127,22 +152,24 @@ export default function PostItsPanel({
                     className="aspect-square rounded-full text-black border border-black/20 shadow-sm flex items-center justify-center text-center p-4"
                     style={{
                       backgroundColor:
-                        dimensionColors[item.dimension] || "#facc15",
+                        dimensionColors[item.dimension] || "#e3e3e3",
                     }}
                   >
                     <span className="text-sm">{item.content}</span>
                   </div>
 
-                  {/* Botón + arriba a la derecha */}
-                  <button
-                    type="button"
-                    onClick={() => openCreateWith(item.content)}
-                    className="absolute -top-2 -right-2 h-7 w-7 rounded-full border border-black/20 bg-white shadow flex items-center justify-center"
-                    aria-label="Agregar post-it"
-                    title="Agregar post-it"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
+                  {/* Botón + arriba a la derecha - solo si puede editar */}
+                  {canEdit && (
+                    <button
+                      type="button"
+                      onClick={() => openCreateWith(item)}
+                      className="absolute -top-2 -right-2 h-7 w-7 rounded-full border border-black/20 bg-white shadow flex items-center justify-center"
+                      aria-label="Agregar post-it"
+                      title="Agregar post-it"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -153,16 +180,18 @@ export default function PostItsPanel({
       {/* Filtros + botón Generar*/}
       <div className="mt-2">
         {children}
-        <div className="sticky bottom-0 bg-background pt-3 pb-4">
-          <Button
-            className="w-full h-11 text-base"
-            onClick={() => generate(selected.dimensions, selected.scales)}
-            icon={<Sparkles size={16} />}
-            disabled={loading}
-          >
-            Generar Post-Its
-          </Button>
-        </div>
+        {canEdit && (
+          <div className="sticky bottom-0 bg-background pt-3 pb-4">
+            <Button
+              className="w-full h-11 text-base"
+              onClick={() => generate(selected.dimensions, selected.scales)}
+              icon={<Sparkles size={16} />}
+              disabled={loading}
+            >
+              Generar Post-Its
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Modal real con texto precargado */}
@@ -172,7 +201,23 @@ export default function PostItsPanel({
         tags={tags}
         onCreate={() => {
           onCreate(prefill, tags);
+          const candidate = selectedCandidate;
+          if (
+            candidate?.request_id != null &&
+            candidate?.candidate_index != null
+          ) {
+            trackPostitConverted({
+              request_id: candidate.request_id,
+              user_id: backendUser?.firebaseUid ?? "",
+              project_id: projectId,
+              mandala_id: mandalaId,
+              candidate_index: candidate.candidate_index,
+              dimension: candidate.dimension,
+              scale: candidate.scale,
+            });
+          }
           deletePostItFromLocal(prefill);
+          setSelectedCandidate(null);
         }}
         onNewTag={onNewTag}
         defaultContent={prefill}

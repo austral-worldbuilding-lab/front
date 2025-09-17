@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { PersonStanding, StickyNote } from "lucide-react";
+import { PersonStanding, StickyNote, Image } from "lucide-react";
 import CreateModal from "./characters/modal/CreateModal";
 import NewPostItModal from "./postits/NewPostItModal";
+import NewImageModal from "./postits/NewImageModal";
 import { Tag } from "@/types/mandala";
-
+import { useProjectAccess } from "@/hooks/useProjectAccess";
+import { useParams } from "react-router-dom";
 
 const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
 
 interface ButtonsProps {
   onCreatePostIt: (content: string, tags: Tag[]) => void;
+  onUploadImage?: (imageFile: File, tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
   onCreateCharacter?: (character: {
     name: string;
@@ -27,14 +30,20 @@ interface ButtonsProps {
 
 const Buttons = ({
   onCreatePostIt,
+  onUploadImage,
   onCreateCharacter,
   onNewTag,
   tags,
   currentMandalaId,
   loading = false,
 }: ButtonsProps) => {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { hasAccess, userRole } = useProjectAccess(projectId || "");
+
+  const canEdit = hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
+  const [isImageModalOpen, setImageModalOpen] = useState(false);
   const [wasCreating, setWasCreating] = useState(false);
 
   useEffect(() => {
@@ -48,6 +57,10 @@ const Buttons = ({
       return () => clearTimeout(timer);
     }
   }, [loading, wasCreating]);
+
+  if (!canEdit) {
+    return null;
+  }
 
   const handleCreateCharacter = (character: {
     name: string;
@@ -65,11 +78,10 @@ const Buttons = ({
     }
   };
 
-
   return (
     <>
-      <div 
-        className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-[100] bg-white rounded-lg p-2 shadow"
+      <div
+        className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
         data-floating-buttons
       >
         <Button
@@ -85,6 +97,13 @@ const Buttons = ({
           className="w-12 h-12 bg-violet-500 hover:bg-violet-400 active:bg-violet-400"
           icon={<PersonStanding size={24} />}
           tooltipText="Nuevo personaje"
+        ></Button>
+        <Button
+          onClick={() => setImageModalOpen(true)}
+          variant="filled"
+          className="w-12 h-12 bg-blue-500 hover:bg-blue-400 active:bg-blue-400"
+          icon={<Image size={24} />}
+          tooltipText="Agregar imagen"
         ></Button>
       </div>
 
@@ -102,6 +121,14 @@ const Buttons = ({
         tags={tags}
         onNewTag={onNewTag}
         onCreate={onCreatePostIt}
+      />
+      <NewImageModal
+        isOpen={isImageModalOpen}
+        onOpenChange={setImageModalOpen}
+        tags={tags}
+        onNewTag={onNewTag}
+        onCreate={onUploadImage}
+        onUploadComplete={() => setImageModalOpen(false)}
       />
     </>
   );

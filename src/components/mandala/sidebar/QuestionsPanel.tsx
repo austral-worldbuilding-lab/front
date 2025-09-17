@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { useQuestionGenerator } from "@/components/mandala/sidebar/useQuestionGenerator.tsx";
 import { Link } from "react-router-dom";
 import { getLocalQueue } from "@/utils/localQueue.ts";
-import { PropsWithChildren, useEffect, useRef } from "react";
+import { CSSProperties, PropsWithChildren, useEffect, useRef } from "react";
 
 export interface QuestionsPanelProps extends PropsWithChildren {
   mandalaId: string;
   organizationId: string;
   projectId: string;
   selected: { dimensions: string[]; scales: string[] };
+  dimensions: { name: string; color: string }[];
 }
 
 export default function QuestionsPanel({
@@ -18,15 +19,20 @@ export default function QuestionsPanel({
   projectId,
   selected,
   children,
+  dimensions,
 }: QuestionsPanelProps) {
   const { questions, setQuestions, loading, error, generate } =
-    useQuestionGenerator(mandalaId);
+    useQuestionGenerator(mandalaId, projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Cargar preguntas guardadas en localStorage al montar
   useEffect(() => {
-    setQuestions(getLocalQueue<string>(`mandala-questions-${mandalaId}`));
-  }, [mandalaId]);
+    setQuestions(
+      getLocalQueue<{ question: string; dimension: string; scale: string }>(
+        `mandala-questions-${mandalaId}`
+      )
+    );
+  }, [mandalaId, setQuestions]);
 
   // Guardar preguntas en localStorage cuando cambian
   useEffect(() => {
@@ -37,6 +43,18 @@ export default function QuestionsPanel({
       );
     }
   }, [questions, mandalaId]);
+
+  const getQuestionBgColor = (questionDimension: string): CSSProperties => {
+    const dimension = dimensions.find((d) => d.name === questionDimension);
+    if (!dimension?.color) return { backgroundColor: "#f3f4f6" };
+    return { backgroundColor: `${dimension.color}33` };
+  };
+
+  const getQuestionColor = (questionDimension: string): string => {
+    const dimension = dimensions.find((d) => d.name === questionDimension);
+    if (!dimension?.color) return "#f3f4f6";
+    return dimension.color;
+  };
 
   // Scroll automático al fondo cuando cambian las preguntas
   useEffect(() => {
@@ -78,13 +96,37 @@ export default function QuestionsPanel({
             <p className="text-red-600">Error: {error}</p>
           ) : null}
           {!loading && questions.length > 0 && (
-            <ul className="space-y-2">
+            <div className="flex flex-col gap-2">
               {questions.map((q, idx) => (
-                <li key={idx} className="px-3 py-2 rounded-md bg-muted">
-                  {q}
-                </li>
+                <>
+                  {q.question && (
+                    <div key={idx} className="flex flex-col gap-1">
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: getQuestionColor(q.dimension) }}
+                      >
+                        {q.dimension}
+                      </p>
+                      <div
+                        key={idx}
+                        className="px-3 py-2 rounded-md relative pb-10 border"
+                        style={{
+                          ...getQuestionBgColor(q.dimension),
+                          borderColor: getQuestionColor(q.dimension),
+                        }}
+                      >
+                        {q.question}
+                        {q.scale && (
+                          <span className="text-xs text-black border bg-white/50 border-gray-300 rounded-full px-2 py-1 absolute right-1 bottom-1">
+                            {q.scale}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </div>

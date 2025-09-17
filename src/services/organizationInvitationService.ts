@@ -79,13 +79,12 @@ export async function rejectOrganizationInvitation(
 
 export async function acceptOrganizationInvitationByToken(
   token: string
-): Promise<{ projectId: string; organizationId?: string }> {
+): Promise<{ organizationId?: string }> {
   const response = await axiosInstance.get(
     `/organization-invitation/join/${token}`
   );
   const data = response.data.data;
   return {
-    projectId: data.projectId,
     organizationId: data.organizationId,
   };
 }

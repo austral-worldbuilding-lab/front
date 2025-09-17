@@ -1,6 +1,6 @@
 import { CustomInput } from "@/components/ui/CustomInput.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import logo from "@/assets/logo.png";
@@ -11,10 +11,31 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleRegister = async () => {
     const success = await register(email, password);
     if (success) {
+      const inviteToken = searchParams.get("invite");
+      if (inviteToken) {
+        const params = new URLSearchParams(searchParams);
+        params.delete("invite");
+        const extra = params.toString();
+        const suffix = extra ? `?${extra}` : "";
+        navigate(`/invite/${inviteToken}${suffix}`, { replace: true });
+        return;
+      }
+
+      const orgInviteToken = searchParams.get("orgInvite");
+      if (orgInviteToken) {
+        const params = new URLSearchParams(searchParams);
+        params.delete("orgInvite");
+        const extra = params.toString();
+        const suffix = extra ? `?${extra}` : "";
+        navigate(`/organization-invite/${orgInviteToken}${suffix}`, { replace: true });
+        return;
+      }
+
       const returnTo = sessionStorage.getItem(RETURN_TO_KEY);
       if (returnTo) {
         sessionStorage.removeItem(RETURN_TO_KEY);
@@ -93,7 +114,10 @@ const RegisterPage = () => {
 
           <p className="text-sm">
             ¿Ya tienes una cuenta?{" "}
-            <Link to="/login" className="text-primary-500">
+            <Link 
+              to={`/login${searchParams.toString() ? `?${searchParams.toString()}` : ""}`} 
+              className="text-primary-500"
+            >
               Iniciar sesión
             </Link>
           </p>
