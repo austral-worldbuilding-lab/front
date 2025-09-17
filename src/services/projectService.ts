@@ -31,6 +31,23 @@ export const createProject = async (project: CreateProject): Promise<Project> =>
   return response.data.data;
 }
 
+export const updateProject = async (
+    id: string,
+    data: { name?: string; description?: string }
+): Promise<Project> => {
+  const response = await axiosInstance.patch<{ data: Project }>(
+      `/project/${id}`,
+      data
+  );
+
+  if (response.status !== 200) {
+    throw new Error(response.statusText || "Error actualizando proyecto.");
+  }
+
+  return response.data.data;
+};
+
+
 
 export const getTags = async(
     projectId: string,
