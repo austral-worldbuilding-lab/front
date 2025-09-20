@@ -40,7 +40,9 @@ const Buttons = ({
   const { projectId } = useParams<{ projectId: string }>();
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
 
-  const canEdit = hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
+  const canEdit =
+    hasAccess &&
+    (userRole === null || ["owner", "admin", "member"].includes(userRole));
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
@@ -81,7 +83,7 @@ const Buttons = ({
   return (
     <>
       <div
-        className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
+        className="absolute top-1/2 -translate-y-1/2 left-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
         data-floating-buttons
       >
         <Button
