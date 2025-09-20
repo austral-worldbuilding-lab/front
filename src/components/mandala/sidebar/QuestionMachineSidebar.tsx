@@ -51,7 +51,7 @@ export default function QuestionMachineSidebar({
   return (
     <Sheet open={open} modal={false}>
       <SheetContent
-        side="left"
+        side="right"
         className="w-[500px] px-4 py-[40px]"
         onOpenAutoFocus={(e) => e.preventDefault()}
         closeIcon={
