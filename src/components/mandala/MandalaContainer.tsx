@@ -45,6 +45,7 @@ import FilesDrawer from "@/components/project/FilesDrawer.tsx";
 import { useSvgExport } from "@/hooks/useSvgExport";
 import { MandalaSVG } from "@/components/mandala/MandalaSVG.tsx";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils.ts";
+import SupportButton from "./SupportButton";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -231,7 +232,27 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
           </p>
         </div>
         {/* Botón Info + Diálogo */}
-        <div className="ml-auto pr-4">
+        <div className="ml-auto pr-4 flex gap-2">
+          <Button
+            variant="outline"
+            color="primary"
+            size="sm"
+            icon={<Download size={16} />}
+            onClick={() =>
+              downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
+            }
+          >
+            SVG
+          </Button>
+          <Button
+            variant="outline"
+            color="primary"
+            size="sm"
+            icon={<FileText size={16} />}
+            onClick={() => setIsFilesDrawerOpen(true)}
+          >
+            Archivos
+          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button
@@ -313,20 +334,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
               {() => (
                 <>
                   {/* Controles superiores izquierdos */}
-                  <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
-                    <div className="flex flex-col gap-2">
-                      {mandala.mandala.type === "CHARACTER" && (
-                        <Button
-                          variant="filled"
-                          color="primary"
-                          onClick={() => setIsSidebarOpen(true)}
-                          icon={<Sparkles size={16} />}
-                        >
-                          Herramientas IA
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                  <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col"></div>
 
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
                     {mandala?.mandala.type === "OVERLAP" && (
@@ -349,24 +357,16 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     >
                       Filtros
                     </Button>
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<FileText size={16} />}
-                      onClick={() => setIsFilesDrawerOpen(true)}
-                    >
-                      Archivos
-                    </Button>
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<Download size={16} />}
-                      onClick={() =>
-                        downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
-                      }
-                    >
-                      SVG
-                    </Button>
+                    {mandala.mandala.type === "CHARACTER" && (
+                      <Button
+                        variant="filled"
+                        color="primary"
+                        onClick={() => setIsSidebarOpen(true)}
+                        icon={<Sparkles size={16} />}
+                      >
+                        Herramientas IA
+                      </Button>
+                    )}
                   </div>
 
                   <div className="absolute bottom-26 right-4 z-20">
@@ -403,7 +403,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           loading={isCreatingCharacter}
                         />
                       )}
-                      <ZoomControls />
+                      <ZoomControls scale={state?.scale} />
+                      <SupportButton />
                     </>
                   )}
 
