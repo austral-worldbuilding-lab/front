@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useEffect, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, Postit, Tag } from "@/types/mandala";
+import { Layer as KonvaLayer } from "konva/lib/Layer";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils";
@@ -148,6 +149,8 @@ const MandalaCanvas: React.FC<{
 
     const maxRadius = 150 * (mandala.mandala.configuration?.scales.length || 1);
     const canvasSize = maxRadius * 2;
+    
+    const charactersLayerRef = useRef<KonvaLayer>(null);
 
     const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(mandala.postits, maxRadius);
     const { toAbsolute, toRelative, getDimensionAndSectionFromCoordinates, zOrder, bringToFront } =
@@ -280,8 +283,9 @@ const MandalaCanvas: React.FC<{
                             />
                         );
                     })}
-
-                    {/* Characters */}
+                </Layer>
+                
+                <Layer ref={charactersLayerRef}>
                     {mandala.characters?.map((character) => {
                         if (!shouldShowCharacter(character, appliedFilters)) return null;
                         const { x, y } = toAbsolute(character.position.x, character.position.y);

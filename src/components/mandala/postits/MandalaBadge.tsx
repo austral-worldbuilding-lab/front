@@ -10,7 +10,6 @@ interface MandalaBadgeProps {
 const MandalaBadge: React.FC<MandalaBadgeProps> = ({
   originMandalaName,
   fontSize,
-  zindex,
 }) => {
   const badgeData = useMemo(() => {
     if (!originMandalaName) return null;
@@ -34,7 +33,6 @@ const MandalaBadge: React.FC<MandalaBadgeProps> = ({
       divProps={{
         style: {
           pointerEvents: "none",
-          zIndex: zindex ? zindex + 1 : 100,
           position: "absolute",
           top: -8,
           left: -8,

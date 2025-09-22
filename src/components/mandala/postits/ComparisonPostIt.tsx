@@ -175,14 +175,13 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
     }, [isEditing]);
 
     return (
-      <Group zIndex={zindex}>
+      <Group>
         {/* Círculo transparente HTML (fondo) */}
         {!isDragging && children.length !== 0 && (
           <Html
             divProps={{
               style: {
                 pointerEvents: "none",
-                zIndex: zindex ? zindex - 1 : -1,
               },
             }}
           >
@@ -301,7 +300,7 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
               divProps={{
                 style: {
                   pointerEvents: "none",
-                  zIndex: zindex ? zindex - 1 : 0,
+                  // zIndex removed to prevent Konva conflicts
                 },
               }}
             >
@@ -337,7 +336,7 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
             divProps={{
               style: {
                 pointerEvents: isEditing ? "auto" : "none",
-                zIndex: disableDragging ? 0 : zindex ? zindex - 1 : 1,
+                // zIndex removed to prevent Konva conflicts
               },
             }}
           >
