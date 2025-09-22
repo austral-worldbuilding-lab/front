@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Group, Path } from "react-konva";
 import { KonvaEventObject } from "konva/lib/Node";
+import { Group as KonvaGroup } from "konva/lib/Group";
 import { Character } from "@/types/mandala";
 import { Html } from "react-konva-utils";
 import { User } from "lucide-react";
@@ -30,7 +31,7 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
 }) => {
   const [showPopover, setShowPopover] = useState(false);
   const isDragging = useRef(false);
-  const groupRef = useRef<Konva.Group>(null);
+  const groupRef = useRef<KonvaGroup>(null);
   const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, 0, 0, 20);
 
   useEffect(() => {

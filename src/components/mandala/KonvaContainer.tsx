@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, MandalaImage, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
+import { Layer as KonvaLayer } from "konva/lib/Layer";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
 import MandalaImageComponent from "./images/MandalaImage";
@@ -78,7 +79,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const SCENE_W = maxRadius * 2;
   const SCENE_H = maxRadius * 2;
   
-  const charactersLayerRef = useRef<Konva.Layer>(null);
+  const charactersLayerRef = useRef<KonvaLayer>(null);
 
   const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(
     mandala.postits,
