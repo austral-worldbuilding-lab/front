@@ -28,6 +28,7 @@ const ProjectListPage = () => {
   );
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { canCreateProject, canManageUsers } = useOrganizationPermissions(organizationId);
   const [modalOpen, setModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);

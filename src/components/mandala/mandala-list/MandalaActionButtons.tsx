@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { MergeIcon, PlusIcon, SquaresIntersect, XIcon } from "lucide-react";
 import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
-import { useParams } from "react-router-dom";
 
 interface MandalaActionButtonsProps {
   selectionMode: boolean;

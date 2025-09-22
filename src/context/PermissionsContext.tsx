@@ -102,15 +102,16 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
           return newMap;
         });
       }
-    } catch (err: any) {
-      if (err?.response?.status === 403) {
+    } catch (err: unknown) {
+      const error = err as { response?: { status?: number }; message?: string };
+      if (error?.response?.status === 403) {
         setOrganizationRoles(prev => {
           const newMap = new Map(prev);
           newMap.delete(orgId);
           return newMap;
         });
       } else {
-        setError(err?.message || 'Error loading organization permissions');
+        setError(error?.message || 'Error loading organization permissions');
       }
     } finally {
       setLoading(false);
@@ -137,8 +138,9 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
           return newMap;
         });
       }
-    } catch (err: any) {
-      if (err?.response?.status === 403) {
+    } catch (err: unknown) {
+      const error = err as { response?: { status?: number }; message?: string };
+      if (error?.response?.status === 403) {
         // User doesn't have permission, remove from cache
         setProjectRoles(prev => {
           const newMap = new Map(prev);
@@ -146,7 +148,7 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
           return newMap;
         });
       } else {
-        setError(err?.message || 'Error loading project permissions');
+        setError(error?.message || 'Error loading project permissions');
       }
     } finally {
       setLoading(false);
