@@ -1,4 +1,4 @@
-import {Pencil, Sparkles, X} from "lucide-react";
+import {Sparkles, X} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {Provocation} from "@/types/mandala";
@@ -48,7 +48,7 @@ export default function ProvocationBox({
                                 className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 flex items-center gap-2"
                                 onSelect={onCreateManual}
                             >
-                                Crear manualmente <Pencil className="w-4 h-4" />
+                                Crear manualmente
                             </DropdownMenu.Item>
 
                         </DropdownMenu.Content>

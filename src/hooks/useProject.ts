@@ -1,23 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { getProject } from "@/services/projectService";
-import {Project} from "@/types/mandala";
+import { Project } from "@/types/mandala";
 
-const useProject = (projectId?: string) => {
+export default function useProject(projectId: string) {
     const [project, setProject] = useState<Project | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!projectId) return;
-
+    const fetchProject = async () => {
         setLoading(true);
-        getProject(projectId)
-            .then(setProject)
-            .catch(() => setError("Error al cargar el proyecto"))
-            .finally(() => setLoading(false));
+        setError(null);
+        try {
+            const data = await getProject(projectId);
+            setProject(data);
+        } catch (e) {
+            setError("Error cargando el proyecto");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (projectId) fetchProject();
     }, [projectId]);
 
-    return { project, loading, error };
-};
-
-export default useProject;
+    return { project, setProject, loading, error, fetchProject };
+}
