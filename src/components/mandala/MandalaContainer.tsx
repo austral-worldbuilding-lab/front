@@ -86,6 +86,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     deleteCharacter,
     updateImage,
     deleteImage,
+    setEditingUser,
+    removeEditingUser,
   } = useMandala(mandalaId);
   const { createMandala, loading: isCreatingCharacter } =
     useCreateMandala(projectId);
@@ -554,8 +556,14 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           }}
                           onMouseEnter={() => setIsHoveringPostIt(true)}
                           onMouseLeave={() => setIsHoveringPostIt(false)}
-                          onDragStart={() => setIsDraggingPostIt(true)}
-                          onDragEnd={() => setIsDraggingPostIt(false)}
+                          onDragStart={(postitId) => {
+                            setIsDraggingPostIt(true);
+                            setEditingUser(postitId);
+                          }}
+                          onDragEnd={(postitId) => {
+                            setIsDraggingPostIt(false);
+                            removeEditingUser(postitId);
+                          }}
                           appliedFilters={appliedFilters}
                           onPostItDelete={deletePostit}
                           onCharacterDelete={(id: string) =>
@@ -564,6 +572,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           tags={tags}
                           onNewTag={handleNewTag}
                           state={state}
+                          onDblClick={setEditingUser}
+                          onBlur={removeEditingUser}
+                          onContextMenu={setEditingUser}
                         />
                       </div>
                     </TransformComponent>

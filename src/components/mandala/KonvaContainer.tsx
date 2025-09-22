@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, MandalaImage, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
@@ -38,12 +38,15 @@ export interface KonvaContainerProps {
   onImageDelete: (id: string) => Promise<boolean>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  onDragStart: () => void;
-  onDragEnd: () => void;
+  onDragStart: (postitId: string) => void;
+  onDragEnd: (postitId: string) => void;
   appliedFilters: Record<string, string[]>;
   tags: Tag[];
   onNewTag: (tag: Tag) => void;
   state: ReactZoomPanPinchState | null;
+  onDblClick?: (postitId: string) => void;
+  onBlur?: (postitId: string) => void;
+  onContextMenu?: (postitId: string) => void;
 }
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
@@ -63,6 +66,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   tags,
   onNewTag,
   state,
+  onDblClick,
+  onBlur,
+  onContextMenu,
 }) => {
   const { projectId } = useParams<{ projectId: string }>();
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
@@ -108,6 +114,20 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onImageDelete
   );
 
+  // Ensure we call onBlur (to remove editing user) when context menu closes
+  const lastPostItIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (contextMenu.visible && contextMenu.type === "postit" && contextMenu.postItId) {
+      lastPostItIdRef.current = contextMenu.postItId;
+    }
+  }, [contextMenu.visible, contextMenu.type, contextMenu.postItId]);
+  useEffect(() => {
+    if (!contextMenu.visible && lastPostItIdRef.current) {
+      onBlur?.(lastPostItIdRef.current);
+      lastPostItIdRef.current = null;
+    }
+  }, [contextMenu.visible, onBlur]);
+
   const {
     isOpen: isEditModalOpen,
     postit: editingPostit,
@@ -138,7 +158,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     id: string,
     postit: Postit
   ) => {
-    onDragEnd();
     const nx = e.target.x(),
       ny = e.target.y();
     const rel = toRelativePostit(nx, ny);
@@ -153,13 +172,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       dimension,
       section,
     });
+    onDragEnd(postit.id!);
   };
 
   const handleOnDragEndCharacter = async (
     e: KonvaEventObject<DragEvent>,
     character: Character
   ) => {
-    onDragEnd();
+    onDragEnd(character.id);
     const nx = e.target.x(),
       ny = e.target.y();
     const rel = toRelative(nx, ny);
@@ -186,7 +206,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     e: KonvaEventObject<DragEvent>,
     image: MandalaImage
   ) => {
-    onDragEnd();
+    onDragEnd(image.id);
     const nx = e.target.x(),
       ny = e.target.y();
     const rel = toRelative(nx, ny);
@@ -232,7 +252,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   type={p.type || "UNICO"}
                   position={{ x, y }}
                   onDragStart={() => {
-                    onDragStart();
+                    onDragStart(p.id!);
                     bringToFront(i);
                   }}
                   onDragEnd={(e) => {
@@ -241,6 +261,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   onDblClick={() => {
                     setEditableIndex(i);
                     bringToFront(i);
+                    onDblClick?.(p.id!);
                   }}
                   onContentChange={(newValue, id) => {
                     onPostItUpdate(id, { content: newValue });
@@ -248,10 +269,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   onBlur={() => {
                     window.getSelection()?.removeAllRanges();
                     setEditableIndex(null);
+                    onBlur?.(p.id!)
                   }}
                   onMouseEnter={onMouseEnter}
                   onMouseLeave={onMouseLeave}
-                  onContextMenu={(e) => showContextMenu(e, p.id!, "postit")}
+                  onContextMenu={(e) => {
+                    showContextMenu(e, p.id!, "postit");
+                    onContextMenu?.(p.id!);
+                  }}
                   mandalaRadius={SCENE_W / 2}
                   currentMandalaName={mandala.mandala.name}
                   characters={
@@ -269,7 +294,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 color={dimensionColors[p.dimension] || "#cccccc"}
                 position={{ x, y }}
                 onDragStart={() => {
-                  onDragStart();
+                  onDragStart(p.id!);
                   bringToFront(i);
                 }}
                 onDragEnd={(e) => {
@@ -278,6 +303,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onDblClick={() => {
                   setEditableIndex(i);
                   bringToFront(i);
+                  onDblClick?.(p.id!)
                 }}
                 onContentChange={(newValue, id) => {
                   onPostItUpdate(id, { content: newValue });
@@ -285,10 +311,14 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onBlur={() => {
                   window.getSelection()?.removeAllRanges();
                   setEditableIndex(null);
+                  onBlur?.(p.id!);
                 }}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
-                onContextMenu={(e, i) => showContextMenu(e, i, "postit")}
+                onContextMenu={(e, i) => {
+                  showContextMenu(e, i, "postit");
+                  onContextMenu?.(i);
+                }}
                 mandalaRadius={SCENE_W / 2}
                 isUnifiedMandala={mandala.mandala.type === "OVERLAP"}
                 currentMandalaName={mandala.mandala.name}
@@ -385,6 +415,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         <EditPostItModal
           isOpen={isEditModalOpen}
           onOpenChange={(open) => {
+            console.log(":DIOAWDBOIADBOA")
+            onBlur?.(editingPostit.id!);
             if (!open) closeEditModal();
           }}
           tags={tags}

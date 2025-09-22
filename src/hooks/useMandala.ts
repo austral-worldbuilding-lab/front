@@ -9,14 +9,18 @@ import {
   updateMandalaCharacters,
   updateImage as updateImageService,
   deleteImage as deleteImageService,
+  setEditingUser as setEditingUserService,
+  removeEditingUser as removeEditingUserService,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
+import { useAuth } from "./useAuth";
 
 const useMandala = (mandalaId: string) => {
   const [mandala, setMandala] = useState<Mandala | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { projectId } = useParams<{ projectId: string }>();
+  const { user } = useAuth();
 
   useEffect(() => {
     setLoading(true);
@@ -151,6 +155,20 @@ const useMandala = (mandalaId: string) => {
     [mandalaId, projectId]
   );
 
+  const setEditingUser = async (postitId: string) => {
+    await setEditingUserService(
+      projectId!,
+      mandalaId,
+      postitId,
+      user!.uid,
+      user?.displayName ?? user?.email?.split("@")[0] ?? "Anonymous User"
+    );
+  };
+
+  const removeEditingUser = async (postitId: string) => {
+    removeEditingUserService(projectId!, mandalaId, postitId, user!.uid);
+  };
+
   return {
     mandala,
     loading,
@@ -162,6 +180,8 @@ const useMandala = (mandalaId: string) => {
     deleteCharacter,
     updateImage,
     deleteImage,
+    setEditingUser,
+    removeEditingUser,
   };
 };
 
