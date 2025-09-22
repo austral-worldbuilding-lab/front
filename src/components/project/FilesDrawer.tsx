@@ -28,7 +28,7 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
         canEdit = true;
     }
     
-    const { files, isLoading, error, refetch } = useFiles(scope, id);
+    const { files, isLoading, error, refetch } = useFiles(scope, id, true);
 
     return (
         <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

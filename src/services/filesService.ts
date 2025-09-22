@@ -22,6 +22,22 @@ export const getFiles = async (scope: FileScope, id: string): Promise<FileItem[]
     }
 };
 
+export const getFilesWithSelection = async (scope: FileScope, id: string): Promise<FileItem[]> => {
+    try {
+        const response = await axiosInstance.get<{ data: FileItem[] }>(`${getBaseUrl(scope, id)}/with-selection`);
+        const mappedFiles = response.data.data.map(file => ({
+            ...file,
+            source_scope: file.source_scope === 'org' ? 'organization' : file.source_scope,
+            url: file.url,
+        }));
+
+        return mappedFiles;
+    } catch (error) {
+        console.error(`Error fetching ${scope} files with selection:`, error);
+        throw error;
+    }
+};
+
 export const createFiles = async (
     scope: FileScope,
     id: string,
@@ -48,6 +64,31 @@ export const deleteFile = async (
         await axiosInstance.delete(`${getBaseUrl(scope, id)}/${encodeURIComponent(fileName)}`);
     } catch (error) {
         console.error(`Error deleting ${scope} file:`, error);
+        throw error;
+    }
+};
+
+export const updateFileSelections = async (
+    scope: FileScope,
+    id: string,
+    selections: { fileName: string; selected: boolean }[]
+): Promise<void> => {
+    try {
+        await axiosInstance.patch(`${getBaseUrl(scope, id)}/selection`, {
+            selections
+        });
+    } catch (error) {
+        console.error(`Error updating ${scope} file selections:`, error);
+        throw error;
+    }
+};
+
+export const getSelectedFileNames = async (scope: FileScope, id: string): Promise<string[]> => {
+    try {
+        const files = await getFilesWithSelection(scope, id);
+        return files.filter(file => file.selected).map(file => file.file_name);
+    } catch (error) {
+        console.error(`Error getting selected ${scope} file names:`, error);
         throw error;
     }
 };

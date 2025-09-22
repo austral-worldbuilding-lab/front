@@ -80,6 +80,7 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
       setSelectedFiles([]);
       
       queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
+      queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
       
       if (onUploadComplete) {
         onUploadComplete();

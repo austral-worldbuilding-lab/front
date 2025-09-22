@@ -1,9 +1,9 @@
 import {Download, Trash2} from "lucide-react";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import ConfirmationDialog from "../common/ConfirmationDialog";
 import {useParams} from "react-router-dom";
 import {useFiles} from "../../hooks/useFiles.ts";
-import {FileItem, SelectedFile} from "@/types/mandala";
+import {FileItem} from "@/types/mandala";
 import {FileScope} from "@/services/filesService.ts";
 
 interface FilesListProps {
@@ -15,15 +15,14 @@ interface FilesListProps {
     open: boolean
 }
 
-export default function FilesList({scope, id, files, loading, error, open}: FilesListProps) {
+export default function FilesList({scope, id, files, loading, error}: FilesListProps) {
     const [fileToDelete, setFileToDelete] = useState<FileItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-
 
     const {projectId: paramProjectId} = useParams<{ projectId: string }>();
     const projectId = scope === "project" ? id || paramProjectId : undefined;
-    const {removeFile, isDeleting} = useFiles(scope, projectId!);
+    const actualId = scope === "project" ? projectId! : id;
+    const {removeFile, updateSelections, isDeleting, isUpdatingSelections} = useFiles(scope, actualId, false);
 
     const handleDeleteClick = (file: FileItem) => {
         setFileToDelete(file);
@@ -35,13 +34,6 @@ export default function FilesList({scope, id, files, loading, error, open}: File
 
         try {
             await removeFile(fileToDelete.file_name);
-
-            setSelectedFiles(prev => prev.filter(f => f !== fileToDelete.file_name));
-
-            const stored = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
-            const updated = stored.filter((f: string) => f !== fileToDelete.file_name);
-            localStorage.setItem("selectedFiles", JSON.stringify(updated));
-
             setIsDialogOpen(false);
             setFileToDelete(null);
         } catch (err) {
@@ -59,37 +51,13 @@ export default function FilesList({scope, id, files, loading, error, open}: File
     };
 
 
-    useEffect(() => {
-        if (open) {
-            const stored: SelectedFile[] = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
-            const contextFiles = stored.filter(f => f.parentId === id && f.scope === scope);
-            setSelectedFiles(contextFiles.map(f => f.fileName));
+    const toggleFile = async (file: FileItem) => {
+        try {
+            const newSelectedState = !file.selected;
+            await updateSelections([{ fileName: file.file_name, selected: newSelectedState }]);
+        } catch (err) {
+            console.error("Error updating file selection:", err);
         }
-    }, [open, id, scope]);
-
-    const toggleFile = (file: FileItem) => {
-        setSelectedFiles(prev => {
-            const stored: SelectedFile[] = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
-
-            const exists = stored.some(f =>
-                f.fileName === file.file_name &&
-                f.scope === scope &&
-                f.parentId === id
-            );
-
-            let updated: SelectedFile[];
-            if (prev.includes(file.file_name)) {
-                updated = stored.filter(f =>
-                    !(f.fileName === file.file_name && f.scope === scope && f.parentId === id)
-                );
-            } else {
-                updated = exists ? stored : [...stored, { fileName: file.file_name, scope, parentId: id }];
-            }
-
-            localStorage.setItem("selectedFiles", JSON.stringify(updated));
-
-            return updated.filter(f => f.scope === scope && f.parentId === id).map(f => f.fileName);
-        });
     };
 
     const groupedFiles: Record<string, FileItem[]> = {};
@@ -127,8 +95,9 @@ export default function FilesList({scope, id, files, loading, error, open}: File
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedFiles.includes(file.file_name)}
+                                                    checked={file.selected}
                                                     onChange={() => toggleFile(file)}
+                                                    disabled={isUpdatingSelections}
                                                 />
                                                 <a
                                                     href={file.url}

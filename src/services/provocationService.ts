@@ -1,5 +1,6 @@
-import {Provocation, SelectedFile} from "@/types/mandala";
+import {Provocation} from "@/types/mandala";
 import axiosInstance from "@/lib/axios.ts";
+import {getSelectedFileNames} from "./filesService.ts";
 
 interface ProvocationResponse {
     id?: string;
@@ -13,13 +14,7 @@ export const provocationsService = {
     async generateAIProvocations(projectId: string): Promise<Provocation[]> {
         if (!projectId) throw new Error("projectId es requerido");
 
-        const selectedFiles: SelectedFile[] = JSON.parse(
-            localStorage.getItem("selectedFiles") || "[]"
-        );
-
-        const projectFiles = selectedFiles
-            .filter(f => f.scope === "project" && f.parentId === projectId)
-            .map(f => f.fileName);
+        const projectFiles = await getSelectedFileNames("project", projectId);
 
         const payload = { selectedFiles: projectFiles };
         const response = await axiosInstance.post<{ data: ProvocationResponse[] }>(
