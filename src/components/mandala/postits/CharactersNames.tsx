@@ -32,7 +32,6 @@ const CharactersNames: React.FC<CharactersNamesProps> = ({
       divProps={{
         style: {
           pointerEvents: "none",
-          zIndex: zindex || 0, // Usar el mismo z-index del post-it al que pertenece
           position: "absolute",
           marginTop: "90px",
           textAlign: "center",

@@ -164,7 +164,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           divProps={{
             style: {
               pointerEvents: "none",
-              zIndex: zindex ? zindex - 1 : -1,
             },
           }}
         >
@@ -282,7 +281,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             divProps={{
               style: {
                 pointerEvents: "none",
-                zIndex: zindex ? zindex - 1 : 0,
               },
             }}
           >
@@ -315,7 +313,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           divProps={{
             style: {
               pointerEvents: isEditing ? "auto" : "none",
-              zIndex: disableDragging ? 0 : zindex ? zindex - 1 : 1,
             },
           }}
         >

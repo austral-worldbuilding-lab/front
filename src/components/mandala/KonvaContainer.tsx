@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, MandalaImage, Postit } from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
@@ -77,6 +77,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const maxRadius = 150 * (mandala.mandala.configuration?.scales.length || 1);
   const SCENE_W = maxRadius * 2;
   const SCENE_H = maxRadius * 2;
+  
+  const charactersLayerRef = useRef<any>(null);
 
   const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(
     mandala.postits,
@@ -296,6 +298,29 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             );
           })}
 
+          {mandala.images?.map((image) => {
+            const { x, y } = toAbsolute(
+              image.coordinates.x,
+              image.coordinates.y
+            );
+
+            return (
+              <MandalaImageComponent
+                key={`image-${image.id}`}
+                image={image}
+                position={{ x, y }}
+                onDragStart={onDragStart}
+                onDragEnd={(e) => handleOnDragEndImage(e, image)}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                onContextMenu={(e) => showContextMenu(e, image.id, "image")}
+                mandalaRadius={SCENE_W / 2}
+              />
+            );
+          })}
+        </Layer>
+        
+        <Layer ref={charactersLayerRef}>
           {mandala.characters?.map((character) => {
             if (!shouldShowCharacter(character, appliedFilters)) return null;
             const { x, y } = toAbsolute(
@@ -316,27 +341,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onContextMenu={(e) =>
                   showContextMenu(e, character.id, "character")
                 }
-              />
-            );
-          })}
-
-          {mandala.images?.map((image) => {
-            const { x, y } = toAbsolute(
-              image.coordinates.x,
-              image.coordinates.y
-            );
-
-            return (
-              <MandalaImageComponent
-                key={`image-${image.id}`}
-                image={image}
-                position={{ x, y }}
-                onDragStart={onDragStart}
-                onDragEnd={(e) => handleOnDragEndImage(e, image)}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
-                onContextMenu={(e) => showContextMenu(e, image.id, "image")}
-                mandalaRadius={SCENE_W / 2}
               />
             );
           })}

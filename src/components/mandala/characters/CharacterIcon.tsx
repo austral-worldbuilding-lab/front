@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
-import { Group, Circle, Text } from "react-konva";
+import React, { useState, useRef, useEffect } from "react";
+import { Group, Path } from "react-konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { Character } from "@/types/mandala";
 import { Html } from "react-konva-utils";
+import { User } from "lucide-react";
 import CharacterPopover from "./CharacterPopover";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 
@@ -29,7 +30,14 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
 }) => {
   const [showPopover, setShowPopover] = useState(false);
   const isDragging = useRef(false);
-  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, 0, 0, 12);
+  const groupRef = useRef<any>(null);
+  const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, 0, 0, 20);
+
+  useEffect(() => {
+    if (groupRef.current) {
+      groupRef.current.moveToTop();
+    }
+  }, []);
 
   const handleClick = (e: KonvaEventObject<PointerEvent>) => {
     // Solo mostrar el popover en clic izquierdo (button = 0)
@@ -56,6 +64,7 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
   return (
     <>
       <Group
+        ref={groupRef}
         x={position.x}
         y={position.y}
         draggable
@@ -68,23 +77,97 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
         className="pointer-events-auto"
         dragBoundFunc={dragBoundFunc}
       >
-        <Circle
-          radius={12}
-          fill={character.color}
-          shadowBlur={0}
-          shadowOpacity={0}
+        <Path
+          data="M 0 -20 C -8 -20 -15 -13 -15 -5 C -15 3 0 15 0 15 C 0 15 15 3 15 -5 C 15 -13 8 -20 0 -20 Z"
+          fill="transparent"
+          stroke="transparent"
         />
-        <Text
-          text={character.name}
-          fontSize={14}
-          fontStyle="bold"
-          fill="#000"
-          y={-35}
-          x={-50}
-          width={100}
-          align="center"
-          ellipsis
-        />
+        
+        <Html
+          divProps={{
+            style: {
+              position: "absolute",
+              top: "-20px",
+              left: "-15px",
+              width: "30px",
+              height: "35px",
+              pointerEvents: "none",
+              zIndex: 9998,
+            },
+          }}
+        >
+          <div
+            style={{
+              width: "30px",
+              height: "30px",
+              backgroundColor: character.color,
+              borderRadius: "50%",
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                bottom: "-8px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "0",
+                height: "0",
+                borderLeft: "8px solid transparent",
+                borderRight: "8px solid transparent",
+                borderTop: `12px solid ${character.color}`,
+              }}
+            />
+          </div>
+        </Html>
+        
+        <Html
+          divProps={{
+            style: {
+              position: "absolute",
+              top: "-12px",
+              left: "-8px",
+              width: "16px",
+              height: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "none",
+              zIndex: 9999,
+            },
+          }}
+        >
+          <User 
+            size={12} 
+            color="#ffffff" 
+            strokeWidth={2.5}
+          />
+        </Html>
+        
+        <Html
+          divProps={{
+            style: {
+              position: "absolute",
+              top: "-45px",
+              left: "-50px",
+              width: "100px",
+              textAlign: "center",
+              pointerEvents: "none",
+              zIndex: 9999,
+              fontWeight: "bold",
+              fontSize: "12px",
+              color: "#000",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            },
+          }}
+        >
+          {character.name}
+        </Html>
 
         {showPopover && (
           <Html
@@ -93,6 +176,7 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
                 position: "absolute",
                 top: "0px",
                 left: "0px",
+                zIndex: 9999,
               },
             }}
           >

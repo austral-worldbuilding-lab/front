@@ -34,7 +34,6 @@ const MandalaBadge: React.FC<MandalaBadgeProps> = ({
       divProps={{
         style: {
           pointerEvents: "none",
-          zIndex: zindex ? zindex + 1 : 100,
           position: "absolute",
           top: -8,
           left: -8,
