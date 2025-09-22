@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import ToggleBadge from "@/components/ui/toggle-badge";
 import { useGetFilters } from "@/hooks/useGetFilters";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FilterSection } from "@/types/mandala";
 
 interface CreateModalProps {
@@ -29,7 +29,10 @@ const FiltersModal = ({
 }: CreateModalProps) => {
   const { filters = [], isLoading } = useGetFilters(mandalaId, projectId);
 
-  const filtersList = Array.isArray(filters) ? filters : [];
+  const filtersList = useMemo(() => 
+    Array.isArray(filters) ? filters : [], 
+    [filters]
+  );
 
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
@@ -37,23 +40,25 @@ const FiltersModal = ({
 
   useEffect(() => {
     if (filtersList.length > 0) {
-      const updatedFilters: Record<string, string[]> = {};
+      setSelectedFilters((prevSelectedFilters) => {
+        const updatedFilters: Record<string, string[]> = {};
 
-      Object.entries(selectedFilters).forEach(([section, options]) => {
-        const filterSection = filtersList.find(
-          (f) => f.sectionName === section
-        );
-        if (filterSection) {
-          const validOptions = options.filter((option) =>
-            filterSection.options.some((o) => o.label === option)
+        Object.entries(prevSelectedFilters).forEach(([section, options]) => {
+          const filterSection = filtersList.find(
+            (f: FilterSection) => f.sectionName === section
           );
-          if (validOptions.length > 0) {
-            updatedFilters[section] = validOptions;
+          if (filterSection) {
+            const validOptions = options.filter((option) =>
+              filterSection.options.some((o: { label: string; color?: string }) => o.label === option)
+            );
+            if (validOptions.length > 0) {
+              updatedFilters[section] = validOptions;
+            }
           }
-        }
-      });
+        });
 
-      setSelectedFilters(updatedFilters);
+        return updatedFilters;
+      });
     }
   }, [filtersList, isOpen]);
 
