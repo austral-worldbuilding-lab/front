@@ -5,6 +5,8 @@ import {Info, X} from "lucide-react";
 import FileLoader from "@/components/project/FileLoader.tsx";
 import {FileScope} from "@/services/filesService.ts";
 import {useFiles} from "@/hooks/useFiles.ts";
+import { useProjectAccess } from "@/hooks/useProjectAccess";
+import { useParams } from "react-router-dom";
 
 
 interface Props {
@@ -16,6 +18,16 @@ interface Props {
 }
 
 const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
+    const { projectId } = useParams<{ projectId: string }>();
+    const { hasAccess, userRole } = useProjectAccess(projectId || "");
+    
+    let canEdit = false;
+    if (scope === "project") {
+        canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
+    } else if (scope === "organization") {
+        canEdit = true;
+    }
+    
     const { files, isLoading, error, refetch } = useFiles(scope, id);
 
     return (
@@ -29,9 +41,11 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
                     <SheetTitle className="text-lg font-bold">{title}</SheetTitle>
                 </SheetHeader>
 
-                <div className="mb-1">
-                    <FileLoader onUploadComplete={refetch} scope={scope} id={id}/>
-                </div>
+                {canEdit && (
+                    <div className="mb-1">
+                        <FileLoader onUploadComplete={refetch} scope={scope} id={id}/>
+                    </div>
+                )}
 
                 <p className="flex items-start gap-1 text-sm italic text-gray-500 mt-1">
                     <Info className="w-6 h-4 mt-0.5"/>

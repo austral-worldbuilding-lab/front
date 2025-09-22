@@ -84,6 +84,7 @@ export default function GeneratorTab({
               organizationId={organizationId}
               projectId={projectId}
               selected={selected}
+              dimensions={dimensionsMandala}
             >
               <FiltersPanel
                 sections={sections}

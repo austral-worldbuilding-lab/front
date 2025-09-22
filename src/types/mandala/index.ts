@@ -146,6 +146,7 @@ export interface MessageDTO {
 export interface Organization {
   id: string;
   name: string;
+  accessType?: 'full' | 'limited';
 }
 export interface FileItem {
   id: string;
@@ -163,8 +164,10 @@ export interface SelectedFile {
 }
 
 export interface Provocation {
-    id: string;
-    question: string;
-    title: string;
-    description: string;
+  id: string;
+  title: string;
+  question: string;
+  description?: string;
+  isCached?: boolean;
 }
+

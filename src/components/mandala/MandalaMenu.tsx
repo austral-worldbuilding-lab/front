@@ -8,6 +8,7 @@ interface MandalaMenuProps {
   isContextMenu?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  canEdit?: boolean;
 }
 
 const MandalaMenu = ({
@@ -17,11 +18,12 @@ const MandalaMenu = ({
   isContextMenu = false,
   open,
   onOpenChange,
+  canEdit = true,
 }: MandalaMenuProps) => {
   if (isContextMenu) {
     return (
       <div className="z-50 min-w-[8rem] rounded-md border bg-white p-1 text-sm shadow-md">
-        {onCreateChild && (
+        {canEdit && onCreateChild && (
           <button
             className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
             onClick={onCreateChild}
@@ -30,7 +32,7 @@ const MandalaMenu = ({
             Crear Hijo
           </button>
         )}
-          {onEdit && (
+          {canEdit && onEdit && (
               <button
                   className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
                   onClick={onEdit}
@@ -39,13 +41,15 @@ const MandalaMenu = ({
                   Editar
               </button>
           )}
-          <button
-          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
-          onClick={onDelete}
-        >
-            <Trash2 size={14} />
-            Eliminar
-        </button>
+          {canEdit && (
+            <button
+              className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
+              onClick={onDelete}
+            >
+                <Trash2 size={14} />
+                Eliminar
+            </button>
+          )}
       </div>
     );
   }

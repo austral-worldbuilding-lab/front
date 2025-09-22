@@ -39,7 +39,7 @@ const Buttons = ({
 }: ButtonsProps) => {
   const { projectId } = useParams<{ projectId: string }>();
   const { canEdit } = useProjectPermissions(projectId || "");
-  
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
@@ -80,7 +80,7 @@ const Buttons = ({
   return (
     <>
       <div
-        className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
+        className="absolute top-1/2 -translate-y-1/2 left-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
         data-floating-buttons
       >
         <Button

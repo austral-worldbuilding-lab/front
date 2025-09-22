@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
       try {
         if (window.location.pathname === "/app/organization") {
           await signOut(auth); // Cerrar sesión en firebase

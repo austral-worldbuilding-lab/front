@@ -45,6 +45,9 @@ import FilesDrawer from "@/components/project/FilesDrawer.tsx";
 import { useSvgExport } from "@/hooks/useSvgExport";
 import { MandalaSVG } from "@/components/mandala/MandalaSVG.tsx";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils.ts";
+import SupportButton from "./SupportButton";
+import {generateReportPDF} from "@/components/download/GeneradorDePDF.tsx";
+import {useReport} from "@/hooks/useReport.tsx";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -97,6 +100,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     maxRadius
   );
 
+  const { report, loading: reportLoading } = useReport(projectId, mandalaId)
+
   const postsAbs = (mandala?.postits ?? []).map((p) => {
     const a = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
     return {
@@ -113,11 +118,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     return { id: c.id, name: c.name, color: c.color, ax: a.x, ay: a.y };
   });
 
-  const imagesAbs = (mandala?.images ?? []).map(img => {
+  const imagesAbs = (mandala?.images ?? []).map((img) => {
     const a = toAbsolute(img.coordinates.x, img.coordinates.y);
     return { id: img.id, url: img.url, ax: a.x, ay: a.y };
   });
-
 
   // Extraer ids de mandalas origen desde los postits (campo from: { id, name })
   const sourceMandalaIds = (() => {
@@ -209,7 +213,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     );
   }
 
-  return (
+    const handleDownloadReport = () => {
+      if (!report) return;
+      generateReportPDF(
+        report,
+        `${mandala?.mandala.name ?? "mandala"}-reporte.pdf`
+      )
+    }
+
+    return (
     <div className="overflow-hidden h-screen">
       <BreadcrumbMandala />
       <div className="w-full bg-white flex items-center relative overflow-hidden">
@@ -232,7 +244,42 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
           </p>
         </div>
         {/* Botón Info + Diálogo */}
-        <div className="ml-auto pr-4">
+        <div className="ml-auto pr-4 flex gap-2">
+            {/* Reporte de mandalas comparadas*/}
+            {mandala?.mandala.type === "OVERLAP_SUMMARY" && (
+                <Button
+                    variant="outline"
+                    color="primary"
+                    size="sm"
+                    icon={<Download size={16} />}
+                    onClick={handleDownloadReport}
+                    disabled={reportLoading}
+                >
+                    Reporte
+                </Button>
+            )}
+
+
+            <Button
+            variant="outline"
+            color="primary"
+            size="sm"
+            icon={<Download size={16} />}
+            onClick={() =>
+              downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
+            }
+          >
+            SVG
+          </Button>
+          <Button
+            variant="outline"
+            color="primary"
+            size="sm"
+            icon={<FileText size={16} />}
+            onClick={() => setIsFilesDrawerOpen(true)}
+          >
+            Archivos
+          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button
@@ -314,35 +361,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
               {() => (
                 <>
                   {/* Controles superiores izquierdos */}
-                  <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
-                    <div className="flex flex-col gap-2">
-                      <CharacterDropdown
-                        characters={
-                          mandala.mandala.type === "OVERLAP" ||
-                          mandala.mandala.type === "OVERLAP_SUMMARY"
-                            ? mandala.mandala.configuration.center.characters ??
-                              []
-                            : projectCharacters
-                        }
-                        onAdd={
-                          mandala.mandala.type === "OVERLAP" ||
-                          mandala.mandala.type === "OVERLAP_SUMMARY"
-                            ? undefined
-                            : linkCharacter
-                        }
-                      />
-                      {mandala.mandala.type === "CHARACTER" && (
-                        <Button
-                          variant="filled"
-                          color="primary"
-                          onClick={() => setIsSidebarOpen(true)}
-                          icon={<Sparkles size={16} />}
-                        >
-                          Herramientas IA
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                  <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col"></div>
 
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
                     {mandala?.mandala.type === "OVERLAP" && (
@@ -365,24 +384,34 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     >
                       Filtros
                     </Button>
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<FileText size={16} />}
-                      onClick={() => setIsFilesDrawerOpen(true)}
-                    >
-                      Archivos
-                    </Button>
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<Download size={16} />}
-                      onClick={() =>
-                        downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
+                    {mandala.mandala.type === "CHARACTER" && (
+                      <Button
+                        variant="filled"
+                        color="primary"
+                        onClick={() => setIsSidebarOpen(true)}
+                        icon={<Sparkles size={16} />}
+                      >
+                        Herramientas IA
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="absolute bottom-26 right-4 z-20">
+                    <CharacterDropdown
+                      characters={
+                        mandala.mandala.type === "OVERLAP" ||
+                        mandala.mandala.type === "OVERLAP_SUMMARY"
+                          ? mandala.mandala.configuration.center.characters ??
+                            []
+                          : projectCharacters
                       }
-                    >
-                      SVG
-                    </Button>
+                      onAdd={
+                        mandala.mandala.type === "OVERLAP" ||
+                        mandala.mandala.type === "OVERLAP_SUMMARY"
+                          ? undefined
+                          : linkCharacter
+                      }
+                    />
                   </div>
 
                   {/* Mostrar botones/controles:
@@ -401,7 +430,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           loading={isCreatingCharacter}
                         />
                       )}
-                      <ZoomControls />
+                      <ZoomControls scale={state?.scale} />
+                      <SupportButton />
                     </>
                   )}
 
@@ -551,13 +581,13 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
               }}
             >
               {mandala && (
-                  <MandalaSVG
-                      ref={svgRef}
-                      mandala={mandala}
-                      postsAbs={postsAbs}
-                      charsAbs={charsAbs}
-                      imagesAbs={imagesAbs}
-                  />
+                <MandalaSVG
+                  ref={svgRef}
+                  mandala={mandala}
+                  postsAbs={postsAbs}
+                  charsAbs={charsAbs}
+                  imagesAbs={imagesAbs}
+                />
               )}
             </div>
           </>
