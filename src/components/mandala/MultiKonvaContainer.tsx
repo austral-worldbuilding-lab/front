@@ -32,10 +32,13 @@ interface MultiKonvaContainerProps {
     state: ReactZoomPanPinchState | null;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
-    onDragStart?: () => void;
-    onDragEnd?: () => void;
+    onDragStart: (postitId: string) => void;
+    onDragEnd: (postitId: string) => void;
     tags: Tag[];
     onNewTag: (tag: Tag) => void;
+    onDblClick?: (postitId: string) => void;
+    onBlur?: (postitId: string) => void;
+    onContextMenu?: (postitId: string) => void;
 }
 
 const GAP = 400; // Gap between mandalas - increased significantly
@@ -126,12 +129,15 @@ const MandalaCanvas: React.FC<{
     onPostItChildCreate?: (content: string, tags: Tag[], postitFatherId?: string) => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
-    onDragStart?: () => void;
-    onDragEnd?: () => void;
+    onDragStart: (postitId: string) => void;
+    onDragEnd: (postitId: string) => void;
     tags?: Tag[];
     onNewTag?: (tag: Tag) => void;
     state?: ReactZoomPanPinchState | null;
-}> = ({ mandala, offsetX, offsetY, scale, readOnly, appliedFilters, onPostItUpdate, onCharacterUpdate, onPostItDelete, onCharacterDelete, onPostItChildCreate, onMouseEnter, onMouseLeave, onDragStart, onDragEnd, tags, onNewTag, state }) => {
+    onDblClick?: (postitId: string) => void;
+    onBlur?: (postitId: string) => void;
+    onContextMenu?: (postitId: string) => void;
+}> = ({ mandala, offsetX, offsetY, scale, readOnly, appliedFilters, onPostItUpdate, onCharacterUpdate, onPostItDelete, onCharacterDelete, onPostItChildCreate, onMouseEnter, onMouseLeave, onDragStart, onDragEnd, tags, onNewTag, state, onContextMenu, onBlur, onDblClick }) => {
     const { projectId } = useParams<{ projectId: string }>();
     const { hasAccess, userRole } = useProjectAccess(projectId || "");
     const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
@@ -215,13 +221,13 @@ const MandalaCanvas: React.FC<{
                                 position={{ x, y }}
                                 onDragStart={() => {
                                     if (!readOnly) {
-                                        onDragStart?.();
+                                        onDragStart?.(p.id!);
                                         bringToFront(i);
                                     }
                                 }}
                                 onDragEnd={async (e) => {
                                     if (readOnly || !onPostItUpdate) return;
-                                    onDragEnd?.();
+                                    onDragEnd?.(p.id!);
                                     const rel = toRelativePostit(e.target.x(), e.target.y());
                                     const { dimension, section } = getDimensionAndSectionFromCoordinates(
                                         rel.x,
@@ -240,6 +246,7 @@ const MandalaCanvas: React.FC<{
                                 onDblClick={() => {
                                     setEditableIndex(i);
                                     bringToFront(i);
+                                    onDblClick?.(p.id!);
                                 }}
                                 onContentChange={(newValue, id) => {
                                     if (onPostItUpdate) {
@@ -249,8 +256,12 @@ const MandalaCanvas: React.FC<{
                                 onBlur={() => {
                                     window.getSelection()?.removeAllRanges();
                                     setEditableIndex(null);
+                                    onBlur?.(p.id!);
                                 }}
-                                onContextMenu={(e, i) => showContextMenu(e, i, "postit")}
+                                onContextMenu={(e, i) => {
+                                    showContextMenu(e, i, "postit");
+                                    onContextMenu?.(p.id!);
+                                }}
                                 mandalaRadius={maxRadius}
                             />
                         );
@@ -268,12 +279,12 @@ const MandalaCanvas: React.FC<{
                                 position={{ x, y }}
                                 onDragStart={() => {
                                     if (!readOnly) {
-                                        onDragStart?.();
+                                        onDragStart?.(character.id!);
                                     }
                                 }}
                                 onDragEnd={async (e) => {
                                     if (readOnly || !onCharacterUpdate) return;
-                                    onDragEnd?.();
+                                    onDragEnd?.(character.id!);
                                     const rel = toRelative(e.target.x(), e.target.y());
                                     const { dimension, section } = getDimensionAndSectionFromCoordinates(
                                         rel.x,
@@ -359,6 +370,9 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     onMouseLeave,
     onDragStart,
     onDragEnd,
+    onDblClick,
+    onBlur,
+    onContextMenu,
 }) => {
     // Call hooks at the top level for each source mandala (max 5 for now)
     const source1 = useMandala(sourceMandalaIds[0] || '');
@@ -460,6 +474,11 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
                         readOnly
                         appliedFilters={appliedFilters}
                         state={state}
+                        onDblClick={onDblClick}
+                        onBlur={onBlur}
+                        onContextMenu={onContextMenu}
+                        onDragStart={onDragStart}
+                        onDragEnd={onDragEnd}
                     />
                 );
             })}

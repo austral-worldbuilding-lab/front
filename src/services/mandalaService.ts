@@ -1,6 +1,13 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Character, FilterSection, Mandala, MandalaImage, Postit, Tag } from "../types/mandala";
+import {
+  Character,
+  FilterSection,
+  Mandala,
+  MandalaImage,
+  Postit,
+  Tag,
+} from "../types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -219,7 +226,7 @@ export const deleteMandalaService = async (mandalaId: string) => {
     throw new Error("Error deleting mandala.");
   }
   return response.data;
-}
+};
 
 export const updateMandalaCharacters = async (
   projectId: string,
@@ -245,7 +252,10 @@ export const updatePostItTags = async (
     tags: Tag[];
   }
 ): Promise<void> => {
-  await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
+  await axiosInstance.patch(
+    `/mandala/${mandalaId}/postits/${postitId}`,
+    payload
+  );
 };
 
 export const updateImage = async (
@@ -333,7 +343,7 @@ export const setEditingUser = async (
     return;
   }
 
-  if (postit.editingUsers.find((user) => user.id === userId) !== null) {
+  if (postit.editingUsers.some((user) => user.id === userId)) {
     return;
   }
 

@@ -20,7 +20,7 @@ const useMandala = (mandalaId: string) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { projectId } = useParams<{ projectId: string }>();
-  const { backendUser } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     setLoading(true);
@@ -155,30 +155,19 @@ const useMandala = (mandalaId: string) => {
     [mandalaId, projectId]
   );
 
-  const setEditingUser = useCallback(
-    async (postitId: string) => {
-      await setEditingUserService(
-        projectId!,
-        mandalaId,
-        postitId,
-        backendUser!.firebaseUid,
-        backendUser!.username.split("@")[0]
-      );
-    },
-    [backendUser, mandalaId, projectId]
-  );
+  const setEditingUser = async (postitId: string) => {
+    await setEditingUserService(
+      projectId!,
+      mandalaId,
+      postitId,
+      user!.uid,
+      user?.displayName ?? user?.email?.split("@")[0] ?? "Anonymous User"
+    );
+  };
 
-  const removeEditingUser = useCallback(
-    async (postitId: string) => {
-      removeEditingUserService(
-        projectId!,
-        mandalaId,
-        postitId,
-        backendUser!.firebaseUid
-      );
-    },
-    [backendUser, mandalaId, projectId]
-  );
+  const removeEditingUser = async (postitId: string) => {
+    removeEditingUserService(projectId!, mandalaId, postitId, user!.uid);
+  };
 
   return {
     mandala,
