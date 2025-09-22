@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, Postit, Tag } from "@/types/mandala";
 import PostIt from "./postits/PostIt";
@@ -16,8 +16,8 @@ import { useEditPostIt } from "@/hooks/useEditPostit";
 import EditPostItModal from "./postits/EditPostitModal";
 import NewPostItModal from "./postits/NewPostItModal";
 import MandalaMenu from "./MandalaMenu";
-import {useParams} from "react-router-dom";
-import {useProjectAccess} from "../../hooks/useProjectAccess";
+import { useParams } from "react-router-dom";
+import { useProjectAccess } from "../../hooks/useProjectAccess";
 
 
 interface MultiKonvaContainerProps {
@@ -176,6 +176,20 @@ const MandalaCanvas: React.FC<{
             }
         }
     );
+
+    // Ensure we call onBlur (to remove editing user) when context menu closes
+    const lastPostItIdRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (contextMenu.visible && contextMenu.type === "postit" && contextMenu.postItId) {
+            lastPostItIdRef.current = contextMenu.postItId;
+        }
+    }, [contextMenu.visible, contextMenu.type, contextMenu.postItId]);
+    useEffect(() => {
+        if (!contextMenu.visible && lastPostItIdRef.current) {
+            onBlur?.(lastPostItIdRef.current);
+            lastPostItIdRef.current = null;
+        }
+    }, [contextMenu.visible, onBlur]);
 
     const {
         isOpen: isEditModalOpen,
