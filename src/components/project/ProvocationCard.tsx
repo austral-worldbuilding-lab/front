@@ -26,7 +26,7 @@ export default function ProvocationCard({ provocation, onClose, onSave }: Provoc
     };
 
     return (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-100">
             <div className="bg-white rounded-lg shadow-lg w-[500px] max-w-full p-6 relative">
                 <button
                     className="absolute top-3 right-3 text-gray-500 hover:text-black"
