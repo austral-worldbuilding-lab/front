@@ -92,3 +92,19 @@ export const deleteTagService = async (
   }
 };
 
+export const createProjectFromProvocation = async (body: {
+  fromProvocationId: string;
+  organizationId: string;
+}): Promise<Project> => {
+  const response = await axiosInstance.post<{ data: Project }>(
+      `/project/from-provocation`,
+      body
+  );
+
+  if (response.status !== 201 && response.status !== 200) {
+    throw new Error( "Error creando proyecto desde provocación");
+  }
+
+  return response.data.data;
+};
+
