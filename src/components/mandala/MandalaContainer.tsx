@@ -46,6 +46,8 @@ import { useSvgExport } from "@/hooks/useSvgExport";
 import { MandalaSVG } from "@/components/mandala/MandalaSVG.tsx";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils.ts";
 import SupportButton from "./SupportButton";
+import {generateReportPDF} from "@/components/download/GeneradorDePDF.tsx";
+import {useReport} from "@/hooks/useReport.tsx";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -97,6 +99,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     mandala?.postits ?? [],
     maxRadius
   );
+
+  const { report, loading: reportLoading } = useReport(projectId, mandalaId)
 
   const postsAbs = (mandala?.postits ?? []).map((p) => {
     const a = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
@@ -209,7 +213,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     );
   }
 
-  return (
+    const handleDownloadReport = () => {
+      if (!report) return;
+        generateReportPDF(
+            report,
+            `${mandala?.mandala.name ?? "mandala"}-reporte.pdf`
+        )
+    }
+
+    return (
     <div className="overflow-hidden h-screen">
       <BreadcrumbMandala />
       <div className="w-full bg-white flex items-center relative overflow-hidden">
@@ -233,7 +245,22 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         </div>
         {/* Botón Info + Diálogo */}
         <div className="ml-auto pr-4 flex gap-2">
-          <Button
+            {/* Reporte de mandalas comparadas*/}
+            {mandala?.mandala.type == "OVERLAP_SUMMARY" && (
+                <Button
+                    variant="outline"
+                    color="primary"
+                    size="sm"
+                    icon={<Download size={16} />}
+                    onClick={handleDownloadReport}
+                    disabled={reportLoading}
+                >
+                    Reporte
+                </Button>
+            )}
+
+
+            <Button
             variant="outline"
             color="primary"
             size="sm"
