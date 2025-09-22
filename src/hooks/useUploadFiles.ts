@@ -54,7 +54,7 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
       setLoading(true);
       setStatus(null);
 
-      const payload: FileItem[] = selectedFiles.map((file) => ({
+      const payload: Omit<FileItem, 'selected'>[] = selectedFiles.map((file) => ({
         file_name: file.name,
         file_type: file.type,
         source_scope: scope,

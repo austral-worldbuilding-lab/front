@@ -37,7 +37,7 @@ export const getFilesWithSelection = async (scope: FileScope, id: string): Promi
 export const createFiles = async (
     scope: FileScope,
     id: string,
-    files: FileItem[]
+    files: Omit<FileItem, 'selected'>[]
 ): Promise<{ url: string }[]> => {
     try {
         const response = await axiosInstance.post<{ data: { url: string }[] }>(

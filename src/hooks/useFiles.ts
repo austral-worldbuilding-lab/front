@@ -37,7 +37,7 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
 
 
   const createFilesMutation = useMutation({
-    mutationFn: async (files: FileItem[]) => {
+    mutationFn: async (files: Omit<FileItem, 'selected'>[]) => {
       return await createFiles(scope, id, files);
     },
     onSuccess: () => {
@@ -85,7 +85,7 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
     },
   });
 
-  const addFiles = async (files: FileItem[]) => {
+  const addFiles = async (files: Omit<FileItem, 'selected'>[]) => {
     return createFilesMutation.mutateAsync(files);
   };
 
