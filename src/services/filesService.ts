@@ -9,13 +9,11 @@ const getBaseUrl = (scope: FileScope, id: string) => `/files/${scope}/${id}`;
 export const getFiles = async (scope: FileScope, id: string): Promise<FileItem[]> => {
     try {
         const response = await axiosInstance.get<{ data: FileItem[] }>(getBaseUrl(scope, id));
-        const mappedFiles = response.data.data.map(file => ({
+        return response.data.data.map(file => ({
             ...file,
             source_scope: file.source_scope === 'org' ? 'organization' : file.source_scope,
             url: file.url,
         }));
-
-        return mappedFiles;
     } catch (error) {
         console.error(`Error fetching ${scope} files:`, error);
         throw error;
@@ -25,13 +23,11 @@ export const getFiles = async (scope: FileScope, id: string): Promise<FileItem[]
 export const getFilesWithSelection = async (scope: FileScope, id: string): Promise<FileItem[]> => {
     try {
         const response = await axiosInstance.get<{ data: FileItem[] }>(`${getBaseUrl(scope, id)}/with-selection`);
-        const mappedFiles = response.data.data.map(file => ({
+        return response.data.data.map(file => ({
             ...file,
             source_scope: file.source_scope === 'org' ? 'organization' : file.source_scope,
             url: file.url,
         }));
-
-        return mappedFiles;
     } catch (error) {
         console.error(`Error fetching ${scope} files with selection:`, error);
         throw error;

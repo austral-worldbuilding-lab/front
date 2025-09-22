@@ -2,7 +2,7 @@ import {Download, Trash2} from "lucide-react";
 import {useState} from "react";
 import ConfirmationDialog from "../common/ConfirmationDialog";
 import {useParams} from "react-router-dom";
-import {useFiles} from "../../hooks/useFiles.ts";
+import {useFiles} from "@/hooks/useFiles.ts";
 import {FileItem} from "@/types/mandala";
 import {FileScope} from "@/services/filesService.ts";
 

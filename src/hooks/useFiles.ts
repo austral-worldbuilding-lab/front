@@ -55,34 +55,28 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
       return await updateFileSelections(scope, id, selections);
     },
     onMutate: async (selections) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
-      
-      // Snapshot the previous value
-      const previousFiles = queryClient.getQueryData([...fileKeys.byScope(scope, id), 'with-selection']);
-      
-      // Optimistically update the cache
-      queryClient.setQueryData([...fileKeys.byScope(scope, id), 'with-selection'], (old: any) => {
-        if (!old) return old;
-        return old.map((file: any) => {
-          const selection = selections.find(s => s.fileName === file.file_name);
-          return selection ? { ...file, selected: selection.selected } : file;
+
+      const previousFiles = queryClient.getQueryData<FileItem[]>([...fileKeys.byScope(scope, id), 'with-selection']);
+
+        queryClient.setQueryData([...fileKeys.byScope(scope, id), 'with-selection'], (old: FileItem[] | undefined) => {
+          if (!old) return old;
+          return old.map((file: FileItem) => {
+            const selection = selections.find(s => s.fileName === file.file_name);
+            return selection ? { ...file, selected: selection.selected } : file;
+          });
         });
-      });
       
       return { previousFiles };
     },
-    onError: (_err, _selections, context) => {
-      // Rollback on error
+    onError: (_err, _selections, context: { previousFiles?: FileItem[] } | undefined) => {
       if (context?.previousFiles) {
         queryClient.setQueryData([...fileKeys.byScope(scope, id), 'with-selection'], context.previousFiles);
       }
     },
     onSettled: () => {
-      // Always refetch after error or success
       queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
-      
-      // Also invalidate all related file queries to ensure consistency
+
       queryClient.invalidateQueries({ 
         predicate: (query) => 
           query.queryKey.includes('files') && 
