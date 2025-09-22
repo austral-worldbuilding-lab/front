@@ -6,7 +6,7 @@ import { removeOrganizationUser, updateOrganizationUserRole } from "@/services/u
 import OrganizationUserRow from "./OrganizationUserRow";
 import { Role } from "@/services/invitationService";
 import { useAuthContext } from "@/context/AuthContext";
-import { Trash2, Users } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface OrganizationUserListProps {
   organizationId: string;
@@ -94,30 +94,17 @@ const OrganizationUserList = ({ organizationId, canManage }: OrganizationUserLis
   }
 
   if (error) {
-    if (!hasPermission) {
-      return (
-        <div className="flex flex-col items-center justify-center py-12 px-6">
-          <div className="text-center max-w-md">
-            <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-amber-100 rounded-full">
-              <Users className="w-8 h-8 text-amber-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Acceso restringido
-            </h3>
-            <p className="text-gray-600 mb-4">
-              No tienes permisos para ver los usuarios de esta organización. Solo los propietarios y administradores pueden gestionar usuarios.
-            </p>
-            <p className="text-sm text-gray-500">
-              Si necesitas acceso, contacta a un administrador de la organización.
-            </p>
-          </div>
-        </div>
-      );
-    }
+        if (!hasPermission) {
+            return (
+                <div className="text-center py-4">
+                    <p className="text-gray-600">Error al cargar usuarios de la organización</p>
+                </div>
+            );
+        }
     
     return (
-      <div className="text-red-600 text-center py-4">
-        Error: {error}
+      <div className="text-center py-4">
+        <p className="text-gray-600">Error al cargar usuarios</p>
       </div>
     );
   }

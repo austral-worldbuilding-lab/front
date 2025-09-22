@@ -23,7 +23,7 @@ export function useOrganizationUsers(organizationId: string) {
       const error = e as { response?: { status?: number }; message?: string };
       if (error?.response?.status === 403) {
         setHasPermission(false);
-        setError("No tienes permisos para ver los usuarios de esta organización");
+        setError("Sin permisos de organización");
       } else {
         setError(error?.message ?? "Error al cargar los usuarios de la organización");
       }

@@ -11,6 +11,7 @@ import FilesDrawer from "@/components/project/FilesDrawer";
 import ProvocationBox from "@/components/project/ProvocationBox.tsx";
 import ProvocationCard from "@/components/project/ProvocationCard.tsx";
 import {Provocation} from "@/types/mandala";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 import useProvocations from "@/hooks/useProvocations.ts";
 
 
@@ -20,6 +21,7 @@ const ProjectPage = () => {
     projectId: string;
   }>();
   const navigate = useNavigate();
+  const { canManageUsers } = useProjectPermissions(projectId);
 
   const { project, loading: projectLoading } = useProject(projectId);
   const { provocations, generateAI, createManual } = useProvocations(projectId!);
@@ -93,7 +95,7 @@ const ProjectPage = () => {
             </Button>
 
 
-          {projectId && organizationId && (
+          {projectId && organizationId && canManageUsers && (
             <UnifiedInvitationDialog
                 projectId={projectId}
                 organizationId={organizationId}
@@ -105,7 +107,7 @@ const ProjectPage = () => {
 
           <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
             <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
-            <ProjectUserList projectId={projectId!} canManage={true} />
+            <ProjectUserList projectId={projectId!} />
           </div>
         </div>
 

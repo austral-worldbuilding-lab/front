@@ -5,6 +5,8 @@ import CreateModal from "./characters/modal/CreateModal";
 import NewPostItModal from "./postits/NewPostItModal";
 import NewImageModal from "./postits/NewImageModal";
 import { Tag } from "@/types/mandala";
+import { useParams } from "react-router-dom";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 
 const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
 
@@ -35,6 +37,9 @@ const Buttons = ({
   currentMandalaId,
   loading = false,
 }: ButtonsProps) => {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { canEdit } = useProjectPermissions(projectId || "");
+  
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
@@ -67,6 +72,10 @@ const Buttons = ({
       });
     }
   };
+
+  if (!canEdit) {
+    return null;
+  }
 
   return (
     <>
