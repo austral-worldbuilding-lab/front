@@ -304,3 +304,69 @@ export const deleteImage = async (
   return true;
 };
 
+export const setEditingUser = async (
+  projectId: string,
+  mandalaId: string,
+  postitId: string,
+  userId: string,
+  displayName: string
+) => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  const mandala = mandalaSnap.data();
+  const postits: Postit[] = mandala?.postits || [];
+  const postit = postits.find((postit) => postit.id === postitId);
+
+  if (!postit) {
+    return;
+  }
+
+  if (!postit.editingUsers) {
+    await updatePostit(projectId, mandalaId, postitId, {
+      editingUsers: [
+        {
+          id: userId,
+          displayName: displayName,
+        },
+      ],
+    });
+    return;
+  }
+
+  if (postit.editingUsers.find((user) => user.id === userId) !== null) {
+    return;
+  }
+
+  await updatePostit(projectId, mandalaId, postitId, {
+    editingUsers: [
+      ...postit.editingUsers,
+      {
+        id: userId,
+        displayName: displayName,
+      },
+    ],
+  });
+};
+
+export const removeEditingUser = async (
+  projectId: string,
+  mandalaId: string,
+  postitId: string,
+  userId: string
+) => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  const mandala = mandalaSnap.data();
+  const postits: Postit[] = mandala?.postits || [];
+  const postit = postits.find((postit) => postit.id === postitId);
+
+  if (!postit) {
+    return;
+  }
+
+  await updatePostit(projectId, mandalaId, postitId, {
+    editingUsers: [
+      ...(postit.editingUsers?.filter((user) => user.id !== userId) ?? []),
+    ],
+  });
+};

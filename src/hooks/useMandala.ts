@@ -9,14 +9,18 @@ import {
   updateMandalaCharacters,
   updateImage as updateImageService,
   deleteImage as deleteImageService,
+  setEditingUser as setEditingUserService,
+  removeEditingUser as removeEditingUserService,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
+import { useAuth } from "./useAuth";
 
 const useMandala = (mandalaId: string) => {
   const [mandala, setMandala] = useState<Mandala | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { projectId } = useParams<{ projectId: string }>();
+  const { backendUser } = useAuth();
 
   useEffect(() => {
     setLoading(true);
@@ -151,6 +155,31 @@ const useMandala = (mandalaId: string) => {
     [mandalaId, projectId]
   );
 
+  const setEditingUser = useCallback(
+    async (postitId: string) => {
+      await setEditingUserService(
+        projectId!,
+        mandalaId,
+        postitId,
+        backendUser!.firebaseUid,
+        backendUser!.username.split("@")[0]
+      );
+    },
+    [backendUser, mandalaId, projectId]
+  );
+
+  const removeEditingUser = useCallback(
+    async (postitId: string) => {
+      removeEditingUserService(
+        projectId!,
+        mandalaId,
+        postitId,
+        backendUser!.firebaseUid
+      );
+    },
+    [backendUser, mandalaId, projectId]
+  );
+
   return {
     mandala,
     loading,
@@ -162,6 +191,8 @@ const useMandala = (mandalaId: string) => {
     deleteCharacter,
     updateImage,
     deleteImage,
+    setEditingUser,
+    removeEditingUser,
   };
 };
 
