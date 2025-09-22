@@ -246,7 +246,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         {/* Botón Info + Diálogo */}
         <div className="ml-auto pr-4 flex gap-2">
             {/* Reporte de mandalas comparadas*/}
-            {mandala?.mandala.type == "OVERLAP_SUMMARY" && (
+            {mandala?.mandala.type === "OVERLAP_SUMMARY" && (
                 <Button
                     variant="outline"
                     color="primary"
