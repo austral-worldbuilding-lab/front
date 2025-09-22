@@ -164,8 +164,10 @@ export interface SelectedFile {
 }
 
 export interface Provocation {
-    id: string;
-    question: string;
-    title: string;
-    description: string;
+  id: string;
+  title: string;
+  question: string;
+  description?: string;
+  isCached?: boolean;
 }
+
