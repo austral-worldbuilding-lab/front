@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ArrowLeftIcon,
   FileText,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -17,6 +18,8 @@ import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import { getOrganizationById } from "@/services/organizationService.ts";
 import FilesDrawer from "@/components/project/FilesDrawer.tsx";
 import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
+import OrganizationUserList from "@/components/organization/OrganizationUserList";
+import { useOrganizationPermissions } from "@/hooks/usePermissionsLoader";
 
 const ProjectListPage = () => {
   const { organizationId } = useParams();
@@ -25,11 +28,13 @@ const ProjectListPage = () => {
   );
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { canCreateProject, canManageUsers } = useOrganizationPermissions(organizationId);
   const [modalOpen, setModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string>("");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [usersOpen, setUsersOpen] = useState(false);
 
   useEffect(() => {
     if (organizationId) {
@@ -76,16 +81,15 @@ const ProjectListPage = () => {
             Proyectos de: {orgName || ""}
           </h1>
           <div className="flex gap-2 mb-4">
-            {!error?.message?.includes("403") &&
-              !error?.message?.includes("Request failed with status code 403") && (
-                <Button
-                  color="primary"
-                  onClick={() => setModalOpen(true)}
-                  icon={<PlusIcon size={16} />}
-                >
-                  Crear Proyecto
-                </Button>
-              )}
+            {canCreateProject && (
+              <Button
+                color="primary"
+                onClick={() => setModalOpen(true)}
+                icon={<PlusIcon size={16} />}
+              >
+                Crear Proyecto
+              </Button>
+            )}
 
             <Button
               variant="outline"
@@ -95,8 +99,15 @@ const ProjectListPage = () => {
               Archivos de la organización
             </Button>
 
-            {!error?.message?.includes("403") &&
-              !error?.message?.includes("Request failed with status code 403") && (
+            {canManageUsers && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setUsersOpen(!usersOpen)}
+                  icon={<Users size={16} />}
+                >
+                  Gestionar Usuarios
+                </Button>
                 <UnifiedInvitationDialog
                   projectName={orgName ?? "Organización"}
                   projectId={projects[0]?.id ?? ""}
@@ -104,7 +115,8 @@ const ProjectListPage = () => {
                   defaultRole="member"
                   isOrganization
                 />
-              )}
+              </>
+            )}
           </div>
           <div className="bg-white rounded-lg shadow-sm border">
             {loading && <Loader size="medium" text="Cargando proyectos..." />}
@@ -115,10 +127,7 @@ const ProjectListPage = () => {
                     Error al cargar proyectos
                   </h2>
                   <p className="text-gray-600 mb-4">
-                    {error.message?.includes("403") ||
-                    error.message === "Request failed with status code 403"
-                      ? "No tienes permisos para ver todos los proyectos de esta organización. Solo puedes acceder a los proyectos donde has sido invitado específicamente."
-                      : error.message || "Error al cargar los proyectos"}
+                    {error.message || "Error al cargar los proyectos"}
                   </p>
                   <div className="flex gap-2 justify-center flex-wrap">
                     <Button
@@ -179,6 +188,18 @@ const ProjectListPage = () => {
             icon={<ChevronRight size={16} />}
           />
         </div>
+
+        {usersOpen && canManageUsers && (
+          <div className="w-full max-w-2xl px-4 mt-8">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <OrganizationUserList
+                organizationId={organizationId!}
+                canManage={true}
+              />
+            </div>
+          </div>
+        )}
+
         <CreateEntityModal
             open={modalOpen}
             onClose={() => setModalOpen(false)}

@@ -8,15 +8,16 @@ import ProjectUserRow from "./ProjectUserRow";
 import { Role } from "@/services/invitationService";
 import { useAuthContext } from "@/context/AuthContext";
 import { isRoleDemotion } from "@/utils/roleUtils";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 
 interface ProjectUserListProps {
   projectId: string;
-  canManage: boolean;
 }
 
-const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
+const ProjectUserList = ({ projectId }: ProjectUserListProps) => {
   const { users, loading, error, refetch } = useProjectUsers(projectId);
   const { user } = useAuthContext();
+  const { canManageUsers } = useProjectPermissions(projectId);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -98,12 +99,12 @@ const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
             name={u.name ?? u.username ?? u.email}
             email={u.email}
             initialRole={u.role as Role}
-            isAdmin={canManage}
+            isAdmin={canManageUsers}
             isCurrentUser={currentUserId === u.id}
             onConfirm={onUpdateRole}
           />
 
-          {canManage && (
+          {canManageUsers && (
             <Button
               variant="outline"
               color="danger"

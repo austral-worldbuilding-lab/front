@@ -11,6 +11,7 @@ import FilesDrawer from "@/components/project/FilesDrawer";
 import ProvocationBox from "@/components/project/ProvocationBox.tsx";
 import ProvocationCard from "@/components/project/ProvocationCard.tsx";
 import {Provocation} from "@/types/mandala";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 import useProvocations from "@/hooks/useProvocations.ts";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import useUpdateProject from "@/hooks/useUpdateProject.ts";
@@ -22,6 +23,7 @@ const ProjectPage = () => {
     projectId: string;
   }>();
   const navigate = useNavigate();
+  const { canManageUsers } = useProjectPermissions(projectId);
 
     const { project, setProject, loading: projectLoading } = useProject(projectId!);
 
@@ -116,21 +118,22 @@ const ProjectPage = () => {
                         Provocaciones <Sparkles className="w-4 h-4" />
                     </Button>
 
-                    {projectId && organizationId && (
-                        <UnifiedInvitationDialog
-                            projectId={projectId}
-                            organizationId={organizationId}
-                            projectName={project?.name ?? "Proyecto"}
-                            defaultRole="member"
-                        />
-                    )}
-                </div>
 
-                <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
-                    <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
-                    <ProjectUserList projectId={projectId!} canManage={true} />
-                </div>
-            </div>
+          {projectId && organizationId && canManageUsers && (
+            <UnifiedInvitationDialog
+                projectId={projectId}
+                organizationId={organizationId}
+                projectName={project?.name ?? "Proyecto"}
+                defaultRole="member"
+            />
+          )}
+        </div>
+
+          <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
+            <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
+            <ProjectUserList projectId={projectId!} />
+          </div>
+        </div>
 
             <FilesDrawer
                 id={projectId!}
