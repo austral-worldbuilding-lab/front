@@ -30,7 +30,7 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
 }) => {
   const [showPopover, setShowPopover] = useState(false);
   const isDragging = useRef(false);
-  const groupRef = useRef<any>(null);
+  const groupRef = useRef<Konva.Group>(null);
   const { dragBoundFunc } = useDragBoundFunc(mandalaRadius, 0, 0, 20);
 
   useEffect(() => {
@@ -40,8 +40,6 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
   }, []);
 
   const handleClick = (e: KonvaEventObject<PointerEvent>) => {
-    // Solo mostrar el popover en clic izquierdo (button = 0)
-    // Esto previene que se abra en Windows cuando se hace clic derecho
     if (!isDragging.current && e.evt.button === 0) {
       setShowPopover(true);
     }
@@ -54,7 +52,6 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
   };
 
   const handleDragEnd = (e: KonvaEventObject<DragEvent>) => {
-    // Resetear el estado de arrastre después de un breve tiempo para evitar que el clic se active inmediatamente
     setTimeout(() => {
       isDragging.current = false;
     }, 10);
@@ -98,27 +95,35 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
         >
           <div
             style={{
+              position: "relative",
               width: "30px",
               height: "30px",
-              backgroundColor: character.color,
-              borderRadius: "50%",
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
           >
             <div
               style={{
+                width: "30px",
+                height: "30px",
+                backgroundColor: character.color,
+                borderRadius: "50%",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            />
+            <div
+              style={{
                 position: "absolute",
-                bottom: "-8px",
+                bottom: "-8px", 
                 left: "50%",
                 transform: "translateX(-50%)",
                 width: "0",
                 height: "0",
-                borderLeft: "8px solid transparent",
-                borderRight: "8px solid transparent",
-                borderTop: `12px solid ${character.color}`,
+                borderLeft: "12px solid transparent",
+                borderRight: "12px solid transparent",
+                borderTop: `14px solid ${character.color}`,
+                borderRadius: "1px",
               }}
             />
           </div>

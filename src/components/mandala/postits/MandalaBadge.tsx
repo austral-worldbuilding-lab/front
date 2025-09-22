@@ -10,7 +10,6 @@ interface MandalaBadgeProps {
 const MandalaBadge: React.FC<MandalaBadgeProps> = ({
   originMandalaName,
   fontSize,
-  zindex,
 }) => {
   const badgeData = useMemo(() => {
     if (!originMandalaName) return null;

@@ -19,7 +19,6 @@ const CharactersNames: React.FC<CharactersNamesProps> = ({
   characters,
   charactersColors,
   fontSize,
-  zindex,
   postItWidth,
 }) => {
   const getColor = (character: string) => {

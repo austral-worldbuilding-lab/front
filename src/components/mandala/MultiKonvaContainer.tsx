@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { Stage, Layer } from "react-konva";
 import { Character, Mandala as MandalaData, Postit, Tag } from "@/types/mandala";
 import PostIt from "./postits/PostIt";
@@ -143,7 +143,7 @@ const MandalaCanvas: React.FC<{
     const maxRadius = 150 * (mandala.mandala.configuration?.scales.length || 1);
     const canvasSize = maxRadius * 2;
     
-    const charactersLayerRef = useRef<any>(null);
+    const charactersLayerRef = useRef<Konva.Layer>(null);
 
     const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(mandala.postits, maxRadius);
     const { toAbsolute, toRelative, getDimensionAndSectionFromCoordinates, zOrder, bringToFront } =
