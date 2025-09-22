@@ -215,10 +215,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
 
     const handleDownloadReport = () => {
       if (!report) return;
-        generateReportPDF(
-            report,
-            `${mandala?.mandala.name ?? "mandala"}-reporte.pdf`
-        )
+      generateReportPDF(
+        report,
+        `${mandala?.mandala.name ?? "mandala"}-reporte.pdf`
+      )
     }
 
     return (
