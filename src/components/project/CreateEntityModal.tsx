@@ -4,6 +4,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Info } from "lucide-react";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@radix-ui/react-tooltip";
 
 interface CreateEntityModalProps {
   open: boolean;
@@ -13,7 +14,10 @@ interface CreateEntityModalProps {
   error?: string | null;
   title: string;
   placeholder: string;
-  showQuestions?: boolean; // true para proyectos, false para organizaciones
+  showQuestions?: boolean;
+  initialName?: string;
+  initialDescription?: string;
+  mode?: "create" | "edit";
 }
 
 const CreateEntityModal = ({
@@ -25,11 +29,14 @@ const CreateEntityModal = ({
                              title,
                              placeholder,
                              showQuestions = false,
+                             initialName,
+                             initialDescription,
+                             mode
                            }: CreateEntityModalProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+    const [name, setName] = useState(initialName ?? "");
+    const [description, setDescription] = useState(initialDescription ?? "");
 
-  if (!open) return null;
+    if (!open) return null;
 
   const handleOnClose = () => {
     setName("");
@@ -70,23 +77,27 @@ const CreateEntityModal = ({
 
           {showQuestions && (
               <div className="mb-4 relative">
-                <Label htmlFor="entity-description" className="flex items-center gap-1">
-                  Descripción
-                  <span className="group relative cursor-pointer text-gray-400 hover:text-gray-600">
-                <Info className="w-4 h-4" />
-                <span className="absolute bottom-full mb-2 left-0 w-64 p-2 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-pre-line z-50">
-                  {questionText}
-                </span>
-              </span>
-                </Label>
-                <Textarea
-                    id="entity-description"
-                    className="border rounded p-2 w-full mt-1 min-h-[150px]"
-                    placeholder="Escribí aquí la descripción..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={loading}
-                />
+                  <Label htmlFor="entity-description" className="flex items-center gap-1">
+                      Descripción
+                      <Tooltip>
+                          <TooltipTrigger asChild>
+                              <Info className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top"   className="bg-gray-700 text-white p-2 rounded max-w-xs whitespace-pre-line"
+                          >
+                              {questionText}
+                          </TooltipContent>
+                      </Tooltip>
+                  </Label>
+                  <Textarea
+                      id="entity-description"
+                      className="border rounded p-2 w-full mt-1 min-h-[150px] font-normal"
+                      placeholder="Escribí aquí la descripción..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      disabled={loading}
+                  />
+
               </div>
           )}
 
@@ -101,14 +112,20 @@ const CreateEntityModal = ({
             >
               Cancelar
             </Button>
-            <Button
-                color="primary"
-                onClick={handleSubmit}
-                disabled={loading || !name.trim() || (showQuestions && !description.trim())}
-                loading={loading}
-            >
-              {loading ? "Creando..." : "Crear"}
-            </Button>
+              <Button
+                  color="primary"
+                  onClick={handleSubmit}
+                  disabled={loading || !name.trim() || (showQuestions && !description.trim())}
+                  loading={loading}
+              >
+                  {loading
+                      ? mode === "edit"
+                          ? "Guardando..."
+                          : "Creando..."
+                      : mode === "edit"
+                          ? "Guardar"
+                          : "Crear"}
+              </Button>
           </div>
         </div>
       </div>
