@@ -23,9 +23,15 @@ const ProjectPage = () => {
   }>();
   const navigate = useNavigate();
 
-  const { project, loading: projectLoading } = useProject(projectId);
+
+  const { project, setProject, loading: projectLoading } = useProject(projectId!);
+
+  const { update, loading: updating, error: updateError } = useUpdateProject((updated) => {
+      setProject(updated);
+      setEditing(false);
+  });
+
   const { provocations, generateAI, createManual } = useProvocations(projectId!);
-  const { update, loading: updating, error: updateError } = useUpdateProject()
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [provBoxOpen, setProvBoxOpen] = useState(false);
