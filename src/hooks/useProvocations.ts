@@ -29,7 +29,7 @@ export default function useProvocations(projectId: string) {
             setProvocations((prev) => {
                 const newOnes = data.filter(
                     (p) => !prev.some((existing) => existing.id === p.id)
-                );
+                ).map(p => ({ ...p, isCached: true })); // marcar como cache
                 return [...prev, ...newOnes];
             });
         } catch (err: any) {
@@ -52,9 +52,15 @@ export default function useProvocations(projectId: string) {
         }
     };
 
+    const linkProvocationToProject = (provId: string, newProjectId: string) => {
+        setProvocations(prev =>
+            prev.map(p => (p.id === provId ? { ...p, parentProjectId: newProjectId, isCached: false } : p))
+        );
+    };
+
     useEffect(() => {
         reload();
     }, [projectId]);
 
-    return { provocations, loading, error, setProvocations, reload, generateAI, createManual };
+    return { provocations, loading, error, setProvocations, reload, generateAI, createManual, linkProvocationToProject };
 }

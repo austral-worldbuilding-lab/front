@@ -56,10 +56,10 @@ export const provocationsService = {
             throw new Error("Error fetching provocations.");
         }
 
-        const dbProvs = dbRes.data.data ?? [];
-        const cacheProvs = cacheRes.data.data ?? [];
+        const dbProvs = dbRes.data.data;
+        const cacheProvs = cacheRes.data.data?.map(p => ({ ...p, isCached: true })) ?? [];
 
-        const all = [...dbProvs, ...cacheProvs.filter(p => !dbProvs.some(d => d.id === p.id))];
+        const all = [...dbProvs, ...cacheProvs.filter(p => !dbProvs.some(d => d.title === p.title))];
 
         return all;
     }
