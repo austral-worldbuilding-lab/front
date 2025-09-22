@@ -31,6 +31,7 @@ export interface Postit {
   from?: { id: string; name: string };
   fromSummary?: string[];
   type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";
+  editingUsers?: EditingUser[]
 }
 
 export interface Tag {
@@ -171,3 +172,7 @@ export interface Provocation {
   isCached?: boolean;
 }
 
+export interface EditingUser {
+  id: string;
+  displayName: string;
+}

@@ -1,8 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { MergeIcon, PlusIcon, SquaresIntersect, XIcon } from "lucide-react";
-import { useProjectAccess } from "@/hooks/useProjectAccess";
-import { useParams } from "react-router-dom";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 
 interface MandalaActionButtonsProps {
   selectionMode: boolean;
@@ -10,6 +9,7 @@ interface MandalaActionButtonsProps {
   isUnifying: boolean;
   isComparing: boolean;
   mandalasExists: boolean;
+  projectId: string;
   onCreateClick: () => void;
   onToggleSelectionMode: () => void;
   onUnifyClick: () => void;
@@ -26,14 +26,13 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
   isUnifying,
   isComparing,
   mandalasExists,
+  projectId,
   onCreateClick,
   onToggleSelectionMode,
   onUnifyClick,
   onCompareClick,
 }) => {
-  const { projectId } = useParams<{ projectId: string }>();
-  const { hasAccess, userRole } = useProjectAccess(projectId || "");
-  const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
+  const { canEdit } = useProjectPermissions(projectId);
   return (
     <div className="flex flex-row w-full justify-between items-center">
       {/* Botón de crear mandala - Solo visible cuando no está en modo selección y puede editar */}

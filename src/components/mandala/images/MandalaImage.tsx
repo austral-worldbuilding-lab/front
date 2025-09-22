@@ -8,7 +8,7 @@ import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 interface MandalaImageProps {
   image: MandalaImage;
   position: { x: number; y: number };
-  onDragStart: () => void;
+  onDragStart: (postitId: string) => void;
   onDragMove?: (e: KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: KonvaEventObject<DragEvent>) => void;
   onMouseEnter: () => void;
@@ -126,7 +126,7 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
         offset={{ x: width / 2, y: height / 2 }}
         scale={{ x: scale, y: scale }}
         onDragStart={() => {
-          onDragStart();
+          onDragStart(image.id);
           setIsDragging(true);
         }}
         {...(onDragMove && { onDragMove })}

@@ -8,6 +8,7 @@ import { isDarkColor } from "@/utils/colorUtils";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 import { usePostItAnimation } from "@/hooks/usePostItAnimation";
 import MandalaBadge from "./MandalaBadge";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PostItProps {
   postit: Postit;
@@ -147,14 +148,29 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         !textAreaRef.current.contains(e.target as Node)
       ) {
         exitEditMode();
+        onBlur();
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("contextmenu", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("contextmenu", handleClickOutside);
     };
-  }, [isEditing]);
+  }, [isEditing, onBlur]);
+
+  const { user } = useAuth();
+
+  const externalEditors = useMemo(() => {
+    return postit.editingUsers?.filter(
+      (editingUser) => editingUser.id !== user?.uid
+    );
+  }, [postit.editingUsers, user]);
+
+  const editorCount = externalEditors?.length ?? 0;
+  const primaryEditorName = externalEditors?.[0]?.displayName ?? "";
+  const showExtraCount = editorCount > 1 ? editorCount - 1 : 0;
 
   return (
     <Group zIndex={zindex}>
@@ -251,6 +267,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
                 textarea.value.length;
             }
           }, 0);
+          onDblClick();
         }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
@@ -262,6 +279,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           x={postItW / 2}
           y={postItH / 2}
           radius={postItW / 2}
+          stroke={editorCount ? "white" : undefined}
+          strokeWidth={4}
           onMouseEnter={(e) => {
             const container = e.target.getStage()?.container();
             if (container) {
@@ -343,6 +362,52 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
               textAlign: "center",
             }}
           />
+          {editorCount > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: `${fontSize * 0.9}px`,
+                fontWeight: 600,
+                color: "#fff",
+                left: "50%",
+                transform: "translateX(-50%)",
+                top: "-28px"
+              }}
+            >
+              <div
+                style={{
+                  background: "rgba(0,0,0,0.75)",
+                  padding: "4px 8px",
+                  borderRadius: 8,
+                  border: "1px solid black",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+                }}
+              >
+                {primaryEditorName}
+              </div>
+              {showExtraCount > 0 && (
+                <div
+                  style={{
+                    minWidth: "22px",
+                    height: "22px",
+                    borderRadius: "50%",
+                    background: "rgba(0,0,0,0.75)",
+                    border: "1px solid black",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: `${fontSize * 0.8}px`,
+                    fontWeight: 600,
+                  }}
+                >
+                  +{showExtraCount}
+                </div>
+              )}
+            </div>
+          )}
         </Html>
       </Group>
     </Group>

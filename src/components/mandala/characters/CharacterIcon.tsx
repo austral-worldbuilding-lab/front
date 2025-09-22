@@ -11,7 +11,7 @@ import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 interface CharacterIconProps {
   character: Character;
   position: { x: number; y: number };
-  onDragStart: () => void;
+  onDragStart: (postitId: string) => void;
   onDragEnd: (e: KonvaEventObject<DragEvent>) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -49,7 +49,7 @@ const CharacterIcon: React.FC<CharacterIconProps> = ({
   const handleDragStart = (e: KonvaEventObject<DragEvent>) => {
     e.cancelBubble = true;
     isDragging.current = true;
-    onDragStart();
+    onDragStart(character.id);
   };
 
   const handleDragEnd = (e: KonvaEventObject<DragEvent>) => {
