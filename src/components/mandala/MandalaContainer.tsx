@@ -15,7 +15,6 @@ import {
   ArrowLeftIcon,
   Download,
   FileText,
-  Filter,
   InfoIcon,
   Sparkles,
 } from "lucide-react";
@@ -23,7 +22,7 @@ import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
-import FiltersModal from "./filters/FiltersModal";
+import FiltersDropdowns from "./filters/FiltersDropdowns";
 import { useTags } from "@/hooks/useTags";
 import { useProjectCharacters } from "@/hooks/useProjectCharacters.ts";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
@@ -62,7 +61,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const [state, setState] = useState<ReactZoomPanPinchState | null>(null);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"overlap" | "all">("overlap");
@@ -335,13 +333,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (
           <>
-            <FiltersModal
-              isOpen={isFiltersOpen}
-              onOpenChange={setIsFiltersOpen}
-              onApplyFilters={(filters) => setAppliedFilters(filters)}
-              mandalaId={mandalaId}
-              projectId={projectId}
-            />
             <TransformWrapper
               initialScale={0.5}
               minScale={0.3}
@@ -376,16 +367,12 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
 
                   {/* Controles superiores derechos */}
                   <div className="absolute top-4 right-4 z-20 flex items-center gap-4">
-                    {/* Toggle de vista - solo visible para mandalas unificadas */}
-
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<Filter size={16} />}
-                      onClick={() => setIsFiltersOpen(true)}
-                    >
-                      Filtros
-                    </Button>
+                    <FiltersDropdowns
+                      mandalaId={mandalaId}
+                      projectId={projectId}
+                      onApplyFilters={(filters) => setAppliedFilters(filters)}
+                    />
+                    
                     {mandala.mandala.type === "CHARACTER" && (
                       <Button
                         variant="filled"

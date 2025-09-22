@@ -39,27 +39,25 @@ export function useGetFilters(mandalaId: string, projectId: string) {
 
       let finalFilters = rawFilters;
 
-      if (
-        tagsData &&
-        tagsData.length > 0 &&
-        !rawFilters.some((f) => f.sectionName === "Tags")
-      ) {
+      if (!rawFilters.some((f) => f.sectionName === "Tags")) {
         finalFilters = [
           ...rawFilters,
           {
             sectionName: "Tags",
             type: "multiple",
-            options: tagsData.map((tag: TagData) => ({
-              label: tag.label,
-              color: tag.color,
-            })),
+            options: tagsData && tagsData.length > 0 
+              ? tagsData.map((tag: TagData) => ({
+                  label: tag.label,
+                  color: tag.color,
+                }))
+              : [],
           },
         ];
       }
 
       return finalFilters;
     },
-    enabled: !!mandalaId && !!projectId && !!tagsData,
+    enabled: !!mandalaId && !!projectId,
   });
 
   return { filters, isLoading };
