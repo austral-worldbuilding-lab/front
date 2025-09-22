@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Loader from "@/components/common/Loader.tsx";
 import { Button } from "@/components/ui/button";
-import {ArrowLeftIcon, Eye, FileText, Sparkles} from "lucide-react";
+import {ArrowLeftIcon, Eye, FileText, Pencil, Sparkles} from "lucide-react";
 import {useEffect, useState} from "react";
 import logo from "@/assets/logo.png";
 import useProject from "@/hooks/useProject.ts";
@@ -12,6 +12,8 @@ import ProvocationBox from "@/components/project/ProvocationBox.tsx";
 import ProvocationCard from "@/components/project/ProvocationCard.tsx";
 import {Provocation} from "@/types/mandala";
 import useProvocations from "@/hooks/useProvocations.ts";
+import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
+import useUpdateProject from "@/hooks/useUpdateProject.ts";
 
 
 const ProjectPage = () => {
@@ -21,7 +23,12 @@ const ProjectPage = () => {
   }>();
   const navigate = useNavigate();
 
-    const { project, loading: projectLoading } = useProject(projectId);
+    const { project, setProject, loading: projectLoading } = useProject(projectId!);
+
+  const { update, loading: updating, error: updateError } = useUpdateProject((updated) => {
+      setProject(updated);
+      setEditing(false);
+  });
     const {
         provocations,
         loading: provLoading,
@@ -35,6 +42,8 @@ const ProjectPage = () => {
   const [provBoxOpen, setProvBoxOpen] = useState(false);
   const [selectedProvocation, setSelectedProvocation] = useState<Provocation | null>(null);
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(false);
+
 
     useEffect(() => {
         reload();
@@ -64,11 +73,22 @@ const ProjectPage = () => {
 
                 <div className="w-full flex flex-col gap-2">
                     <h2 className="text-base font-semibold mb-1">Descripción</h2>
-                    <div className="text-sm leading-6 whitespace-pre-wrap break-words italic">
+                    <div className="relative">
+                      <div className="text-sm leading-6 whitespace-pre-wrap break-words italic pr-8">
                         {project?.description?.trim().length
                             ? project.description
                             : "No hay detalles agregados."}
                     </div>
+
+                      <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 bottom-0 translate-y-1"
+                          onClick={() => setEditing(true)}
+                      >
+                          <Pencil size={14}/>
+                      </Button>
+                  </div>
                     <Button
                         variant="outline"
                         onClick={() => setDrawerOpen(true)}
@@ -145,7 +165,25 @@ const ProjectPage = () => {
                     onSave={createManual}
                 />
             )}
-        </div>
+
+          {editing && (
+              <CreateEntityModal
+                  open={editing}
+                  onClose={() => setEditing(false)}
+                  onCreate={(data) => update(projectId!, data).then(() => {})}
+                  loading={updating}
+                  error={updateError}
+                  title="Editar proyecto"
+                  placeholder="Nombre del proyecto"
+                  showQuestions={true}
+                  mode="edit"
+                  initialName={project?.name ?? ""}
+                  initialDescription={project?.description ?? ""}
+              />
+          )}
+
+
+      </div>
     );
 };
 
