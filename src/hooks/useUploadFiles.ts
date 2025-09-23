@@ -54,7 +54,7 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
       setLoading(true);
       setStatus(null);
 
-      const payload: FileItem[] = selectedFiles.map((file) => ({
+      const payload: Omit<FileItem, 'selected'>[] = selectedFiles.map((file) => ({
         file_name: file.name,
         file_type: file.type,
         source_scope: scope,
@@ -80,6 +80,21 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
       setSelectedFiles([]);
       
       queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
+      queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
+      
+      if (scope === 'mandala') {
+        queryClient.invalidateQueries({ 
+          predicate: (query) => 
+            query.queryKey.includes('files') && 
+            (query.queryKey.includes('project') || query.queryKey.includes('organization'))
+        });
+      } else if (scope === 'project') {
+        queryClient.invalidateQueries({ 
+          predicate: (query) => 
+            query.queryKey.includes('files') && 
+            query.queryKey.includes('organization')
+        });
+      }
       
       if (onUploadComplete) {
         onUploadComplete();

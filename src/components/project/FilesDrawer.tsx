@@ -26,9 +26,11 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
         canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
     } else if (scope === "organization") {
         canEdit = true;
+    } else if (scope === "mandala") {
+        canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
     }
     
-    const { files, isLoading, error, refetch } = useFiles(scope, id);
+    const { files, isLoading, error, refetch } = useFiles(scope, id, true);
 
     return (
         <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

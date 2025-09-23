@@ -156,13 +156,9 @@ export interface FileItem {
   source_scope: string;
   full_path: string;
   url: string;
+  selected: boolean;
 }
 
-export interface SelectedFile {
-  fileName: string;
-  scope: string;
-  parentId: string;
-}
 
 export interface Provocation {
   id: string;
