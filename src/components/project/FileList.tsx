@@ -54,7 +54,12 @@ export default function FilesList({scope, id, files, loading, error}: FilesListP
     const toggleFile = async (file: FileItem) => {
         try {
             const newSelectedState = !file.selected;
-            await updateSelections([{ fileName: file.file_name, selected: newSelectedState }]);
+            const sourceScope = file.source_scope === 'organization' ? 'org' : file.source_scope;
+            await updateSelections([{ 
+                fileName: file.file_name, 
+                selected: newSelectedState,
+                sourceScope: sourceScope
+            }]);
         } catch (err) {
             console.error("Error updating file selection:", err);
         }

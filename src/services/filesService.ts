@@ -67,7 +67,7 @@ export const deleteFile = async (
 export const updateFileSelections = async (
     scope: FileScope,
     id: string,
-    selections: { fileName: string; selected: boolean }[]
+    selections: { fileName: string; selected: boolean; sourceScope: string }[]
 ): Promise<void> => {
     try {
         await axiosInstance.patch(`${getBaseUrl(scope, id)}/selection`, {

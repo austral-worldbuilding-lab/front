@@ -82,6 +82,20 @@ export const useUploadFiles = (scope: FileScope, id: string, onUploadComplete?: 
       queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
       queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
       
+      if (scope === 'mandala') {
+        queryClient.invalidateQueries({ 
+          predicate: (query) => 
+            query.queryKey.includes('files') && 
+            (query.queryKey.includes('project') || query.queryKey.includes('organization'))
+        });
+      } else if (scope === 'project') {
+        queryClient.invalidateQueries({ 
+          predicate: (query) => 
+            query.queryKey.includes('files') && 
+            query.queryKey.includes('organization')
+        });
+      }
+      
       if (onUploadComplete) {
         onUploadComplete();
       }

@@ -10,6 +10,27 @@ export const fileKeys = {
 export function useFiles(scope: FileScope, id: string, withSelection: boolean = false) {
   const queryClient = useQueryClient();
 
+  const invalidateRelatedQueries = () => {
+    queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
+    queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
+    
+    if (scope === 'mandala') {
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          query.queryKey.includes('files') && 
+          (query.queryKey.includes('project') || query.queryKey.includes('organization')) && 
+          (query.queryKey.includes('with-selection') || !query.queryKey.includes('with-selection'))
+      });
+    } else if (scope === 'project') {
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          query.queryKey.includes('files') && 
+          query.queryKey.includes('organization') && 
+          (query.queryKey.includes('with-selection') || !query.queryKey.includes('with-selection'))
+      });
+    }
+  };
+
   const {
     data: files = [],
     isLoading,
@@ -30,8 +51,7 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
       return await deleteFile(scope, id, fileName);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
-      queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
+      invalidateRelatedQueries();
     },
   });
 
@@ -41,8 +61,7 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
       return await createFiles(scope, id, files);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: fileKeys.byScope(scope, id) });
-      queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
+      invalidateRelatedQueries();
     },
   });
 
@@ -51,7 +70,7 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
   };
 
   const updateSelectionsMutation = useMutation({
-    mutationFn: async (selections: { fileName: string; selected: boolean }[]) => {
+    mutationFn: async (selections: { fileName: string; selected: boolean; sourceScope: string }[]) => {
       return await updateFileSelections(scope, id, selections);
     },
     onMutate: async (selections) => {
@@ -62,7 +81,11 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
         queryClient.setQueryData([...fileKeys.byScope(scope, id), 'with-selection'], (old: FileItem[] | undefined) => {
           if (!old) return old;
           return old.map((file: FileItem) => {
-            const selection = selections.find(s => s.fileName === file.file_name);
+            const fileSourceScope = file.source_scope === 'organization' ? 'org' : file.source_scope;
+            const selection = selections.find(s => 
+              s.fileName === file.file_name && 
+              s.sourceScope === fileSourceScope
+            );
             return selection ? { ...file, selected: selection.selected } : file;
           });
         });
@@ -75,13 +98,7 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [...fileKeys.byScope(scope, id), 'with-selection'] });
-
-      queryClient.invalidateQueries({ 
-        predicate: (query) => 
-          query.queryKey.includes('files') && 
-          query.queryKey.includes('with-selection')
-      });
+      invalidateRelatedQueries();
     },
   });
 
@@ -89,7 +106,7 @@ export function useFiles(scope: FileScope, id: string, withSelection: boolean = 
     return createFilesMutation.mutateAsync(files);
   };
 
-  const updateSelections = async (selections: { fileName: string; selected: boolean }[]) => {
+  const updateSelections = async (selections: { fileName: string; selected: boolean; sourceScope: string }[]) => {
     return updateSelectionsMutation.mutateAsync(selections);
   };
 
