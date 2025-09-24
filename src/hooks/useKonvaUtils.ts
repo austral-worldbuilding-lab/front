@@ -1,15 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Postit } from "@/types/mandala";
 
 const POSTIT_W = 64;
 const POSTIT_H = 64;
 
 export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
-  const [zOrder, setZOrder] = useState<number[]>(postits.map((_, i) => i));
+  const postitIds = useMemo(() => postits.map((postit) => postit.id!), [postits]);
+  const [zOrder, setZOrder] = useState<string[]>(postitIds);
 
   useEffect(() => {
-    setZOrder(postits.map((_, idx) => idx));
-  }, [postits]);
+    setZOrder((prev) => {
+      const keep = prev.filter(id => postitIds.includes(id));
+      const add = postitIds.filter(id => !prev.includes(id));
+      return [...keep, ...add];
+    });
+  }, [postitIds]);
 
   const SCENE_W = mandalaRadius * 2;
   const SCENE_H = mandalaRadius * 2;
@@ -46,10 +51,9 @@ export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
     [SCENE_H, SCENE_W]
   );
 
-  const bringToFront = useCallback((index: number) => {
+  const bringToFront = useCallback((id: string) => {
     setZOrder((prev) => {
-      const filtered = prev.filter((i) => i !== index);
-      return [...filtered, index];
+      return [...prev.filter((x) => x !== id), id]
     });
   }, []);
 

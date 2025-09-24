@@ -226,8 +226,8 @@ const MandalaCanvas: React.FC<{
             <Stage width={canvasSize} height={canvasSize} listening={!readOnly}>
                 <Layer>
                     {/* Post-its */}
-                    {zOrder.map((i) => {
-                        const p = mandala.postits[i];
+                    {zOrder.map((id, orderIndex) => {
+                        const p = mandala.postits.find((postit) => postit.id === id)!;
                         if (!shouldShowPostIt(p, appliedFilters)) return null;
                         const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
                         return (
@@ -239,7 +239,7 @@ const MandalaCanvas: React.FC<{
                                 onDragStart={() => {
                                     if (!readOnly) {
                                         onDragStart?.(p.id!);
-                                        bringToFront(i);
+                                        bringToFront(id);
                                     }
                                 }}
                                 onDragEnd={async (e) => {
@@ -261,8 +261,7 @@ const MandalaCanvas: React.FC<{
                                 onMouseEnter={onMouseEnter || (() => { })}
                                 onMouseLeave={onMouseLeave || (() => { })}
                                 onDblClick={() => {
-                                    setEditableIndex(i);
-                                    bringToFront(i);
+                                    bringToFront(id);
                                     onDblClick?.(p.id!);
                                 }}
                                 onContentChange={(newValue, id) => {
@@ -280,6 +279,7 @@ const MandalaCanvas: React.FC<{
                                     onContextMenu?.(p.id!);
                                 }}
                                 mandalaRadius={maxRadius}
+                                zindex={orderIndex }
                             />
                         );
                     })}

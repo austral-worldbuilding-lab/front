@@ -240,8 +240,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     >
       <Stage width={SCENE_W} height={SCENE_H} offset={{ x: 0, y: 0 }}>
         <Layer>
-          {zOrder.map((i) => {
-            const p = mandala.postits[i];
+          {zOrder.map((id, orderIndex) => {
+            const p = mandala.postits.find((postit) => postit.id === id)!;
             if (!shouldShowPostIt(p, appliedFilters)) return null;
             const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
             const mandalaType = mandala.mandala.type;
@@ -251,19 +251,17 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 <ComparisonPostIt
                   key={`static-${p.id}`}
                   postit={p}
-                  zindex={i}
                   type={p.type || "UNICO"}
                   position={{ x, y }}
                   onDragStart={() => {
                     onDragStart(p.id!);
-                    bringToFront(i);
+                    bringToFront(id);
                   }}
                   onDragEnd={(e) => {
                     handleOnDragEndPostIt(e, p.id!, p);
                   }}
                   onDblClick={() => {
-                    setEditableIndex(i);
-                    bringToFront(i);
+                    bringToFront(id);
                     onDblClick?.(p.id!);
                   }}
                   onContentChange={(newValue, id) => {
@@ -293,19 +291,17 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
               <PostIt
                 key={`static-${p.id}`}
                 postit={p}
-                zindex={i}
                 color={dimensionColors[p.dimension] || "#cccccc"}
                 position={{ x, y }}
                 onDragStart={() => {
                   onDragStart(p.id!);
-                  bringToFront(i);
+                  bringToFront(id);
                 }}
                 onDragEnd={(e) => {
                   handleOnDragEndPostIt(e, p.id!, p);
                 }}
                 onDblClick={() => {
-                  setEditableIndex(i);
-                  bringToFront(i);
+                  bringToFront(id);
                   onDblClick?.(p.id!)
                 }}
                 onContentChange={(newValue, id) => {
@@ -325,6 +321,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 mandalaRadius={SCENE_W / 2}
                 isUnifiedMandala={mandala.mandala.type === "OVERLAP"}
                 currentMandalaName={mandala.mandala.name}
+                zindex={orderIndex}
               />
             );
           })}
