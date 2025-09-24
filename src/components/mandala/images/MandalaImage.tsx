@@ -33,7 +33,6 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
     mandalaRadius,
     disableDragging,
     scale = 1,
-    zindex,
   } = props;
 
   const groupRef = useRef<Konva.Group>(null);
@@ -94,7 +93,6 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
         x={position.x}
         y={position.y}
         scale={{ x: scale, y: scale }}
-        zIndex={zindex}
       >
         <Rect
           width={scaledSize}
@@ -111,7 +109,7 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
   }
 
   return (
-    <Group zIndex={zindex}>
+    <Group>
       <Group
         ref={(node) => {
           groupRef.current = node;

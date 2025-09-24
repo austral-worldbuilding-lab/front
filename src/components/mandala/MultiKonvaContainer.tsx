@@ -226,7 +226,9 @@ const MandalaCanvas: React.FC<{
             <Stage width={canvasSize} height={canvasSize} listening={!readOnly}>
                 <Layer>
                     {/* Post-its */}
-                    {zOrder.map((id, orderIndex) => {
+                    {zOrder.map((item, orderIndex) => {
+                        const id = item.id;
+                        if (item.type !== "postit") return;
                         const p = mandala.postits.find((postit) => postit.id === id)!;
                         if (!shouldShowPostIt(p, appliedFilters)) return null;
                         const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
@@ -239,7 +241,7 @@ const MandalaCanvas: React.FC<{
                                 onDragStart={() => {
                                     if (!readOnly) {
                                         onDragStart?.(p.id!);
-                                        bringToFront(id);
+                                        bringToFront({ type: "postit", id: id });
                                     }
                                 }}
                                 onDragEnd={async (e) => {
@@ -261,7 +263,7 @@ const MandalaCanvas: React.FC<{
                                 onMouseEnter={onMouseEnter || (() => { })}
                                 onMouseLeave={onMouseLeave || (() => { })}
                                 onDblClick={() => {
-                                    bringToFront(id);
+                                    bringToFront({ type: "postit", id: id });
                                     onDblClick?.(p.id!);
                                 }}
                                 onContentChange={(newValue, id) => {
