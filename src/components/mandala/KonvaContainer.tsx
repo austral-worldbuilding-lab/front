@@ -84,7 +84,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const maxRadius = 150 * (mandala.mandala.configuration?.scales.length || 1);
   const SCENE_W = maxRadius * 2;
   const SCENE_H = maxRadius * 2;
-  
+
   const charactersLayerRef = useRef<KonvaLayer>(null);
 
   const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(
@@ -212,7 +212,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onDragEnd(image.id);
     const nx = e.target.x(),
       ny = e.target.y();
-    const rel = toRelative(nx, ny);
+    const rel = toRelativePostit(nx, ny);
     const { dimension, section } = getDimensionAndSectionFromCoordinates(
       rel.x,
       rel.y,
@@ -330,7 +330,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
           })}
 
           {mandala.images?.map((image) => {
-            const { x, y } = toAbsolute(
+            const { x, y } = toAbsolutePostit(
               image.coordinates.x,
               image.coordinates.y
             );
@@ -350,7 +350,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             );
           })}
         </Layer>
-        
+
         <Layer ref={charactersLayerRef}>
           {mandala.characters?.map((character) => {
             if (!shouldShowCharacter(character, appliedFilters)) return null;
