@@ -8,8 +8,12 @@ export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
   const [zOrder, setZOrder] = useState<number[]>(postits.map((_, i) => i));
 
   useEffect(() => {
-    setZOrder(postits.map((_, idx) => idx));
-  }, [postits]);
+    setZOrder((prev) => {
+      const next = postits.map((_, idx) => idx);
+      if (prev.length === next.length) return prev;
+      return next;
+    });
+  }, [postits, postits.length]);
 
   const SCENE_W = mandalaRadius * 2;
   const SCENE_H = mandalaRadius * 2;
