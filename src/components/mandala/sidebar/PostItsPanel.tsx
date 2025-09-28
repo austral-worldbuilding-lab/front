@@ -58,7 +58,7 @@ export default function PostItsPanel({
 
   // Cargar post-its guardados en localStorage al montar
   useEffect(() => {
-    const stored = getLocalQueue<any>(`mandala-postits-${mandalaId}`);
+    const stored = getLocalQueue<GeneratedPostIt>(`mandala-postits-${mandalaId}`);
     if (stored.length > 0) setItems(stored);
   }, [mandalaId, setItems]);
 
@@ -82,8 +82,8 @@ export default function PostItsPanel({
   // Eliminar post-it de localStorage cuando se crea uno nuevo
   const deletePostItFromLocal = (content: string) => {
     const key = `mandala-postits-${mandalaId}`;
-    const stored = getLocalQueue<any>(key);
-    const filtered = stored.filter((item: any) => item.content !== content);
+    const stored = getLocalQueue<GeneratedPostIt>(key);
+    const filtered = stored.filter((item: GeneratedPostIt) => item.content !== content);
     localStorage.setItem(key, JSON.stringify(filtered.slice(-20)));
     setItems(filtered.slice(-20));
   };
