@@ -17,7 +17,7 @@ export interface PostItsPanelProps extends PropsWithChildren {
   projectId: string;
   selected: { dimensions: string[]; scales: string[] };
   tags?: Tag[];
-  onCreate: (content: string, tags: Tag[], postItFatherId?: string) => void;
+  onCreate: (content: string, tags: Tag[], postItFatherId?: string, dimension?: string, section?: string) => void;
   onNewTag?: (tag: Tag) => void;
   dimensions: { name: string; color: string }[];
 }
@@ -199,8 +199,8 @@ export default function PostItsPanel({
         isOpen={open}
         onOpenChange={setOpen}
         tags={tags}
-        onCreate={() => {
-          onCreate(prefill, tags);
+        onCreate={(content, tags, postItFatherId, dimension, section) => {
+          onCreate(content, tags, postItFatherId, dimension, section);
           const candidate = selectedCandidate;
           if (
             candidate?.request_id != null &&
@@ -221,6 +221,8 @@ export default function PostItsPanel({
         }}
         onNewTag={onNewTag}
         defaultContent={prefill}
+        defaultDimension={selectedCandidate?.dimension}
+        defaultSection={selectedCandidate?.scale}
       />
     </div>
   );

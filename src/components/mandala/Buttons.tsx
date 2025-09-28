@@ -11,7 +11,7 @@ import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
 
 interface ButtonsProps {
-  onCreatePostIt: (content: string, tags: Tag[]) => void;
+  onCreatePostIt: (content: string, tags: Tag[], postItFatherId?: string, dimension?: string, section?: string) => void;
   onUploadImage?: (imageFile: File, tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
   onCreateCharacter?: (character: {
@@ -119,7 +119,9 @@ const Buttons = ({
         onOpenChange={setPostItModalOpen}
         tags={tags}
         onNewTag={onNewTag}
-        onCreate={onCreatePostIt}
+        onCreate={(content, tags, postItFatherId, dimension, section) => 
+          onCreatePostIt(content, tags, postItFatherId, dimension, section)
+        }
       />
       <NewImageModal
         isOpen={isImageModalOpen}

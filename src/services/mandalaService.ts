@@ -54,14 +54,18 @@ export const createPostit = async (
   postitFatherId?: string
 ): Promise<void> => {
   try {
-    const payload = {
+    const payload: any = {
       content: postit.content,
-      dimension: postit.dimension,
-      section: postit.section,
-      coordinates: postit.coordinates,
       tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
       parentId: postitFatherId ?? undefined,
     };
+
+    if (postit.dimension && postit.section) {
+      payload.dimension = postit.dimension;
+      payload.section = postit.section;
+    } else {
+      payload.coordinates = postit.coordinates;
+    }
 
     await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
   } catch (error) {
