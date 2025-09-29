@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Loader from "@/components/common/Loader.tsx";
 import { Button } from "@/components/ui/button";
-import {ArrowLeftIcon, Eye, FileText, Pencil, Sparkles} from "lucide-react";
+import {ArrowLeftIcon, ExternalLink, Eye, FileText, Pencil, Sparkles} from "lucide-react";
 import {useEffect, useState} from "react";
 import logo from "@/assets/logo.png";
 import useProject from "@/hooks/useProject.ts";
@@ -15,23 +15,27 @@ import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 import useProvocations from "@/hooks/useProvocations.ts";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import useUpdateProject from "@/hooks/useUpdateProject.ts";
+import TimelineTree from "@/components/project/TimelineTree.tsx";
+import useTimeline from "@/hooks/useTimeline.ts";
 import CreatedWorldsModal from "@/components/project/CreatedWorldsModal.tsx";
 
 
 const ProjectPage = () => {
-  const { projectId, organizationId } = useParams<{
-    organizationId: string;
-    projectId: string;
-  }>();
-  const navigate = useNavigate();
-  const { canManageUsers } = useProjectPermissions(projectId);
+    const { projectId, organizationId } = useParams<{
+        organizationId: string;
+        projectId: string;
+    }>();
+    const navigate = useNavigate();
+    const { canManageUsers } = useProjectPermissions(projectId);
 
   const { project, setProject, loading: projectLoading } = useProject(projectId!);
 
-  const { update, loading: updating, error: updateError } = useUpdateProject((updated) => {
-      setProject(updated);
-      setEditing(false);
-  });
+    const { update, loading: updating, error: updateError } = useUpdateProject((updated) => {
+        setProject(updated);
+        setEditing(false);
+    });
+    const { data: timelineData, loading: timelineLoading } = useTimeline(projectId!);
+
     const {
         provocations,
         loading: provLoading,
@@ -40,6 +44,7 @@ const ProjectPage = () => {
         createManual,
         reload
     } = useProvocations(projectId!);
+
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [provBoxOpen, setProvBoxOpen] = useState(false);
@@ -75,13 +80,13 @@ const ProjectPage = () => {
         setProvBoxOpen(false);
     };
 
-  if (projectLoading) {
-    return (
-        <div className="flex items-center justify-center h-screen">
-          <Loader size="large" text="Cargando proyecto..." />
-        </div>
-    );
-  }
+    if (projectLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <Loader size="large" text="Cargando proyecto..." />
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
@@ -100,21 +105,21 @@ const ProjectPage = () => {
                 <div className="w-full flex flex-col gap-2">
                     <h2 className="text-base font-semibold mb-1">Descripción</h2>
                     <div className="relative">
-                      <div className="text-sm leading-6 whitespace-pre-wrap break-words italic pr-8">
-                        {project?.description?.trim().length
-                            ? project.description
-                            : "No hay detalles agregados."}
-                    </div>
+                        <div className="text-sm leading-6 whitespace-pre-wrap break-words italic pr-8">
+                            {project?.description?.trim().length
+                                ? project.description
+                                : "No hay detalles agregados."}
+                        </div>
 
-                      <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 bottom-0 translate-y-1"
-                          onClick={() => setEditing(true)}
-                      >
-                          <Pencil size={14}/>
-                      </Button>
-                  </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 bottom-0 translate-y-1"
+                            onClick={() => setEditing(true)}
+                        >
+                            <Pencil size={14} />
+                        </Button>
+                    </div>
                     <Button
                         variant="outline"
                         onClick={() => setDrawerOpen(true)}
@@ -142,22 +147,49 @@ const ProjectPage = () => {
                         Provocaciones <Sparkles className="w-4 h-4" />
                     </Button>
 
+                    {projectId && organizationId && canManageUsers && (
+                        <UnifiedInvitationDialog
+                            projectId={projectId}
+                            organizationId={organizationId}
+                            projectName={project?.name ?? "Proyecto"}
+                            defaultRole="member"
+                        />
+                    )}
+                </div>
 
-          {projectId && organizationId && canManageUsers && (
-            <UnifiedInvitationDialog
-                projectId={projectId}
-                organizationId={organizationId}
-                projectName={project?.name ?? "Proyecto"}
-                defaultRole="member"
-            />
-          )}
-        </div>
+                <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
+                    <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
+                    <ProjectUserList projectId={projectId!} />
+                </div>
+            </div>
 
-          <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
-            <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
-            <ProjectUserList projectId={projectId!} />
-          </div>
-        </div>
+            <div className="absolute bottom-6 right-6 w-80 h-60 border rounded-lg shadow bg-white p-2 flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center mb-2">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                            navigate(`/app/organization/${organizationId}/projects/${projectId}/timeline`)
+                        }
+                    >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                    </Button>
+                </div>
+                <div className="flex-1 relative overflow-hidden">
+                    {timelineLoading ? (
+                        <Loader size="small" text="Cargando..." />
+                    ) : timelineData ? (
+                        <div className="flex-1 flex items-center justify-center overflow-hidden">
+                            <div className="scale-[0.99] origin-center">
+                                <TimelineTree data={timelineData}/>
+                            </div>
+                        </div>
+
+                    ) : (
+                        <p className="text-xs text-gray-500 text-center mt-5">Sin datos</p>
+                    )}
+                </div>
+            </div>
 
             <FilesDrawer
                 id={projectId!}
@@ -215,24 +247,22 @@ const ProjectPage = () => {
                 />
             )}
 
-          {editing && (
-              <CreateEntityModal
-                  open={editing}
-                  onClose={() => setEditing(false)}
-                  onCreate={(data) => update(projectId!, data).then(() => {})}
-                  loading={updating}
-                  error={updateError}
-                  title="Editar proyecto"
-                  placeholder="Nombre del proyecto"
-                  showQuestions={true}
-                  mode="edit"
-                  initialName={project?.name ?? ""}
-                  initialDescription={project?.description ?? ""}
-              />
-          )}
-
-
-      </div>
+            {editing && (
+                <CreateEntityModal
+                    open={editing}
+                    onClose={() => setEditing(false)}
+                    onCreate={(data) => update(projectId!, data).then(() => {})}
+                    loading={updating}
+                    error={updateError}
+                    title="Editar proyecto"
+                    placeholder="Nombre del proyecto"
+                    showQuestions={true}
+                    mode="edit"
+                    initialName={project?.name ?? ""}
+                    initialDescription={project?.description ?? ""}
+                />
+            )}
+        </div>
     );
 };
 
