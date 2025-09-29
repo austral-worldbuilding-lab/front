@@ -21,9 +21,10 @@ export default function useProvocationToProject() {
             let provId = provocation.id;
             if (provocation.isCached) {
                 const saved = await provocationsService.createManualProvocation(projectId!, {
+                    projectsOrigin: provocation.projectsOrigin ?? [],
                     title: provocation.title,
                     question: provocation.question,
-                    description: provocation.description,
+                    description: provocation.description
                 });
                 provId = saved.id;
             }
