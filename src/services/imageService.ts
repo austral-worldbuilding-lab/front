@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import { Tag } from "@/types/mandala";
 
 export interface GetPresignedUrlResponse {
   imageId: string;
@@ -26,11 +27,13 @@ export const getImagePresignedUrl = async (
 
 export const confirmImage = async (
   mandalaId: string,
-  imageId: string
+  imageId: string,
+  tags?: Tag[]
 ): Promise<void> => {
   try {
     await axiosInstance.post(`/mandala/${mandalaId}/images/confirm`, {
       id: imageId,
+      tags: tags?.map(tag => ({ name: tag.name, color: tag.color })) || [],
     });
   } catch (error) {
     console.error("Error confirming image:", error);

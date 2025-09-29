@@ -17,6 +17,7 @@ import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import useUpdateProject from "@/hooks/useUpdateProject.ts";
 import TimelineTree from "@/components/project/TimelineTree.tsx";
 import useTimeline from "@/hooks/useTimeline.ts";
+import CreatedWorldsModal from "@/components/project/CreatedWorldsModal.tsx";
 
 
 const ProjectPage = () => {
@@ -27,7 +28,7 @@ const ProjectPage = () => {
     const navigate = useNavigate();
     const { canManageUsers } = useProjectPermissions(projectId);
 
-    const { project, setProject, loading: projectLoading } = useProject(projectId!);
+  const { project, setProject, loading: projectLoading } = useProject(projectId!);
 
     const { update, loading: updating, error: updateError } = useUpdateProject((updated) => {
         setProject(updated);
@@ -44,15 +45,40 @@ const ProjectPage = () => {
         reload
     } = useProvocations(projectId!);
 
-    const [drawerOpen, setDrawerOpen] = useState(false);
-    const [provBoxOpen, setProvBoxOpen] = useState(false);
-    const [selectedProvocation, setSelectedProvocation] = useState<Provocation | null>(null);
-    const [creating, setCreating] = useState(false);
-    const [editing, setEditing] = useState(false);
 
-    useEffect(() => {
-        reload();
-    }, [projectId]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [provBoxOpen, setProvBoxOpen] = useState(false);
+  const [selectedProvocation, setSelectedProvocation] = useState<Provocation | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(false);
+  // Estados de modales
+  const [provocationOpen, setProvocationOpen] = useState(false);
+  const [worldsOpen, setWorldsOpen] = useState(false);
+
+  useEffect(() => {
+      reload();
+  }, [projectId]);
+
+    const handleCloseAll = () => {
+        // Cerrar todos los modales y resetear provocación
+        setSelectedProvocation(null);
+        setProvocationOpen(false);
+        setWorldsOpen(false);
+    };
+
+    const handleBackToProvocation = () => {
+        // Cerrar CreatedWorlds y volver a ProvocationCard
+        setWorldsOpen(false);
+        setProvocationOpen(true);
+    };
+
+    const handleNavigate = () => {
+        // Cerrar todos los modales y resetear al navegar a otro mundo
+        setSelectedProvocation(null);
+        setProvocationOpen(false);
+        setWorldsOpen(false);
+        setProvBoxOpen(false);
+    };
 
     if (projectLoading) {
         return (
@@ -173,10 +199,28 @@ const ProjectPage = () => {
                 scope="project"
             />
 
+            {/* ProvocationCard */}
             {selectedProvocation && (
                 <ProvocationCard
                     provocation={selectedProvocation}
-                    onClose={() => setSelectedProvocation(null)}
+                    open={provocationOpen}
+                    onClose={handleCloseAll}
+                    onOpenWorlds={() => {
+                        setProvocationOpen(false);
+                        setWorldsOpen(true);
+                    }}
+                    onNavigate={handleNavigate}
+                />
+            )}
+
+            {/* CreatedWorldsModal */}
+            {selectedProvocation && (
+                <CreatedWorldsModal
+                    provocation={selectedProvocation}
+                    open={worldsOpen}
+                    onClose={handleCloseAll}
+                    onBack={handleBackToProvocation}
+                    onNavigate={handleNavigate}
                 />
             )}
 
@@ -184,7 +228,10 @@ const ProjectPage = () => {
                 open={provBoxOpen}
                 onClose={() => setProvBoxOpen(false)}
                 provocations={provocations}
-                onSelect={setSelectedProvocation}
+                onSelect={(prov) => {
+                    setSelectedProvocation(prov);
+                    setProvocationOpen(true);
+                }}
                 onGenerateAI={generateAI}
                 onCreateManual={() => setCreating(true)}
                 loading={provLoading}
@@ -194,6 +241,7 @@ const ProjectPage = () => {
             {creating && (
                 <ProvocationCard
                     provocation={null}
+                    open={true}
                     onClose={() => setCreating(false)}
                     onSave={createManual}
                 />

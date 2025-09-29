@@ -11,7 +11,7 @@ import { useKonvaUtils } from "@/hooks/useKonvaUtils";
 import { useContextMenu } from "@/hooks/useContextMenu.ts";
 import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
-import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
+import { shouldShowCharacter, shouldShowPostIt, shouldShowImage } from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 
 import { useEditPostIt } from "@/hooks/useEditPostit.ts";
@@ -330,6 +330,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
           })}
 
           {mandala.images?.map((image) => {
+            if (!shouldShowImage(image, appliedFilters)) return null;
             const { x, y } = toAbsolutePostit(
               image.coordinates.x,
               image.coordinates.y
@@ -410,7 +411,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         tags={tags}
         onNewTag={onNewTag}
         postItFatherId={selectedPostItId}
-        onCreate={(content, tags, postItFatherId) => {
+        onCreate={(content, tags, postItFatherId, _dimension, _section) => {
           onPostItChildCreate(content, tags, postItFatherId);
           setIsChildPostItModalOpen(false);
           setSelectedPostItId(undefined);

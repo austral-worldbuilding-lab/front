@@ -17,10 +17,12 @@ interface NewPostItModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   tags: Tag[];
-  onCreate: (content: string, tags: Tag[], postItFatherId?: string) => void;
+  onCreate: (content: string, tags: Tag[], postItFatherId?: string, dimension?: string, section?: string) => void;
   onNewTag: (tag: Tag) => void;
   postItFatherId?: string;
   defaultContent?: string;
+  defaultDimension?: string;
+  defaultSection?: string;
 }
 
 const NewPostItModal = ({
@@ -31,6 +33,8 @@ const NewPostItModal = ({
   onNewTag,
   postItFatherId,
   defaultContent = "",
+  defaultDimension,
+  defaultSection,
 }: NewPostItModalProps) => {
   const [content, setContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
@@ -45,7 +49,7 @@ const NewPostItModal = ({
 
   const handleCreate = () => {
     if (isValid) {
-      onCreate(content.trim(), selectedTags, postItFatherId);
+      onCreate(content.trim(), selectedTags, postItFatherId, defaultDimension, defaultSection);
       setContent("");
       setSelectedTags([]);
       onOpenChange(false);

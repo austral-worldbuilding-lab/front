@@ -57,6 +57,7 @@ export interface MandalaImage {
   coordinates: { x: number; y: number };
   dimension: string;
   section: string;
+  tags: Tag[];
 }
 
 export interface Mandala {
@@ -161,11 +162,19 @@ export interface FileItem {
 
 
 export interface Provocation {
+  projectsOrigin: ProvocationProject[];
   id: string;
   title: string;
   question: string;
   description?: string;
   isCached?: boolean;
+}
+
+export interface ProvocationProject{
+    id: string,
+    name: string,
+    description: string,
+    organizationId: string,
 }
 
 export interface EditingUser {
