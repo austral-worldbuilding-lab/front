@@ -73,7 +73,7 @@ export default function QuestionsPanel({
               </Link>
             </>
           ) : error ? (
-            <p className="text-red-600">Error: {error}</p>
+            <p className="text-red-600">{error}</p>
           ) : null}
           {!loading && questions.length > 0 && (
             <div className="flex flex-col gap-2">

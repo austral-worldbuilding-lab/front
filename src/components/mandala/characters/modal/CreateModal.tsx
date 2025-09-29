@@ -174,6 +174,20 @@ const CreateModal = ({
               onChange={(e) => setName(e.target.value)}
               className="w-full"
             />
+
+            <CustomInput
+              id="description"
+              label="Descripción"
+              about={mandalaType === "ai" 
+                ? "Esta descripción será útil para que la IA genere la mandala con más precisión" 
+                : "Describe el propósito o contexto de esta mandala"}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              as="textarea"
+              style={{ maxHeight: 160 }}
+              required
+            />
+
             <div className="grid  sm:grid-cols-2 gap-4">
               <TagInput
                 label="Dimensiones"
@@ -216,20 +230,6 @@ const CreateModal = ({
                 colors={colors}
               />
             </div>
-
-            {mandalaType === "ai" && (
-              <div className="space-y-2">
-                <CustomInput
-                  id="description"
-                  label="Descripcion (opcional)"
-                  about="Esta descripción será útil para que la IA genere la mandala con más precisión"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  as="textarea"
-                  style={{ maxHeight: 160 }}
-                />
-              </div>
-            )}
           </div>
         )}
 
@@ -246,7 +246,7 @@ const CreateModal = ({
               variant="filled"
               color="primary"
               onClick={handleCreateCharacter}
-              disabled={!name || dimensions.length === 0 || scales.length === 0}
+              disabled={!name || !description || dimensions.length === 0 || scales.length === 0}
               loading={loading}
             >
               {createButtonText}
