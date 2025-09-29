@@ -226,7 +226,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onDragEnd(image.id);
     const nx = e.target.x(),
       ny = e.target.y();
-    const rel = toRelative(nx, ny);
+    const rel = toRelativePostit(nx, ny);
     const { dimension, section } = getDimensionAndSectionFromCoordinates(
       rel.x,
       rel.y,
@@ -348,7 +348,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
 
             if (item.type === "image") {
               const image = mandala.images!.find((image) => image.id === id)!;
-              const { x, y } = toAbsolute(
+              const { x, y } = toAbsolutePostit(
                 image.coordinates.x,
                 image.coordinates.y
               );
