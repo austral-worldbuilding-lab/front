@@ -170,10 +170,10 @@ export interface Provocation {
 }
 
 export interface ProvocationProject{
-    "id": string,
-    "name": string,
-    "description": string,
-    "organizationId": string,
+    id: string,
+    name: string,
+    description: string,
+    organizationId: string,
 }
 
 export interface EditingUser {
