@@ -10,7 +10,7 @@ export type AiMandalaReport = {
 }
 
 export function useReport(projectId: string, mandalaId: string) {
-    const [report, setReport] = useState<AiMandalaReport | null>(null)
+    const [summaryReport, setSummaryReport] = useState<AiMandalaReport | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
 
@@ -24,9 +24,9 @@ export function useReport(projectId: string, mandalaId: string) {
             (snap) => {
                 if (snap.exists()) {
                     const data = snap.data()
-                    setReport(data.report ?? null)
+                    setSummaryReport(data.summaryReport ?? null)
                 } else {
-                    setReport(null)
+                    setSummaryReport(null)
                 }
                 setLoading(false)
             },
@@ -39,5 +39,5 @@ export function useReport(projectId: string, mandalaId: string) {
         return () => unsub()
     }, [projectId, mandalaId])
 
-    return { report, loading, error }
+    return { report: summaryReport, loading, error }
 }
