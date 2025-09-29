@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useRef, useMemo, useState, useEffect, useCallback } from "react";
 import { Circle, Group, Transformer } from "react-konva";
 import { Html } from "react-konva-utils";
 import Konva from "konva";
@@ -143,6 +143,13 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     window.getSelection()?.removeAllRanges();
   };
 
+  const emitSyntheticDragEnd = useCallback(() => {
+    const node = groupRef.current;
+    if (!node) return;
+    const synthetic = ({ target: node } as unknown) as KonvaEventObject<DragEvent>;
+    onDragEnd(synthetic);
+  }, [onDragEnd]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (!isEditing) return;
@@ -170,9 +177,10 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         // no-op
       }
 
-      // Otherwise, exit edit mode
+      // Otherwise, exit edit mode and ensure parent re-enables zoom/pan
       exitEditMode();
       onBlur();
+      emitSyntheticDragEnd();
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -181,7 +189,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("contextmenu", handleClickOutside);
     };
-  }, [isEditing, onBlur]);
+  }, [isEditing, onBlur, emitSyntheticDragEnd]);
 
   const { user } = useAuth();
 
@@ -214,8 +222,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       onDragStart();
     };
     const handleTransformEnd = () => {
-      // We don't need the Konva event in parent; just signal completion
-      onDragEnd((undefined as unknown) as KonvaEventObject<DragEvent>);
+      emitSyntheticDragEnd();
     };
     node.on("transformstart", handleTransformStart);
     node.on("transformend", handleTransformEnd);
@@ -223,7 +230,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       node.off("transformstart", handleTransformStart);
       node.off("transformend", handleTransformEnd);
     };
-  }, [onDragStart, onDragEnd]);
+  }, [onDragStart, emitSyntheticDragEnd]);
 
   return (
     <Group zIndex={zindex}>
