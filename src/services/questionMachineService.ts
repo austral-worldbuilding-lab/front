@@ -57,6 +57,34 @@ export async function generateQuestionsService(
     }
 }
 
+export async function getCachedQuestionsService(
+    mandalaId: string
+): Promise<AiQuestionResponse[]> {
+    if (!mandalaId) throw new Error("mandalaId es requerido");
+
+    try {
+        const res = await axiosInstance.get<{ data: AiQuestionResponse[] }>(
+            `/mandala/${encodeURIComponent(mandalaId)}/cached-questions`
+        );
+
+        return res?.data?.data ?? [];
+    } catch (err) {
+        if (axios.isAxiosError(err)) {
+            const status = err.response?.status;
+
+            switch (status) {
+                case 403:
+                    throw new Error("No tienes permisos para obtener preguntas de esta mandala");
+                case 404:
+                    throw new Error("Mandala no encontrada");
+                default:
+                    throw new Error("Error al obtener preguntas. Por favor, intenta nuevamente");
+            }
+        }
+        throw new Error("Error al obtener preguntas. Por favor, intenta nuevamente");
+    }
+}
+
 export interface GeneratePostItsDto {
     dimensions: string[];
     scales: string[];
@@ -86,5 +114,4 @@ export async function generatePostItsService(
         payloadWithFiles
     );
 
-    return res?.data?.data ?? []
-}
+    return res?.data?.data ?? [] }
