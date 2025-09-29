@@ -45,20 +45,14 @@ export async function generateQuestionsService(
     } catch (err) {
         if (axios.isAxiosError(err)) {
             const status = err.response?.status;
-            const message = err.response?.data?.message;
-            
+
             switch (status) {
                 case 400:
-                    if (Array.isArray(message) && message.some(msg => msg.includes('tags') && (msg.includes('must be longer') || msg.includes('should not be empty')))) {
-                        throw new Error("Los tags no pueden estar vacíos. Por favor, revisa los tags seleccionados");
-                    }
                     throw new Error("Los parámetros para generar preguntas no son válidos. Verifica las dimensiones y escalas seleccionadas");
                 case 403:
                     throw new Error("No tienes permisos para generar preguntas en esta mandala");
                 case 500:
-                    // Como el backend no envía el error específico de archivos, asumimos que un 500 
-                    // en generate-questions es por falta de archivos
-                    throw new Error("No hay archivos seleccionados para procesar. Por favor, sube archivos al proyecto antes de generar preguntas");
+                    throw new Error("No hay archivos subidos para este proyecto, por favor sube archivos para generar preguntas");
                 default:
                     throw new Error("Error al generar preguntas. Por favor, intenta nuevamente");
             }
@@ -109,7 +103,7 @@ export async function generatePostItsService(
                     throw new Error("No tienes permisos para generar post-its en esta mandala");
                 case 500:
                     //TODO ANA arreglar el back para que mande un mnsaje especifico por problema de archvios
-                    throw new Error("No hay archivos seleccionados para procesar. Por favor, sube archivos al proyecto antes de generar post-its");
+                    throw new Error("No hay archivos subidos para este proyecto, por favor sube archivos para generar post-its");
                 default:
                     throw new Error("Error al generar post-its. Por favor, intenta nuevamente");
             }

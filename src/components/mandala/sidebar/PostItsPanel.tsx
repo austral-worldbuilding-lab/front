@@ -139,7 +139,7 @@ export default function PostItsPanel({
               </Link>
             </>
           ) : error ? (
-            <p className="text-red-600">Error: {error}</p>
+            <p className="text-red-600">{error}</p>
           ) : null}
           {isEmpty && <p>No hay Post-Its para mostrar</p>}
 
