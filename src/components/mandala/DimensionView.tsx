@@ -135,15 +135,15 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
               }
             }}
             onCreate={
-            async (content, selectedTags, parentId) => {
+            async (content, selectedTags, parentId, dimension, section) => {
               await createPostitService(
                   mandalaId,
                   {
                     content,
                     tags: selectedTags,
                     coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
-                    dimension: dimensionName,
-                    section: "Institución",
+                    dimension: dimension || dimensionName,
+                    section: section || "Institución",
                     childrens: [],
                   },
                   parentId

@@ -352,7 +352,7 @@ const MandalaCanvas: React.FC<{
                 tags={tags || []}
                 onNewTag={onNewTag || (() => { })}
                 postItFatherId={selectedPostItId}
-                onCreate={(content, tags, postItFatherId) => {
+                onCreate={(content, tags, postItFatherId, _dimension, _section) => {
                     if (onPostItChildCreate) {
                         onPostItChildCreate(content, tags, postItFatherId);
                     }

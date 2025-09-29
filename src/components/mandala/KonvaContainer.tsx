@@ -410,7 +410,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         tags={tags}
         onNewTag={onNewTag}
         postItFatherId={selectedPostItId}
-        onCreate={(content, tags, postItFatherId) => {
+        onCreate={(content, tags, postItFatherId, _dimension, _section) => {
           onPostItChildCreate(content, tags, postItFatherId);
           setIsChildPostItModalOpen(false);
           setSelectedPostItId(undefined);
