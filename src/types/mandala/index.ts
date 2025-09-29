@@ -57,6 +57,7 @@ export interface MandalaImage {
   coordinates: { x: number; y: number };
   dimension: string;
   section: string;
+  tags: Tag[];
 }
 
 export interface Mandala {
