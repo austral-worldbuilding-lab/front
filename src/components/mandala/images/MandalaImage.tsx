@@ -48,14 +48,6 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
   const IMAGE_SIZE = 80; // Tamaño base
   const scaledSize = IMAGE_SIZE * scale;
 
-  const { dragBoundFunc } = useDragBoundFunc(
-      mandalaRadius,
-      scaledSize,
-      scaledSize,
-      0,
-      scale
-  );
-
   useEffect(() => {
     const img = new window.Image();
     img.crossOrigin = "anonymous";
@@ -89,6 +81,14 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
   };
 
   const { width, height } = getImageDimensions();
+
+  const { dragBoundFunc } = useDragBoundFunc(
+    mandalaRadius,
+    width,
+    height,
+    0,
+    scale
+  );
 
   if (!imageLoaded || !konvaImage) {
     return (
@@ -168,7 +168,6 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
                 style={{
                   borderRadius: 4,
                   display: "block",
-                  transform: "translate(-50%, -50%)",
                 }}
             ></img>
           </Html>
@@ -177,8 +176,6 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
               image={konvaImage}
               width={width}
               height={height}
-              x={-width / 2}
-              y={-height / 2}
               shadowColor="rgba(0,0,0,0.3)"
               shadowBlur={isDragging ? 10 : 5}
               shadowOffset={{ x: 2, y: 2 }}
