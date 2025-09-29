@@ -43,7 +43,7 @@ export const useCreateImage = (): UseCreateImageReturn => {
       }
 
       // 3. Confirm image upload
-      await confirmImage(mandalaId, imageId);
+      await confirmImage(mandalaId, imageId, tags);
 
       // Success
       return true;
