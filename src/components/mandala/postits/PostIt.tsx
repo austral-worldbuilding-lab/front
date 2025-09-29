@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
-import { Circle, Group } from "react-konva";
+import { Circle, Group, Transformer } from "react-konva";
 import { Html } from "react-konva-utils";
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
@@ -54,6 +54,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   } = props;
 
   const groupRef = useRef<Konva.Group>(null);
+  const trRef = useRef<Konva.Transformer>(null);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -64,6 +65,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const [editingContent, setEditingContent] = useState<string>(
     postit.content ?? ""
   );
+  const [resizeScale, setResizeScale] = useState<number>(1);
 
   const postItW = 100;
   const postItH = 100;
@@ -73,7 +75,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const fontSize = postItW / 10;
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
-  const currentScale = isOpen ? scaleFather : scale;
+  const baseScale = isOpen ? scaleFather : scale;
+  const currentScale = baseScale * resizeScale;
   const { dragBoundFunc } = useDragBoundFunc(
     mandalaRadius,
     postItW,
@@ -142,14 +145,34 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        isEditing &&
-        textAreaRef.current &&
-        !textAreaRef.current.contains(e.target as Node)
-      ) {
-        exitEditMode();
-        onBlur();
+      if (!isEditing) return;
+
+      // If clicked inside textarea, ignore
+      if (textAreaRef.current && textAreaRef.current.contains(e.target as Node)) {
+        return;
       }
+
+      // If clicked on Transformer handles, ignore
+      const stage = groupRef.current?.getStage();
+      const tr = trRef.current as unknown as Konva.Transformer | null;
+      try {
+        const pos = stage?.getPointerPosition();
+        if (stage && tr && pos) {
+          const shape = stage.getIntersection(pos);
+          if (shape) {
+            const transformerAncestor = shape.findAncestor((n: Konva.Node) => n.getClassName() === "Transformer", true);
+            if (transformerAncestor && transformerAncestor === tr) {
+              return; // interacting with handles
+            }
+          }
+        }
+      } catch {
+        // no-op
+      }
+
+      // Otherwise, exit edit mode
+      exitEditMode();
+      onBlur();
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -171,6 +194,17 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const editorCount = externalEditors?.length ?? 0;
   const primaryEditorName = externalEditors?.[0]?.displayName ?? "";
   const showExtraCount = editorCount > 1 ? editorCount - 1 : 0;
+
+  useEffect(() => {
+    if (isEditing && groupRef.current && trRef.current) {
+      try {
+        trRef.current.nodes([groupRef.current]);
+        trRef.current.getLayer()?.batchDraw();
+      } catch {
+        // no-op
+      }
+    }
+  }, [isEditing]);
 
   return (
     <Group zIndex={zindex}>
@@ -238,9 +272,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         draggable={!isEditing && !disableDragging}
         dragBoundFunc={dragBoundFunc}
         offset={{ x: postItW / 2, y: postItH / 2 }}
-        scale={
-          isOpen ? { x: scaleFather, y: scaleFather } : { x: scale, y: scale }
-        }
+        scale={{ x: currentScale, y: currentScale }}
         onDragStart={() => {
           onDragStart();
           setIsDragging(true);
@@ -274,7 +306,15 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         onContextMenu={(e) => {
           onContextMenu(e, postit.id!);
         }}
+        onTransformEnd={() => {
+          const node = groupRef.current;
+          if (!node) return;
+          const scaleX = node.scaleX();
+          const nextResize = Math.max(0.25, Math.min(4, scaleX / baseScale));
+          setResizeScale(nextResize);
+        }}
       >
+        {/* Transformer moved outside of the target group */}
         <Circle
           x={postItW / 2}
           y={postItH / 2}
@@ -410,6 +450,20 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           )}
         </Html>
       </Group>
+      {isEditing && (
+        <Transformer
+          ref={trRef}
+          rotateEnabled={false}
+          keepRatio
+          enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+          boundBoxFunc={(_oldBox, newBox) => {
+            const min = 30;
+            const max = 600;
+            const width = Math.max(min, Math.min(max, newBox.width));
+            return { ...newBox, width, height: width };
+          }}
+        />
+      )}
     </Group>
   );
 });
