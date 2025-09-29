@@ -206,6 +206,25 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     }
   }, [isEditing]);
 
+  // While resizing (transforming), notify parent to disable zoom/pan
+  useEffect(() => {
+    const node = groupRef.current;
+    if (!node) return;
+    const handleTransformStart = () => {
+      onDragStart();
+    };
+    const handleTransformEnd = () => {
+      // We don't need the Konva event in parent; just signal completion
+      onDragEnd((undefined as unknown) as KonvaEventObject<DragEvent>);
+    };
+    node.on("transformstart", handleTransformStart);
+    node.on("transformend", handleTransformEnd);
+    return () => {
+      node.off("transformstart", handleTransformStart);
+      node.off("transformend", handleTransformEnd);
+    };
+  }, [onDragStart, onDragEnd]);
+
   return (
     <Group zIndex={zindex}>
       {/* Círculo transparente HTML (fondo) */}
