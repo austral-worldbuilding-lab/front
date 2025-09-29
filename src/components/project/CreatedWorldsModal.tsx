@@ -56,7 +56,8 @@ export default function CreatedWorldsModal({provocation, open, onClose, onBack, 
                         {worlds.map((world) => (
                             <div
                                 key={world.id}
-                                className="group border rounded-md p-3 hover:bg-gray-50 transition cursor-pointer flex justify-between items-center"                                onClick={() => handleNavigate(world)}
+                                className="group border rounded-md p-3 hover:bg-gray-50 transition cursor-pointer flex justify-between items-center"
+                                onClick={() => handleNavigate(world)}
                             >
                                 <div>
                                     <h4 className="font-semibold">{world.name}</h4>
