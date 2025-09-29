@@ -8,21 +8,26 @@ import useProvocationToProject from "@/hooks/useProvocationToProject.ts";
 
 interface ProvocationCardProps {
     provocation: Provocation | null;
+    open?: boolean;
     onClose: () => void;
     onSave?: (data: Omit<Provocation, "id">) => void;
+    onOpenWorlds?: () => void;
+    onNavigate?: () => void;
 }
 
-export default function ProvocationCard({ provocation, onClose, onSave }: ProvocationCardProps) {
+export default function ProvocationCard({provocation, open = true, onClose, onSave, onOpenWorlds, onNavigate
+}: ProvocationCardProps) {
     const isCreate = !provocation;
     const [title, setTitle] = useState("");
     const [question, setQuestion] = useState("");
     const [description, setDescription] = useState("");
     const { provocationToProject } = useProvocationToProject();
 
+    if (!open) return null;
 
     const handleSave = () => {
         if (onSave) {
-            onSave({ title, question, description });
+            onSave({projectsOrigin: provocation?.projectsOrigin ?? [], title, question, description });
             onClose();
         }
     };
@@ -53,10 +58,25 @@ export default function ProvocationCard({ provocation, onClose, onSave }: Provoc
                         <h3 className="text-xl font-bold mb-2">{provocation!.title}</h3>
                         <p className="text-gray-700 font-medium mb-4 italic">{provocation!.question}</p>
                         <p className="text-gray-600 mb-4">{provocation!.description}</p>
-                        <Button color="secondary" onClick={() => provocation && provocationToProject(provocation, onClose)}>
-                            { "Explorar mundo" } <Globe className="w-4 h-4" />
-                        </Button>
 
+                        {/* Acciones con mundos */}
+                        <div className="flex flex-col gap-3">
+                            <Button
+                                color="secondary"
+                                onClick={() =>
+                                    provocation && provocationToProject(provocation, onNavigate)
+                                }
+                            >
+                                Explorar nuevo mundo <Globe className="w-4 h-4 ml-1" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={onOpenWorlds}
+                                disabled={!onOpenWorlds}
+                            >
+                                Ver mundos creados
+                            </Button>
+                        </div>
                     </>
                 )}
             </div>

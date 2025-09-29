@@ -160,14 +160,16 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const handleCreatePostIt = (
     content: string,
     tags: Tag[],
-    postItFatherId?: string
+    postItFatherId?: string,
+    dimension?: string,
+    section?: string
   ) => {
     createPostit(
       {
         content: content,
         coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
-        dimension: "Gobierno",
-        section: "Institución",
+        dimension: dimension || "Gobierno",
+        section: section || "Institución",
         tags: tags || null,
         childrens: [],
       },

@@ -34,7 +34,6 @@ interface PostItProps {
 const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const {
     postit,
-    zindex,
     color,
     position,
     onDragStart,
@@ -51,6 +50,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     currentMandalaName,
     disableDragging,
     scale = 1,
+    zindex
   } = props;
 
   const groupRef = useRef<Konva.Group>(null);
@@ -173,7 +173,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const showExtraCount = editorCount > 1 ? editorCount - 1 : 0;
 
   return (
-    <Group zIndex={zindex}>
+    <Group>
       {/* Círculo transparente HTML (fondo) */}
       {!isDragging && children.length !== 0 && (
         <Html
@@ -222,7 +222,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             currentMandalaName={currentMandalaName}
             disableDragging={true}
             scale={scaleChildren}
-            zindex={zindex}
           />
         ))}
 
@@ -325,13 +324,13 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           <MandalaBadge
             originMandalaName={postit.from?.name}
             fontSize={fontSize}
-            zindex={zindex}
           />
         )}
         <Html
           divProps={{
             style: {
               pointerEvents: isEditing ? "auto" : "none",
+              zIndex: zindex
             },
           }}
         >

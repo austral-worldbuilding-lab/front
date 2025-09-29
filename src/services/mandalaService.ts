@@ -16,7 +16,7 @@ export const subscribeMandala = (
   callback: (mandala: Mandala | null) => void
 ) => {
   const mandalaRef = doc(db, projectId, mandalaId);
-  const unsubscribe = onSnapshot(mandalaRef, (snapshot) => {
+  return onSnapshot(mandalaRef, (snapshot) => {
     if (!snapshot.exists()) {
       callback(null);
       return;
@@ -44,8 +44,20 @@ export const subscribeMandala = (
 
     callback(mandala);
   });
+};
 
-  return unsubscribe;
+type CreatePostItPayload = {
+  content: string;
+  tags: { name: string; color: string }[];
+  parentId?: string;
+  dimension?: string;
+  section?: string;
+  coordinates?: {
+    x: number;
+    y: number;
+    angle: number;
+    percentileDistance: number;
+  };
 };
 
 export const createPostit = async (
@@ -54,14 +66,18 @@ export const createPostit = async (
   postitFatherId?: string
 ): Promise<void> => {
   try {
-    const payload = {
+    const payload: CreatePostItPayload = {
       content: postit.content,
-      dimension: postit.dimension,
-      section: postit.section,
-      coordinates: postit.coordinates,
       tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
       parentId: postitFatherId ?? undefined,
     };
+
+    if (postit.dimension && postit.section) {
+      payload.dimension = postit.dimension;
+      payload.section = postit.section;
+    } else {
+      payload.coordinates = postit.coordinates;
+    }
 
     await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
   } catch (error) {

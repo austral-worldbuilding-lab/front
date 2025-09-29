@@ -1,9 +1,11 @@
+
 import React, { useRef, useState, useEffect } from "react";
-import { Group, Image as KonvaImage, Rect } from "react-konva";
+import { Group, Rect } from "react-konva";
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import type { MandalaImage } from "@/types/mandala";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
+import { Html } from "react-konva-utils";
 
 interface MandalaImageProps {
   image: MandalaImage;
@@ -64,7 +66,7 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
     if (!konvaImage) return { width: scaledSize, height: scaledSize };
 
     const aspectRatio = konvaImage.width / konvaImage.height;
-    
+
     if (aspectRatio > 1) {
       return {
         width: scaledSize,
@@ -90,83 +92,99 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
 
   if (!imageLoaded || !konvaImage) {
     return (
-      <Group
-        x={position.x}
-        y={position.y}
-        scale={{ x: scale, y: scale }}
-        zIndex={zindex}
-      >
-        <Rect
-          width={scaledSize}
-          height={scaledSize}
-          x={-scaledSize / 2}
-          y={-scaledSize / 2}
-          fill="#f0f0f0"
-          stroke="#ccc"
-          strokeWidth={1}
-          cornerRadius={4}
-        />
-      </Group>
+        <Group
+            x={position.x}
+            y={position.y}
+            scale={{ x: scale, y: scale }}
+        >
+          <Rect
+              width={scaledSize}
+              height={scaledSize}
+              x={-scaledSize / 2}
+              y={-scaledSize / 2}
+              fill="#f0f0f0"
+              stroke="#ccc"
+              strokeWidth={1}
+              cornerRadius={4}
+          />
+        </Group>
     );
   }
 
   return (
-    <Group zIndex={zindex}>
-      <Group
-        ref={(node) => {
-          groupRef.current = node;
-          if (typeof ref === "function") ref(node);
-          else if (ref)
-            (ref as React.MutableRefObject<Konva.Group | null>).current = node;
-        }}
-        x={position.x}
-        y={position.y}
-        draggable={!disableDragging}
-        dragBoundFunc={dragBoundFunc}
-        scale={{ x: scale, y: scale }}
-        onDragStart={() => {
-          onDragStart(image.id);
-          setIsDragging(true);
-        }}
-        {...(onDragMove && { onDragMove })}
-        onDragEnd={(e) => {
-          onDragEnd(e);
-          setTimeout(() => setIsDragging(false), 100);
-        }}
-        onMouseEnter={() => {
-          onMouseEnter();
-          const container = groupRef.current?.getStage()?.container();
-          if (container) {
-            container.style.cursor = "pointer";
-          }
-        }}
-        onMouseLeave={() => {
-          onMouseLeave();
-          const container = groupRef.current?.getStage()?.container();
-          if (container) {
-            container.style.cursor = "grab";
-          }
-        }}
-        onContextMenu={(e) => {
-          onContextMenu(e, image.id);
-        }}
-      >
-        <KonvaImage
-          ref={imageRef}
-          image={konvaImage}
-          width={width}
-          height={height}
-          offsetX={width / 2}
-          offsetY={height / 2}
-          shadowColor="rgba(0,0,0,0.3)"
-          shadowBlur={isDragging ? 10 : 5}
-          shadowOffset={{ x: 2, y: 2 }}
-          shadowOpacity={0.5}
-          strokeWidth={isDragging ? 2 : 1}
-          cornerRadius={4}
-        />
+      <Group>
+        <Group
+            ref={(node) => {
+              groupRef.current = node;
+              if (typeof ref === "function") ref(node);
+              else if (ref)
+                (ref as React.MutableRefObject<Konva.Group | null>).current = node;
+            }}
+            x={position.x}
+            y={position.y}
+            draggable={!disableDragging}
+            dragBoundFunc={dragBoundFunc}
+            offset={{ x: width / 2, y: height / 2 }}
+            scale={{ x: scale, y: scale }}
+            onDragStart={() => {
+              onDragStart(image.id);
+              setIsDragging(true);
+            }}
+            {...(onDragMove && { onDragMove })}
+            onDragEnd={(e) => {
+              onDragEnd(e);
+              setTimeout(() => setIsDragging(false), 100);
+            }}
+            onMouseEnter={() => {
+              onMouseEnter();
+              const container = groupRef.current?.getStage()?.container();
+              if (container) {
+                container.style.cursor = "pointer";
+              }
+            }}
+            onMouseLeave={() => {
+              onMouseLeave();
+              const container = groupRef.current?.getStage()?.container();
+              if (container) {
+                container.style.cursor = "grab";
+              }
+            }}
+            onContextMenu={(e) => {
+              onContextMenu(e, image.id);
+            }}
+        >
+          <Html
+              divProps={{
+                style: {
+                  pointerEvents: "none",
+                  zIndex: zindex,
+                },
+              }}
+          >
+            <img
+                src={image.url}
+                width={width}
+                height={height}
+                style={{
+                  borderRadius: 4,
+                  display: "block",
+                }}
+            ></img>
+          </Html>
+          <Rect
+              ref={imageRef}
+              image={konvaImage}
+              width={width}
+              height={height}
+              shadowColor="rgba(0,0,0,0.3)"
+              shadowBlur={isDragging ? 10 : 5}
+              shadowOffset={{ x: 2, y: 2 }}
+              shadowOpacity={0.5}
+              strokeWidth={isDragging ? 2 : 1}
+              cornerRadius={4}
+          />
+        </Group>
       </Group>
-    </Group>
   );
 });
 

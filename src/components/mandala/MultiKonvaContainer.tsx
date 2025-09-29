@@ -226,8 +226,10 @@ const MandalaCanvas: React.FC<{
             <Stage width={canvasSize} height={canvasSize} listening={!readOnly}>
                 <Layer>
                     {/* Post-its */}
-                    {zOrder.map((i) => {
-                        const p = mandala.postits[i];
+                    {zOrder.map((item, orderIndex) => {
+                        const id = item.id;
+                        if (item.type !== "postit") return;
+                        const p = mandala.postits.find((postit) => postit.id === id)!;
                         if (!shouldShowPostIt(p, appliedFilters)) return null;
                         const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
                         return (
@@ -239,7 +241,7 @@ const MandalaCanvas: React.FC<{
                                 onDragStart={() => {
                                     if (!readOnly) {
                                         onDragStart?.(p.id!);
-                                        bringToFront(i);
+                                        bringToFront({ type: "postit", id: id });
                                     }
                                 }}
                                 onDragEnd={async (e) => {
@@ -261,8 +263,7 @@ const MandalaCanvas: React.FC<{
                                 onMouseEnter={onMouseEnter || (() => { })}
                                 onMouseLeave={onMouseLeave || (() => { })}
                                 onDblClick={() => {
-                                    setEditableIndex(i);
-                                    bringToFront(i);
+                                    bringToFront({ type: "postit", id: id });
                                     onDblClick?.(p.id!);
                                 }}
                                 onContentChange={(newValue, id) => {
@@ -280,6 +281,7 @@ const MandalaCanvas: React.FC<{
                                     onContextMenu?.(p.id!);
                                 }}
                                 mandalaRadius={maxRadius}
+                                zindex={orderIndex }
                             />
                         );
                     })}
@@ -352,7 +354,7 @@ const MandalaCanvas: React.FC<{
                 tags={tags || []}
                 onNewTag={onNewTag || (() => { })}
                 postItFatherId={selectedPostItId}
-                onCreate={(content, tags, postItFatherId) => {
+                onCreate={(content, tags, postItFatherId, _dimension, _section) => {
                     if (onPostItChildCreate) {
                         onPostItChildCreate(content, tags, postItFatherId);
                     }

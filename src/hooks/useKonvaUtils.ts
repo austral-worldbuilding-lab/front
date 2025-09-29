@@ -1,19 +1,41 @@
-import { useState, useEffect, useCallback } from "react";
-import { Postit } from "@/types/mandala";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { MandalaImage, Postit } from "@/types/mandala";
 
 const POSTIT_W = 64;
 const POSTIT_H = 64;
 
-export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
-  const [zOrder, setZOrder] = useState<number[]>(postits.map((_, i) => i));
+export type OrderedItem = { type: "postit" | "image"; id: string };
+
+export const useKonvaUtils = (
+  postits: Postit[],
+  mandalaRadius: number,
+  images?: MandalaImage[]
+) => {
+  const postitItems: OrderedItem[] = useMemo(
+    () => postits.map((postit) => ({ type: "postit", id: postit.id! })),
+    [postits]
+  );
+  const imageItems: OrderedItem[] | undefined = useMemo(
+    () => images?.map((image) => ({ type: "image", id: image.id })),
+    [images]
+  );
+  const [zOrder, setZOrder] = useState<OrderedItem[]>([
+    ...postitItems,
+    ...(imageItems ?? []),
+  ]);
 
   useEffect(() => {
+    const current = [...postitItems, ...(imageItems ?? [])];
     setZOrder((prev) => {
-      const next = postits.map((_, idx) => idx);
-      if (prev.length === next.length) return prev;
-      return next;
+      const keep = prev.filter((p) =>
+        current.some((item) => item.type === p.type && item.id === p.id)
+      );
+      const add = current.filter(
+        (item) => !keep.some((k) => k.type === item.type && k.id === item.id)
+      );
+      return [...keep, ...add];
     });
-  }, [postits, postits.length]);
+  }, [postitItems, imageItems]);
 
   const SCENE_W = mandalaRadius * 2;
   const SCENE_H = mandalaRadius * 2;
@@ -50,11 +72,11 @@ export const useKonvaUtils = (postits: Postit[], mandalaRadius: number) => {
     [SCENE_H, SCENE_W]
   );
 
-  const bringToFront = useCallback((index: number) => {
-    setZOrder((prev) => {
-      const filtered = prev.filter((i) => i !== index);
-      return [...filtered, index];
-    });
+  const bringToFront = useCallback((target: OrderedItem) => {
+    setZOrder((prev) => [
+      ...prev.filter((x) => !(x.type === target.type && x.id === target.id)),
+      target,
+    ]);
   }, []);
 
   const getDimensionAndSectionFromCoordinates = useCallback(
