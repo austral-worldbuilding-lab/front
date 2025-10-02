@@ -35,11 +35,15 @@ export default function OrganizationUserRow({
   const [saving, setSaving] = useState(false);
 
   const dirty = draftRole !== prevRole;
-  
-  const availableRoles = ORGANIZATION_ROLES.filter(role => {
+
+  const availableRoles = ORGANIZATION_ROLES.filter((role) => {
     if (isCurrentUser) {
-      if ((initialRole === 'owner' || initialRole === 'admin') &&
-          (role === 'member' || role === 'viewer' || (role === 'admin' && initialRole === 'owner'))) {
+      if (
+        (initialRole === "owner" || initialRole === "admin") &&
+        (role === "member" ||
+          role === "viewer" ||
+          (role === "admin" && initialRole === "owner"))
+      ) {
         return false;
       }
     }
@@ -110,11 +114,13 @@ export default function OrganizationUserRow({
                   {r.charAt(0).toUpperCase() + r.slice(1)}
                 </SelectItem>
               ))}
-              {ORGANIZATION_ROLES.filter(r => !availableRoles.includes(r)).map((r) => (
-                <SelectItem 
-                  key={r} 
-                  value={r} 
-                  disabled 
+              {ORGANIZATION_ROLES.filter(
+                (r) => !availableRoles.includes(r)
+              ).map((r) => (
+                <SelectItem
+                  key={r}
+                  value={r}
+                  disabled
                   className="opacity-50 cursor-not-allowed"
                 >
                   {r.charAt(0).toUpperCase() + r.slice(1)} (No disponible)
@@ -124,7 +130,7 @@ export default function OrganizationUserRow({
           </Select>
         </div>
       ) : (
-        <Badge variant="secondary" className="text-xs">
+        <Badge variant="outline" className="text-xs">
           {prevRole.charAt(0).toUpperCase() + prevRole.slice(1)}
         </Badge>
       )}

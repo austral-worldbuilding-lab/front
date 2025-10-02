@@ -25,7 +25,7 @@ const buttonVariants = cva(
         secondary: "",
         tertiary: "",
         danger: "",
-        ghost: "",
+        white: "",
       },
     },
     compoundVariants: [
@@ -56,9 +56,9 @@ const buttonVariants = cva(
       },
       {
         variant: "filled",
-        color: "ghost",
+        color: "white",
         className:
-          "bg-transparent text-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+          "bg-white text-gray-800 hover:bg-gray-100 active:bg-gray-100",
       },
 
       // Outline variants
@@ -88,9 +88,9 @@ const buttonVariants = cva(
       },
       {
         variant: "outline",
-        color: "ghost",
+        color: "white",
         className:
-          "bg-transparent text-primary border-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+          "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 active:bg-gray-50",
       },
 
       // Text variants
@@ -120,9 +120,9 @@ const buttonVariants = cva(
       },
       {
         variant: "text",
-        color: "ghost",
+        color: "white",
         className:
-          "bg-transparent text-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+          "bg-transparent text-gray-800 hover:bg-gray-100 active:bg-gray-100",
       },
 
       // Ghost variants
@@ -152,9 +152,9 @@ const buttonVariants = cva(
       },
       {
         variant: "ghost",
-        color: "ghost",
+        color: "white",
         className:
-          "bg-transparent text-primary hover:bg-tertiary/5 active:bg-tertiary/10",
+          "bg-transparent text-gray-800 hover:bg-gray-100 active:bg-gray-100",
       },
     ],
     defaultVariants: {
@@ -173,7 +173,7 @@ interface ButtonProps
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
   width?: string;
-  buttonColor?: "primary" | "secondary" | "tertiary" | "danger" | "ghost";
+  buttonColor?: "primary" | "secondary" | "tertiary" | "danger" | "white";
   tooltipText?: string;
 }
 
@@ -222,4 +222,4 @@ function Button({
   return buttonContent;
 }
 
-export {Button, buttonVariants};
+export { Button, buttonVariants };

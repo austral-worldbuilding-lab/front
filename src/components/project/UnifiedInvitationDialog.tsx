@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Share2, Link as LinkIcon, Globe2, Check, Loader2, Copy } from "lucide-react";
+import {
+  Share2,
+  Link as LinkIcon,
+  Globe2,
+  Check,
+  Loader2,
+  Copy,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -73,7 +80,10 @@ export default function UnifiedInvitationDialog({
 
       setInviteUrl(result.inviteUrl);
     } catch (err: unknown) {
-      const error = err as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const error = err as {
+        response?: { status?: number; data?: { message?: string } };
+        message?: string;
+      };
       if (error?.response?.status === 403) {
         setError(
           isOrganization
@@ -109,7 +119,14 @@ export default function UnifiedInvitationDialog({
     } else {
       if (projectId && organizationId) void generateInviteLink();
     }
-  }, [open, role, projectId, organizationId, isOrganization, generateInviteLink]);
+  }, [
+    open,
+    role,
+    projectId,
+    organizationId,
+    isOrganization,
+    generateInviteLink,
+  ]);
 
   const copyLink = async () => {
     if (!inviteUrl) return;
@@ -154,7 +171,10 @@ export default function UnifiedInvitationDialog({
       setEmailSent(true);
       setEmail("");
     } catch (err: unknown) {
-      const error = err as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const error = err as {
+        response?: { status?: number; data?: { message?: string } };
+        message?: string;
+      };
       if (error?.response?.status === 403) {
         setError(
           isOrganization
@@ -162,7 +182,9 @@ export default function UnifiedInvitationDialog({
             : "No tenés permisos para enviar invitaciones. Solo los propietarios del proyecto pueden invitar usuarios."
         );
       } else if (error?.response?.status === 409) {
-        setError("Ya existe una invitación pendiente para este usuario o ya es miembro del proyecto.");
+        setError(
+          "Ya existe una invitación pendiente para este usuario o ya es miembro del proyecto."
+        );
       } else {
         setError(
           error?.response?.data?.message ||
@@ -183,10 +205,11 @@ export default function UnifiedInvitationDialog({
         <Button
           variant="outline"
           size="md"
+          color="white"
           aria-label="Compartir"
           className={className}
+          icon={<Share2 size={16} />}
         >
-          <Share2 className="w-4 h-4 mr-2" />
           Compartir
         </Button>
       </DialogTrigger>
@@ -298,7 +321,12 @@ export default function UnifiedInvitationDialog({
                 </div>
 
                 <div className="text-xs text-muted-foreground">
-                  Cualquiera en internet con el link puede {role === "viewer" ? "ver" : role === "member" ? "editar" : "administrar"}
+                  Cualquiera en internet con el link puede{" "}
+                  {role === "viewer"
+                    ? "ver"
+                    : role === "member"
+                    ? "editar"
+                    : "administrar"}
                 </div>
 
                 <Button
