@@ -12,7 +12,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute.tsx";
 import MandalaPage from "./pages/app/project/mandala/MandalaPage";
 import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
-import ProjectListPage from "./pages/app/project/ProjectListPage";
+import OrganizationPage from "./pages/app/project/OrganizationPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 import MyInvitationsPage from "@/pages/MyInvitationsPage";
 import InviteTokenPage from "@/pages/InviteTokenPage";
@@ -43,7 +43,7 @@ function App() {
         />
 
         <Route
-          path="/my-invitations"  
+          path="/my-invitations"
           element={
             <ProtectedLayout>
               <MyInvitationsPage />
@@ -70,15 +70,15 @@ function App() {
           <Route path="organization/" element={<OrganizationListPage />} />
           <Route
             path="organization/:organizationId/projects"
-            element={<ProjectListPage />}
+            element={<OrganizationPage />}
           />
           <Route
             path="organization/:organizationId/projects/:projectId"
             element={<ProjectPage />}
           />
           <Route
-              path="organization/:organizationId/projects/:projectId/timeline"
-              element={<TimelinePage />}
+            path="organization/:organizationId/projects/:projectId/timeline"
+            element={<TimelinePage />}
           />
 
           <Route

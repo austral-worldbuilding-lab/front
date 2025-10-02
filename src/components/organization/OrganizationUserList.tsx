@@ -2,7 +2,10 @@ import { useState } from "react";
 import useOrganizationUsers from "@/hooks/useOrganizationUsers";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
-import { removeOrganizationUser, updateOrganizationUserRole } from "@/services/userService";
+import {
+  removeOrganizationUser,
+  updateOrganizationUserRole,
+} from "@/services/userService";
 import OrganizationUserRow from "./OrganizationUserRow";
 import { Role } from "@/services/invitationService";
 import { useAuthContext } from "@/context/AuthContext";
@@ -13,40 +16,62 @@ interface OrganizationUserListProps {
   canManage: boolean;
 }
 
-const OrganizationUserList = ({ organizationId, canManage }: OrganizationUserListProps) => {
-  const { users, loading, error, hasPermission, refetch } = useOrganizationUsers(organizationId);
+const OrganizationUserList = ({
+  organizationId,
+  canManage,
+}: OrganizationUserListProps) => {
+  const { users, loading, error, hasPermission, refetch } =
+    useOrganizationUsers(organizationId);
   const { user } = useAuthContext();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  
+
   const currentUserId = user?.uid;
 
   const onUpdateRole = async (userId: string, newRole: Role) => {
     setActionError(null);
-    
-    const targetUser = users.find(u => u.id === userId);
+
+    const targetUser = users.find((u) => u.id === userId);
     const isCurrentUser = currentUserId === userId;
-    
-    if (isCurrentUser && targetUser &&
-        ((targetUser.role === 'owner' && newRole !== 'owner') ||
-         (targetUser.role === 'admin' && (newRole === 'member' || newRole === 'viewer')))) {
-      setActionError("No puedes reducir tu propio rol de administrador. Solicita a otro administrador que cambie tu rol.");
+
+    if (
+      isCurrentUser &&
+      targetUser &&
+      ((targetUser.role === "owner" && newRole !== "owner") ||
+        (targetUser.role === "admin" &&
+          (newRole === "member" || newRole === "viewer")))
+    ) {
+      setActionError(
+        "No puedes reducir tu propio rol de administrador. Solicita a otro administrador que cambie tu rol."
+      );
       return;
     }
-    
+
     try {
       setActionLoading(true);
       await updateOrganizationUserRole(organizationId, userId, newRole);
       await refetch();
     } catch (e: unknown) {
-      const error = e as { response?: { status?: number; data?: { statusCode?: number; message?: string } }; message?: string };
+      const error = e as {
+        response?: {
+          status?: number;
+          data?: { statusCode?: number; message?: string };
+        };
+        message?: string;
+      };
       if (error.response?.status === 409) {
-        setActionError("Debe haber al menos un propietario en la organización.");
+        setActionError(
+          "Debe haber al menos un propietario en la organización."
+        );
         return;
       }
-      setActionError(error?.response?.data?.message || error?.message || "Error al actualizar el rol");
+      setActionError(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Error al actualizar el rol"
+      );
     } finally {
       setActionLoading(false);
     }
@@ -72,18 +97,31 @@ const OrganizationUserList = ({ organizationId, canManage }: OrganizationUserLis
       setConfirmOpen(false);
       setSelectedUserId(null);
     } catch (e: unknown) {
-      const error = e as { response?: { status?: number; data?: { statusCode?: number; message?: string } }; message?: string };
+      const error = e as {
+        response?: {
+          status?: number;
+          data?: { statusCode?: number; message?: string };
+        };
+        message?: string;
+      };
       if (error.response?.status === 409) {
-        setActionError("No se puede eliminar al último propietario de la organización.");
+        setActionError(
+          "No se puede eliminar al último propietario de la organización."
+        );
         return;
       }
-      setActionError(error?.response?.data?.message || error?.message || "Error al eliminar el usuario");
+      setActionError(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Error al eliminar el usuario"
+      );
     } finally {
       setActionLoading(false);
     }
   };
 
-  const selectedUserName = users.find(u => u.id === selectedUserId)?.username || 'usuario';
+  const selectedUserName =
+    users.find((u) => u.id === selectedUserId)?.username || "usuario";
 
   if (loading && users.length === 0) {
     return (
@@ -94,14 +132,16 @@ const OrganizationUserList = ({ organizationId, canManage }: OrganizationUserLis
   }
 
   if (error) {
-        if (!hasPermission) {
-            return (
-                <div className="text-center py-4">
-                    <p className="text-gray-600">Error al cargar usuarios de la organización</p>
-                </div>
-            );
-        }
-    
+    if (!hasPermission) {
+      return (
+        <div className="text-center py-4">
+          <p className="text-gray-600">
+            Error al cargar usuarios de la organización
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="text-center py-4">
         <p className="text-gray-600">Error al cargar usuarios</p>
@@ -112,9 +152,8 @@ const OrganizationUserList = ({ organizationId, canManage }: OrganizationUserLis
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Usuarios de la organización</h3>
         <span className="text-sm text-muted-foreground">
-          {users.length} usuario{users.length !== 1 ? 's' : ''}
+          {users.length} usuario{users.length !== 1 ? "s" : ""}
         </span>
       </div>
 
@@ -126,7 +165,10 @@ const OrganizationUserList = ({ organizationId, canManage }: OrganizationUserLis
 
       <div className="space-y-2">
         {users.map((user) => (
-          <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+          <div
+            key={user.id}
+            className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+          >
             <OrganizationUserRow
               userId={user.id}
               name={user.username}
@@ -136,7 +178,7 @@ const OrganizationUserList = ({ organizationId, canManage }: OrganizationUserLis
               isCurrentUser={currentUserId === user.id}
               onConfirm={onUpdateRole}
             />
-            
+
             {canManage && currentUserId !== user.id && (
               <Button
                 variant="ghost"
