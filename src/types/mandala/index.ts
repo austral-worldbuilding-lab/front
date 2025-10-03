@@ -1,3 +1,5 @@
+import { AcceptedTypes } from "@/hooks/useUploadFiles";
+
 export interface Level {
   id: string;
   name: string;
@@ -31,7 +33,7 @@ export interface Postit {
   from?: { id: string; name: string };
   fromSummary?: string[];
   type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";
-  editingUsers?: EditingUser[]
+  editingUsers?: EditingUser[];
 }
 
 export interface Tag {
@@ -148,18 +150,17 @@ export interface MessageDTO {
 export interface Organization {
   id: string;
   name: string;
-  accessType?: 'full' | 'limited';
+  accessType?: "full" | "limited";
 }
 export interface FileItem {
   id: string;
   file_name: string;
-  file_type: string;
+  file_type: AcceptedTypes;
   source_scope: string;
   full_path: string;
   url: string;
   selected: boolean;
 }
-
 
 export interface Provocation {
   projectsOrigin: ProvocationProject[];
@@ -170,11 +171,11 @@ export interface Provocation {
   isCached?: boolean;
 }
 
-export interface ProvocationProject{
-    id: string,
-    name: string,
-    description: string,
-    organizationId: string,
+export interface ProvocationProject {
+  id: string;
+  name: string;
+  description: string;
+  organizationId: string;
 }
 
 export interface EditingUser {
