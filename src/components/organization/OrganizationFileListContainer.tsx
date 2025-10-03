@@ -61,7 +61,7 @@ const OrganizationFileListContainer = ({
         </div>
       </div>
 
-      <p className="flex items-start gap-1 text-sm italic text-gray-500 mt-1">
+      <p className="flex items-start gap-1 text-xs italic text-gray-500 mt-1 leading-4">
         Los siguientes archivos darán contexto a la IA a la hora de generar
         mandalas, postits o preguntas. Selecciónalos adecuadamente.
       </p>
@@ -95,7 +95,7 @@ const OrganizationFileListContainer = ({
         )}
 
         {!error && !isLoading && files.length > 0 && (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 max-h-[450px] overflow-y-auto">
             {scopeOrder.map((scopeKey) =>
               groupedFiles[scopeKey] ? (
                 <div key={scopeKey}>
