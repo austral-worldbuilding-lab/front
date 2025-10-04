@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import {CreateProject, Project, BackendTag} from "@/types/mandala";
+import {CreateProject, Project, BackendTag, CreateProjectFromQuestion} from "@/types/mandala";
 import { BackendTimelineResponse} from "@/utils/timelineUtils.ts";
 
 export interface CreateMandalaDto {
@@ -93,17 +93,32 @@ export const deleteTagService = async (
   }
 };
 
-export const createProjectFromProvocation = async (body: {
+export const createProjectFromProvocationId = async (body: {
   fromProvocationId: string;
   organizationId: string;
 }): Promise<Project> => {
   const response = await axiosInstance.post<{ data: Project }>(
-      `/project/from-provocation`,
+      `/project/from-provocationId`,
       body
   );
 
   if (response.status !== 201 && response.status !== 200) {
-    throw new Error( "Error creando proyecto desde provocación");
+    throw new Error( "Error creando proyecto desde el id de la provocación");
+  }
+
+  return response.data.data;
+};
+
+export const createProjectFromQuestion = async (
+  body: CreateProjectFromQuestion
+): Promise<Project> => {
+  const response = await axiosInstance.post<{ data: Project }>(
+    `/project/from-provocation`,
+    body
+  );
+
+  if (response.status !== 201 && response.status !== 200) {
+    throw new Error("Error creando proyecto desde provocación");
   }
 
   return response.data.data;
