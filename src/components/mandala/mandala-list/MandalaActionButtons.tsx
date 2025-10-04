@@ -1,7 +1,15 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MergeIcon, PlusIcon, SquaresIntersect, XIcon } from "lucide-react";
+import {
+  MergeIcon,
+  PlusIcon,
+  Search,
+  Square,
+  SquaresIntersect,
+  XIcon,
+} from "lucide-react";
 import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
+import { Input } from "@/components/ui/input";
 
 interface MandalaActionButtonsProps {
   selectionMode: boolean;
@@ -14,6 +22,7 @@ interface MandalaActionButtonsProps {
   onToggleSelectionMode: () => void;
   onUnifyClick: () => void;
   onCompareClick: () => void;
+  onSearchChange?: (value: string) => void;
 }
 
 /**
@@ -31,20 +40,31 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
   onToggleSelectionMode,
   onUnifyClick,
   onCompareClick,
+  onSearchChange,
 }) => {
   const { canEdit } = useProjectPermissions(projectId);
   return (
-    <div className="flex flex-row w-full justify-between items-center overflow-x-auto">
+    <div className="relative flex flex-row w-full justify-between overflow-x-auto gap-2">
       {/* Botón de crear mandala - Solo visible cuando no está en modo selección y puede editar */}
       {!selectionMode && canEdit && (
-        <Button
-          color="primary"
-          className="mb-4"
-          onClick={onCreateClick}
-          icon={<PlusIcon size={16} />}
-        >
-          Crear Mandala
-        </Button>
+        <>
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-5 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              className="pl-9"
+              placeholder="Buscar por nombre"
+              onChange={(e) => onSearchChange?.(e.target.value)}
+            />
+          </div>
+          <Button
+            color="primary"
+            className="mb-4"
+            onClick={onCreateClick}
+            icon={<PlusIcon size={16} />}
+          >
+            Crear Mandala
+          </Button>
+        </>
       )}
 
       <div className="flex gap-2">
@@ -58,7 +78,7 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
                 className="mb-4 text-gray-500 hover:text-gray-700"
                 onClick={onToggleSelectionMode}
               >
-                Seleccionar
+                <Square />
               </Button>
             ) : (
               <>

@@ -93,7 +93,7 @@ const ProjectFileListContainer = ({ projectId }: ProjectFileListContainer) => {
         )}
 
         {!error && !isLoading && files.length > 0 && (
-          <div className="divide-y divide-gray-100 flex-1 overflow-y-auto min-h-0">
+          <div className="divide-y divide-gray-100 flex-1 overflow-y-auto max-h-[450px] min-h-0">
             {scopeOrder.map((scopeKey) =>
               groupedFiles[scopeKey] ? (
                 <div key={scopeKey}>

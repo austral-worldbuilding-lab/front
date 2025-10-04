@@ -13,6 +13,7 @@ interface MandalaListContainerProps {
   children: React.ReactNode;
   onCreateClick: () => void;
   mandalasExists: boolean;
+  onSearchChange?: (value: string) => void;
 }
 
 /**
@@ -26,6 +27,7 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
   children,
   onCreateClick,
   mandalasExists,
+  onSearchChange,
 }) => {
   // Estado de selección
   const [selectionMode, setSelectionMode] = useState(false);
@@ -136,6 +138,7 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
         onToggleSelectionMode={toggleSelectionMode}
         onUnifyClick={handleOpenUnifyModal}
         onCompareClick={handleOpenCompareModal}
+        onSearchChange={onSearchChange}
       />
 
       {/* Contenido principal (inyectado como children) */}
