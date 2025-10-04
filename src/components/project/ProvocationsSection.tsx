@@ -26,7 +26,7 @@ export const ProvocationsSection = ({
   const navigate = useNavigate();
 
   return (
-    <div className="w-full flex flex-col gap-4 p-4 border border-gray-200 rounded-xl bg-white max-h-[500px] overflow-hidden">
+    <div className="w-full flex flex-col gap-4 p-5 border border-gray-200 rounded-xl bg-white max-h-[500px] overflow-hidden">
       <div className="flex flex-row gap-2 justify-between shrink-0">
         <div className="flex flex-row gap-3 items-center">
           <History />

@@ -8,18 +8,14 @@ import { FileItem } from "@/types/mandala";
 import FileRow from "../organization/FileRow";
 
 interface ProjectFileListContainer {
-  organizationId: string;
   projectId: string;
 }
 
-const ProjectFileListContainer = ({
-  organizationId,
-  projectId,
-}: ProjectFileListContainer) => {
+const ProjectFileListContainer = ({ projectId }: ProjectFileListContainer) => {
   const [searchText, setSearchText] = useState("");
   const { files, isLoading, error, refetch } = useFiles(
-    "organization",
-    organizationId,
+    "project",
+    projectId,
     true
   );
 
@@ -56,8 +52,8 @@ const ProjectFileListContainer = ({
             />
           </div>
           <FileLoader
-            scope="organization"
-            id={organizationId}
+            scope="project"
+            id={projectId}
             onUploadComplete={refetch}
           />
         </div>

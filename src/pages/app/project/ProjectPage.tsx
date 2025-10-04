@@ -24,7 +24,7 @@ const ProjectPage = () => {
         </Link>
       </div>
 
-      <div className="w-full flex flex-col gap-4 flex-1">
+      <div className="w-full flex flex-col gap-6 flex-1">
         <div className="flex justify-between">
           <div className="flex flex-col gap-2">
             <Folder size={40} className="text-primary" />
@@ -45,10 +45,7 @@ const ProjectPage = () => {
         </div>
         <div className="mt-4 flex flex-1 flex-row gap-6 justify-between w-full">
           <MandalaListPage />
-          <ProjectFileListContainer
-            organizationId={organizationId ?? ""}
-            projectId={projectId ?? ""}
-          />
+          <ProjectFileListContainer projectId={projectId ?? ""} />
         </div>
         <ProvocationsSection
           organizationId={organizationId ?? ""}
