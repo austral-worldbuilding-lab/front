@@ -7,7 +7,7 @@ interface AuthContextType {
     user: FirebaseUser | null;
     backendUser: BackendUser | null;
     login: (email: string, password: string) => Promise<boolean>;
-    register: (email: string, password: string) => Promise<boolean>;
+    register: (email: string, password: string, fullName: string) => Promise<boolean>;
     logout: () => Promise<void>;
     isAuth: () => boolean;
     isLoading: boolean;
