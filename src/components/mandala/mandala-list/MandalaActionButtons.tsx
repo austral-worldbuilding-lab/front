@@ -34,7 +34,7 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
 }) => {
   const { canEdit } = useProjectPermissions(projectId);
   return (
-    <div className="flex flex-row w-full justify-between items-center">
+    <div className="flex flex-row w-full justify-between items-center overflow-x-auto">
       {/* Botón de crear mandala - Solo visible cuando no está en modo selección y puede editar */}
       {!selectionMode && canEdit && (
         <Button

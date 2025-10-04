@@ -65,7 +65,7 @@ const MandalasPaginatedList = ({
   return (
     <>
       {/* Contenedor de la lista */}
-      <div className="bg-white rounded-lg shadow-sm border">
+      <div className="bg-white rounded-lg border flex-1">
         {/* Estado de carga */}
         {loading ? (
           <div className="flex justify-center items-center min-h-[100px]">

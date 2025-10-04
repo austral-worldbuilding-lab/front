@@ -5,6 +5,7 @@ import TimelineTree from "./TimelineTree";
 import useTimeline from "@/hooks/useTimeline";
 import { useNavigate } from "react-router-dom";
 import { ProvocationDialog } from "./ProvocationDialog";
+import { ProvocationItem } from "./ProvocationItem";
 
 export type ProvocationsSectionProps = {
   organizationId: string;
@@ -15,14 +16,19 @@ export const ProvocationsSection = ({
   organizationId,
   projectId,
 }: ProvocationsSectionProps) => {
-  const { provocations, createManual, generateAI } = useProvocations(projectId);
+  const {
+    provocations,
+    createManual,
+    generateAI,
+    loading: loadingAI,
+  } = useProvocations(projectId);
   const { data, loading } = useTimeline(projectId);
   const navigate = useNavigate();
 
   return (
-    <div className="w-full flex flex-col gap-4 p-4 align-middle border border-gray-200 rounded-xl bg-white overflow-hidden min-h-0">
+    <div className="w-full flex flex-col gap-4 p-4 border border-gray-200 rounded-xl bg-white max-h-[500px] overflow-hidden">
       <div className="flex flex-row gap-2 justify-between shrink-0">
-        <div className="flex flex-row gap-3 align-middle">
+        <div className="flex flex-row gap-3 items-center">
           <History />
           <span className="font-semibold text-xl text-foreground">
             Provocaciones
@@ -31,38 +37,43 @@ export const ProvocationsSection = ({
 
         <ProvocationDialog onSave={createManual} />
       </div>
-      <div className="flex-1 w-full flex flex-row gap-4 overflow-hidden min-h-0">
-        <div className="flex flex-col flex-1 border border-gray-200 rounded-xl p-4 gap-4 overflow-hidden min-h-0">
-          <div className="w-full flex flex-row justify-between align-middle shrink-0">
+      <div className="flex-1 w-full flex flex-row gap-4 overflow-hidden">
+        <div className="flex flex-col flex-1 border border-gray-200 rounded-xl p-4 gap-4 overflow-hidden">
+          <div className="w-full flex flex-row justify-between items-center shrink-0">
             <div className="flex flex-row gap-2">
               <Lightbulb />
               <span className="font-semibold text-l text-foreground">
                 Ideas
               </span>
             </div>
-            <Button onClick={generateAI} color="secondary" icon={<Sparkles />}>
+            <Button
+              onClick={generateAI}
+              loading={loadingAI}
+              color="secondary"
+              icon={<Sparkles />}
+            >
               Generar
             </Button>
           </div>
-          <div className="flex-1 border border-gray-200 rounded-xl overflow-y-auto min-h-0">
-            {provocations.map((provocation, index) => (
-              <div className="flex flex-col">
-                {index !== 0 && <hr className="border-t border-gray-200" />}
-                <div className="flex flex-col p-3">
-                  <span className="font-semibold text-foreground">
-                    {provocation.title}
-                  </span>
-                  <span className="text-foreground">
-                    {provocation.description}
+          <div className="flex flex-1 border border-gray-200 rounded-xl overflow-hidden">
+            <div className="w-full h-full overflow-y-auto custom-scrollbar">
+              {provocations.length === 0 && (
+                <div className="p-4 w-full h-full flex justify-center items-center">
+                  <span>
+                    No hay provocaciones. Crea provocaciones para explorar
+                    nuevos mundos.
                   </span>
                 </div>
-              </div>
-            ))}
+              )}
+              {provocations.map((provocation, index) => (
+                <ProvocationItem provocation={provocation} index={index} />
+              ))}
+            </div>
           </div>
         </div>
         {loading && (
-          <div className="flex-1 justify-center align-middle">
-            <span>Cargando Timeline</span>
+          <div className="flex flex-1 items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         )}
         {data && (
@@ -77,7 +88,7 @@ export const ProvocationsSection = ({
                 )
               }
             />
-            <TimelineTree data={data}></TimelineTree>
+            <TimelineTree className="rounded-xl" data={data}></TimelineTree>
           </div>
         )}
       </div>
