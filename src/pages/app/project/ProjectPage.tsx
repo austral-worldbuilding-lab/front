@@ -18,6 +18,7 @@ import useUpdateProject from "@/hooks/useUpdateProject.ts";
 import TimelineTree from "@/components/project/TimelineTree.tsx";
 import useTimeline from "@/hooks/useTimeline.ts";
 import CreatedWorldsModal from "@/components/project/CreatedWorldsModal.tsx";
+import AppLayout from "@/components/layout/AppLayout";
 
 
 const ProjectPage = () => {
@@ -89,7 +90,8 @@ const ProjectPage = () => {
     }
 
     return (
-        <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
+        <AppLayout>
+            <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
             <div className="absolute top-10 left-10">
                 <Link to={`/app/organization/${organizationId}/projects`}>
                     <ArrowLeftIcon className="w-5 h-5" />
@@ -263,6 +265,7 @@ const ProjectPage = () => {
                 />
             )}
         </div>
+        </AppLayout>
     );
 };
 

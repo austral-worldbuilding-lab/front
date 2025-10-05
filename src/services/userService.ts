@@ -7,9 +7,12 @@ export interface CreateUserData {
 }
 
 export interface User {
+    id?: string;
     firebaseUid: string;
     email: string;
     username: string;
+    fullName?: string;
+    is_active?: boolean;
 }
 
 export interface ProjectUser {
@@ -57,4 +60,9 @@ export async function updateOrganizationUserRole(organizationId: string, userId:
 
 export async function removeOrganizationUser(organizationId: string, userId: string): Promise<void> {
     await axiosInstance.delete(`/organization/${organizationId}/users/${userId}`);
+}
+
+export async function getCurrentUser(): Promise<User> {
+    const response = await axiosInstance.get<{data: User}>('/user/me');
+    return response.data.data;
 }
