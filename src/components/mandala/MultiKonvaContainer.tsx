@@ -1,38 +1,17 @@
-import React, {
-  useMemo,
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
-import { Stage, Layer } from "react-konva";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useMemo, useCallback } from "react";
 import {
   Character,
   Mandala as MandalaData,
   Postit,
   Tag,
 } from "@/types/mandala";
-import { Layer as KonvaLayer } from "konva/lib/Layer";
-import PostIt from "./postits/PostIt";
-import CharacterIcon from "./characters/CharacterIcon";
-import { useKonvaUtils } from "@/hooks/useKonvaUtils";
-import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 import useMandala from "@/hooks/useMandala";
-import MandalaConcentric from "./MandalaConcentric";
-import MandalaSectors from "./MandalaSectors";
-import MandalaPerson from "./MandalaPerson";
-import { Levels, Sectors } from "@/constants/mandala";
-import { useContextMenu } from "@/hooks/useContextMenu";
-import { useEditPostIt } from "@/hooks/useEditPostit";
-import EditPostItModal from "./postits/EditPostitModal";
-import NewPostItModal from "./postits/NewPostItModal";
-import MandalaMenu from "./MandalaMenu";
-import { useParams } from "react-router-dom";
-import { useProjectAccess } from "../../hooks/useProjectAccess";
+import { MandalaBackground } from "./MandalaBackground";
+import { MandalaCanvas } from "./MandalaCanvas";
 
 interface MultiKonvaContainerProps {
-  // unified: MandalaData; // ⬅ eliminado
   sourceMandalaIds: string[];
   appliedFilters: Record<string, string[]>;
   onPostItUpdate: (id: string, updates: Partial<Postit>) => Promise<boolean>;
@@ -57,418 +36,18 @@ interface MultiKonvaContainerProps {
   onDblClick?: (postitId: string) => void;
   onBlur?: (postitId: string) => void;
   onContextMenu?: (postitId: string) => void;
+  hidePreviews?: boolean;
 }
 
 const GAP = 400;
 const PREVIEW_SCALE = 0.4;
 const PREVIEW_Y_NUDGE = -355;
 
-// ---------- Background ----------
-const MandalaBackground: React.FC<{
-  mandala: MandalaData;
-  offsetX: number;
-  offsetY: number;
-  scale: number;
-}> = ({ mandala, offsetX, offsetY, scale }) => {
-  const config = mandala.mandala.configuration;
-  const scaleCount = config?.scales?.length || 1;
-  const maxRadius = 150 * scaleCount;
-
-  function getInterpolatedLevelColor(index: number, total: number): string {
-    const from = [200, 220, 255, 0.9];
-    const to = [140, 190, 255, 0.3];
-    const t = total > 1 ? index / (total - 1) : 0;
-    const interpolated = from.map((start, i) => start + (to[i] - start) * t);
-    const [r, g, b, a] = interpolated;
-    return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(
-      b
-    )}, ${a.toFixed(2)})`;
-  }
-
-  const levels =
-    config?.scales?.map((name, index) => {
-      return {
-        id: `level-${index}`,
-        name,
-        radius: 150 * (index + 1),
-        color: getInterpolatedLevelColor(index, scaleCount),
-      };
-    }) ?? Levels;
-
-  const sectors =
-    config?.dimensions?.map((dimension, index) => ({
-      id: `sector-${index}`,
-      name: dimension.name,
-      question: `¿Qué pasa en ${dimension.name}?`,
-      color: dimension.color,
-    })) ?? Sectors;
-
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: offsetX,
-        top: offsetY,
-        width: maxRadius * 2,
-        height: maxRadius * 2,
-        transform: `scale(${scale})`,
-        transformOrigin: "center",
-      }}
-    >
-      <div className="relative w-full h-full flex items-center justify-center">
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <MandalaConcentric levels={levels} />
-          <MandalaPerson type={mandala.mandala.type} />
-          <MandalaSectors
-            sectors={sectors}
-            maxRadius={maxRadius}
-            levels={levels}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ---------- Canvas ----------
-const MandalaCanvas: React.FC<{
-  mandala: MandalaData;
-  offsetX: number;
-  offsetY: number;
-  scale: number;
-  readOnly: boolean;
-  appliedFilters: Record<string, string[]>;
-  onPostItUpdate?: (id: string, updates: Partial<Postit>) => Promise<boolean>;
-  onCharacterUpdate?: (
-    index: number,
-    updates: Partial<Character>
-  ) => Promise<boolean | void>;
-  onPostItDelete?: (id: string) => Promise<boolean>;
-  onCharacterDelete?: (id: string) => Promise<boolean>;
-  onPostItChildCreate?: (
-    content: string,
-    tags: Tag[],
-    postitFatherId?: string
-  ) => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
-  onDragStart: (postitId: string) => void;
-  onDragEnd: (postitId: string) => void;
-  tags?: Tag[];
-  onNewTag?: (tag: Tag) => void;
-  state?: ReactZoomPanPinchState | null;
-  onDblClick?: (postitId: string) => void;
-  onBlur?: (postitId: string) => void;
-  onContextMenu?: (postitId: string) => void;
-}> = ({
-  mandala,
-  offsetX,
-  offsetY,
-  scale,
-  readOnly,
-  appliedFilters,
-  onPostItUpdate,
-  onCharacterUpdate,
-  onPostItDelete,
-  onCharacterDelete,
-  onPostItChildCreate,
-  onMouseEnter,
-  onMouseLeave,
-  onDragStart,
-  onDragEnd,
-  tags,
-  onNewTag,
-  state,
-  onContextMenu,
-  onBlur,
-  onDblClick,
-}) => {
-  const { projectId } = useParams<{ projectId: string }>();
-  const { hasAccess, userRole } = useProjectAccess(projectId || "");
-  const canEdit =
-    !!hasAccess &&
-    (userRole === null || ["owner", "admin", "member"].includes(userRole));
-
-  const [, setEditableIndex] = useState<number | null>(null);
-  const [, setEditingContent] = useState<string | null>(null);
-  const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
-  const [selectedPostItId, setSelectedPostItId] = useState<string | undefined>(
-    undefined
-  );
-
-  const maxRadius = 150 * (mandala.mandala.configuration?.scales.length || 1);
-  const canvasSize = maxRadius * 2;
-
-  const charactersLayerRef = useRef<KonvaLayer>(null);
-
-  const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(
-    mandala.postits,
-    maxRadius
-  );
-  const {
-    toAbsolute,
-    toRelative,
-    getDimensionAndSectionFromCoordinates,
-    zOrder,
-    bringToFront,
-  } = useKonvaUtils(mandala.postits, maxRadius);
-
-  const {
-    contextMenu,
-    showContextMenu,
-    hideContextMenu,
-    handleDelete,
-    handleCreateChild,
-    handleEditPostIt,
-  } = useContextMenu(
-    onPostItDelete || (() => Promise.resolve(false)),
-    onCharacterDelete || (() => Promise.resolve(false)),
-    setEditableIndex,
-    setEditingContent,
-    (id) => {
-      setSelectedPostItId(id);
-      setIsChildPostItModalOpen(true);
-    },
-    (id) => {
-      const postit = mandala.postits.find((p) => p.id === id);
-      if (postit) {
-        openEditModal(mandala.id, postit);
-      }
-    }
-  );
-
-  const lastPostItIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (
-      contextMenu.visible &&
-      contextMenu.type === "postit" &&
-      contextMenu.postItId
-    ) {
-      lastPostItIdRef.current = contextMenu.postItId;
-    }
-  }, [contextMenu.visible, contextMenu.type, contextMenu.postItId]);
-  useEffect(() => {
-    if (!contextMenu.visible && lastPostItIdRef.current) {
-      onBlur?.(lastPostItIdRef.current);
-      lastPostItIdRef.current = null;
-    }
-  }, [contextMenu.visible, onBlur]);
-
-  const {
-    isOpen: isEditModalOpen,
-    postit: editingPostit,
-    open: openEditModal,
-    close: closeEditModal,
-    handleUpdate,
-  } = useEditPostIt();
-
-  const dimensionColors = useMemo(() => {
-    return (
-      mandala.mandala.configuration?.dimensions?.reduce((acc, d) => {
-        acc[d.name] = d.color;
-        return acc;
-      }, {} as Record<string, string>) ?? {}
-    );
-  }, [mandala.mandala.configuration?.dimensions]);
-
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: offsetX,
-        top: offsetY,
-        width: canvasSize,
-        height: canvasSize,
-        transform: `scale(${scale})`,
-        transformOrigin: "center",
-      }}
-    >
-      <Stage width={canvasSize} height={canvasSize} listening={!readOnly}>
-        <Layer>
-          {zOrder.map((item, orderIndex) => {
-            const id = item.id;
-            if (item.type !== "postit") return;
-            const p = mandala.postits.find((postit) => postit.id === id)!;
-            if (!shouldShowPostIt(p, appliedFilters)) return null;
-            const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
-            return (
-              <PostIt
-                key={`p-${mandala.id}-${p.id}`}
-                postit={p}
-                color={dimensionColors[p.dimension] || "#cccccc"}
-                position={{ x, y }}
-                onDragStart={() => {
-                  if (!readOnly) {
-                    onDragStart?.(p.id!);
-                    bringToFront({ type: "postit", id: id });
-                  }
-                }}
-                onDragEnd={async (e) => {
-                  if (readOnly || !onPostItUpdate) return;
-                  onDragEnd?.(p.id!);
-                  const rel = toRelativePostit(e.target.x(), e.target.y());
-                  const { dimension, section } =
-                    getDimensionAndSectionFromCoordinates(
-                      rel.x,
-                      rel.y,
-                      mandala.mandala.configuration?.dimensions.map(
-                        (d) => d.name
-                      ) || [],
-                      mandala.mandala.configuration?.scales || []
-                    );
-                  await onPostItUpdate(p.id!, {
-                    coordinates: { ...p.coordinates, x: rel.x, y: rel.y },
-                    dimension,
-                    section,
-                  });
-                }}
-                onMouseEnter={onMouseEnter || (() => {})}
-                onMouseLeave={onMouseLeave || (() => {})}
-                onDblClick={() => {
-                  bringToFront({ type: "postit", id: id });
-                  onDblClick?.(p.id!);
-                }}
-                onContentChange={(newValue, id) => {
-                  if (onPostItUpdate) {
-                    onPostItUpdate(id, { content: newValue });
-                  }
-                }}
-                onBlur={() => {
-                  window.getSelection()?.removeAllRanges();
-                  setEditableIndex(null);
-                  onBlur?.(p.id!);
-                }}
-                onContextMenu={(e, i) => {
-                  showContextMenu(e, i, "postit");
-                  onContextMenu?.(p.id!);
-                }}
-                mandalaRadius={maxRadius}
-                zindex={orderIndex}
-              />
-            );
-          })}
-        </Layer>
-
-        <Layer ref={charactersLayerRef}>
-          {mandala.characters?.map((character) => {
-            if (!shouldShowCharacter(character, appliedFilters)) return null;
-            const { x, y } = toAbsolute(
-              character.position.x,
-              character.position.y
-            );
-            return (
-              <CharacterIcon
-                key={`c-${mandala.id}-${character.id}`}
-                mandalaRadius={maxRadius}
-                character={character}
-                position={{ x, y }}
-                onDragStart={() => {
-                  if (!readOnly) {
-                    onDragStart?.(character.id!);
-                  }
-                }}
-                onDragEnd={async (e) => {
-                  if (readOnly || !onCharacterUpdate) return;
-                  onDragEnd?.(character.id!);
-                  const rel = toRelative(e.target.x(), e.target.y());
-                  const { dimension, section } =
-                    getDimensionAndSectionFromCoordinates(
-                      rel.x,
-                      rel.y,
-                      mandala.mandala.configuration?.dimensions.map(
-                        (d) => d.name
-                      ) || [],
-                      mandala.mandala.configuration?.scales || []
-                    );
-                  const idx =
-                    mandala.characters?.findIndex(
-                      (c) => c.id === character.id
-                    ) ?? -1;
-                  if (idx >= 0)
-                    await onCharacterUpdate(idx, {
-                      id: character.id, // ⭐ agregamos id para ruteo seguro
-                      position: { x: rel.x, y: rel.y },
-                      dimension,
-                      section,
-                    });
-                }}
-                onMouseEnter={onMouseEnter || (() => {})}
-                onMouseLeave={onMouseLeave || (() => {})}
-                onContextMenu={(e) =>
-                  showContextMenu(e, character.id, "character")
-                }
-              />
-            );
-          })}
-        </Layer>
-      </Stage>
-
-      {contextMenu.visible && (
-        <div
-          style={{
-            position: "absolute",
-            top: contextMenu.y,
-            left: contextMenu.x,
-            zIndex: 1000,
-            transform: state ? `scale(${1 / state.scale})` : "none",
-            transformOrigin: "top left",
-          }}
-          onClick={hideContextMenu}
-        >
-          <MandalaMenu
-            onDelete={handleDelete}
-            onCreateChild={
-              contextMenu.type === "postit" ? handleCreateChild : undefined
-            }
-            onEdit={
-              contextMenu.type === "postit" ? handleEditPostIt : undefined
-            }
-            isContextMenu={true}
-            canEdit={canEdit}
-          />
-        </div>
-      )}
-
-      <NewPostItModal
-        isOpen={isChildPostItModalOpen}
-        onOpenChange={setIsChildPostItModalOpen}
-        tags={tags || []}
-        onNewTag={onNewTag || (() => {})}
-        postItFatherId={selectedPostItId}
-        onCreate={(content, tags, postItFatherId, _dimension, _section) => {
-          if (onPostItChildCreate) {
-            onPostItChildCreate(content, tags, postItFatherId);
-          }
-          setIsChildPostItModalOpen(false);
-          setSelectedPostItId(undefined);
-        }}
-      />
-      {editingPostit && (
-        <EditPostItModal
-          isOpen={isEditModalOpen}
-          onOpenChange={(open) => {
-            if (!open) closeEditModal();
-          }}
-          tags={tags || []}
-          onUpdate={handleUpdate}
-          initialContent={editingPostit.content}
-          initialTags={editingPostit.tags}
-          onNewTag={onNewTag || (() => {})}
-        />
-      )}
-    </div>
-  );
-};
-
-// ---------- Multi ----------
 const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
-  // unified, // ⬅ eliminado
   sourceMandalaIds,
   appliedFilters,
   onPostItUpdate,
-  onCharacterUpdate,
   onPostItDelete,
-  onCharacterDelete,
   onPostItChildCreate,
   state,
   onMouseEnter,
@@ -480,8 +59,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
   onContextMenu,
   tags,
   onNewTag,
+  hidePreviews = false,
 }) => {
-  // hooks por fuente
   const s1 = useMandala(sourceMandalaIds[0] || "");
   const s2 = useMandala(sourceMandalaIds[1] || "");
   const s3 = useMandala(sourceMandalaIds[2] || "");
@@ -502,7 +81,6 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
       hook: x.hook!,
     }));
 
-  // map id -> mandalaId (dueño)
   const idToMandalaId = useMemo(() => {
     const m = new Map<string, string>();
     for (const s of sourceMandalas) {
@@ -512,7 +90,6 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     return m;
   }, [sourceMandalas]);
 
-  // índice de updaters por mandalaId (para rutear desde el merged)
   const updaterByMandalaId = useMemo(() => {
     const map = new Map<
       string,
@@ -537,7 +114,6 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     return map;
   }, [sourceMandalas]);
 
-  // merged en tiempo real
   const merged: MandalaData | null = useMemo(() => {
     if (sourceMandalas.length === 0) return null;
     const base = sourceMandalas[0].mandala;
@@ -552,7 +128,6 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     } as MandalaData;
   }, [sourceMandalas]);
 
-  // wrappers (mantienen firma original)
   const routedPostItUpdate = useCallback(
     async (postitId: string, d: Partial<Postit>) => {
       const owner = idToMandalaId.get(postitId);
@@ -560,7 +135,6 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         const u = updaterByMandalaId.get(owner);
         if (u) return u.updatePostit(postitId, d);
       }
-      // fallback al prop global si algo falla
       return onPostItUpdate(postitId, d);
     },
     [idToMandalaId, updaterByMandalaId, onPostItUpdate]
@@ -609,13 +183,51 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     [idToMandalaId, updaterByMandalaId, sourceMandalas]
   );
 
-  // layout basado en merged
   if (!state || !merged) return <div />;
 
   const unifiedMaxRadius =
     150 * (merged.mandala.configuration?.scales.length || 1);
   const unifiedSize = unifiedMaxRadius * 2;
 
+  if (hidePreviews) {
+    return (
+      <div
+        id="multi-konva"
+        style={{
+          position: "relative",
+          width: unifiedSize,
+          height: unifiedSize,
+        }}
+      >
+        <MandalaBackground mandala={merged} offsetX={0} offsetY={0} scale={1} />
+        <MandalaCanvas
+          mandala={merged}
+          offsetX={0}
+          offsetY={0}
+          scale={1}
+          readOnly={false}
+          appliedFilters={appliedFilters}
+          onPostItUpdate={routedPostItUpdate}
+          onCharacterUpdate={routedCharacterUpdate}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onPostItDelete={routedDeletePostit}
+          onCharacterDelete={(id) => routedDeleteCharacter(id)}
+          onPostItChildCreate={onPostItChildCreate}
+          tags={tags}
+          onNewTag={onNewTag}
+          state={state}
+          onDblClick={onDblClick}
+          onBlur={onBlur}
+          onContextMenu={onContextMenu}
+        />
+      </div>
+    );
+  }
+
+  // ----- MODO CON PREVIEWS (layout original) -----
   const gap = GAP;
   const previewScale = PREVIEW_SCALE;
   const previewSize = unifiedSize * previewScale;
@@ -675,7 +287,7 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         scale={1}
       />
 
-      {/* canvases fuentes (editables + tags/child/delete) */}
+      {/* canvases fuentes */}
       {sourceMandalas.map((s, index) => {
         const offsetY = previewStartY + index * (previewSize + gap);
         return (
@@ -704,7 +316,7 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         );
       })}
 
-      {/* canvas grande merged (ruteado por dueño) */}
+      {/* canvas grande merged */}
       <MandalaCanvas
         mandala={merged}
         offsetX={unifiedX - unifiedSize / 2}
