@@ -19,6 +19,7 @@ import RootRedirect from "@/components/common/RootRedirect.tsx";
 import OrganizationListPage from "@/pages/app/project/OrganizationListPage.tsx";
 import OrganizationInviteTokenPage from "./pages/OrganizationInviteTokenPage";
 import TimelinePage from "@/pages/app/project/TimelinePage.tsx";
+import SolutionsPage from "@/pages/app/project/SolutionPage.tsx";
 
 // Layout component for all protected routes
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
@@ -78,6 +79,10 @@ function App() {
           <Route
             path="organization/:organizationId/projects/:projectId/timeline"
             element={<TimelinePage />}
+          />
+          <Route
+              path="organization/:organizationId/projects/:projectId/solutions"
+              element={<SolutionsPage />}
           />
 
           <Route
