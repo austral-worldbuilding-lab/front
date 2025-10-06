@@ -9,6 +9,7 @@ import {useCreateOrganization} from "@/hooks/useCreateOrganization.ts";
 import MandalaMenu from "@/components/mandala/MandalaMenu";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 import { useDeleteOrganization } from "@/hooks/useDeleteOrganizations.ts";
+import AppLayout from "@/components/layout/AppLayout";
 
 const OrganizationListPage = () => {
     const { organizations: fetchedOrgs, nextPageOrgs, loading, error, page, setPage } = useOrganizations();
@@ -69,7 +70,8 @@ const OrganizationListPage = () => {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center pt-12">
+        <AppLayout>
+            <div className="min-h-screen flex flex-col items-center pt-12">
             <div className="w-full max-w-2xl px-4">
                 <h1 className="text-2xl font-bold mb-6 text-center">Organizaciones</h1>
                 <Button
@@ -147,7 +149,8 @@ const OrganizationListPage = () => {
                 isDanger
                 onConfirm={handleConfirmDelete}
             />
-        </div>
+            </div>
+        </AppLayout>
     );
 };
 

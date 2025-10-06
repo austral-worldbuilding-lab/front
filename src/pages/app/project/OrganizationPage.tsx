@@ -12,6 +12,7 @@ import OrganizationUserCircles from "@/components/organization/OrganizationUserC
 import OrganizationProjectsList from "@/components/project/OrganizationProjectsList";
 import OrganizationFileListContainer from "@/components/organization/OrganizationFileListContainer";
 import { DimensionDto } from "@/types/mandala";
+import AppLayout from "@/components/layout/AppLayout";
 
 const OrganizationPage = () => {
   const { organizationId } = useParams();
@@ -90,7 +91,7 @@ const OrganizationPage = () => {
   };
 
   return (
-    <>
+    <AppLayout>
       <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
         <div className="absolute top-10 left-10">
           <Link to={`/app/organization/`}>
@@ -149,7 +150,7 @@ const OrganizationPage = () => {
           allowProvocationMode={true}
         />
       </div>
-    </>
+    </AppLayout>
   );
 };
 

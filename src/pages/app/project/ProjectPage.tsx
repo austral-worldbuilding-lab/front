@@ -7,6 +7,7 @@ import { ProvocationsSection } from "@/components/project/ProvocationsSection";
 import ProjectFileListContainer from "@/components/project/ProjectFileListContainer";
 import ProjectUserCircles from "@/components/project/ProjectUserCircles";
 import MandalaListPage from "./mandala/MandalaListPage";
+import AppLayout from "@/components/layout/AppLayout";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -17,7 +18,8 @@ const ProjectPage = () => {
   const { project } = useProject(projectId!);
 
   return (
-    <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
+      <AppLayout>
+      <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
       <div className="absolute top-10 left-10">
         <Link to={`/app/organization/${organizationId}/projects`}>
           <ArrowLeftIcon size={20} />
@@ -53,6 +55,7 @@ const ProjectPage = () => {
         />
       </div>
     </div>
+      </AppLayout>
   );
 };
 
