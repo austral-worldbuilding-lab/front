@@ -1,24 +1,7 @@
 import type { Solution} from "@/types/mandala"
 // import axiosInstance from "@/lib/axios.ts";
 
-const mockSolutions: Solution[] = [
-    {
-        id: "1",
-        title: "Sistema de Reciclaje Comunitario",
-        description: "Implementación de puntos de reciclaje inteligentes con incentivos vecinales.",
-        problem: "Alta generación de residuos no clasificados en zonas urbanas.",
-        impact: { level: "high", description: "Reduce un 40% los residuos no reciclados." },
-        provocations: ["¿Qué pasa si los ciudadanos obtienen beneficios por reciclar?"],
-    },
-    {
-        id: "2",
-        title: "Red de Transporte Compartido",
-        description: "Sistema de carpooling con rutas optimizadas.",
-        problem: "Congestión vehicular y alta emisión de CO2.",
-        impact: { level: "medium", description: "Reducción del 25% del tráfico urbano." },
-        provocations: ["¿Y si compartimos más viajes?", "¿Qué pasaría si cada viaje suma puntos verdes?"],
-    },
-];
+const mockSolutions: Solution[] = [];
 
 export const solutionService = {
     async getAllSolutions(projectId: string): Promise<Solution[]> {
