@@ -4,6 +4,7 @@ export interface CreateUserData {
     firebaseUid: string;
     email: string;
     username: string;
+    fullName: string;
 }
 
 export interface User {

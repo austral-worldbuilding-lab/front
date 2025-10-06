@@ -8,13 +8,14 @@ import { RETURN_TO_KEY } from "@/components/auth/ProtectedRoute";
 
 const RegisterPage = () => {
   const { register, error } = useAuthContext();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const handleRegister = async () => {
-    const success = await register(email, password);
+    const success = await register(email, password, fullName);
     if (success) {
       const inviteToken = searchParams.get("invite");
       if (inviteToken) {
@@ -77,6 +78,13 @@ const RegisterPage = () => {
         {/* Formulario */}
         <div className="w-full sm:w-1/2 p-4 flex flex-col gap-4">
           <CustomInput
+            placeholder="Nombre completo"
+            color="foreground"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+          />
+          <CustomInput
             placeholder="Correo electrónico"
             color="foreground"
             value={email}
@@ -101,7 +109,9 @@ const RegisterPage = () => {
             }
           />
 
-          <Button onClick={handleRegister}>Crear cuenta</Button>
+          <Button onClick={handleRegister} disabled={!fullName.trim() || !email.trim() || !password.trim()}>
+            Crear cuenta
+          </Button>
 
           {error &&
             !error.includes("auth/invalid-email") &&
