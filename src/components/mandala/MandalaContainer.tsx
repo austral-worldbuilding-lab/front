@@ -230,7 +230,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         <Button
           onClick={() =>
             navigate(
-              `/app/organization/${organizationId}/projects/${projectId}/mandalas`
+              `/app/organization/${organizationId}/projects/${projectId}`
             )
           }
           className="flex items-center gap-2 cursor-pointer"

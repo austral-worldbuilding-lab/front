@@ -13,6 +13,7 @@ interface ProjectNode {
 interface TimelineTreeProps {
     data: ProjectNode;
     onWorldClick?: (node: ProjectNode) => void;
+    className?: string
 }
 
 interface Position {
@@ -25,7 +26,7 @@ interface DraggableNode extends d3.HierarchyPointNode<ProjectNode> {
     _dragged?: boolean;
 }
 
-export default function TimelineTree({ data, onWorldClick }: TimelineTreeProps) {
+export default function TimelineTree({ data, onWorldClick, className }: TimelineTreeProps) {
     const ref = useRef<SVGSVGElement | null>(null);
     const navigate = useNavigate();
     const { organizationId } = useParams<{ organizationId: string }>();
@@ -266,5 +267,5 @@ export default function TimelineTree({ data, onWorldClick }: TimelineTreeProps) 
         }
     }, [data, onWorldClick, navigate, organizationId]);
 
-    return <svg ref={ref}></svg>;
+    return <svg className={className} ref={ref}></svg>;
 }

@@ -10,7 +10,6 @@ import LoginPage from "@/pages/LoginPage.tsx";
 import RegisterPage from "@/pages/RegisterPage.tsx";
 import ProtectedRoute from "@/components/auth/ProtectedRoute.tsx";
 import MandalaPage from "./pages/app/project/mandala/MandalaPage";
-import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
 import OrganizationPage from "./pages/app/project/OrganizationPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
@@ -81,10 +80,6 @@ function App() {
             element={<TimelinePage />}
           />
 
-          <Route
-            path="organization/:organizationId/projects/:projectId/mandalas"
-            element={<MandalaListPage />}
-          />
           <Route
             path="organization/:organizationId/projects/:projectId/mandala/:mandalaId"
             element={<MandalaPage />}
