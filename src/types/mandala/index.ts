@@ -195,3 +195,15 @@ export interface EditingUser {
   id: string;
   displayName: string;
 }
+
+export interface Solution {
+  id: string;
+  title: string;
+  description: string;
+  problem: string;
+  impact: {
+    level: "low" | "medium" | "high";
+    description: string;
+  };
+  provocations: string[];
+}
