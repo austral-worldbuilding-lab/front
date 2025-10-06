@@ -2,7 +2,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
 import { ArrowLeftIcon, Folder } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createProject } from "@/services/projectService.ts";
+import { createProject, createProjectFromQuestion } from "@/services/projectService.ts";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import { getOrganizationById } from "@/services/organizationService.ts";
@@ -11,6 +11,7 @@ import { useOrganizationPermissions } from "@/hooks/usePermissionsLoader";
 import OrganizationUserCircles from "@/components/organization/OrganizationUserCircles";
 import OrganizationProjectsList from "@/components/project/OrganizationProjectsList";
 import OrganizationFileListContainer from "@/components/organization/OrganizationFileListContainer";
+import { DimensionDto } from "@/types/mandala";
 import AppLayout from "@/components/layout/AppLayout";
 
 const OrganizationPage = () => {
@@ -54,6 +55,35 @@ const OrganizationPage = () => {
     } catch (error) {
       setErrorMsg(
         error instanceof Error ? error.message : "Error al crear proyecto"
+      );
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleCreateProjectFromProvocation = async (data: {
+    question: string;
+    name?: string;
+    dimensions?: DimensionDto[];
+    scales?: string[];
+  }) => {
+    setCreating(true);
+    try {
+      if (!organizationId) throw new Error("ID de organización no disponible");
+
+      const project = await createProjectFromQuestion({
+        question: data.question,
+        organizationId: organizationId,
+        name: data.name,
+        dimensions: data.dimensions,
+        scales: data.scales,
+      });
+
+      setModalOpen(false);
+      navigate(`/app/organization/${organizationId}/projects/${project.id}`);
+    } catch (error) {
+      setErrorMsg(
+        error instanceof Error ? error.message : "Error al crear proyecto desde provocación"
       );
     } finally {
       setCreating(false);
@@ -106,13 +136,18 @@ const OrganizationPage = () => {
 
         <CreateEntityModal
           open={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false);
+            setErrorMsg(null);
+          }}
           onCreate={handleCreateProject}
+          onCreateFromProvocation={handleCreateProjectFromProvocation}
           loading={creating}
           error={errorMsg}
-          title="Crear Proyecto"
+          title="Crear nuevo proyecto"
           placeholder="Nombre del proyecto"
           showQuestions={true}
+          allowProvocationMode={true}
         />
       </div>
     </AppLayout>

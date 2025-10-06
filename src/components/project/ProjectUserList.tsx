@@ -9,6 +9,7 @@ import { Role } from "@/services/invitationService";
 import { useAuthContext } from "@/context/AuthContext";
 import { isRoleDemotion } from "@/utils/roleUtils";
 import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
+import { Trash2 } from "lucide-react";
 
 interface ProjectUserListProps {
   projectId: string;
@@ -106,15 +107,17 @@ const ProjectUserList = ({ projectId }: ProjectUserListProps) => {
 
           {canManageUsers && (
             <Button
-              variant="outline"
+              variant="ghost"
+              size={"sm"}
               color="danger"
               loading={actionLoading && selectedUserId === u.id}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-2"
               onClick={() => {
                 setSelectedUserId(u.id);
                 setConfirmOpen(true);
               }}
             >
-              Eliminar
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
