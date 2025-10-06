@@ -122,6 +122,19 @@ export interface CreateProject {
   organizationId: string;
 }
 
+export interface DimensionDto {
+  name: string;
+  color: string;
+}
+
+export interface CreateProjectFromQuestion {
+  question: string;
+  organizationId: string;
+  name?: string;
+  dimensions?: DimensionDto[];
+  scales?: string[];
+}
+
 export interface FilterOption {
   label: string;
   color?: string;

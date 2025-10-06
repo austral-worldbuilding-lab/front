@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { provocationsService } from "@/services/provocationService";
-import { createProjectFromProvocation } from "@/services/projectService";
+import { createProjectFromProvocationId } from "@/services/projectService";
 import useProvocations from "@/hooks/useProvocations";
 import { Provocation } from "@/types/mandala";
 
@@ -29,7 +29,7 @@ export default function useProvocationToProject() {
                 provId = saved.id;
             }
 
-            const newProject = await createProjectFromProvocation({
+            const newProject = await createProjectFromProvocationId({
                 fromProvocationId: provId,
                 organizationId: organizationId!,
             });
