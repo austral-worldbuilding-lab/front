@@ -7,6 +7,7 @@ import {FileScope} from "@/services/filesService.ts";
 import {useFiles} from "@/hooks/useFiles.ts";
 import { useProjectAccess } from "@/hooks/useProjectAccess";
 import { useParams } from "react-router-dom";
+import SelectAllFilesButton from "../files/SelectAllFilesButton";
 
 
 interface Props {
@@ -30,7 +31,16 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
         canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
     }
     
-    const { files, isLoading, error, refetch } = useFiles(scope, id, true);
+    const { 
+        files, 
+        isLoading, 
+        error, 
+        refetch, 
+        selectAllFiles, 
+        selectedCount, 
+        totalCount, 
+        isUpdatingSelections 
+    } = useFiles(scope, id, true);
 
     return (
         <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -44,8 +54,18 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
                 </SheetHeader>
 
                 {canEdit && (
-                    <div className="mb-1">
-                        <FileLoader onUploadComplete={refetch} scope={scope} id={id}/>
+                    <div className="mb-4 space-y-2">
+                        <div className="flex justify-between items-center">
+                            <FileLoader onUploadComplete={refetch} scope={scope} id={id}/>
+                            {totalCount > 0 && (
+                                <SelectAllFilesButton
+                                    selectedCount={selectedCount}
+                                    totalCount={totalCount}
+                                    onSelectAll={selectAllFiles}
+                                    isUpdating={isUpdatingSelections}
+                                />
+                            )}
+                        </div>
                     </div>
                 )}
 

@@ -6,6 +6,7 @@ import Loader from "@/components/common/Loader";
 import FileLoader from "@/components/project/FileLoader";
 import FileRow from "./FileRow";
 import { FileItem } from "@/types/mandala";
+import SelectAllFilesButton from "../files/SelectAllFilesButton";
 
 interface OrganizationFileListContainerProps {
   organizationId: string;
@@ -15,11 +16,16 @@ const OrganizationFileListContainer = ({
   organizationId,
 }: OrganizationFileListContainerProps) => {
   const [searchText, setSearchText] = useState("");
-  const { files, isLoading, error, refetch } = useFiles(
-    "organization",
-    organizationId,
-    true
-  );
+  const { 
+    files, 
+    isLoading, 
+    error, 
+    refetch, 
+    selectAllFiles, 
+    selectedCount, 
+    totalCount, 
+    isUpdatingSelections 
+  } = useFiles("organization", organizationId, true);
 
   const filteredFiles = files.filter((file) =>
     file.file_name.toLowerCase().includes(searchText.toLowerCase())
@@ -59,6 +65,16 @@ const OrganizationFileListContainer = ({
             onUploadComplete={refetch}
           />
         </div>
+        {totalCount > 0 && (
+          <div className="flex justify-end">
+            <SelectAllFilesButton
+              selectedCount={selectedCount}
+              totalCount={totalCount}
+              onSelectAll={selectAllFiles}
+              isUpdating={isUpdatingSelections}
+            />
+          </div>
+        )}
       </div>
 
       <p className="flex items-start gap-1 text-xs italic text-gray-500 mt-1 leading-4">
