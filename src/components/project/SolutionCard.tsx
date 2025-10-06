@@ -1,5 +1,5 @@
 import { BarChart2 } from "lucide-react"; // ícono de métrica
-import { Solution } from "@/pages/app/project/SolutionPage.tsx";
+import { Solution} from "@/types/mandala"
 
 interface SolutionCardProps {
     solution: Solution;

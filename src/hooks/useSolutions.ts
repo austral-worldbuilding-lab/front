@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Solution } from "@/pages/app/project/SolutionPage";
+import type { Solution} from "@/types/mandala"
 import { solutionService } from "@/services/solutionService";
 
 export default function useSolutions(projectId: string) {

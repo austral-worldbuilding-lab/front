@@ -1,4 +1,4 @@
-import type { Solution } from "@/pages/app/project/SolutionPage";
+import type { Solution} from "@/types/mandala"
 // import axiosInstance from "@/lib/axios.ts";
 
 const mockSolutions: Solution[] = [

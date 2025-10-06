@@ -20,9 +20,8 @@ import {
 import { BarChart2 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandItem, CommandEmpty } from "@/components/ui/command";
-import type { Solution } from "@/pages/app/project/SolutionPage";
 import useProvocations from "@/hooks/useProvocations";
-import type { Provocation } from "@/types/mandala";
+import type {Provocation, Solution} from "@/types/mandala";
 
 interface CreateSolutionModalProps {
     open: boolean;

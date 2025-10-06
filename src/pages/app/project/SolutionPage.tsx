@@ -4,18 +4,8 @@ import SolutionCard from "@/components/project/SolutionCard";
 import { Plus, ArrowLeftIcon, Folder } from "lucide-react";
 import { CreateSolutionModal } from "@/components/project/CreateSolutionModal";
 import useSolutions from "@/hooks/useSolutions";
+import {Solution} from "@/types/mandala";
 
-export interface Solution {
-    id: string;
-    title: string;
-    description: string;
-    problem: string;
-    impact: {
-        level: "low" | "medium" | "high";
-        description: string;
-    };
-    provocations: string[];
-}
 
 export default function SolutionsPage() {
     const { projectId, organizationId } = useParams<{ projectId: string; organizationId: string }>();
