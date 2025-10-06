@@ -1,10 +1,11 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import {MoreVertical, Pencil, Plus, Trash2} from "lucide-react";
+import {MoreVertical, Pencil, Plus, Trash2, Download} from "lucide-react";
 
 interface MandalaMenuProps {
   onDelete: () => void;
   onCreateChild?: () => void;
   onEdit?: () => void;
+  onDownloadSummary?: () => void;
   isContextMenu?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -14,7 +15,8 @@ interface MandalaMenuProps {
 const MandalaMenu = ({
   onDelete,
   onCreateChild,
-    onEdit,
+  onEdit,
+  onDownloadSummary,
   isContextMenu = false,
   open,
   onOpenChange,
@@ -40,6 +42,15 @@ const MandalaMenu = ({
                   <Pencil size={14} />
                   Editar
               </button>
+          )}
+          {onDownloadSummary && (
+            <button
+              className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
+              onClick={onDownloadSummary}
+            >
+              <Download size={14} />
+              Descargar Resumen
+            </button>
           )}
           {canEdit && (
             <button
@@ -75,12 +86,21 @@ const MandalaMenu = ({
             Crear Hijo
           </DropdownMenu.Item>
         )}
+        {onDownloadSummary && (
+          <DropdownMenu.Item
+            className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary flex items-center gap-2"
+            onSelect={onDownloadSummary}
+          >
+            <Download size={14} />
+            Descargar Resumen
+          </DropdownMenu.Item>
+        )}
         <DropdownMenu.Item
-            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
+          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
           onSelect={onDelete}
         >
-            <Trash2 size={14} />
-            Eliminar
+          <Trash2 size={14} />
+          Eliminar
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

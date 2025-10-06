@@ -4,6 +4,7 @@ import MandalaMenu from "../MandalaMenu";
 import { CompleteApiMandala } from "@/types/mandala";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { useDownloadSummary } from "@/hooks/useDownloadSummary";
 
 interface MandalaListItemProps {
   mandala: CompleteApiMandala;
@@ -32,11 +33,25 @@ const MandalaListItem = ({
   isSelected = false,
   onToggleSelection,
 }: MandalaListItemProps) => {
+  // Hook para manejar la descarga del resumen (solo para mandalas de comparación)
+  const { downloadSummary, loading: downloadLoading } = useDownloadSummary(
+    projectId,
+    mandala.id,
+    mandala.name
+  );
+
   // Manejador del click en el ítem cuando está en modo selección
   const handleItemClick = (e: React.MouseEvent) => {
     if (selectionMode) {
       e.preventDefault();
       onToggleSelection?.();
+    }
+  };
+
+  // Manejador para la descarga del resumen
+  const handleDownloadSummary = () => {
+    if (!downloadLoading) {
+      downloadSummary();
     }
   };
 
@@ -131,6 +146,7 @@ const MandalaListItem = ({
             open={dropdownOpen === mandala.id}
             onOpenChange={onOpenChange}
             onDelete={onDelete}
+            onDownloadSummary={mandala.type === "OVERLAP_SUMMARY" ? handleDownloadSummary : undefined}
           />
         )}
       </div>
