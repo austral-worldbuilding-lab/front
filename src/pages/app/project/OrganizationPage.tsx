@@ -17,7 +17,10 @@ import AppLayout from "@/components/layout/AppLayout";
 const OrganizationPage = () => {
   const { organizationId } = useParams();
   const { projects, loading, page, setPage, error } = useProjects(
-    organizationId!
+    organizationId!,
+    1,
+    10,
+    true
   );
   const navigate = useNavigate();
   const { user } = useAuthContext();
