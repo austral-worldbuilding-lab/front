@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import type { Solution} from "@/types/mandala"
+import type { Solution } from "@/types/mandala";
 import { solutionService } from "@/services/solutionService";
 
 export default function useSolutions(projectId: string) {
     const [solutions, setSolutions] = useState<Solution[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(false); // loading de toda la página
+    const [creating, setCreating] = useState(false); // loading del botón
     const [error, setError] = useState<string | null>(null);
 
     const reload = async () => {
         if (!projectId) return;
-        setLoading(true);
+        setLoadingPage(true);
         setError(null);
 
         try {
@@ -19,13 +20,13 @@ export default function useSolutions(projectId: string) {
             setError(err.message ?? "Error cargando soluciones");
             setSolutions([]);
         } finally {
-            setLoading(false);
+            setLoadingPage(false);
         }
     };
 
-    const create = async (body: Omit<Solution, "id">) => {
+    const createSolution = async (body: Omit<Solution, "id">) => {
         if (!projectId) return;
-        setLoading(true);
+        setCreating(true);
         setError(null);
 
         try {
@@ -36,7 +37,7 @@ export default function useSolutions(projectId: string) {
             setError(err.message ?? "Error creando solución");
             throw err;
         } finally {
-            setLoading(false);
+            setCreating(false);
         }
     };
 
@@ -44,5 +45,5 @@ export default function useSolutions(projectId: string) {
         reload();
     }, [projectId]);
 
-    return { solutions, loading, error, reload, create, setSolutions };
+    return { solutions, loadingPage, creating, error, reload, createSolution, setSolutions };
 }
