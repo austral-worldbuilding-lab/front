@@ -354,7 +354,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                 <>
                   <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col"></div>
 
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
+                  <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
                     {mandala?.mandala.type === "OVERLAP" && (
                       <ViewToggle
                         viewMode={viewMode}
