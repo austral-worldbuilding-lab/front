@@ -159,6 +159,14 @@ export const useUploadFiles = (
     }
   };
 
+  const clearSelectedFiles = () => {
+    setSelectedFiles([]);
+    setVideoWarning(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return {
     fileInputRef,
     selectedFiles,
@@ -168,5 +176,6 @@ export const useUploadFiles = (
     uploadFiles,
     videoWarning,
     setVideoWarning,
+    clearSelectedFiles,
   };
 };

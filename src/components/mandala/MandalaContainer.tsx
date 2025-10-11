@@ -354,7 +354,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                 <>
                   <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col"></div>
 
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
+                  <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
                     {mandala?.mandala.type === "OVERLAP" && (
                       <ViewToggle
                         viewMode={viewMode}
@@ -400,23 +400,18 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     />
                   </div>
 
-                  {(mandala.mandala.type === "CHARACTER" ||
-                    viewMode === "overlap") && (
-                    <>
-                      {mandala.mandala.type !== "OVERLAP_SUMMARY" && (
-                        <Buttons
-                          onCreatePostIt={handleCreatePostIt}
-                          onCreateCharacter={handleCreateCharacter}
-                          currentMandalaId={mandalaId}
-                          onNewTag={handleNewTag}
-                          tags={tags}
-                          loading={isCreatingCharacter}
-                        />
-                      )}
-                      <ZoomControls scale={state?.scale} />
-                      <SupportButton />
-                    </>
+                  {mandala.mandala.type === "CHARACTER" && (
+                    <Buttons
+                      onCreatePostIt={handleCreatePostIt}
+                      onCreateCharacter={handleCreateCharacter}
+                      currentMandalaId={mandalaId}
+                      onNewTag={handleNewTag}
+                      tags={tags}
+                      loading={isCreatingCharacter}
+                    />
                   )}
+                  <ZoomControls scale={state?.scale} />
+                  <SupportButton />
 
                   {/* UNA SOLA LLAMADA a MultiKonvaContainer para OVERLAP */}
                   {mandala.mandala.type === "OVERLAP" ? (

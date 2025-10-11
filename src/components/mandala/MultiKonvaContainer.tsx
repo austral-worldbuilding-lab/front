@@ -3,6 +3,7 @@ import React, { useMemo, useCallback } from "react";
 import {
   Character,
   Mandala as MandalaData,
+  MandalaImage,
   Postit,
   Tag,
 } from "@/types/mandala";
@@ -86,6 +87,7 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     for (const s of sourceMandalas) {
       for (const p of s.mandala.postits ?? []) m.set(p.id!, s.id);
       for (const c of s.mandala.characters ?? []) m.set(c.id!, s.id);
+      for (const img of s.mandala.images ?? []) m.set(img.id, s.id);
     }
     return m;
   }, [sourceMandalas]);
@@ -101,6 +103,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         ) => Promise<boolean | void>;
         deletePostit: (id: string) => Promise<boolean>;
         deleteCharacter: (idx: number) => Promise<boolean>;
+        updateImage: (id: string, d: Partial<MandalaImage>) => Promise<boolean>;
+        deleteImage: (id: string) => Promise<boolean>;
       }
     >();
     for (const s of sourceMandalas) {
@@ -109,6 +113,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         updateCharacter: s.hook.updateCharacter,
         deletePostit: s.hook.deletePostit,
         deleteCharacter: s.hook.deleteCharacter,
+        updateImage: s.hook.updateImage,
+        deleteImage: s.hook.deleteImage,
       });
     }
     return map;
@@ -125,6 +131,7 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
       },
       postits: sourceMandalas.flatMap((s) => s.mandala.postits ?? []),
       characters: sourceMandalas.flatMap((s) => s.mandala.characters ?? []),
+      images: sourceMandalas.flatMap((s) => s.mandala.images ?? []),
     } as MandalaData;
   }, [sourceMandalas]);
 
@@ -183,6 +190,30 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
     [idToMandalaId, updaterByMandalaId, sourceMandalas]
   );
 
+  const routedImageUpdate = useCallback(
+    async (imageId: string, d: Partial<MandalaImage>) => {
+      const owner = idToMandalaId.get(imageId);
+      if (owner) {
+        const u = updaterByMandalaId.get(owner);
+        if (u) return u.updateImage(imageId, d);
+      }
+      return false;
+    },
+    [idToMandalaId, updaterByMandalaId]
+  );
+
+  const routedDeleteImage = useCallback(
+    async (imageId: string) => {
+      const owner = idToMandalaId.get(imageId);
+      if (owner) {
+        const u = updaterByMandalaId.get(owner);
+        if (u) return u.deleteImage(imageId);
+      }
+      return false;
+    },
+    [idToMandalaId, updaterByMandalaId]
+  );
+
   if (!state || !merged) return <div />;
 
   const unifiedMaxRadius =
@@ -209,6 +240,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
           appliedFilters={appliedFilters}
           onPostItUpdate={routedPostItUpdate}
           onCharacterUpdate={routedCharacterUpdate}
+          onImageUpdate={routedImageUpdate}
+          onImageDelete={routedDeleteImage}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           onDragStart={onDragStart}
@@ -307,6 +340,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
             onDragEnd={onDragEnd}
             onPostItUpdate={s.hook.updatePostit}
             onCharacterUpdate={(idx, d) => s.hook.updateCharacter(idx, d)}
+            onImageUpdate={s.hook.updateImage}
+            onImageDelete={s.hook.deleteImage}
             onPostItDelete={s.hook.deletePostit}
             onCharacterDelete={(id) => routedDeleteCharacter(id)}
             onPostItChildCreate={onPostItChildCreate}
@@ -326,6 +361,8 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         appliedFilters={appliedFilters}
         onPostItUpdate={routedPostItUpdate}
         onCharacterUpdate={routedCharacterUpdate}
+        onImageUpdate={routedImageUpdate}
+        onImageDelete={routedDeleteImage}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         onDragStart={onDragStart}
