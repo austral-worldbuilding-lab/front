@@ -34,6 +34,7 @@ export interface Postit {
   fromSummary?: string[];
   type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";
   editingUsers?: EditingUser[];
+  scale?: number;
 }
 
 export interface Tag {

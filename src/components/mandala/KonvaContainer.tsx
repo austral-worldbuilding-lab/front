@@ -175,7 +175,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   }, [mandala.mandala.configuration?.dimensions]);
 
   const handleOnDragEndPostIt = async (
-    e: KonvaEventObject<DragEvent>,
+    e: KonvaEventObject<Event>,
     id: string,
     postit: Postit
   ) => {
@@ -192,6 +192,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       coordinates: { ...postit.coordinates, x: rel.x, y: rel.y },
       dimension,
       section,
+      scale: postit.scale ?? 1,
     });
     onDragEnd(postit.id!);
   };
@@ -346,6 +347,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   isUnifiedMandala={mandala.mandala.type === "OVERLAP"}
                   currentMandalaName={mandala.mandala.name}
                   zindex={orderIndex}
+                  onTransformEnd={async (e, scale) => {
+                    handleOnDragEndPostIt(e, p.id!, { ...p, scale: scale });
+                  }}
                 />
               );
             }
