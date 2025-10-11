@@ -1,14 +1,19 @@
 import { useEditPostIt } from "@/hooks/useEditPostit";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils";
 import { useProjectAccess } from "@/hooks/useProjectAccess";
-import { Character, Mandala, Postit, Tag } from "@/types/mandala";
-import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
+import { Character, Mandala, MandalaImage, Postit, Tag } from "@/types/mandala";
+import {
+  shouldShowCharacter,
+  shouldShowPostIt,
+  shouldShowImage,
+} from "@/utils/filterUtils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { useParams } from "react-router-dom";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
+import MandalaImageComponent from "./images/MandalaImage";
 import MandalaMenu from "./MandalaMenu";
 import NewPostItModal from "./postits/NewPostItModal";
 import EditPostItModal from "./postits/EditPostitModal";
@@ -29,6 +34,11 @@ export const MandalaCanvas: React.FC<{
   ) => Promise<boolean | void>;
   onPostItDelete?: (id: string) => Promise<boolean>;
   onCharacterDelete?: (id: string) => Promise<boolean>;
+  onImageUpdate?: (
+    id: string,
+    updates: Partial<MandalaImage>
+  ) => Promise<boolean>;
+  onImageDelete?: (id: string) => Promise<boolean>;
   onPostItChildCreate?: (
     content: string,
     tags: Tag[],
@@ -55,6 +65,8 @@ export const MandalaCanvas: React.FC<{
   onCharacterUpdate,
   onPostItDelete,
   onCharacterDelete,
+  onImageUpdate,
+  onImageDelete,
   onPostItChildCreate,
   onMouseEnter,
   onMouseLeave,
@@ -87,7 +99,8 @@ export const MandalaCanvas: React.FC<{
 
   const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(
     mandala.postits,
-    maxRadius
+    maxRadius,
+    mandala.images
   );
   const {
     toAbsolute,
@@ -95,7 +108,7 @@ export const MandalaCanvas: React.FC<{
     getDimensionAndSectionFromCoordinates,
     zOrder,
     bringToFront,
-  } = useKonvaUtils(mandala.postits, maxRadius);
+  } = useKonvaUtils(mandala.postits, maxRadius, mandala.images);
 
   const {
     contextMenu,
@@ -118,7 +131,8 @@ export const MandalaCanvas: React.FC<{
       if (postit) {
         openEditModal(mandala.id, postit);
       }
-    }
+    },
+    onImageDelete || (() => Promise.resolve(false))
   );
 
   const lastPostItIdRef = useRef<string | null>(null);
@@ -175,65 +189,119 @@ export const MandalaCanvas: React.FC<{
         <Layer>
           {zOrder.map((item, orderIndex) => {
             const id = item.id;
-            if (item.type !== "postit") return;
-            const p = mandala.postits.find((postit) => postit.id === id)!;
-            if (!shouldShowPostIt(p, appliedFilters)) return null;
-            const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
-            return (
-              <PostIt
-                key={`p-${mandala.id}-${p.id}`}
-                postit={p}
-                color={dimensionColors[p.dimension] || "#cccccc"}
-                position={{ x, y }}
-                onDragStart={() => {
-                  if (!readOnly) {
-                    onDragStart?.(p.id!);
+
+            if (item.type === "postit") {
+              const p = mandala.postits.find((postit) => postit.id === id)!;
+              if (!shouldShowPostIt(p, appliedFilters)) return null;
+              const { x, y } = toAbsolutePostit(
+                p.coordinates.x,
+                p.coordinates.y
+              );
+              return (
+                <PostIt
+                  key={`p-${mandala.id}-${p.id}`}
+                  postit={p}
+                  color={dimensionColors[p.dimension] || "#cccccc"}
+                  position={{ x, y }}
+                  onDragStart={() => {
+                    if (!readOnly) {
+                      onDragStart?.(p.id!);
+                      bringToFront({ type: "postit", id: id });
+                    }
+                  }}
+                  onDragEnd={async (e) => {
+                    if (readOnly || !onPostItUpdate) return;
+                    onDragEnd?.(p.id!);
+                    const rel = toRelativePostit(e.target.x(), e.target.y());
+                    const { dimension, section } =
+                      getDimensionAndSectionFromCoordinates(
+                        rel.x,
+                        rel.y,
+                        mandala.mandala.configuration?.dimensions.map(
+                          (d) => d.name
+                        ) || [],
+                        mandala.mandala.configuration?.scales || []
+                      );
+                    await onPostItUpdate(p.id!, {
+                      coordinates: { ...p.coordinates, x: rel.x, y: rel.y },
+                      dimension,
+                      section,
+                    });
+                  }}
+                  onMouseEnter={onMouseEnter || (() => {})}
+                  onMouseLeave={onMouseLeave || (() => {})}
+                  onDblClick={() => {
                     bringToFront({ type: "postit", id: id });
-                  }
-                }}
-                onDragEnd={async (e) => {
-                  if (readOnly || !onPostItUpdate) return;
-                  onDragEnd?.(p.id!);
-                  const rel = toRelativePostit(e.target.x(), e.target.y());
-                  const { dimension, section } =
-                    getDimensionAndSectionFromCoordinates(
-                      rel.x,
-                      rel.y,
-                      mandala.mandala.configuration?.dimensions.map(
-                        (d) => d.name
-                      ) || [],
-                      mandala.mandala.configuration?.scales || []
-                    );
-                  await onPostItUpdate(p.id!, {
-                    coordinates: { ...p.coordinates, x: rel.x, y: rel.y },
-                    dimension,
-                    section,
-                  });
-                }}
-                onMouseEnter={onMouseEnter || (() => {})}
-                onMouseLeave={onMouseLeave || (() => {})}
-                onDblClick={() => {
-                  bringToFront({ type: "postit", id: id });
-                  onDblClick?.(p.id!);
-                }}
-                onContentChange={(newValue, id) => {
-                  if (onPostItUpdate) {
-                    onPostItUpdate(id, { content: newValue });
-                  }
-                }}
-                onBlur={() => {
-                  window.getSelection()?.removeAllRanges();
-                  setEditableIndex(null);
-                  onBlur?.(p.id!);
-                }}
-                onContextMenu={(e, i) => {
-                  showContextMenu(e, i, "postit");
-                  onContextMenu?.(p.id!);
-                }}
-                mandalaRadius={maxRadius}
-                zindex={orderIndex}
-              />
-            );
+                    onDblClick?.(p.id!);
+                  }}
+                  onContentChange={(newValue, id) => {
+                    if (onPostItUpdate) {
+                      onPostItUpdate(id, { content: newValue });
+                    }
+                  }}
+                  onBlur={() => {
+                    window.getSelection()?.removeAllRanges();
+                    setEditableIndex(null);
+                    onBlur?.(p.id!);
+                  }}
+                  onContextMenu={(e, i) => {
+                    showContextMenu(e, i, "postit");
+                    onContextMenu?.(p.id!);
+                  }}
+                  mandalaRadius={maxRadius}
+                  zindex={orderIndex}
+                />
+              );
+            }
+
+            if (item.type === "image") {
+              const image = mandala.images?.find((img) => img.id === id);
+              if (!image) return null;
+              if (!shouldShowImage(image, appliedFilters)) return null;
+              const { x, y } = toAbsolutePostit(
+                image.coordinates.x,
+                image.coordinates.y
+              );
+              return (
+                <MandalaImageComponent
+                  key={`image-${mandala.id}-${image.id}`}
+                  image={image}
+                  position={{ x, y }}
+                  onDragStart={(postitId) => {
+                    if (!readOnly) {
+                      onDragStart?.(postitId);
+                      bringToFront({ type: "image", id: image.id });
+                    }
+                  }}
+                  onDragEnd={async (e) => {
+                    if (readOnly || !onImageUpdate) return;
+                    onDragEnd?.(image.id);
+                    const rel = toRelativePostit(e.target.x(), e.target.y());
+                    const { dimension, section } =
+                      getDimensionAndSectionFromCoordinates(
+                        rel.x,
+                        rel.y,
+                        mandala.mandala.configuration?.dimensions.map(
+                          (d) => d.name
+                        ) || [],
+                        mandala.mandala.configuration?.scales || []
+                      );
+                    await onImageUpdate(image.id, {
+                      coordinates: { x: rel.x, y: rel.y },
+                      dimension,
+                      section,
+                    });
+                  }}
+                  onMouseEnter={onMouseEnter || (() => {})}
+                  onMouseLeave={onMouseLeave || (() => {})}
+                  onContextMenu={(e) => showContextMenu(e, image.id, "image")}
+                  mandalaRadius={maxRadius}
+                  zindex={orderIndex}
+                />
+              );
+            }
+
+            return null;
           })}
         </Layer>
 
