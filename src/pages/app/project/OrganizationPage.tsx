@@ -2,7 +2,10 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
 import { ArrowLeftIcon, Folder } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createProject, createProjectFromQuestion } from "@/services/projectService.ts";
+import {
+  createProject,
+  createProjectFromQuestion,
+} from "@/services/projectService.ts";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import { getOrganizationById } from "@/services/organizationService.ts";
@@ -10,7 +13,7 @@ import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialo
 import { useOrganizationPermissions } from "@/hooks/usePermissionsLoader";
 import OrganizationUserCircles from "@/components/organization/OrganizationUserCircles";
 import OrganizationProjectsList from "@/components/project/OrganizationProjectsList";
-import OrganizationFileListContainer from "@/components/organization/OrganizationFileListContainer";
+import FileListContainer from "@/components/files/FileListContainer";
 import { DimensionDto } from "@/types/mandala";
 import AppLayout from "@/components/layout/AppLayout";
 
@@ -83,7 +86,9 @@ const OrganizationPage = () => {
       navigate(`/app/organization/${organizationId}/projects/${project.id}`);
     } catch (error) {
       setErrorMsg(
-        error instanceof Error ? error.message : "Error al crear proyecto desde provocación"
+        error instanceof Error
+          ? error.message
+          : "Error al crear proyecto desde provocación"
       );
     } finally {
       setCreating(false);
@@ -130,7 +135,7 @@ const OrganizationPage = () => {
               page={page}
               setPage={setPage}
             />
-            <OrganizationFileListContainer organizationId={organizationId!} />
+            <FileListContainer scope="organization" id={organizationId!} />
           </div>
         </div>
 

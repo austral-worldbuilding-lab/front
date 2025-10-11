@@ -3,29 +3,29 @@ import { FileText, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useFiles } from "@/hooks/useFiles";
 import Loader from "@/components/common/Loader";
-import FileLoader from "@/components/project/FileLoader";
-import FileRow from "./FileRow";
+import FileLoader from "@/components/files/FileLoader";
 import { FileItem } from "@/types/mandala";
-import SelectAllFilesButton from "../files/SelectAllFilesButton";
+import { FileScope } from "@/services/filesService";
+import FileRow from "./FileRow";
+import SelectAllFilesButton from "./SelectAllFilesButton";
 
-interface OrganizationFileListContainerProps {
-  organizationId: string;
+interface FileListContainerProps {
+  scope: FileScope;
+  id: string;
 }
 
-const OrganizationFileListContainer = ({
-  organizationId,
-}: OrganizationFileListContainerProps) => {
+const FileListContainer = ({ scope, id }: FileListContainerProps) => {
   const [searchText, setSearchText] = useState("");
-  const { 
-    files, 
-    isLoading, 
-    error, 
-    refetch, 
-    selectAllFiles, 
-    selectedCount, 
-    totalCount, 
-    isUpdatingSelections 
-  } = useFiles("organization", organizationId, true);
+  const {
+    files,
+    isLoading,
+    error,
+    refetch,
+    selectAllFiles,
+    selectedCount,
+    totalCount,
+    isUpdatingSelections,
+  } = useFiles(scope, id, true);
 
   const filteredFiles = files.filter((file) =>
     file.file_name.toLowerCase().includes(searchText.toLowerCase())
@@ -41,8 +41,8 @@ const OrganizationFileListContainer = ({
   const scopeOrder = ["organization", "project", "mandala"];
 
   return (
-    <div className="flex flex-col gap-4 bg-white rounded-[12px] border border-gray-200 overflow-hidden px-5 py-4 lg:max-w-[450px] min-w-[300px] flex-1">
-      <div className="flex items-center justify-between flex-wrap w-full gap-2">
+    <div className="flex flex-col gap-4 bg-white rounded-[12px] border border-gray-200 overflow-hidden px-5 py-4 lg:max-w-[450px] min-w-[300px] flex-1 min-h-0">
+      <div className="flex items-center justify-between flex-wrap w-full gap-2 shrink-0">
         <div className="flex items-center gap-2">
           <FileText size={20} className="text-foreground" />
           <span className="font-semibold text-xl text-foreground">
@@ -59,30 +59,27 @@ const OrganizationFileListContainer = ({
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
-          <FileLoader
-            scope="organization"
-            id={organizationId}
-            onUploadComplete={refetch}
-          />
+          <FileLoader scope={scope} id={id} onUploadComplete={refetch} />
         </div>
-        {totalCount > 0 && (
-          <div className="flex justify-end">
-            <SelectAllFilesButton
-              selectedCount={selectedCount}
-              totalCount={totalCount}
-              onSelectAll={selectAllFiles}
-              isUpdating={isUpdatingSelections}
-            />
-          </div>
-        )}
       </div>
 
-      <p className="flex items-start gap-1 text-xs italic text-gray-500 mt-1 leading-4">
+      <p className="flex items-start gap-1 text-sm italic text-gray-500 mt-1 shrink-0">
         Los siguientes archivos darán contexto a la IA a la hora de generar
         mandalas, postits o preguntas. Selecciónalos adecuadamente.
       </p>
 
-      <div className="border border-gray-200 rounded-md">
+      {totalCount > 0 && (
+        <div className="flex justify-start">
+          <SelectAllFilesButton
+            selectedCount={selectedCount}
+            totalCount={totalCount}
+            onSelectAll={selectAllFiles}
+            isUpdating={isUpdatingSelections}
+          />
+        </div>
+      )}
+
+      <div className="border border-gray-200 rounded-md flex flex-col flex-1 overflow-hidden min-h-0">
         {isLoading && (
           <div className="p-8">
             <Loader size="medium" text="Cargando archivos..." />
@@ -111,33 +108,34 @@ const OrganizationFileListContainer = ({
         )}
 
         {!error && !isLoading && files.length > 0 && (
-          <div className="divide-y divide-gray-100 max-h-[450px] overflow-y-auto">
-            {scopeOrder.map((scopeKey) =>
-              groupedFiles[scopeKey] ? (
-                <div key={scopeKey}>
-                  {Object.keys(groupedFiles).length > 1 && (
-                    <h3 className="font-semibold text-gray-700 py-2 capitalize px-2">
-                      {scopeKey === "organization"
-                        ? "Archivos de la organización"
-                        : scopeKey === "project"
-                        ? "Archivos del proyecto"
-                        : scopeKey === "mandala"
-                        ? "Archivos de la mandala"
-                        : scopeKey}
-                    </h3>
-                  )}
-                  <ul className="divide-y divide-gray-100">
-                    {groupedFiles[scopeKey].map((file, index) => (
-                      <FileRow
-                        key={index}
-                        file={file}
-                        scope="organization"
-                        id={organizationId}
-                      />
-                    ))}
-                  </ul>
-                </div>
-              ) : null
+          <div className="divide-y divide-gray-100 flex-1 overflow-y-auto max-h-[450px] min-h-0">
+            {scopeOrder.map(
+              (scopeKey) =>
+                groupedFiles[scopeKey] && (
+                  <div key={scopeKey}>
+                    {Object.keys(groupedFiles).length > 1 && (
+                      <h3 className="font-semibold text-gray-700 py-2 capitalize px-2">
+                        {scopeKey === "organization"
+                          ? "Archivos de la organización"
+                          : scopeKey === "project"
+                          ? "Archivos del proyecto"
+                          : scopeKey === "mandala"
+                          ? "Archivos de la mandala"
+                          : scopeKey}
+                      </h3>
+                    )}
+                    <ul className="divide-y divide-gray-100">
+                      {groupedFiles[scopeKey].map((file, index) => (
+                        <FileRow
+                          key={index}
+                          file={file}
+                          scope={scope}
+                          id={id}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )
             )}
           </div>
         )}
@@ -146,4 +144,4 @@ const OrganizationFileListContainer = ({
   );
 };
 
-export default OrganizationFileListContainer;
+export default FileListContainer;

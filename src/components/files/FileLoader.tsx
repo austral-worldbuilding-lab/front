@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useUploadFiles, ACCEPTED_TYPES } from "@/hooks/useUploadFiles";
-import { CloudUpload, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useState } from "react";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog.tsx";
+import SelectedFilesDropdown from "./SelectedFilesDropdown";
 
 interface FileUploaderProps {
   scope: "organization" | "project" | "mandala";
@@ -14,12 +15,12 @@ const FileLoader = ({ scope, id, onUploadComplete }: FileUploaderProps) => {
   const {
     fileInputRef,
     selectedFiles,
-    status,
     loading,
     handleFileChange,
     uploadFiles,
     videoWarning,
     setVideoWarning,
+    clearSelectedFiles,
   } = useUploadFiles(scope, id, onUploadComplete);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -44,48 +45,29 @@ const FileLoader = ({ scope, id, onUploadComplete }: FileUploaderProps) => {
         className="hidden"
       />
 
-      <Button
-        type="button"
-        variant="filled"
-        color="primary"
-        onClick={handleTriggerFileSelect}
-        icon={<Upload size={16} />}
-      >
-        Cargar archivos
-      </Button>
+      <div className="relative">
+        <Button
+          type="button"
+          variant="filled"
+          color="primary"
+          onClick={handleTriggerFileSelect}
+          icon={<Upload size={16} />}
+        >
+          Cargar archivos
+        </Button>
 
-      {selectedFiles.length > 0 && (
-        <>
-          <div className="text-sm text-gray-600">
-            {selectedFiles.length <= 5 ? (
-              <ul className="list-disc pl-5">
-                {selectedFiles.map((file, idx) => (
-                  <li key={idx}>{file.name}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>{selectedFiles.length} files selected</p>
-            )}
-          </div>
-
-          <Button
-            onClick={() => {
-              if (videoWarning) {
-                setDialogOpen(true);
-              } else {
-                uploadFiles();
-              }
-            }}
+        {selectedFiles.length > 0 && (
+          <SelectedFilesDropdown
+            selectedFiles={selectedFiles}
             loading={loading}
-            color="primary"
-            icon={<CloudUpload size={16} />}
-          >
-            Subir archivos
-          </Button>
-        </>
-      )}
+            videoWarning={videoWarning}
+            onUpload={uploadFiles}
+            onOpenDialog={() => setDialogOpen(true)}
+            onClear={clearSelectedFiles}
+          />
+        )}
+      </div>
 
-      {status && <p className="text-sm text-gray-700">{status}</p>}
       <ConfirmationDialog
         isOpen={dialogOpen}
         onOpenChange={setDialogOpen}

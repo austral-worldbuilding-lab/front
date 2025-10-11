@@ -11,16 +11,17 @@ export default function SelectAllFilesButton({
   selectedCount,
   totalCount,
   onSelectAll,
-  isUpdating
+  isUpdating,
 }: SelectAllFilesButtonProps) {
   if (totalCount === 0) return null;
-  
+
   const hasSelected = selectedCount > 0;
-  
+
   return (
     <Button
-      variant="outline" 
+      variant="ghost"
       size="sm"
+      className="p-2"
       onClick={() => onSelectAll(!hasSelected)}
       disabled={isUpdating}
     >
