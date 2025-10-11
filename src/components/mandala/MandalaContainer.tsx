@@ -400,23 +400,18 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     />
                   </div>
 
-                  {(mandala.mandala.type === "CHARACTER" ||
-                    viewMode === "overlap") && (
-                    <>
-                      {mandala.mandala.type !== "OVERLAP_SUMMARY" && (
-                        <Buttons
-                          onCreatePostIt={handleCreatePostIt}
-                          onCreateCharacter={handleCreateCharacter}
-                          currentMandalaId={mandalaId}
-                          onNewTag={handleNewTag}
-                          tags={tags}
-                          loading={isCreatingCharacter}
-                        />
-                      )}
-                      <ZoomControls scale={state?.scale} />
-                      <SupportButton />
-                    </>
+                  {mandala.mandala.type === "CHARACTER" && (
+                    <Buttons
+                      onCreatePostIt={handleCreatePostIt}
+                      onCreateCharacter={handleCreateCharacter}
+                      currentMandalaId={mandalaId}
+                      onNewTag={handleNewTag}
+                      tags={tags}
+                      loading={isCreatingCharacter}
+                    />
                   )}
+                  <ZoomControls scale={state?.scale} />
+                  <SupportButton />
 
                   {/* UNA SOLA LLAMADA a MultiKonvaContainer para OVERLAP */}
                   {mandala.mandala.type === "OVERLAP" ? (
