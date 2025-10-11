@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
-import {CreateProject, Project, BackendTag, CreateProjectFromQuestion} from "@/types/mandala";
-import { BackendTimelineResponse} from "@/utils/timelineUtils.ts";
+import {BackendTag, CreateProject, CreateProjectFromQuestion, Project} from "@/types/mandala";
+import {BackendTimelineResponse} from "@/utils/timelineUtils.ts";
 
 export interface CreateMandalaDto {
   name: string;
@@ -8,7 +8,19 @@ export interface CreateMandalaDto {
 }
 
 
-export const getProjects = async (organizationId: string, page : number, limit : number): Promise<Project[]> => {
+export const getProjects = async (organizationId: string, page : number, limit : number, rootsOnly?: boolean): Promise<Project[]> => {
+  if (rootsOnly) {
+    const response = await axiosInstance.get<{ data: Project[] }>(
+        `/project?page=${page}&limit=${limit}&rootOnly=true`
+    );
+
+    const allRootProjects = response.data.data;
+    return allRootProjects.filter(project =>
+        project.organizationId === organizationId
+    );
+  }
+  
+  // Endpoint original para todos los proyectos de la organización
   const response = await axiosInstance.get<{ data: Project[] }>(
       `/organization/${organizationId}/projects?page=${page}&limit=${limit}`
   );
