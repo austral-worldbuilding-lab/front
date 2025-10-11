@@ -9,7 +9,7 @@ type MandalaSelectionBannerProps = Record<string, never>;
  */
 const MandalaSelectionBanner: React.FC<MandalaSelectionBannerProps> = () => {
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4 text-left">
+    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-left">
       <p className="text-primary text-sm">
         <span className="font-medium">
           <b>Unificar Mandalas:</b>
