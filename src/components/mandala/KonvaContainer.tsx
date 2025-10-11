@@ -225,10 +225,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   };
 
   const handleOnDragEndImage = async (
-    e: KonvaEventObject<DragEvent>,
+    e: KonvaEventObject<Event>,
     image: MandalaImage
   ) => {
-    onDragEnd(image.id);
     const nx = e.target.x(),
       ny = e.target.y();
     const rel = toRelativePostit(nx, ny);
@@ -243,7 +242,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       coordinates: { x: rel.x, y: rel.y },
       dimension,
       section,
+      scale: image.scale ?? 1,
     });
+    onDragEnd(image.id);
   };
 
   if (!mandala || !state) return <div>No mandala found</div>;
@@ -376,6 +377,12 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   onContextMenu={(e) => showContextMenu(e, image.id, "image")}
                   mandalaRadius={SCENE_W / 2}
                   zindex={orderIndex}
+                  onTransformEnd={async (e, scale) => {
+                    handleOnDragEndImage(e, {
+                      ...image,
+                      scale: scale,
+                    });
+                  }}
                 />
               );
             }

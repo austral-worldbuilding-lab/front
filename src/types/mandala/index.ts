@@ -61,6 +61,7 @@ export interface MandalaImage {
   dimension: string;
   section: string;
   tags: Tag[];
+  scale?: number;
 }
 
 export interface Mandala {
