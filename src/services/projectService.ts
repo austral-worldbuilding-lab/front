@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import {BackendTag, CreateProject, CreateProjectFromQuestion, Project} from "@/types/mandala";
+import {BackendTag, CreateProject, CreateProjectFromQuestion, Project, ProjectConfiguration} from "@/types/mandala";
 import {BackendTimelineEdge, BackendTimelineNode} from "@/utils/timelineUtils.ts";
 
 export interface CreateMandalaDto {
@@ -145,6 +145,16 @@ export const getTimelineForProject = async (
 
   if (response.status !== 200) {
     throw new Error("Error fetching timeline");
+  }
+
+  return response.data.data;
+};
+
+export const getProjectConfiguration = async (projectId: string): Promise<ProjectConfiguration> => {
+  const response = await axiosInstance.get<{ data: ProjectConfiguration }>(`/project/${projectId}/configuration`);
+
+  if (response.status !== 200) {
+    throw new Error("Error obteniendo la configuración del proyecto");
   }
 
   return response.data.data;
