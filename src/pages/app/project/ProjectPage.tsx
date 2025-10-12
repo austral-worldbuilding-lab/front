@@ -8,6 +8,8 @@ import FileListContainer from "@/components/files/FileListContainer";
 import ProjectUserCircles from "@/components/project/ProjectUserCircles";
 import MandalaListPage from "./mandala/MandalaListPage";
 import AppLayout from "@/components/layout/AppLayout";
+import { useState, useEffect } from "react";
+import { getOrganizationById } from "@/services/organizationService";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -16,6 +18,15 @@ const ProjectPage = () => {
   }>();
   const { canManageUsers } = useProjectPermissions(projectId);
   const { project } = useProject(projectId!);
+  const [orgName, setOrgName] = useState<string>("");
+
+  useEffect(() => {
+    if (organizationId) {
+      getOrganizationById(organizationId)
+        .then((org) => setOrgName(org.name))
+        .catch(() => setOrgName("Organización desconocida"));
+    }
+  }, [organizationId]);
 
   return (
     <AppLayout>
@@ -47,7 +58,12 @@ const ProjectPage = () => {
           </div>
           <div className="mt-4 flex flex-1 flex-row gap-6 justify-between w-full">
             <MandalaListPage />
-            <FileListContainer scope="project" id={projectId ?? ""} />
+            <FileListContainer 
+              scope="project" 
+              id={projectId ?? ""} 
+              organizationName={orgName}
+              projectName={project?.name}
+            />
           </div>
           <ProvocationsSection
             organizationId={organizationId ?? ""}

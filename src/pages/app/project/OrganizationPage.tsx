@@ -49,7 +49,10 @@ const OrganizationPage = () => {
     const { name, description } = data;
     setCreating(true);
     try {
-      if (!user) throw new Error("Usuario no autenticado");
+      if (!user) {
+        setErrorMsg("Usuario no autenticado");
+        return;
+      }
       const project = await createProject({
         name: name,
         description: description || "",
@@ -75,7 +78,10 @@ const OrganizationPage = () => {
   }) => {
     setCreating(true);
     try {
-      if (!organizationId) throw new Error("ID de organización no disponible");
+      if (!organizationId) {
+        setErrorMsg("ID de organización no disponible");
+        return;
+      }
 
       const project = await createProjectFromQuestion({
         question: data.question,
@@ -138,7 +144,11 @@ const OrganizationPage = () => {
               page={page}
               setPage={setPage}
             />
-            <FileListContainer scope="organization" id={organizationId!} />
+            <FileListContainer 
+              scope="organization" 
+              id={organizationId!} 
+              organizationName={orgName}
+            />
           </div>
         </div>
 
