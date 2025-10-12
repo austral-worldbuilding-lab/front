@@ -8,6 +8,7 @@ import {
   createPostit as createPostitService,
 } from "@/services/mandalaService.ts";
 import DimensionPostit from "@/components/mandala/postits/DimensionPostit.tsx";
+import DimensionImage from "@/components/mandala/images/DimensionImage.tsx";
 import { useParams } from "react-router-dom";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import { useTags } from "@/hooks/useTags";
@@ -41,6 +42,12 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
 
   if (!projectId) {
     return <div className="text-red-500">Project ID is required</div>;
+  }
+
+  if (mandala && mandala.images) {
+    console.log("Imágenes disponibles en mandala:", mandala.images);
+    console.log("Dimensión actual:", dimensionName);
+    console.log("Configuración escalas:", config?.scales);
   }
 
 
@@ -107,6 +114,20 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                             />
                             );
                           })}
+                  {mandala?.images
+                      ?.filter(
+                          (img) =>
+                              img.dimension.toLowerCase() === dimensionName.toLowerCase() &&
+                              img.section.toLowerCase() === scaleName.toLowerCase()
+                      )
+                      .map((image) => (
+                        <DimensionImage
+                          key={image.id}
+                          image={image}
+                          width={80}
+                          height={80}
+                        />
+                      ))}
                 </div>
               </div>
               <div
