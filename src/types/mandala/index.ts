@@ -34,6 +34,7 @@ export interface Postit {
   fromSummary?: string[];
   type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";
   editingUsers?: EditingUser[];
+  scale?: number;
 }
 
 export interface Tag {
@@ -60,6 +61,7 @@ export interface MandalaImage {
   dimension: string;
   section: string;
   tags: Tag[];
+  scale?: number;
 }
 
 export interface Mandala {

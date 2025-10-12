@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { CustomInput } from "../ui/CustomInput";
@@ -44,6 +44,11 @@ const CreateEntityModal = ({
   const [description, setDescription] = useState(initialDescription ?? "");
   const [isProvocationMode, setIsProvocationMode] = useState(false);
   const [question, setQuestion] = useState("");
+
+  useEffect(() => {
+    setName(initialName ?? "");
+    setDescription(initialDescription ?? "");
+  }, [initialName, initialDescription, open]);
 
   if (!open) return null;
 

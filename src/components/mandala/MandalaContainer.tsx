@@ -44,8 +44,22 @@ import { useSvgExport } from "@/hooks/useSvgExport";
 import { MandalaSVG } from "@/components/mandala/MandalaSVG.tsx";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils.ts";
 import SupportButton from "./SupportButton";
-import { generateReportPDF } from "@/components/download/GeneradorDePDF.tsx";
-import { useReport } from "@/hooks/useReport.tsx";
+import { useGenerateSummary } from "@/hooks/useGenerateSummary";
+import {
+  generateOverlapReportPDF,
+  generateNormalMandalaReportPDF,
+} from "@/components/download/GeneradorDePDF.tsx";
+import { useOverlapReport, useNormalMandalaReport } from "@/hooks/useReport.tsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { getOrganizationById } from "@/services/organizationService";
 
 interface MandalaContainerProps {
@@ -109,7 +123,22 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     maxRadius
   );
 
-  const { report, loading: reportLoading } = useReport(projectId, mandalaId);
+  // Hooks específicos según el tipo de mandala
+  const { report: overlapReport, loading: overlapReportLoading } = useOverlapReport(
+    projectId,
+    mandalaId
+  );
+  const { report: normalReport, loading: normalReportLoading } = useNormalMandalaReport(
+    projectId,
+    mandalaId
+  );
+  const { generateSummary, loading: generatingReport } = useGenerateSummary();
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+
+  // Determinar qué tipo de reporte usar según el tipo de mandala
+  const isOverlapMandala = mandala?.mandala.type === "OVERLAP_SUMMARY";
+  const report = isOverlapMandala ? overlapReport : normalReport;
+  const reportLoading = isOverlapMandala ? overlapReportLoading : normalReportLoading;
 
   const postsAbs = (mandala?.postits ?? []).map((p) => {
     const a = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
@@ -225,10 +254,27 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
 
   const handleDownloadReport = () => {
     if (!report) return;
-    generateReportPDF(
-      report,
-      `${mandala?.mandala.name ?? "mandala"}-reporte.pdf`
-    );
+
+    if (isOverlapMandala && overlapReport) {
+      // Para mandalas comparadas (OVERLAP_SUMMARY) - reporte complejo
+      generateOverlapReportPDF(
+        overlapReport,
+        `${mandala?.mandala.name ?? "mandala"}-reporte-comparado.pdf`
+      );
+    } else if (!isOverlapMandala && normalReport) {
+      // Para mandalas normales - reporte simple (string)
+      generateNormalMandalaReportPDF(
+        normalReport,
+        `${mandala?.mandala.name ?? "mandala"}-reporte.pdf`
+      );
+    }
+  };
+
+  const handleGenerateSummary = async () => {
+    const success = await generateSummary(mandalaId);
+    if (success) {
+      setShowGenerateDialog(false);
+    }
   };
 
   return (
@@ -253,19 +299,48 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
             {mandala?.mandala.name}
           </p>
         </div>
-        {/* Botón Info + Diálogo */}
+        {/* Botones según el tipo de mandala */}
         <div className="ml-auto pr-4 flex gap-2">
-          {mandala?.mandala.type === "OVERLAP_SUMMARY" && (
+          {/* Para mandalas comparadas (OVERLAP_SUMMARY) - solo descarga */}
+          {isOverlapMandala && report && !reportLoading && (
             <Button
               variant="outline"
               color="primary"
               size="sm"
               icon={<Download size={16} />}
               onClick={handleDownloadReport}
-              disabled={reportLoading}
             >
-              Reporte
+              Reporte Comparado
             </Button>
+          )}
+
+          {/* Para mandalas normales - generar y descargar */}
+          {!isOverlapMandala && (
+            <>
+              {report && !reportLoading && (
+                <Button
+                  variant="outline"
+                  color="primary"
+                  size="sm"
+                  icon={<Download size={16} />}
+                  onClick={handleDownloadReport}
+                >
+                  Resumen
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                color="primary"
+                size="sm"
+                icon={<Sparkles size={16} />}
+                onClick={() => setShowGenerateDialog(true)}
+                loading={generatingReport}
+                disabled={generatingReport}
+              >
+                {report ? "Regenerar resumen" : "Generar resumen"}
+              </Button>
+            </>
           )}
 
           <Button
@@ -603,6 +678,43 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         organizationName={orgName}
         projectName={project.project?.name}
       />
+
+      {/* Modal de confirmación para generar resumen - solo para mandalas normales */}
+      {!isOverlapMandala && (
+        <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {normalReport ? "¿Regenerar resumen de esta mandala?" : "¿Generar resumen de esta mandala?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                El sistema generará un resumen mediante IA según el estado actual de la mandala.
+                Este proceso puede tardar unos segundos.
+                {normalReport && " El resumen existente será reemplazado por uno nuevo."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={generatingReport}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleGenerateSummary}
+                disabled={generatingReport}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {generatingReport ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Generando...</span>
+                  </div>
+                ) : (
+                  "Confirmar generación"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };

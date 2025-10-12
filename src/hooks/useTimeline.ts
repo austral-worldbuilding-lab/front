@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getTimelineForProject } from "@/services/projectService";
-import { buildTimelineTree, TimelineNode } from "@/utils/timelineUtils";
+import { buildTimelineTree } from "@/utils/timelineUtils";
+import {TimelineNode} from "@/components/project/TimelineTree.tsx";
 
 export default function useTimeline(projectId?: string) {
     const [data, setData] = useState<TimelineNode | null>(null);
