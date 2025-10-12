@@ -45,8 +45,10 @@ const OrganizationPage = () => {
   const handleCreateProject = async (data: {
     name: string;
     description?: string;
+    dimensions?: DimensionDto[];
+    scales?: string[];
   }) => {
-    const { name, description } = data;
+    const { name, description, dimensions, scales } = data;
     setCreating(true);
     try {
       if (!user) throw new Error("Usuario no autenticado");
@@ -55,6 +57,8 @@ const OrganizationPage = () => {
         description: description || "",
         userId: user.uid,
         organizationId: organizationId!,
+        dimensions,
+        scales,
       });
       setModalOpen(false);
       navigate(`/app/organization/${organizationId}/projects/${project.id}`);
@@ -156,6 +160,7 @@ const OrganizationPage = () => {
           placeholder="Nombre del proyecto"
           showQuestions={true}
           allowProvocationMode={true}
+          showConfiguration={true}
         />
       </div>
     </AppLayout>

@@ -114,6 +114,12 @@ export interface Project {
   name: string;
   description?: string;
   organizationId: string;
+  configuration?: ProjectConfiguration;
+}
+
+export interface ProjectConfiguration {
+  dimensions: DimensionDto[];
+  scales: string[];
 }
 
 export interface CreateProject {
@@ -121,6 +127,8 @@ export interface CreateProject {
   userId: string;
   description?: string;
   organizationId: string;
+  dimensions?: DimensionDto[];
+  scales?: string[];
 }
 
 export interface DimensionDto {

@@ -18,6 +18,7 @@ interface TagInputProps {
   onChange: (items: Item[]) => void;
   colorPicker?: boolean;
   tooltip?: string;
+  disabled?: boolean;
 }
 
 export default function TagInput({
@@ -26,6 +27,7 @@ export default function TagInput({
   onChange,
   colorPicker = true,
   tooltip,
+  disabled = false,
 }: TagInputProps) {
   const [value, setValue] = useState("");
   const [items, setItems] = useState<Item[]>(initialItems);
@@ -115,6 +117,7 @@ export default function TagInput({
           }}
           onKeyDown={handleKeyDown}
           placeholder={`Añadir ${label.toLowerCase()}`}
+          disabled={disabled}
           className="flex-1 h-8 truncate overflow-hidden text-ellipsis whitespace-nowrap"
         />
 
@@ -122,11 +125,11 @@ export default function TagInput({
           {colorPicker && (
             <>
               <div
-                className="w-8 h-8 rounded border cursor-pointer"
+                className={`w-8 h-8 rounded border ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 style={{ backgroundColor: color }}
-                onClick={() => setShowPicker((prev) => !prev)}
+                onClick={disabled ? undefined : () => setShowPicker((prev) => !prev)}
               />
-              {showPicker && (
+              {showPicker && !disabled && (
                 <div ref={pickerRef} className="absolute z-10 mt-2">
                   <HexColorPicker color={color} onChange={setColor} />
                 </div>
@@ -137,7 +140,7 @@ export default function TagInput({
 
         <Button
           onClick={handleAddItem}
-          disabled={!value.trim()}
+          disabled={!value.trim() || disabled}
           className="px-3 h-8"
         >
           +
@@ -155,24 +158,26 @@ export default function TagInput({
             key={item.id}
             className={`group flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs h-6 select-none m-0 w-fit ${
               isDarkColor(item.color) ? "text-white" : "text-black"
-            }`}
+            } ${disabled ? 'opacity-50' : ''}`}
             style={{ backgroundColor: item.color }}
           >
             <span>{item.value}</span>
-            <button
-              onClick={() => handleRemoveItem(item.id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label="Remove item"
-            >
-              <X
-                size={14}
-                className={`${
-                  isDarkColor(item.color)
-                    ? "text-white/70 hover:text-white"
-                    : "text-black/70 hover:text-black"
-                }`}
-              />
-            </button>
+            {!disabled && (
+              <button
+                onClick={() => handleRemoveItem(item.id)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Remove item"
+              >
+                <X
+                  size={14}
+                  className={`${
+                    isDarkColor(item.color)
+                      ? "text-white/70 hover:text-white"
+                      : "text-black/70 hover:text-black"
+                  }`}
+                />
+              </button>
+            )}
           </div>
         ))}
       </div>

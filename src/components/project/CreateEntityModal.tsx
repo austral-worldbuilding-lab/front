@@ -3,11 +3,34 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { CustomInput } from "../ui/CustomInput";
 import { DimensionDto } from "@/types/mandala";
+import TagInput, { Item } from "@/components/common/TagInput.tsx";
+import { Sectors, Levels } from "@/constants/mandala";
+
+const getInitialDimensions = (): Item[] => {
+  return Sectors.map((sector) => ({
+    id: sector.id,
+    value: sector.name,
+    color: sector.color,
+  }));
+};
+
+const getInitialScales = (): Item[] => {
+  return Levels.map((level) => ({
+    id: level.id,
+    value: level.name,
+    color: "rgba(180, 210, 255, 0.7)",
+  }));
+};
 
 interface CreateEntityModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { name: string; description?: string }) => Promise<void>;
+  onCreate: (data: { 
+    name: string; 
+    description?: string;
+    dimensions?: DimensionDto[];
+    scales?: string[];
+  }) => Promise<void>;
   onCreateFromProvocation?: (data: {
     question: string;
     name?: string;
@@ -23,6 +46,7 @@ interface CreateEntityModalProps {
   initialDescription?: string;
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
+  showConfiguration?: boolean;
 }
 
 const CreateEntityModal = ({
@@ -39,24 +63,45 @@ const CreateEntityModal = ({
   initialDescription,
   mode,
   allowProvocationMode = false,
+  showConfiguration = false,
 }: CreateEntityModalProps) => {
   const [name, setName] = useState(initialName ?? "");
   const [description, setDescription] = useState(initialDescription ?? "");
   const [isProvocationMode, setIsProvocationMode] = useState(false);
   const [question, setQuestion] = useState("");
+  const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
+  const [scales, setScales] = useState<Item[]>(getInitialScales());
 
   if (!open) return null;
 
   const handleSubmit = () => {
+    const dimensionsData: DimensionDto[] = dimensions.map(dim => ({
+      name: dim.value,
+      color: dim.color || "#cccccc"
+    }));
+
+    const scalesData: string[] = scales.map(scale => scale.value);
+
     if (isProvocationMode && onCreateFromProvocation) {
       onCreateFromProvocation({
         question,
         name: name.trim() || undefined,
+        dimensions: showConfiguration ? dimensionsData : undefined,
+        scales: showConfiguration ? scalesData : undefined,
       });
     } else if (showQuestions) {
-      onCreate({ name, description });
+      onCreate({ 
+        name, 
+        description,
+        dimensions: showConfiguration ? dimensionsData : undefined,
+        scales: showConfiguration ? scalesData : undefined,
+      });
     } else {
-      onCreate({ name });
+      onCreate({ 
+        name,
+        dimensions: showConfiguration ? dimensionsData : undefined,
+        scales: showConfiguration ? scalesData : undefined,
+      });
     }
   };
 
@@ -67,15 +112,39 @@ const CreateEntityModal = ({
 • ¿Qué impacto tienen estos problemas?`;
 
   const isFormValid = () => {
-    if (isProvocationMode) {
-      return question.trim().length > 0;
+    const baseValidation = (() => {
+      if (isProvocationMode) {
+        return question.trim().length > 0;
+      }
+      return name.trim().length > 0 && (!showQuestions || description.trim().length > 0);
+    })();
+
+    if (showConfiguration) {
+      return baseValidation && dimensions.length > 0 && scales.length > 0;
     }
-    return name.trim().length > 0 && (!showQuestions || description.trim().length > 0);
+
+    return baseValidation;
+  };
+
+  const handleModalChange = () => {
+    if (!open) {
+      setName(initialName ?? "");
+      setDescription(initialDescription ?? "");
+      setIsProvocationMode(false);
+      setQuestion("");
+      setDimensions(getInitialDimensions());
+      setScales(getInitialScales());
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+    <Dialog open={open} onOpenChange={(openState) => {
+      if (!openState) {
+        handleModalChange();
+        onClose();
+      }
+    }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -165,9 +234,40 @@ const CreateEntityModal = ({
             </>
           )}
 
+          {showConfiguration && (
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-lg font-medium">Configuración del Proyecto</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TagInput
+                  label="Dimensiones"
+                  initialItems={getInitialDimensions()}
+                  onChange={setDimensions}
+                  tooltip="Las dimensiones representan los sectores de la mandala. Se pueden agregar, eliminar o editar."
+                  disabled={loading}
+                />
+
+                <TagInput
+                  label="Escalas"
+                  initialItems={getInitialScales()}
+                  onChange={setScales}
+                  colorPicker={false}
+                  tooltip="Las escalas representan los niveles de la mandala. Se pueden agregar, eliminar o editar."
+                  disabled={loading}
+                />
+              </div>
+            </div>
+          )}
+
           {error && <div className="text-red-500 mb-2">{error}</div>}
 
           <div className="flex justify-end gap-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancelar
+            </Button>
             <Button
               color="primary"
               onClick={handleSubmit}
