@@ -5,11 +5,20 @@ import TimelineTree from "@/components/project/TimelineTree";
 import useTimeline from "@/hooks/useTimeline.ts";
 import useProject from "@/hooks/useProject.ts";
 import AppLayout from "@/components/layout/AppLayout";
+import { useProjectBreadcrumb } from "@/hooks/useProjectBreadcrumb";
 
 export default function TimelinePage() {
     const { projectId, organizationId } = useParams<{ projectId: string; organizationId: string }>();
     const { project, loading: loadingProject } = useProject(projectId!);
     const { data, loading: loadingTimeline } = useTimeline(projectId);
+    const { push } = useProjectBreadcrumb();
+
+    const handleClick = () => {
+      push({
+        title: project!.name,
+        url: `/app/organization/${organizationId}/projects/${project!.id}`,
+      });
+    };
 
     const loadingPage = loadingProject || loadingTimeline;
 
@@ -54,7 +63,7 @@ export default function TimelinePage() {
                         >
                             {data ? (
                                 <div className="w-full h-full overflow-auto">
-                                    <TimelineTree data={data} />
+                                    <TimelineTree data={data} onProjectClick={handleClick} />
                                 </div>
                             ) : (
                                 <p className="text-gray-500 text-center mt-10">
