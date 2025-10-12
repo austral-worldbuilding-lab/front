@@ -244,6 +244,14 @@ export const deleteMandalaService = async (mandalaId: string) => {
   return response.data;
 };
 
+export const generateMandalaSummary = async (mandalaId: string) => {
+  const response = await axiosInstance.post(`/mandala/${mandalaId}/summary`);
+  if (response.status !== 201) {
+    throw new Error("Error generating mandala summary.");
+  }
+  return response.data;
+};
+
 export const updateMandalaCharacters = async (
   projectId: string,
   mandalaId: string,
