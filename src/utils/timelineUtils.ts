@@ -1,30 +1,17 @@
-export interface TimelineNode {
-    id: string;
-    name: string;
-    kind: "project" | "provocation";
-    children: TimelineNode[];
-    question?: string;
-    description?: string;
-}
+import { TimelineNode } from "@/components/project/TimelineTree";
 
 export interface BackendTimelineNode {
     id: string;
-    type: string;
     name?: string;
-    label?: string;
     description?: string;
-    parentId?: string | null;
-    depth?: number;
+    originQuestion?: string;
 }
 
 export interface BackendTimelineEdge {
     from: string;
     to: string;
-}
-
-export interface BackendTimelineResponse {
-    nodes: BackendTimelineNode[];
-    edges: BackendTimelineEdge[];
+    type: string;
+    createdAt: string;
 }
 
 interface NodeWithChildren extends BackendTimelineNode {
@@ -40,37 +27,59 @@ export const buildTimelineTree = (
         return { id: "root", name: "Root", kind: "project", children: [] };
     }
 
-    const nodeMap = new Map(
-        nodes.map(n => [n.id, { ...n, children: [] } as NodeWithChildren])
-    );
+    const nodeMap = new Map(nodes.map(n => [n.id, { ...n, children: [] } as NodeWithChildren]));
 
     edges.forEach(edge => {
-        const parent = nodeMap.get(edge.from); // from = padre
-        const child = nodeMap.get(edge.to);    // to = hijo
+        const parent = nodeMap.get(edge.from);
+        const child = nodeMap.get(edge.to);
         if (parent && child) parent.children.push(child);
     });
 
-    const findRoot = (node: NodeWithChildren): NodeWithChildren => {
-        if (!node.parentId) return node; // ya es raíz
-        const parent = nodeMap.get(node.parentId);
-        return parent ? findRoot(parent) : node;
+    const childIds = new Set(edges.map(e => e.to));
+    const rootNodeRaw = nodes.find(n => !childIds.has(n.id));
+    const rootNode = rootNodeRaw ? nodeMap.get(rootNodeRaw.id)! : null;
+
+    if (!rootNode) return { id: "root", name: "Root", kind: "project", children: [] };
+
+    const convertNode = (n: NodeWithChildren): TimelineNode => {
+        const children: TimelineNode[] = [];
+
+        for (const child of n.children) {
+            let childNode = convertNode(child);
+
+            if (child.originQuestion) {
+                childNode = {
+                    id: `${n.id}-${child.id}-prov`,
+                    name: "provocación",
+                    kind: "provocation",
+                    question: child.originQuestion,
+                    children: [childNode],
+                };
+            }
+
+            children.push(childNode);
+        }
+
+        return {
+            id: n.id,
+            name: n.name ?? "Sin nombre",
+            kind: "project",
+            description: n.description,
+            highlighted: n.id === projectId,
+            question: n.originQuestion,
+            children,
+        };
     };
 
-    const currentNode = nodeMap.get(projectId);
-    if (!currentNode) return { id: "root", name: "Root", kind: "project", children: [] };
-
-    const rootNode = findRoot(currentNode);
-
-    const convertNode = (n: NodeWithChildren): TimelineNode => ({
-        id: n.id,
-        name: n.name || n.label || "Unnamed",
-        kind: n.type === "project" ? "project" : "provocation",
-        children: n.children.map(convertNode),
-        question: n.type !== "project" ? n.description || n.label : undefined,
-        description: n.description,
-    });
-
+    if (rootNode.originQuestion) {
+        return {
+            id: `${rootNode.id}-prov-root`,
+            name: "provocación inicial",
+            kind: "provocation",
+            question: rootNode.originQuestion,
+            children: [convertNode(rootNode)],
+        };
+    }
 
     return convertNode(rootNode);
 };
-
