@@ -1,7 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
-import { Circle, Group } from "react-konva";
+import { Circle, Group, Transformer } from "react-konva";
 import { Html } from "react-konva-utils";
-import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { Postit } from "@/types/mandala";
 import { isDarkColor } from "@/utils/colorUtils";
@@ -9,6 +8,7 @@ import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 import { usePostItAnimation } from "@/hooks/usePostItAnimation";
 import MandalaBadge from "./MandalaBadge";
 import { useAuth } from "@/hooks/useAuth";
+import Konva from "konva";
 
 interface PostItProps {
   postit: Postit;
@@ -28,7 +28,8 @@ interface PostItProps {
   currentMandalaName?: string;
   disableDragging?: boolean;
   scale?: number;
-  zindex?: number;
+  zindex: number;
+  onTransformEnd?: (e: KonvaEventObject<Event>, scale: number) => void;
 }
 
 const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
@@ -50,12 +51,16 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     currentMandalaName,
     disableDragging,
     scale = 1,
-    zindex
+    zindex,
+    onTransformEnd,
   } = props;
 
   const groupRef = useRef<Konva.Group>(null);
+  const trRef = useRef<Konva.Transformer>(null);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+  const rafRef = useRef<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textColor = isDarkColor(color) ? "white" : "black";
   const { shouldAnimate, markAnimated, isOpen, toggleOpen } =
@@ -68,23 +73,68 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const postItW = 100;
   const postItH = 100;
   const padding = 12;
-  const scaleFather = 0.4 * scale;
-  const scaleChildren = 0.25 * scale;
+
+  // Escala "estática": NO depende del estado abierto/cerrado (sirve para hijos y aro)
+  const staticScale = scale * (postit.scale ?? 1);
+
+  // Escala base del post-it principal (sí depende de abierto/cerrado)
+  const baseScale = (isOpen ? 0.4 : 1) * staticScale;
+
+  // Tamaño de hijos (independiente de la animación del padre)
+  const childrenScale = 0.25 * staticScale;
+
+  const [localScale, setLocalScale] = useState(baseScale);
   const fontSize = postItW / 10;
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
-  const currentScale = isOpen ? scaleFather : scale;
+  const isAnimatingRef = useRef(false);
+  const hasAnimatedRef = useRef(shouldAnimate);
+
+  useEffect(() => {
+    if (isAnimatingRef.current) return;
+    setLocalScale(baseScale);
+  }, [baseScale]);
+
+  const tweenScale = (to: number, ms = 180) => {
+    const from = localScale;
+    const start = performance.now();
+    const ease = (t: number) =>
+      t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    isAnimatingRef.current = true;
+
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / ms);
+      const v = from + (to - from) * ease(p);
+      setLocalScale(v);
+      if (p < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        isAnimatingRef.current = false;
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   const { dragBoundFunc } = useDragBoundFunc(
     mandalaRadius,
     postItW,
     postItH,
     0,
-    currentScale
+    localScale
   );
 
   const orbit = useMemo(() => {
-    return postItW * 0.37 * scale;
-  }, [postItW, scale]);
+    return postItW * 0.37 * staticScale;
+  }, [postItW, staticScale]);
 
   const childPositions = useMemo(
     () =>
@@ -98,39 +148,21 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     [children, orbit, position.x, position.y]
   );
 
-  const isAnimatingRef = useRef(false);
-  const hasAnimatedRef = useRef(shouldAnimate); // capture only once on mount
-
   const handleClick = (e: KonvaEventObject<MouseEvent>) => {
-    if (e.evt.button !== 0) return; // Only proceed on left click
-
+    if (e.evt.button !== 0) return; // only left click
     if (clickTimeout.current || isAnimatingRef.current) return;
 
     clickTimeout.current = setTimeout(() => {
       clickTimeout.current = null;
-
       if (!children.length) return;
-
-      const group = groupRef.current;
-      if (!group) return;
-
-      isAnimatingRef.current = true;
 
       if (hasAnimatedRef.current) {
         markAnimated();
         hasAnimatedRef.current = false;
       }
 
-      group.to({
-        scaleX: !isOpen ? scaleFather : scale,
-        scaleY: !isOpen ? scaleFather : scale,
-        duration: 0.1,
-        easing: Konva.Easings.EaseInOut,
-        onFinish: () => {
-          isAnimatingRef.current = false;
-        },
-      });
-
+      const target = (!isOpen ? 0.4 : 1) * staticScale;
+      tweenScale(target, 180);
       toggleOpen();
     }, 250);
   };
@@ -142,14 +174,37 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      if (!isEditing) return;
+
       if (
-        isEditing &&
         textAreaRef.current &&
-        !textAreaRef.current.contains(e.target as Node)
+        textAreaRef.current.contains(e.target as Node)
       ) {
-        exitEditMode();
-        onBlur();
+        return;
       }
+
+      const stage = groupRef.current?.getStage();
+      const tr = trRef.current as unknown as Konva.Transformer | null;
+      try {
+        const pos = stage?.getPointerPosition();
+        if (stage && tr && pos) {
+          const shape = stage.getIntersection(pos);
+          if (shape) {
+            const transformerAncestor = shape.findAncestor(
+              (n: Konva.Node) => n.getClassName() === "Transformer",
+              true
+            );
+            if (transformerAncestor && transformerAncestor === tr) {
+              return; // interactuando con handles
+            }
+          }
+        }
+      } catch {
+        // no-op
+      }
+
+      exitEditMode();
+      onBlur();
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -172,22 +227,55 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const primaryEditorName = externalEditors?.[0]?.displayName ?? "";
   const showExtraCount = editorCount > 1 ? editorCount - 1 : 0;
 
+  useEffect(() => {
+    if (isEditing && groupRef.current && trRef.current) {
+      try {
+        trRef.current.nodes([groupRef.current]);
+        trRef.current.getLayer()?.batchDraw();
+      } catch {
+        // no-op
+      }
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    const node = groupRef.current;
+    if (!node) return;
+    const handleTransformStart = () => {
+      setIsResizing(true);
+      onDragStart();
+    };
+    const handleTransformEnd = (e: KonvaEventObject<Event>) => {
+      setIsResizing(false);
+      const sx = node.scaleX();
+      setLocalScale(sx);
+      onTransformEnd?.(e, sx);
+    };
+    node.on("transformstart", handleTransformStart);
+    node.on("transformend", handleTransformEnd);
+    return () => {
+      node.off("transformstart", handleTransformStart);
+      node.off("transformend", handleTransformEnd);
+    };
+  }, [onDragStart, onTransformEnd]);
+
   return (
     <Group>
-      {/* Círculo transparente HTML (fondo) */}
-      {!isDragging && children.length !== 0 && (
+      {/* Aro transparente: tamaño ORIGINAL (staticScale), no cambia al abrir/cerrar */}
+      {!isDragging && !isResizing && children.length !== 0 && (
         <Html
           divProps={{
             style: {
               pointerEvents: "none",
+              zIndex: zindex,
             },
           }}
         >
           <div
             style={{
               position: "absolute",
-              width: postItW * scale,
-              height: postItH * scale,
+              width: postItW * staticScale,
+              height: postItH * staticScale,
               borderRadius: "100%",
               backgroundColor: color,
               opacity: 0.3,
@@ -201,6 +289,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       )}
 
       {!isDragging &&
+        !isResizing &&
         children.map((child, i) => (
           <PostIt
             key={child.id}
@@ -221,7 +310,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             isUnifiedMandala={isUnifiedMandala}
             currentMandalaName={currentMandalaName}
             disableDragging={true}
-            scale={scaleChildren}
+            scale={childrenScale}
+            zindex={zindex - 1}
           />
         ))}
 
@@ -234,12 +324,12 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         }}
         x={position.x}
         y={position.y}
+        width={postItW}
+        height={postItH}
         draggable={!isEditing && !disableDragging}
         dragBoundFunc={dragBoundFunc}
         offset={{ x: postItW / 2, y: postItH / 2 }}
-        scale={
-          isOpen ? { x: scaleFather, y: scaleFather } : { x: scale, y: scale }
-        }
+        scale={{ x: localScale, y: localScale }}
         onDragStart={() => {
           onDragStart();
           setIsDragging(true);
@@ -273,7 +363,17 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         onContextMenu={(e) => {
           onContextMenu(e, postit.id!);
         }}
+        onTransformEnd={(e) => {
+          setTimeout(() => {
+            setIsResizing(false);
+          }, 100);
+          const node = groupRef.current;
+          if (!node) return;
+          setLocalScale(node.scaleX());
+          onTransformEnd?.(e, node.scaleX());
+        }}
       >
+        {/* Transformer moved outside of the target group */}
         <Circle
           x={postItW / 2}
           y={postItH / 2}
@@ -299,6 +399,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             divProps={{
               style: {
                 pointerEvents: "none",
+                zIndex: zindex,
               },
             }}
           >
@@ -324,13 +425,14 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           <MandalaBadge
             originMandalaName={postit.from?.name}
             fontSize={fontSize}
+            zindex={zindex}
           />
         )}
         <Html
           divProps={{
             style: {
               pointerEvents: isEditing ? "auto" : "none",
-              zIndex: zindex
+              zIndex: zindex,
             },
           }}
         >
@@ -373,7 +475,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
                 color: "#fff",
                 left: "50%",
                 transform: "translateX(-50%)",
-                top: "-28px"
+                top: "-28px",
               }}
             >
               <div
@@ -409,6 +511,25 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           )}
         </Html>
       </Group>
+      {isEditing && !disableDragging && !isOpen && (
+        <Transformer
+          ref={trRef}
+          rotateEnabled={false}
+          keepRatio
+          enabledAnchors={[
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+          ]}
+          boundBoxFunc={(_oldBox, newBox) => {
+            const min = 30;
+            const max = 600;
+            const width = Math.max(min, Math.min(max, newBox.width));
+            return { ...newBox, width, height: width };
+          }}
+        />
+      )}
     </Group>
   );
 });

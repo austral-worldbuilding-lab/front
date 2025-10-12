@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { CustomInput } from "../ui/CustomInput";
@@ -71,6 +71,11 @@ const CreateEntityModal = ({
   const [question, setQuestion] = useState("");
   const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
   const [scales, setScales] = useState<Item[]>(getInitialScales());
+
+  useEffect(() => {
+    setName(initialName ?? "");
+    setDescription(initialDescription ?? "");
+  }, [initialName, initialDescription, open]);
 
   if (!open) return null;
 

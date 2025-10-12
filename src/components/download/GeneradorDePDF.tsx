@@ -1,7 +1,12 @@
 import { jsPDF } from "jspdf"
-import { AiMandalaReport } from "@/hooks/useReport"
+import { AiOverlapMandalaReport } from "@/hooks/useReport"
 
-export function generateReportPDF(report: AiMandalaReport, fileName = "reporte.pdf") {
+export type PDFSection = {
+    title: string;
+    content: string | string[];
+}
+
+export function generatePDF(sections: PDFSection[], fileName = "documento.pdf") {
     const doc = new jsPDF()
     const margin = 15
     const pageWidth = doc.internal.pageSize.getWidth() - margin * 2
@@ -40,10 +45,46 @@ export function generateReportPDF(report: AiMandalaReport, fileName = "reporte.p
         cursorY += 10
     }
 
-    addSection("Resumen", report.summary)
-    addSection("Coincidencias", report.coincidences)
-    addSection("Tensiones", report.tensions)
-    addSection("Insights", report.insights)
+    sections.forEach(section => {
+        addSection(section.title, section.content)
+    })
 
     doc.save(fileName)
 }
+
+// Para reportes de mandalas comparadas (OVERLAP) - reporte complejo
+export function generateOverlapReportPDF(report: AiOverlapMandalaReport, fileName = "reporte-comparado.pdf") {
+    const sections: PDFSection[] = [
+        {
+            title: "Resumen",
+            content: report.summary
+        },
+        {
+            title: "Coincidencias",
+            content: report.coincidences
+        },
+        {
+            title: "Tensiones",
+            content: report.tensions
+        },
+        {
+            title: "Insights",
+            content: report.insights
+        }
+    ]
+
+    generatePDF(sections, fileName)
+}
+
+// Para reportes de mandalas normales - reporte simple (string)
+export function generateNormalMandalaReportPDF(report: string, fileName = "reporte-mandala.pdf") {
+    const sections: PDFSection[] = [
+        {
+            title: "Resumen de la Mandala",
+            content: report
+        }
+    ]
+
+    generatePDF(sections, fileName)
+}
+
