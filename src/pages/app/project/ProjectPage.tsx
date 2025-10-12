@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Folder } from "lucide-react";
+import { ArrowLeftIcon, Folder, Edit } from "lucide-react";
 import useProject from "@/hooks/useProject.ts";
 import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
 import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
@@ -8,14 +8,34 @@ import FileListContainer from "@/components/files/FileListContainer";
 import ProjectUserCircles from "@/components/project/ProjectUserCircles";
 import MandalaListPage from "./mandala/MandalaListPage";
 import AppLayout from "@/components/layout/AppLayout";
+import CreateEntityModal from "@/components/project/CreateEntityModal";
+import useUpdateProject from "@/hooks/useUpdateProject";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
     organizationId: string;
     projectId: string;
   }>();
-  const { canManageUsers } = useProjectPermissions(projectId);
-  const { project } = useProject(projectId!);
+  const { canManageUsers, canEdit } = useProjectPermissions(projectId);
+  const { project, fetchProject } = useProject(projectId!);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const { update: updateProject, loading: updating, error: updateError } = useUpdateProject(() => {
+    fetchProject();
+  });
+
+  const handleEditProject = async (data: { name: string; description?: string }) => {
+    try {
+      await updateProject(projectId!, data);
+      setIsEditModalOpen(false);
+      setErrorMessage(null);
+    } catch {
+      setErrorMessage("No se pudo actualizar el proyecto. Intentalo de nuevo más tarde.");
+    }
+  };
 
   return (
     <AppLayout>
@@ -28,17 +48,42 @@ const ProjectPage = () => {
 
         <div className="w-full flex flex-col gap-6 flex-1">
           <div className="flex justify-between">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 flex-1">
               <Folder size={40} className="text-primary" />
               <h1 className="text-3xl font-bold">{project?.name || ""}</h1>
+              <div className="mt-2">
+                {project?.description && project.description.trim().length > 0 ? (
+                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                    {project.description}
+                  </p>
+                ) : (
+                  <p className="text-gray-500 text-sm italic">
+                    Este mundo no tiene descripción
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="flex flex-col gap-2 items-end flex-1">
-              <UnifiedInvitationDialog
-                projectName={project?.name ?? "Proyecto"}
-                projectId={projectId ?? ""}
-                organizationId={organizationId ?? ""}
-                defaultRole="member"
-              />
+            <div className="flex flex-col gap-2 items-end">
+              <div className="flex gap-2">
+                {canEdit && (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    color="white"
+                    onClick={() => setIsEditModalOpen(true)}
+                    aria-label="Editar"
+                    icon={<Edit size={16} />}
+                  >
+                    Editar
+                  </Button>
+                )}
+                <UnifiedInvitationDialog
+                  projectName={project?.name ?? "Proyecto"}
+                  projectId={projectId ?? ""}
+                  organizationId={organizationId ?? ""}
+                  defaultRole="member"
+                />
+              </div>
               <ProjectUserCircles
                 projectId={projectId ?? ""}
                 canManageUsers={canManageUsers}
@@ -54,6 +99,25 @@ const ProjectPage = () => {
             projectId={projectId ?? ""}
           />
         </div>
+          
+        <CreateEntityModal
+          open={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onCreate={handleEditProject}
+          loading={updating}
+          error={updateError}
+          title="Editar proyecto"
+          placeholder="Nombre del proyecto"
+          showQuestions={true}
+          initialName={project?.name || ""}
+          initialDescription={project?.description || ""}
+          mode="edit"
+        />
+        {errorMessage && (
+            <p className="text-red-500 mt-4 text-sm text-center">
+                {errorMessage}
+            </p>
+        )}
       </div>
     </AppLayout>
   );
