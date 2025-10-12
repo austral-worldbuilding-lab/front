@@ -2,15 +2,16 @@ import { useState, useEffect } from "react"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/config/firebase"
 
-export type AiMandalaReport = {
+export type AiOverlapMandalaReport = {
     summary: string
     coincidences: string[]
     tensions: string[]
     insights: string[]
 }
 
-export function useReport(projectId: string, mandalaId: string) {
-    const [summaryReport, setSummaryReport] = useState<AiMandalaReport | null>(null)
+// Hook base reutilizable para leer datos de Firestore
+function useFirestoreDocument<T>(projectId: string, mandalaId: string, fieldName: string) {
+    const [data, setData] = useState<T | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
 
@@ -23,10 +24,10 @@ export function useReport(projectId: string, mandalaId: string) {
             ref,
             (snap) => {
                 if (snap.exists()) {
-                    const data = snap.data()
-                    setSummaryReport(data.summaryReport ?? null)
+                    const docData = snap.data()
+                    setData(docData[fieldName] ?? null)
                 } else {
-                    setSummaryReport(null)
+                    setData(null)
                 }
                 setLoading(false)
             },
@@ -37,7 +38,29 @@ export function useReport(projectId: string, mandalaId: string) {
         )
 
         return () => unsub()
-    }, [projectId, mandalaId])
+    }, [projectId, mandalaId, fieldName])
+
+    return { data, loading, error }
+}
+
+// Hook específico para reportes de mandalas comparadas (OVERLAP_SUMMARY)
+export function useOverlapReport(projectId: string, mandalaId: string) {
+    const { data: summaryReport, loading, error } = useFirestoreDocument<AiOverlapMandalaReport>(
+        projectId,
+        mandalaId,
+        'summaryReport'
+    )
+
+    return { report: summaryReport, loading, error }
+}
+
+// Hook específico para reportes de mandalas normales (CHARACTER, etc.)
+export function useNormalMandalaReport(projectId: string, mandalaId: string) {
+    const { data: summaryReport, loading, error } = useFirestoreDocument<string>(
+        projectId,
+        mandalaId,
+        'summaryReport'
+    )
 
     return { report: summaryReport, loading, error }
 }
