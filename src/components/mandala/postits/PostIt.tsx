@@ -28,7 +28,7 @@ interface PostItProps {
   currentMandalaName?: string;
   disableDragging?: boolean;
   scale?: number;
-  zindex?: number;
+  zindex: number;
   onTransformEnd?: (e: KonvaEventObject<Event>, scale: number) => void;
 }
 
@@ -267,6 +267,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           divProps={{
             style: {
               pointerEvents: "none",
+              zIndex: zindex,
             },
           }}
         >
@@ -310,6 +311,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             currentMandalaName={currentMandalaName}
             disableDragging={true}
             scale={childrenScale}
+            zindex={zindex - 1}
           />
         ))}
 
@@ -397,6 +399,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             divProps={{
               style: {
                 pointerEvents: "none",
+                zIndex: zindex,
               },
             }}
           >
@@ -422,6 +425,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           <MandalaBadge
             originMandalaName={postit.from?.name}
             fontSize={fontSize}
+            zindex={zindex}
           />
         )}
         <Html
