@@ -19,7 +19,7 @@ import AppLayout from "@/components/layout/AppLayout";
 
 const OrganizationPage = () => {
   const { organizationId } = useParams();
-  const { projects, loading, page, setPage, error } = useProjects(
+  const { projects, loading, error } = useProjects(
       organizationId!,
       1,
       100
@@ -134,8 +134,6 @@ const OrganizationPage = () => {
                   organizationId={organizationId!}
                   canCreateProject={canCreateProject}
                   onCreateProject={() => setModalOpen(true)}
-                  page={page}
-                  setPage={setPage}
               />
               <FileListContainer scope="organization" id={organizationId!} />
             </div>
