@@ -174,6 +174,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     dimensions: { name: string; color?: string }[];
     scales: string[];
     parentId?: string;
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => {
     await createMandala(
       character.name,
@@ -182,7 +183,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       character.useAIMandala,
       character.dimensions,
       character.scales,
-      character.parentId
+      character.parentId,
+      character.mandalaType
     );
   };
 

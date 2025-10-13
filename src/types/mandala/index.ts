@@ -76,7 +76,7 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  type?: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
+  type?: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY" | "CONTEXT";
   configuration: MandalaConfiguration;
   parentId: string;
 }
@@ -102,7 +102,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
-  type: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
+  type: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY" | "CONTEXT";
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];

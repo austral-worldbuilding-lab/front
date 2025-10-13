@@ -31,6 +31,7 @@ interface CreateModalProps {
     dimensions: { name: string; color?: string }[];
     scales: string[];
     parentId?: string;
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => void | Promise<void>;
   title?: string;
   createButtonText?: string;
@@ -41,14 +42,15 @@ const CreateModal = ({
   isOpen,
   onOpenChange,
   onCreateCharacter,
-  title = "New Character",
-  createButtonText = "Create Character",
+  title = "Crear Mandala",
+  createButtonText = "Crear Mandala",
   loading = false,
 }: CreateModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [mandalaType, setMandalaType] = useState("empty");
+  const [selectedMandalaType, setSelectedMandalaType] = useState<"CHARACTER" | "CONTEXT">("CHARACTER");
   const [dimensions, setDimensions] = useState<Item[]>([]);
   const [scales, setScales] = useState<Item[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -78,20 +80,20 @@ const CreateModal = ({
 
   // Mensajes para mandala con IA
   const aiMessages = [
-    "Generando mandala con IA en base a los archivos subidos...",
+    `Generando mandala ${selectedMandalaType === 'CONTEXT' ? 'de contexto' : 'de personaje'} con IA...`,
     "Analizando contenido de los archivos...",
     "Procesando información con inteligencia artificial...",
     "Creando estructura de la mandala...",
-    "Generando personajes y dimensiones...",
+    selectedMandalaType === 'CONTEXT' ? "Generando observaciones del contexto..." : "Generando personajes y dimensiones...",
     "Finalizando la mandala personalizada...",
   ];
 
   // Mensajes para mandala normal
   const normalMessages = [
-    "Creando nueva mandala...",
+    `Creando mandala ${selectedMandalaType === 'CONTEXT' ? 'de contexto' : 'de personaje'}...`,
     "Configurando estructura inicial...",
     "Preparando dimensiones y escalas...",
-    "Guardando información del personaje...",
+    selectedMandalaType === 'CONTEXT' ? "Guardando información del contexto..." : "Guardando información del personaje...",
     "Finalizando configuración...",
   ];
 
@@ -117,6 +119,7 @@ const CreateModal = ({
       setDescription("");
       setSelectedColor(colors[0]);
       setMandalaType("empty");
+      setSelectedMandalaType("CHARACTER");
       setCurrentMessageIndex(0);
     }
   }, [isOpen]);
@@ -138,6 +141,7 @@ const CreateModal = ({
       color: selectedColor,
       dimensions: processedDimensions,
       scales: scales.map((s) => s.value),
+      mandalaType: selectedMandalaType,
     });
   };
 
@@ -153,7 +157,7 @@ const CreateModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-md"
+        className="max-w-lg"
         showCloseButton={!loading}
         onPointerDownOutside={handlePointerDownOutside}
         onEscapeKeyDown={handleEscapeKeyDown}
@@ -174,7 +178,7 @@ const CreateModal = ({
             </div>
           </div>
         ) : (
-          <div className="space-y-6 py-4">
+          <div className="space-y-4 py-2">
             <CustomInput
               id="name"
               label="Nombre"
@@ -188,7 +192,9 @@ const CreateModal = ({
               label="Descripción"
               about={mandalaType === "ai" 
                 ? "Esta descripción será útil para que la IA genere la mandala con más precisión" 
-                : "Describe el propósito o contexto de esta mandala"}
+                : selectedMandalaType === "CONTEXT" 
+                  ? "Describe el contexto general del mundo o ambiente que vas a explorar"
+                  : "Describe el personaje o entidad que estará en el centro de esta mandala"}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               as="textarea"
@@ -221,30 +227,69 @@ const CreateModal = ({
               />
             </div>
 
-            <div className="flex justify-between gap-2">
-              <RadioGroup
-                value={mandalaType}
-                onValueChange={setMandalaType}
-                className="flex flex-col gap-2"
-              >
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <RadioGroupItem value="empty" />
-                  <span className="text-black">Mandala vacía</span>
+            <div className="space-y-4">
+              {/* Tipo de Mandala */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Tipo de Mandala
                 </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <RadioGroupItem value="ai" />
-                  <span className="text-black flex items-center gap-2">
-                    Generada con IA <Sparkles className="w-4 h-4" />
-                  </span>
-                </label>
-              </RadioGroup>
+                <RadioGroup
+                  value={selectedMandalaType}
+                  onValueChange={(value) => setSelectedMandalaType(value as "CHARACTER" | "CONTEXT")}
+                  className="flex flex-col gap-2"
+                >
+                  <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <RadioGroupItem value="CHARACTER" />
+                    <div className="flex-1">
+                      <span className="text-black font-medium text-sm">Mandala de Personaje</span>
+                      <p className="text-xs text-gray-500">Para explorar un personaje o entidad específica</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <RadioGroupItem value="CONTEXT" />
+                    <div className="flex-1">
+                      <span className="text-black font-medium text-sm">Mandala de Contexto</span>
+                      <p className="text-xs text-gray-500">Para observaciones generales del mundo o ambiente</p>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
 
-              <ColorSelector
-                className="w-1/2"
-                selectedColor={selectedColor}
-                setSelectedColor={setSelectedColor}
-                colors={colors}
-              />
+              {/* Método de creación y Color */}
+              <div className="flex justify-between gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Método de creación
+                  </label>
+                  <RadioGroup
+                    value={mandalaType}
+                    onValueChange={setMandalaType}
+                    className="flex flex-col gap-2"
+                  >
+                    <label className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-50">
+                      <RadioGroupItem value="empty" />
+                      <span className="text-black text-sm">Mandala vacía</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-50">
+                      <RadioGroupItem value="ai" />
+                      <span className="text-black text-sm flex items-center gap-2">
+                        Generada con IA <Sparkles className="w-3 h-3" />
+                      </span>
+                    </label>
+                  </RadioGroup>
+                </div>
+
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Color
+                  </label>
+                  <ColorSelector
+                    selectedColor={selectedColor}
+                    setSelectedColor={setSelectedColor}
+                    colors={colors}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}
