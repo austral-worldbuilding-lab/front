@@ -6,6 +6,8 @@ import useTimeline from "@/hooks/useTimeline";
 import { useNavigate } from "react-router-dom";
 import { ProvocationDialog } from "./ProvocationDialog";
 import { ProvocationItem } from "./ProvocationItem";
+import useProject from "@/hooks/useProject";
+import { useProjectBreadcrumb } from "@/hooks/useProjectBreadcrumb";
 
 export type ProvocationsSectionProps = {
   organizationId: string;
@@ -24,6 +26,15 @@ export const ProvocationsSection = ({
   } = useProvocations(projectId);
   const { data, loading } = useTimeline(projectId);
   const navigate = useNavigate();
+  const { project } = useProject(projectId);
+  const { push } = useProjectBreadcrumb();
+
+  const handleClick = () => {
+    push({
+      title: project!.name,
+      url: `/app/organization/${organizationId}/projects/${project!.id}`,
+    });
+  };
 
   return (
     <div className="w-full flex flex-col gap-4 p-5 border border-gray-200 rounded-xl bg-white max-h-[500px] overflow-hidden">
@@ -88,7 +99,11 @@ export const ProvocationsSection = ({
                 )
               }
             />
-            <TimelineTree className="rounded-xl" data={data}></TimelineTree>
+            <TimelineTree
+              className="rounded-xl"
+              data={data}
+              onProjectClick={handleClick}
+            ></TimelineTree>
           </div>
         )}
       </div>

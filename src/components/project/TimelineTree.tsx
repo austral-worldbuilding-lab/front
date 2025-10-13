@@ -15,9 +15,10 @@ export interface TimelineNode {
 interface TimelineTreeProps {
     data: TimelineNode;
     className?: string;
+    onProjectClick?: () => void;
 }
 
-export default function TimelineTree({ data, className }: TimelineTreeProps) {
+export default function TimelineTree({ data, className, onProjectClick }: TimelineTreeProps) {
     const ref = useRef<SVGSVGElement | null>(null);
     const navigate = useNavigate();
     const { organizationId } = useParams<{ organizationId: string }>();
@@ -99,6 +100,7 @@ export default function TimelineTree({ data, className }: TimelineTreeProps) {
             .style("cursor", "pointer")
             .on("click", (_, d) => {
                 if (d.data.kind === "project") {
+                    onProjectClick?.();
                     navigate(`/app/organization/${organizationId}/projects/${d.data.id}`);
                 }
             });
@@ -183,7 +185,7 @@ export default function TimelineTree({ data, className }: TimelineTreeProps) {
             const tspans = textEl.selectAll<SVGTextElement, unknown>("tspan");
             tspans.attr("dy", (_, i) => (i - lineNumber / 2) * lineHeight + 0.35 + "em");
         }
-    }, [data, navigate, organizationId]);
+    }, [data, navigate, onProjectClick, organizationId]);
 
     return <svg className={className} ref={ref}></svg>;
 }
