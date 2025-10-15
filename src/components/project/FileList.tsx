@@ -5,6 +5,12 @@ import {useParams} from "react-router-dom";
 import {useFiles} from "@/hooks/useFiles.ts";
 import {FileItem} from "@/types/mandala";
 import {FileScope} from "@/services/filesService.ts";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface FilesListProps {
     scope: FileScope;
@@ -12,10 +18,12 @@ interface FilesListProps {
     files?: FileItem[],
     loading?: boolean,
     error?: Error,
-    open: boolean
+    open: boolean,
+    organizationName?: string,
+    projectName?: string,
 }
 
-export default function FilesList({scope, id, files, loading, error}: FilesListProps) {
+export default function FilesList({scope, id, files, loading, error, organizationName, projectName}: FilesListProps) {
     const [fileToDelete, setFileToDelete] = useState<FileItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -74,6 +82,19 @@ export default function FilesList({scope, id, files, loading, error}: FilesListP
 
     const scopeOrder = ["organization", "project", "mandala"];
 
+    const getScopeTitle = (scopeKey: string) => {
+        switch (scopeKey) {
+            case "organization":
+                return organizationName || "Organización";
+            case "project":
+                return projectName || "Proyecto";
+            case "mandala":
+                return "Archivos de la mandala";
+            default:
+                return scopeKey;
+        }
+    };
+
 
     return (
         <div>
@@ -82,65 +103,68 @@ export default function FilesList({scope, id, files, loading, error}: FilesListP
             {!files || files.length === 0 ? (
                 <p>No hay archivos cargados aún</p>
             ) : (
-                <>
+                <Accordion type="multiple" defaultValue={scopeOrder} className="w-full">
                     {scopeOrder.map(scopeKey => (
                         groupedFiles[scopeKey] ? (
-                            <div key={scopeKey} className="mb-4">
-                                <h3 className="font-semibold text-gray-700 mb-1 capitalize">
-                                    {scopeKey === "organization" ? "Archivos de la organización" :
-                                        scopeKey === "project" ? "Archivos del proyecto" :
-                                            scopeKey === "mandala" ? "Archivos de la mandala" :
-                                                scopeKey}
-                                </h3>
-                                <ul className="space-y-1">
-                                    {groupedFiles[scopeKey].map((file, index) => (
-                                        <li key={index} className="flex items-center justify-between gap-2 text-sm text-gray-800
+                            <AccordionItem key={scopeKey} value={scopeKey} className="border-none">
+                                <AccordionTrigger className="px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left font-semibold text-gray-800 hover:no-underline rounded-none border-b border-gray-200 text-base">
+                                    <div className="flex items-center justify-between w-full pr-2">
+                                        <span>
+                                            {getScopeTitle(scopeKey)}
+                                        </span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="p-0">
+                                    <div className="space-y-1 p-2">
+                                        {groupedFiles[scopeKey].map((file, index) => (
+                                            <div key={index} className="flex items-center justify-between gap-2 text-sm text-gray-800
              bg-gray-50 hover:bg-blue-50 rounded-md px-2 py-1 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={file.selected}
-                                                    onChange={() => toggleFile(file)}
-                                                    disabled={isUpdatingSelections}
-                                                />
-                                                <a
-                                                    href={file.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:underline"
-                                                >
-                                                    {file.file_name}
-                                                </a>
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleDownload(file)}
-                                                    className="text-gray-600 hover:text-blue-600"
-                                                    title="Descargar"
-                                                >
-                                                    <Download className="w-4 h-4"/>
-                                                </button>
-
-                                                {scopeKey === scope && (
-                                                    <button
-                                                        onClick={() => handleDeleteClick(file)}
-                                                        className="text-red-500 hover:text-red-700"
-                                                        disabled={isDeleting}
-                                                        title="Eliminar"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={file.selected}
+                                                        onChange={() => toggleFile(file)}
+                                                        disabled={isUpdatingSelections}
+                                                    />
+                                                    <a
+                                                        href={file.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:underline"
                                                     >
-                                                        <Trash2 className="w-4 h-4"/>
+                                                        {file.file_name}
+                                                    </a>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleDownload(file)}
+                                                        className="text-gray-600 hover:text-blue-600"
+                                                        title="Descargar"
+                                                    >
+                                                        <Download className="w-4 h-4"/>
                                                     </button>
-                                                )}
+
+                                                    {scopeKey === scope && (
+                                                        <button
+                                                            onClick={() => handleDeleteClick(file)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                            disabled={isDeleting}
+                                                            title="Eliminar"
+                                                        >
+                                                            <Trash2 className="w-4 h-4"/>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                                        ))}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                         ) : null
                     ))}
-                </>
+                </Accordion>
             )}
 
             <ConfirmationDialog
