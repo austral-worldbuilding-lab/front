@@ -10,15 +10,16 @@ import LoginPage from "@/pages/LoginPage.tsx";
 import RegisterPage from "@/pages/RegisterPage.tsx";
 import ProtectedRoute from "@/components/auth/ProtectedRoute.tsx";
 import MandalaPage from "./pages/app/project/mandala/MandalaPage";
-import MandalaListPage from "./pages/app/project/mandala/MandalaListPage";
 import ProjectPage from "./pages/app/project/ProjectPage";
-import ProjectListPage from "./pages/app/project/ProjectListPage";
+import OrganizationPage from "./pages/app/project/OrganizationPage";
 import DimensionPage from "@/pages/app/project/mandala/DimensionPage.tsx";
 import MyInvitationsPage from "@/pages/MyInvitationsPage";
 import InviteTokenPage from "@/pages/InviteTokenPage";
 import RootRedirect from "@/components/common/RootRedirect.tsx";
 import OrganizationListPage from "@/pages/app/project/OrganizationListPage.tsx";
 import OrganizationInviteTokenPage from "./pages/OrganizationInviteTokenPage";
+import TimelinePage from "@/pages/app/project/TimelinePage.tsx";
+import SolutionsPage from "@/pages/app/project/SolutionPage.tsx";
 
 // Layout component for all protected routes
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
@@ -42,7 +43,7 @@ function App() {
         />
 
         <Route
-          path="/my-invitations"  
+          path="/my-invitations"
           element={
             <ProtectedLayout>
               <MyInvitationsPage />
@@ -69,17 +70,21 @@ function App() {
           <Route path="organization/" element={<OrganizationListPage />} />
           <Route
             path="organization/:organizationId/projects"
-            element={<ProjectListPage />}
+            element={<OrganizationPage />}
           />
           <Route
             path="organization/:organizationId/projects/:projectId"
             element={<ProjectPage />}
           />
-
           <Route
-            path="organization/:organizationId/projects/:projectId/mandalas"
-            element={<MandalaListPage />}
+            path="organization/:organizationId/projects/:projectId/timeline"
+            element={<TimelinePage />}
           />
+          <Route
+              path="organization/:organizationId/projects/:projectId/solutions"
+              element={<SolutionsPage />}
+          />
+
           <Route
             path="organization/:organizationId/projects/:projectId/mandala/:mandalaId"
             element={<MandalaPage />}

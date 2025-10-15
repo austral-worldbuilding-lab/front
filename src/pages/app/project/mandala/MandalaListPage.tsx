@@ -4,9 +4,9 @@ import useGetMandalas from "@/hooks/useGetMandalas.ts";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { useDeleteMandala } from "@/hooks/useDeleteMandala.ts";
 import CreateModal from "@/components/mandala/characters/modal/CreateModal";
-import MandalaPageHeader from "@/components/mandala/mandala-list/MandalaPageHeader";
 import MandalasPaginatedList from "@/components/mandala/mandala-list/MandalasPaginatedList";
 import MandalaListContainer from "@/components/mandala/mandala-list/MandalaListContainer";
+import { Globe } from "lucide-react";
 
 const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
 
@@ -17,6 +17,7 @@ const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
  * - Selección y unificación de mandalas
  */
 const MandalaListPage = () => {
+  const [searchText, setSearchText] = useState("");
   const { organizationId, projectId } = useParams<{
     organizationId: string;
     projectId: string;
@@ -79,8 +80,9 @@ const MandalaListPage = () => {
     color: string;
     dimensions: { name: string; color?: string }[];
     scales: string[];
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => {
-    const { name, description, color, useAIMandala, dimensions, scales } =
+    const { name, description, color, useAIMandala, dimensions, scales, mandalaType } =
       character;
 
     if (!name.trim()) {
@@ -97,7 +99,9 @@ const MandalaListPage = () => {
         color,
         useAIMandala,
         dimensions,
-        scales
+        scales,
+        undefined,
+        mandalaType
       );
       navigate(
         `/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`
@@ -134,32 +138,33 @@ const MandalaListPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-12 relative">
-      <MandalaPageHeader
-        title="Mandalas"
+    <div className="flex flex-col gap-4 bg-white rounded-[12px] border border-gray-200 overflow-hidden px-5 py-4 flex-1 lg:min-w-[450px] min-w-[300px] max-h-[636px]">
+      <div className="flex items-center gap-2">
+        <Globe size={20} className="text-foreground" />
+        <span className="font-semibold text-xl text-foreground">Mandalas</span>
+      </div>
+      {/* Contenedor que maneja la lógica de selección */}
+      <MandalaListContainer
         organizationId={organizationId}
-        projectId={projectId}
+        projectId={projectId || ""}
+        onCreateClick={() => setIsCreateModalOpen(true)}
+        mandalasExists={mandalas.length > 0}
+        onSearchChange={setSearchText}
       >
-        {/* Contenedor que maneja la lógica de selección */}
-        <MandalaListContainer
-          organizationId={organizationId}
-          projectId={projectId || ""}
-          onCreateClick={() => setIsCreateModalOpen(true)}
-          mandalasExists={mandalas.length > 0}
-        >
-          {/* Lista paginada de mandalas */}
-          <MandalasPaginatedList
-            mandalas={mandalas}
-            loading={mandalasLoading}
-            organizationId={organizationId || ""}
-            projectId={projectId}
-            onDeleteMandala={handleDeleteMandala}
-            nextPageMandalas={nextPageMandalas}
-            page={page}
-            onPageChange={setPage}
-          />
-        </MandalaListContainer>
-      </MandalaPageHeader>
+        {/* Lista paginada de mandalas */}
+        <MandalasPaginatedList
+          mandalas={mandalas.filter((m) =>
+            m.name.toLowerCase().includes(searchText.toLowerCase())
+          )}
+          loading={mandalasLoading}
+          organizationId={organizationId || ""}
+          projectId={projectId}
+          onDeleteMandala={handleDeleteMandala}
+          nextPageMandalas={nextPageMandalas}
+          page={page}
+          onPageChange={setPage}
+        />
+      </MandalaListContainer>
 
       {/* Modal de creación */}
       <CreateModal

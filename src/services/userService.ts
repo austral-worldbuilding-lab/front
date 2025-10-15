@@ -4,12 +4,16 @@ export interface CreateUserData {
     firebaseUid: string;
     email: string;
     username: string;
+    fullName: string;
 }
 
 export interface User {
+    id?: string;
     firebaseUid: string;
     email: string;
     username: string;
+    fullName?: string;
+    is_active?: boolean;
 }
 
 export interface ProjectUser {
@@ -20,6 +24,14 @@ export interface ProjectUser {
     role: string;
 }
 
+export interface OrganizationUser {
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+    isActive: boolean;
+}
+
 export const createUser = async (userData: CreateUserData): Promise<User> => {
     const response = await axiosInstance.post<User>('/user', userData);
     return response.data;
@@ -27,11 +39,31 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
 
 export async function getProjectUsers(projectId: string): Promise<ProjectUser[]> {
     const response = await axiosInstance.get(`/project/${projectId}/users`);
-    const raw = response.data as any;
-    const list = Array.isArray(raw) ? raw : raw?.data ?? raw?.users;
-    return (list ?? []) as ProjectUser[];
+    const raw = response.data as { data?: ProjectUser[] } | ProjectUser[];
+    const list = Array.isArray(raw) ? raw : raw?.data ?? [];
+    return list as ProjectUser[];
 }
 
 export async function removeProjectUser(projectId: string, userId: string): Promise<void> {
     await axiosInstance.delete(`/project/${projectId}/users/${userId}`);
+}
+
+export async function getOrganizationUsers(organizationId: string): Promise<OrganizationUser[]> {
+    const response = await axiosInstance.get(`/organization/${organizationId}/users`);
+    const raw = response.data as { data?: OrganizationUser[] } | OrganizationUser[];
+    const list = Array.isArray(raw) ? raw : raw?.data ?? [];
+    return list as OrganizationUser[];
+}
+
+export async function updateOrganizationUserRole(organizationId: string, userId: string, role: string): Promise<void> {
+    await axiosInstance.put(`/organization/${organizationId}/users/${userId}/role`, { role });
+}
+
+export async function removeOrganizationUser(organizationId: string, userId: string): Promise<void> {
+    await axiosInstance.delete(`/organization/${organizationId}/users/${userId}`);
+}
+
+export async function getCurrentUser(): Promise<User> {
+    const response = await axiosInstance.get<{data: User}>('/user/me');
+    return response.data.data;
 }

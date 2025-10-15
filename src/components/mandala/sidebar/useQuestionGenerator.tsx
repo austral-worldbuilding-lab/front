@@ -1,7 +1,8 @@
 // components/question-machine/useQuestionGenerator.ts
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   generateQuestionsService,
+  getCachedQuestionsService,
   type AiQuestionResponse,
 } from "@/services/questionMachineService";
 import { useAnalytics } from "@/services/analytics";
@@ -16,6 +17,23 @@ export function useQuestionGenerator(mandalaId: string, projectId: string) {
   const [error, setError] = useState<string | null>(null);
   const { trackAiRequest } = useAnalytics();
   const { backendUser } = useAuth();
+
+  useEffect(() => {
+    const loadCachedQuestions = async () => {
+      if (!mandalaId) return;
+      
+      const cachedQuestions = await getCachedQuestionsService(mandalaId).catch(() => []);
+      const formattedQuestions = cachedQuestions.map((q) => ({
+        question: q.question?.trim() || "",
+        dimension: q.dimension?.trim() || "",
+        scale: q.scale?.trim() || "",
+      })).filter(q => q.question && q.dimension && q.scale);
+      
+      setQuestions(formattedQuestions);
+    };
+
+    loadCachedQuestions();
+  }, [mandalaId]);
 
   const generate = useCallback(
     async (dimensions: string[], scales: string[]) => {

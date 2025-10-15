@@ -45,6 +45,7 @@ export const useAuth = () => {
     const register = async (
         email: string,
         password: string,
+        fullName: string,
     ): Promise<boolean> => {
         setIsLoading(true);
         setError(null);
@@ -57,6 +58,7 @@ export const useAuth = () => {
                     firebaseUid: firebaseUser.uid,
                     email: firebaseUser.email!,
                     username: firebaseUser.email!,
+                    fullName: fullName,
                 });
                 setBackendUser(newUser);
             } catch (backendError: any) {

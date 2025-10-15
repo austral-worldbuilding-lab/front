@@ -1,14 +1,15 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Group, Image as KonvaImage, Rect } from "react-konva";
+import { Group, Rect, Transformer } from "react-konva";
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import type { MandalaImage } from "@/types/mandala";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
+import { Html } from "react-konva-utils";
 
 interface MandalaImageProps {
   image: MandalaImage;
   position: { x: number; y: number };
-  onDragStart: () => void;
+  onDragStart: (postitId: string) => void;
   onDragMove?: (e: KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: KonvaEventObject<DragEvent>) => void;
   onMouseEnter: () => void;
@@ -18,6 +19,7 @@ interface MandalaImageProps {
   disableDragging?: boolean;
   scale?: number;
   zindex?: number;
+  onTransformEnd?: (e: KonvaEventObject<Event>, scale: number) => void;
 }
 
 const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, ref) => {
@@ -34,25 +36,22 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
     disableDragging,
     scale = 1,
     zindex,
+    onTransformEnd,
   } = props;
 
   const groupRef = useRef<Konva.Group>(null);
-  const imageRef = useRef<Konva.Image>(null);
+  const trRef = useRef<Konva.Transformer>(null);
+  const imgHtmlRef = useRef<HTMLImageElement | null>(null);
+
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [konvaImage, setKonvaImage] = useState<HTMLImageElement | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Tamaño fijo para todas las imágenes (altura o ancho igual según requerimientos)
-  const IMAGE_SIZE = 80; // Tamaño base
-  const scaledSize = IMAGE_SIZE * scale;
-
-  const { dragBoundFunc } = useDragBoundFunc(
-    mandalaRadius,
-    scaledSize,
-    scaledSize,
-    0,
-    scale
-  );
+  const IMAGE_SIZE = 80;
+  const staticScale = scale * (image.scale ?? 1);
+  const [localScale, setLocalScale] = useState(staticScale);
 
   useEffect(() => {
     const img = new window.Image();
@@ -68,39 +67,111 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
     img.src = image.url;
   }, [image.url]);
 
-  const getImageDimensions = () => {
-    if (!konvaImage) return { width: scaledSize, height: scaledSize };
+  useEffect(() => {
+    if (!isResizing) setLocalScale(staticScale);
+  }, [staticScale, isResizing]);
 
-    const aspectRatio = konvaImage.width / konvaImage.height;
-    
-    if (aspectRatio > 1) {
-      return {
-        width: scaledSize,
-        height: scaledSize / aspectRatio,
-      };
-    } else {
-      return {
-        width: scaledSize * aspectRatio,
-        height: scaledSize,
-      };
-    }
+  const getBaseDimensions = () => {
+    const base = IMAGE_SIZE;
+    if (!konvaImage) return { width: base, height: base, aspect: 1 };
+    const ar = konvaImage.width / konvaImage.height;
+    return ar > 1
+      ? { width: base, height: base / ar, aspect: ar }
+      : { width: base * ar, height: base, aspect: ar };
   };
+  const { width, height, aspect } = getBaseDimensions();
 
-  const { width, height } = getImageDimensions();
+  const { dragBoundFunc } = useDragBoundFunc(
+    mandalaRadius,
+    width,
+    height,
+    0,
+    localScale
+  );
+
+  useEffect(() => {
+    if (isEditing && groupRef.current && trRef.current) {
+      try {
+        trRef.current.nodes([groupRef.current]);
+        trRef.current.getLayer()?.batchDraw();
+      } catch {
+        // no-op
+      }
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (!isEditing) return;
+
+      const stage = groupRef.current?.getStage();
+      const tr = trRef.current as unknown as Konva.Transformer | null;
+
+      try {
+        const pos = stage?.getPointerPosition();
+        if (stage && tr && pos) {
+          const shape = stage.getIntersection(pos);
+          if (shape) {
+            const transformerAncestor = shape.findAncestor(
+              (n: Konva.Node) => n.getClassName() === "Transformer",
+              true
+            );
+            if (transformerAncestor && transformerAncestor === tr) return;
+            const groupAncestor = shape.findAncestor(
+              (n: Konva.Node) => n === groupRef.current,
+              true
+            );
+            if (groupAncestor) return;
+          }
+        }
+      } catch {
+        // no-op
+      }
+
+      setIsEditing(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("contextmenu", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("contextmenu", handleClickOutside);
+    };
+  }, [isEditing]);
+
+  useEffect(() => {
+    const node = groupRef.current;
+    if (!node) return;
+
+    const handleTransformStart = () => {
+      setIsResizing(true);
+      onDragStart(image.id);
+    };
+
+    const handleTransformEnd = (e: KonvaEventObject<Event>) => {
+      setIsResizing(false);
+      const sx = node.scaleX();
+      setLocalScale(sx);
+      onTransformEnd?.(e, sx);
+    };
+
+    node.on("transformstart", handleTransformStart);
+    node.on("transformend", handleTransformEnd);
+
+    return () => {
+      node.off("transformstart", handleTransformStart);
+      node.off("transformend", handleTransformEnd);
+    };
+  }, [onDragStart, onTransformEnd, image.id]);
 
   if (!imageLoaded || !konvaImage) {
     return (
-      <Group
-        x={position.x}
-        y={position.y}
-        scale={{ x: scale, y: scale }}
-        zIndex={zindex}
-      >
+      <Group x={position.x} y={position.y} scale={{ x: staticScale, y: staticScale }}>
         <Rect
-          width={scaledSize}
-          height={scaledSize}
-          x={-scaledSize / 2}
-          y={-scaledSize / 2}
+          width={IMAGE_SIZE}
+          height={IMAGE_SIZE}
+          x={-IMAGE_SIZE / 2}
+          y={-IMAGE_SIZE / 2}
           fill="#f0f0f0"
           stroke="#ccc"
           strokeWidth={1}
@@ -111,7 +182,7 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
   }
 
   return (
-    <Group zIndex={zindex}>
+    <Group>
       <Group
         ref={(node) => {
           groupRef.current = node;
@@ -121,12 +192,14 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
         }}
         x={position.x}
         y={position.y}
-        draggable={!disableDragging}
+        width={width}
+        height={height}
+        draggable={!disableDragging && !isResizing}
         dragBoundFunc={dragBoundFunc}
         offset={{ x: width / 2, y: height / 2 }}
-        scale={{ x: scale, y: scale }}
+        scale={{ x: localScale, y: localScale }}
         onDragStart={() => {
-          onDragStart();
+          onDragStart(image.id);
           setIsDragging(true);
         }}
         {...(onDragMove && { onDragMove })}
@@ -134,39 +207,74 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
           onDragEnd(e);
           setTimeout(() => setIsDragging(false), 100);
         }}
+        onDblClick={() => {
+          setIsEditing((v) => !v);
+        }}
         onMouseEnter={() => {
           onMouseEnter();
           const container = groupRef.current?.getStage()?.container();
-          if (container) {
-            container.style.cursor = "pointer";
-          }
+          if (container) container.style.cursor = "pointer";
         }}
         onMouseLeave={() => {
           onMouseLeave();
           const container = groupRef.current?.getStage()?.container();
-          if (container) {
-            container.style.cursor = "grab";
-          }
+          if (container) container.style.cursor = "grab";
         }}
-        onContextMenu={(e) => {
-          onContextMenu(e, image.id);
+        onContextMenu={(e) => onContextMenu(e, image.id)}
+        onTransformEnd={(e) => {
+          setTimeout(() => setIsResizing(false), 100);
+          const node = groupRef.current;
+          if (!node) return;
+          const sx = node.scaleX();
+          setLocalScale(sx);
+          onTransformEnd?.(e, sx);
         }}
       >
-        <KonvaImage
-          ref={imageRef}
-          image={konvaImage}
+        {/* HTML img para nitidez + Rect para sombra/selección */}
+        <Html
+          divProps={{
+            style: { pointerEvents: "none", zIndex: zindex } as React.CSSProperties,
+          }}
+        >
+          <img
+            ref={imgHtmlRef}
+            src={image.url}
+            width={width}
+            height={height}
+            style={{ borderRadius: 4, display: "block" }}
+            alt=""
+          />
+        </Html>
+
+        <Rect
           width={width}
           height={height}
-          x={-width / 2}
-          y={-height / 2}
           shadowColor="rgba(0,0,0,0.3)"
-          shadowBlur={isDragging ? 10 : 5}
+          shadowBlur={isDragging || isResizing ? 10 : 5}
           shadowOffset={{ x: 2, y: 2 }}
           shadowOpacity={0.5}
-          strokeWidth={isDragging ? 2 : 1}
+          stroke="#00000020"
+          strokeWidth={isDragging || isResizing ? 2 : 1}
           cornerRadius={4}
         />
       </Group>
+
+      {/* Transformer como en PostIt: sólo si está en edición y no está bloqueado */}
+      {isEditing && !disableDragging && (
+        <Transformer
+          ref={trRef}
+          rotateEnabled={false}
+          keepRatio
+          enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
+          boundBoxFunc={(_oldBox, newBox) => {
+            const min = 40;
+            const max = 600;
+            const nextW = Math.max(min, Math.min(max, newBox.width));
+            const nextH = nextW / (aspect || 1);
+            return { ...newBox, width: nextW, height: nextH };
+          }}
+        />
+      )}
     </Group>
   );
 });

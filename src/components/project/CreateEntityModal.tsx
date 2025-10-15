@@ -1,117 +1,296 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import { Info } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { CustomInput } from "../ui/CustomInput";
+import { DimensionDto } from "@/types/mandala";
+import TagInput, { Item } from "@/components/common/TagInput.tsx";
+import { Sectors, Levels } from "@/constants/mandala";
+
+const getInitialDimensions = (): Item[] => {
+  return Sectors.map((sector) => ({
+    id: sector.id,
+    value: sector.name,
+    color: sector.color,
+  }));
+};
+
+const getInitialScales = (): Item[] => {
+  return Levels.map((level) => ({
+    id: level.id,
+    value: level.name,
+    color: "rgba(180, 210, 255, 0.7)",
+  }));
+};
 
 interface CreateEntityModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { name: string; description?: string }) => Promise<void>;
+  onCreate: (data: { 
+    name: string; 
+    description?: string;
+    dimensions?: DimensionDto[];
+    scales?: string[];
+  }) => Promise<void>;
+  onCreateFromProvocation?: (data: {
+    question: string;
+    name?: string;
+    dimensions?: DimensionDto[];
+    scales?: string[];
+  }) => Promise<void>;
   loading: boolean;
   error?: string | null;
   title: string;
   placeholder: string;
-  showQuestions?: boolean; // true para proyectos, false para organizaciones
+  showQuestions?: boolean;
+  initialName?: string;
+  initialDescription?: string;
+  mode?: "create" | "edit";
+  allowProvocationMode?: boolean;
+  showConfiguration?: boolean;
 }
 
 const CreateEntityModal = ({
-                             open,
-                             onClose,
-                             onCreate,
-                             loading,
-                             error,
-                             title,
-                             placeholder,
-                             showQuestions = false,
-                           }: CreateEntityModalProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  open,
+  onClose,
+  onCreate,
+  onCreateFromProvocation,
+  loading,
+  error,
+  title,
+  placeholder,
+  showQuestions = false,
+  initialName,
+  initialDescription,
+  mode,
+  allowProvocationMode = false,
+  showConfiguration = false,
+}: CreateEntityModalProps) => {
+  const [name, setName] = useState(initialName ?? "");
+  const [description, setDescription] = useState(initialDescription ?? "");
+  const [isProvocationMode, setIsProvocationMode] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
+  const [scales, setScales] = useState<Item[]>(getInitialScales());
+
+  useEffect(() => {
+    setName(initialName ?? "");
+    setDescription(initialDescription ?? "");
+  }, [initialName, initialDescription, open]);
 
   if (!open) return null;
 
-  const handleOnClose = () => {
-    setName("");
-    setDescription("");
-    onClose();
-  };
-
   const handleSubmit = () => {
-    if (showQuestions) {
-      onCreate({ name, description });
+    const dimensionsData: DimensionDto[] = dimensions.map(dim => ({
+      name: dim.value,
+      color: dim.color || "#cccccc"
+    }));
+
+    const scalesData: string[] = scales.map(scale => scale.value);
+
+    if (isProvocationMode && onCreateFromProvocation) {
+      onCreateFromProvocation({
+        question,
+        name: name.trim() || undefined,
+        dimensions: showConfiguration ? dimensionsData : undefined,
+        scales: showConfiguration ? scalesData : undefined,
+      });
+    } else if (showQuestions) {
+      onCreate({ 
+        name, 
+        description,
+        dimensions: showConfiguration ? dimensionsData : undefined,
+        scales: showConfiguration ? scalesData : undefined,
+      });
     } else {
-      onCreate({ name });
+      onCreate({ 
+        name,
+        dimensions: showConfiguration ? dimensionsData : undefined,
+        scales: showConfiguration ? scalesData : undefined,
+      });
     }
   };
 
-  const questionText = `• ¿Qué mundo o contexto estás creando?
-• ¿Qué problemas aparecen en este mundo?
-• ¿Qué personajes o situaciones ilustran esos problemas?
-• ¿Cuáles son los deseos de esos personajes?
+  const questionText = `• ¿Qué mundo o contexto estás creando?\n
+• ¿Qué problemas aparecen en este mundo?\n
+• ¿Qué personajes o situaciones ilustran esos problemas?\n
+• ¿Cuáles son los deseos de esos personajes?\n
 • ¿Qué impacto tienen estos problemas?`;
 
+  const isFormValid = () => {
+    const baseValidation = (() => {
+      if (isProvocationMode) {
+        return question.trim().length > 0;
+      }
+      return name.trim().length > 0 && (!showQuestions || description.trim().length > 0);
+    })();
+
+    if (showConfiguration) {
+      return baseValidation && dimensions.length > 0 && scales.length > 0;
+    }
+
+    return baseValidation;
+  };
+
+  const handleModalChange = () => {
+    if (!open) {
+      setName(initialName ?? "");
+      setDescription(initialDescription ?? "");
+      setIsProvocationMode(false);
+      setQuestion("");
+      setDimensions(getInitialDimensions());
+      setScales(getInitialScales());
+    }
+  };
+
   return (
-      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg">
-          <h2 className="text-xl font-semibold mb-6">{title}</h2>
+    <Dialog open={open} onOpenChange={(openState) => {
+      if (!openState) {
+        handleModalChange();
+        onClose();
+      }
+    }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6 py-4">
+          {allowProvocationMode && mode !== "edit" && (
+            <div className="flex gap-3 mb-6 p-1 bg-gray-100 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setIsProvocationMode(false)}
+                className={`flex-1 px-4 py-2.5 rounded-md font-medium transition-all ${
+                  !isProvocationMode
+                    ? "bg-white text-primary shadow-sm border border-primary"
+                    : "bg-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Proyecto Normal
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsProvocationMode(true)}
+                className={`flex-1 px-4 py-2.5 rounded-md font-medium transition-all ${
+                  isProvocationMode
+                    ? "bg-white text-primary shadow-sm border border-primary"
+                    : "bg-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Desde Provocación
+              </button>
+            </div>
+          )}
 
-          <div className="mb-4">
-            <Label htmlFor="entity-name">Nombre</Label>
-            <Input
-                id="entity-name"
-                className="border rounded p-2 w-full mt-1"
-                placeholder={placeholder}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-            />
-          </div>
+          {isProvocationMode ? (
+            <>
+              <div className="mb-4">
+                <CustomInput
+                  as="textarea"
+                  id="provocation-question"
+                  className="w-full min-h-[120px]"
+                  label="Pregunta provocadora"
+                  placeholder="¿Qué pasaría si...?"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="mb-4">
+                <CustomInput
+                  id="project-name"
+                  className="w-full"
+                  label="Nombre del proyecto (opcional)"
+                  placeholder="Si no se especifica, se usará la pregunta como nombre"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-4">
+                <CustomInput
+                  id="entity-name"
+                  className="w-full"
+                  label="Nombre"
+                  placeholder={placeholder}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
 
-          {showQuestions && (
-              <div className="mb-4 relative">
-                <Label htmlFor="entity-description" className="flex items-center gap-1">
-                  Descripción
-                  <span className="group relative cursor-pointer text-gray-400 hover:text-gray-600">
-                <Info className="w-4 h-4" />
-                <span className="absolute bottom-full mb-2 left-0 w-64 p-2 text-xs text-white bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-pre-line z-50">
-                  {questionText}
-                </span>
-              </span>
-                </Label>
-                <Textarea
+              {showQuestions && (
+                <div className="mb-4 relative">
+                  <CustomInput
+                    as="textarea"
                     id="entity-description"
-                    className="border rounded p-2 w-full mt-1 min-h-[150px]"
+                    className="w-full min-h-[150px]"
+                    label="Descripción"
+                    about={questionText}
                     placeholder="Escribí aquí la descripción..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     disabled={loading}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          {showConfiguration && (
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-lg font-medium">Configuración del Proyecto</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TagInput
+                  label="Dimensiones"
+                  initialItems={getInitialDimensions()}
+                  onChange={setDimensions}
+                  tooltip="Las dimensiones representan los sectores de la mandala. Se pueden agregar, eliminar o editar."
+                  disabled={loading}
+                />
+
+                <TagInput
+                  label="Escalas"
+                  initialItems={getInitialScales()}
+                  onChange={setScales}
+                  colorPicker={false}
+                  tooltip="Las escalas representan los niveles de la mandala. Se pueden agregar, eliminar o editar."
+                  disabled={loading}
                 />
               </div>
+            </div>
           )}
 
           {error && <div className="text-red-500 mb-2">{error}</div>}
 
           <div className="flex justify-end gap-3 mt-6">
             <Button
-                variant="outline"
-                color="tertiary"
-                onClick={handleOnClose}
-                disabled={loading}
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
             >
               Cancelar
             </Button>
             <Button
-                color="primary"
-                onClick={handleSubmit}
-                disabled={loading || !name.trim() || (showQuestions && !description.trim())}
-                loading={loading}
+              color="primary"
+              onClick={handleSubmit}
+              disabled={loading || !isFormValid()}
+              loading={loading}
             >
-              {loading ? "Creando..." : "Crear"}
+              {loading
+                ? mode === "edit"
+                  ? "Guardando..."
+                  : "Creando..."
+                : mode === "edit"
+                ? "Guardar"
+                : "Crear"}
             </Button>
           </div>
         </div>
-      </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

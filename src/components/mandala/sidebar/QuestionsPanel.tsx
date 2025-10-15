@@ -2,7 +2,6 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuestionGenerator } from "@/components/mandala/sidebar/useQuestionGenerator.tsx";
 import { Link } from "react-router-dom";
-import { getLocalQueue } from "@/utils/localQueue.ts";
 import { CSSProperties, PropsWithChildren, useEffect, useRef } from "react";
 
 export interface QuestionsPanelProps extends PropsWithChildren {
@@ -21,28 +20,9 @@ export default function QuestionsPanel({
   children,
   dimensions,
 }: QuestionsPanelProps) {
-  const { questions, setQuestions, loading, error, generate } =
+  const { questions, loading, error, generate } =
     useQuestionGenerator(mandalaId, projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Cargar preguntas guardadas en localStorage al montar
-  useEffect(() => {
-    setQuestions(
-      getLocalQueue<{ question: string; dimension: string; scale: string }>(
-        `mandala-questions-${mandalaId}`
-      )
-    );
-  }, [mandalaId, setQuestions]);
-
-  // Guardar preguntas en localStorage cuando cambian
-  useEffect(() => {
-    if (questions.length > 0) {
-      localStorage.setItem(
-        `mandala-questions-${mandalaId}`,
-        JSON.stringify(questions.slice(-20))
-      );
-    }
-  }, [questions, mandalaId]);
 
   const getQuestionBgColor = (questionDimension: string): CSSProperties => {
     const dimension = dimensions.find((d) => d.name === questionDimension);
@@ -93,7 +73,7 @@ export default function QuestionsPanel({
               </Link>
             </>
           ) : error ? (
-            <p className="text-red-600">Error: {error}</p>
+            <p className="text-red-600">{error}</p>
           ) : null}
           {!loading && questions.length > 0 && (
             <div className="flex flex-col gap-2">

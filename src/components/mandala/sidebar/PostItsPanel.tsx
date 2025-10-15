@@ -17,7 +17,7 @@ export interface PostItsPanelProps extends PropsWithChildren {
   projectId: string;
   selected: { dimensions: string[]; scales: string[] };
   tags?: Tag[];
-  onCreate: (content: string, tags: Tag[], postItFatherId?: string) => void;
+  onCreate: (content: string, tags: Tag[], postItFatherId?: string, dimension?: string, section?: string) => void;
   onNewTag?: (tag: Tag) => void;
   dimensions: { name: string; color: string }[];
 }
@@ -58,7 +58,7 @@ export default function PostItsPanel({
 
   // Cargar post-its guardados en localStorage al montar
   useEffect(() => {
-    const stored = getLocalQueue<any>(`mandala-postits-${mandalaId}`);
+    const stored = getLocalQueue<GeneratedPostIt>(`mandala-postits-${mandalaId}`);
     if (stored.length > 0) setItems(stored);
   }, [mandalaId, setItems]);
 
@@ -82,8 +82,8 @@ export default function PostItsPanel({
   // Eliminar post-it de localStorage cuando se crea uno nuevo
   const deletePostItFromLocal = (content: string) => {
     const key = `mandala-postits-${mandalaId}`;
-    const stored = getLocalQueue<any>(key);
-    const filtered = stored.filter((item: any) => item.content !== content);
+    const stored = getLocalQueue<GeneratedPostIt>(key);
+    const filtered = stored.filter((item: GeneratedPostIt) => item.content !== content);
     localStorage.setItem(key, JSON.stringify(filtered.slice(-20)));
     setItems(filtered.slice(-20));
   };
@@ -139,7 +139,7 @@ export default function PostItsPanel({
               </Link>
             </>
           ) : error ? (
-            <p className="text-red-600">Error: {error}</p>
+            <p className="text-red-600">{error}</p>
           ) : null}
           {isEmpty && <p>No hay Post-Its para mostrar</p>}
 
@@ -199,8 +199,8 @@ export default function PostItsPanel({
         isOpen={open}
         onOpenChange={setOpen}
         tags={tags}
-        onCreate={() => {
-          onCreate(prefill, tags);
+        onCreate={(content, tags, postItFatherId, dimension, section) => {
+          onCreate(content, tags, postItFatherId, dimension, section);
           const candidate = selectedCandidate;
           if (
             candidate?.request_id != null &&
@@ -221,6 +221,8 @@ export default function PostItsPanel({
         }}
         onNewTag={onNewTag}
         defaultContent={prefill}
+        defaultDimension={selectedCandidate?.dimension}
+        defaultSection={selectedCandidate?.scale}
       />
     </div>
   );

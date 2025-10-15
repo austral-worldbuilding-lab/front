@@ -1,6 +1,13 @@
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Character, FilterSection, Mandala, MandalaImage, Postit, Tag } from "../types/mandala";
+import {
+  Character,
+  FilterSection,
+  Mandala,
+  MandalaImage,
+  Postit,
+  Tag,
+} from "../types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -9,7 +16,7 @@ export const subscribeMandala = (
   callback: (mandala: Mandala | null) => void
 ) => {
   const mandalaRef = doc(db, projectId, mandalaId);
-  const unsubscribe = onSnapshot(mandalaRef, (snapshot) => {
+  return onSnapshot(mandalaRef, (snapshot) => {
     if (!snapshot.exists()) {
       callback(null);
       return;
@@ -37,8 +44,20 @@ export const subscribeMandala = (
 
     callback(mandala);
   });
+};
 
-  return unsubscribe;
+type CreatePostItPayload = {
+  content: string;
+  tags: { name: string; color: string }[];
+  parentId?: string;
+  dimension?: string;
+  section?: string;
+  coordinates?: {
+    x: number;
+    y: number;
+    angle: number;
+    percentileDistance: number;
+  };
 };
 
 export const createPostit = async (
@@ -47,14 +66,18 @@ export const createPostit = async (
   postitFatherId?: string
 ): Promise<void> => {
   try {
-    const payload = {
+    const payload: CreatePostItPayload = {
       content: postit.content,
-      dimension: postit.dimension,
-      section: postit.section,
-      coordinates: postit.coordinates,
       tags: postit.tags?.map(({ name, color }) => ({ name, color })) || [],
       parentId: postitFatherId ?? undefined,
     };
+
+    if (postit.dimension && postit.section) {
+      payload.dimension = postit.dimension;
+      payload.section = postit.section;
+    } else {
+      payload.coordinates = postit.coordinates;
+    }
 
     await axiosInstance.post(`/mandala/${mandalaId}/postits`, payload);
   } catch (error) {
@@ -219,7 +242,15 @@ export const deleteMandalaService = async (mandalaId: string) => {
     throw new Error("Error deleting mandala.");
   }
   return response.data;
-}
+};
+
+export const generateMandalaSummary = async (mandalaId: string) => {
+  const response = await axiosInstance.post(`/mandala/${mandalaId}/summary`);
+  if (response.status !== 201) {
+    throw new Error("Error generating mandala summary.");
+  }
+  return response.data;
+};
 
 export const updateMandalaCharacters = async (
   projectId: string,
@@ -245,7 +276,10 @@ export const updatePostItTags = async (
     tags: Tag[];
   }
 ): Promise<void> => {
-  await axiosInstance.patch(`/mandala/${mandalaId}/postits/${postitId}`, payload);
+  await axiosInstance.patch(
+    `/mandala/${mandalaId}/postits/${postitId}`,
+    payload
+  );
 };
 
 export const updateImage = async (
@@ -304,3 +338,69 @@ export const deleteImage = async (
   return true;
 };
 
+export const setEditingUser = async (
+  projectId: string,
+  mandalaId: string,
+  postitId: string,
+  userId: string,
+  displayName: string
+) => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  const mandala = mandalaSnap.data();
+  const postits: Postit[] = mandala?.postits || [];
+  const postit = postits.find((postit) => postit.id === postitId);
+
+  if (!postit) {
+    return;
+  }
+
+  if (!postit.editingUsers) {
+    await updatePostit(projectId, mandalaId, postitId, {
+      editingUsers: [
+        {
+          id: userId,
+          displayName: displayName,
+        },
+      ],
+    });
+    return;
+  }
+
+  if (postit.editingUsers.some((user) => user.id === userId)) {
+    return;
+  }
+
+  await updatePostit(projectId, mandalaId, postitId, {
+    editingUsers: [
+      ...postit.editingUsers,
+      {
+        id: userId,
+        displayName: displayName,
+      },
+    ],
+  });
+};
+
+export const removeEditingUser = async (
+  projectId: string,
+  mandalaId: string,
+  postitId: string,
+  userId: string
+) => {
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  const mandala = mandalaSnap.data();
+  const postits: Postit[] = mandala?.postits || [];
+  const postit = postits.find((postit) => postit.id === postitId);
+
+  if (!postit) {
+    return;
+  }
+
+  await updatePostit(projectId, mandalaId, postitId, {
+    editingUsers: [
+      ...(postit.editingUsers?.filter((user) => user.id !== userId) ?? []),
+    ],
+  });
+};

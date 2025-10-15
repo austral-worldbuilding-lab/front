@@ -1,7 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import { Stage, Layer } from "react-konva";
-import { Character, Mandala as MandalaData, MandalaImage, Postit } from "@/types/mandala";
+import {
+  Character,
+  Mandala as MandalaData,
+  MandalaImage,
+  Postit,
+} from "@/types/mandala";
 import { KonvaEventObject } from "konva/lib/Node";
+import { Layer as KonvaLayer } from "konva/lib/Layer";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
 import MandalaImageComponent from "./images/MandalaImage";
@@ -10,7 +16,11 @@ import { useKonvaUtils } from "@/hooks/useKonvaUtils";
 import { useContextMenu } from "@/hooks/useContextMenu.ts";
 import NewPostItModal from "./postits/NewPostItModal";
 import { Tag } from "@/types/mandala";
-import { shouldShowCharacter, shouldShowPostIt } from "@/utils/filterUtils";
+import {
+  shouldShowCharacter,
+  shouldShowPostIt,
+  shouldShowImage,
+} from "@/utils/filterUtils";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 
 import { useEditPostIt } from "@/hooks/useEditPostit.ts";
@@ -34,16 +44,22 @@ export interface KonvaContainerProps {
     updates: Partial<Character>
   ) => Promise<boolean | void>;
   onCharacterDelete: (id: string) => Promise<boolean>;
-  onImageUpdate: (id: string, updates: Partial<MandalaImage>) => Promise<boolean>;
+  onImageUpdate: (
+    id: string,
+    updates: Partial<MandalaImage>
+  ) => Promise<boolean>;
   onImageDelete: (id: string) => Promise<boolean>;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  onDragStart: () => void;
-  onDragEnd: () => void;
+  onDragStart: (postitId: string) => void;
+  onDragEnd: (postitId: string) => void;
   appliedFilters: Record<string, string[]>;
   tags: Tag[];
   onNewTag: (tag: Tag) => void;
   state: ReactZoomPanPinchState | null;
+  onDblClick?: (postitId: string) => void;
+  onBlur?: (postitId: string) => void;
+  onContextMenu?: (postitId: string) => void;
 }
 
 const KonvaContainer: React.FC<KonvaContainerProps> = ({
@@ -63,10 +79,15 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   tags,
   onNewTag,
   state,
+  onDblClick,
+  onBlur,
+  onContextMenu,
 }) => {
   const { projectId } = useParams<{ projectId: string }>();
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
-  const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
+  const canEdit =
+    !!hasAccess &&
+    (userRole === null || ["owner", "admin", "member"].includes(userRole));
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
@@ -77,6 +98,8 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const maxRadius = 150 * (mandala.mandala.configuration?.scales.length || 1);
   const SCENE_W = maxRadius * 2;
   const SCENE_H = maxRadius * 2;
+
+  const charactersLayerRef = useRef<KonvaLayer>(null);
 
   const { toAbsolutePostit, toRelativePostit } = useKonvaUtils(
     mandala.postits,
@@ -108,6 +131,24 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     onImageDelete
   );
 
+  // Ensure we call onBlur (to remove editing user) when context menu closes
+  const lastPostItIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      contextMenu.visible &&
+      contextMenu.type === "postit" &&
+      contextMenu.postItId
+    ) {
+      lastPostItIdRef.current = contextMenu.postItId;
+    }
+  }, [contextMenu.visible, contextMenu.type, contextMenu.postItId]);
+  useEffect(() => {
+    if (!contextMenu.visible && lastPostItIdRef.current) {
+      onBlur?.(lastPostItIdRef.current);
+      lastPostItIdRef.current = null;
+    }
+  }, [contextMenu.visible, onBlur]);
+
   const {
     isOpen: isEditModalOpen,
     postit: editingPostit,
@@ -122,7 +163,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     toAbsolute,
     toRelative,
     getDimensionAndSectionFromCoordinates,
-  } = useKonvaUtils(mandala.postits, SCENE_W / 2);
+  } = useKonvaUtils(mandala.postits, SCENE_W / 2, mandala.images);
 
   const dimensionColors = useMemo(() => {
     return (
@@ -134,11 +175,10 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   }, [mandala.mandala.configuration?.dimensions]);
 
   const handleOnDragEndPostIt = async (
-    e: KonvaEventObject<DragEvent>,
+    e: KonvaEventObject<Event>,
     id: string,
     postit: Postit
   ) => {
-    onDragEnd();
     const nx = e.target.x(),
       ny = e.target.y();
     const rel = toRelativePostit(nx, ny);
@@ -152,14 +192,16 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       coordinates: { ...postit.coordinates, x: rel.x, y: rel.y },
       dimension,
       section,
+      scale: postit.scale ?? 1,
     });
+    onDragEnd(postit.id!);
   };
 
   const handleOnDragEndCharacter = async (
     e: KonvaEventObject<DragEvent>,
     character: Character
   ) => {
-    onDragEnd();
+    onDragEnd(character.id);
     const nx = e.target.x(),
       ny = e.target.y();
     const rel = toRelative(nx, ny);
@@ -183,13 +225,12 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   };
 
   const handleOnDragEndImage = async (
-    e: KonvaEventObject<DragEvent>,
+    e: KonvaEventObject<Event>,
     image: MandalaImage
   ) => {
-    onDragEnd();
     const nx = e.target.x(),
       ny = e.target.y();
-    const rel = toRelative(nx, ny);
+    const rel = toRelativePostit(nx, ny);
     const { dimension, section } = getDimensionAndSectionFromCoordinates(
       rel.x,
       rel.y,
@@ -201,7 +242,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
       coordinates: { x: rel.x, y: rel.y },
       dimension,
       section,
+      scale: image.scale ?? 1,
     });
+    onDragEnd(image.id);
   };
 
   if (!mandala || !state) return <div>No mandala found</div>;
@@ -217,30 +260,75 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     >
       <Stage width={SCENE_W} height={SCENE_H} offset={{ x: 0, y: 0 }}>
         <Layer>
-          {zOrder.map((i) => {
-            const p = mandala.postits[i];
-            if (!shouldShowPostIt(p, appliedFilters)) return null;
-            const { x, y } = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
-            const mandalaType = mandala.mandala.type;
+          {zOrder.map((item, orderIndex) => {
+            const id = item.id;
 
-            if (mandalaType === "OVERLAP_SUMMARY") {
+            if (item.type === "postit") {
+              const p = mandala.postits.find((postit) => postit.id === id)!;
+              if (!shouldShowPostIt(p, appliedFilters)) return null;
+              const { x, y } = toAbsolutePostit(
+                p.coordinates.x,
+                p.coordinates.y
+              );
+              const mandalaType = mandala.mandala.type;
+
+              if (mandalaType === "OVERLAP_SUMMARY") {
+                return (
+                  <ComparisonPostIt
+                    key={`static-${p.id}`}
+                    postit={p}
+                    type={p.type || "UNICO"}
+                    position={{ x, y }}
+                    onDragStart={() => {
+                      onDragStart(p.id!);
+                      bringToFront({ type: "postit", id: id });
+                    }}
+                    onDragEnd={(e) => {
+                      handleOnDragEndPostIt(e, p.id!, p);
+                    }}
+                    onDblClick={() => {
+                      bringToFront({ type: "postit", id: id });
+                      onDblClick?.(p.id!);
+                    }}
+                    onContentChange={(newValue, id) => {
+                      onPostItUpdate(id, { content: newValue });
+                    }}
+                    onBlur={() => {
+                      window.getSelection()?.removeAllRanges();
+                      setEditableIndex(null);
+                      onBlur?.(p.id!);
+                    }}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                    onContextMenu={(e) => {
+                      showContextMenu(e, p.id!, "postit");
+                      onContextMenu?.(p.id!);
+                    }}
+                    mandalaRadius={SCENE_W / 2}
+                    currentMandalaName={mandala.mandala.name}
+                    characters={
+                      mandala.mandala.configuration?.center?.characters ?? []
+                    }
+                  />
+                );
+              }
+
               return (
-                <ComparisonPostIt
+                <PostIt
                   key={`static-${p.id}`}
                   postit={p}
-                  zindex={i}
-                  type={p.type || "UNICO"}
+                  color={dimensionColors[p.dimension] || "#cccccc"}
                   position={{ x, y }}
                   onDragStart={() => {
-                    onDragStart();
-                    bringToFront(i);
+                    onDragStart(p.id!);
+                    bringToFront({ type: "postit", id: id });
                   }}
                   onDragEnd={(e) => {
                     handleOnDragEndPostIt(e, p.id!, p);
                   }}
                   onDblClick={() => {
-                    setEditableIndex(i);
-                    bringToFront(i);
+                    bringToFront({ type: "postit", id: id });
+                    onDblClick?.(p.id!);
                   }}
                   onContentChange={(newValue, id) => {
                     onPostItUpdate(id, { content: newValue });
@@ -248,54 +336,60 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                   onBlur={() => {
                     window.getSelection()?.removeAllRanges();
                     setEditableIndex(null);
+                    onBlur?.(p.id!);
                   }}
                   onMouseEnter={onMouseEnter}
                   onMouseLeave={onMouseLeave}
-                  onContextMenu={(e) => showContextMenu(e, p.id!, "postit")}
+                  onContextMenu={(e, i) => {
+                    showContextMenu(e, i, "postit");
+                    onContextMenu?.(i);
+                  }}
                   mandalaRadius={SCENE_W / 2}
+                  isUnifiedMandala={mandala.mandala.type === "OVERLAP"}
                   currentMandalaName={mandala.mandala.name}
-                  characters={
-                    mandala.mandala.configuration?.center?.characters ?? []
-                  }
+                  zindex={orderIndex}
+                  onTransformEnd={async (e, scale) => {
+                    handleOnDragEndPostIt(e, p.id!, { ...p, scale: scale });
+                  }}
                 />
               );
             }
 
-            return (
-              <PostIt
-                key={`static-${p.id}`}
-                postit={p}
-                zindex={i}
-                color={dimensionColors[p.dimension] || "#cccccc"}
-                position={{ x, y }}
-                onDragStart={() => {
-                  onDragStart();
-                  bringToFront(i);
-                }}
-                onDragEnd={(e) => {
-                  handleOnDragEndPostIt(e, p.id!, p);
-                }}
-                onDblClick={() => {
-                  setEditableIndex(i);
-                  bringToFront(i);
-                }}
-                onContentChange={(newValue, id) => {
-                  onPostItUpdate(id, { content: newValue });
-                }}
-                onBlur={() => {
-                  window.getSelection()?.removeAllRanges();
-                  setEditableIndex(null);
-                }}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
-                onContextMenu={(e, i) => showContextMenu(e, i, "postit")}
-                mandalaRadius={SCENE_W / 2}
-                isUnifiedMandala={mandala.mandala.type === "OVERLAP"}
-                currentMandalaName={mandala.mandala.name}
-              />
-            );
+            if (item.type === "image") {
+              const image = mandala.images!.find((image) => image.id === id)!;
+              if (!shouldShowImage(image, appliedFilters)) return null;
+              const { x, y } = toAbsolutePostit(
+                image.coordinates.x,
+                image.coordinates.y
+              );
+              return (
+                <MandalaImageComponent
+                  key={`image-${image.id}`}
+                  image={image}
+                  position={{ x, y }}
+                  onDragStart={(postitId) => {
+                    onDragStart(postitId);
+                    bringToFront({ type: "image", id: image.id });
+                  }}
+                  onDragEnd={(e) => handleOnDragEndImage(e, image)}
+                  onMouseEnter={onMouseEnter}
+                  onMouseLeave={onMouseLeave}
+                  onContextMenu={(e) => showContextMenu(e, image.id, "image")}
+                  mandalaRadius={SCENE_W / 2}
+                  zindex={orderIndex}
+                  onTransformEnd={async (e, scale) => {
+                    handleOnDragEndImage(e, {
+                      ...image,
+                      scale: scale,
+                    });
+                  }}
+                />
+              );
+            }
           })}
+        </Layer>
 
+        <Layer ref={charactersLayerRef}>
           {mandala.characters?.map((character) => {
             if (!shouldShowCharacter(character, appliedFilters)) return null;
             const { x, y } = toAbsolute(
@@ -316,27 +410,6 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
                 onContextMenu={(e) =>
                   showContextMenu(e, character.id, "character")
                 }
-              />
-            );
-          })}
-
-          {mandala.images?.map((image) => {
-            const { x, y } = toAbsolute(
-              image.coordinates.x,
-              image.coordinates.y
-            );
-
-            return (
-              <MandalaImageComponent
-                key={`image-${image.id}`}
-                image={image}
-                position={{ x, y }}
-                onDragStart={onDragStart}
-                onDragEnd={(e) => handleOnDragEndImage(e, image)}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
-                onContextMenu={(e) => showContextMenu(e, image.id, "image")}
-                mandalaRadius={SCENE_W / 2}
               />
             );
           })}
@@ -385,6 +458,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         <EditPostItModal
           isOpen={isEditModalOpen}
           onOpenChange={(open) => {
+            onBlur?.(editingPostit.id!);
             if (!open) closeEditModal();
           }}
           tags={tags}

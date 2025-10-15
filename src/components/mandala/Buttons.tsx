@@ -5,13 +5,13 @@ import CreateModal from "./characters/modal/CreateModal";
 import NewPostItModal from "./postits/NewPostItModal";
 import NewImageModal from "./postits/NewImageModal";
 import { Tag } from "@/types/mandala";
-import { useProjectAccess } from "@/hooks/useProjectAccess";
 import { useParams } from "react-router-dom";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
 
 const MODAL_CLOSE_DELAY = 500; // 500 milisegundos
 
 interface ButtonsProps {
-  onCreatePostIt: (content: string, tags: Tag[]) => void;
+  onCreatePostIt: (content: string, tags: Tag[], postItFatherId?: string, dimension?: string, section?: string) => void;
   onUploadImage?: (imageFile: File, tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
   onCreateCharacter?: (character: {
@@ -22,6 +22,7 @@ interface ButtonsProps {
     dimensions: { name: string; color?: string }[];
     scales: string[];
     parentId?: string;
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => void;
   tags: Tag[];
   currentMandalaId?: string;
@@ -38,9 +39,8 @@ const Buttons = ({
   loading = false,
 }: ButtonsProps) => {
   const { projectId } = useParams<{ projectId: string }>();
-  const { hasAccess, userRole } = useProjectAccess(projectId || "");
+  const { canEdit } = useProjectPermissions(projectId || "");
 
-  const canEdit = hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostItModalOpen, setPostItModalOpen] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
@@ -58,10 +58,6 @@ const Buttons = ({
     }
   }, [loading, wasCreating]);
 
-  if (!canEdit) {
-    return null;
-  }
-
   const handleCreateCharacter = (character: {
     name: string;
     description: string;
@@ -69,6 +65,7 @@ const Buttons = ({
     color: string;
     dimensions: { name: string; color?: string }[];
     scales: string[];
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => {
     if (onCreateCharacter) {
       onCreateCharacter({
@@ -78,10 +75,14 @@ const Buttons = ({
     }
   };
 
+  if (!canEdit) {
+    return null;
+  }
+
   return (
     <>
       <div
-        className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
+        className="absolute top-1/2 -translate-y-1/2 left-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
         data-floating-buttons
       >
         <Button
@@ -96,7 +97,7 @@ const Buttons = ({
           variant="filled"
           className="w-12 h-12 bg-violet-500 hover:bg-violet-400 active:bg-violet-400"
           icon={<PersonStanding size={24} />}
-          tooltipText="Nuevo personaje"
+          tooltipText="Nueva mandala"
         ></Button>
         <Button
           onClick={() => setImageModalOpen(true)}
@@ -111,8 +112,8 @@ const Buttons = ({
         isOpen={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onCreateCharacter={handleCreateCharacter}
-        title="Crear nuevo personaje"
-        createButtonText="Crear personaje"
+        title="Crear Mandala"
+        createButtonText="Crear Mandala"
         loading={loading}
       />
       <NewPostItModal
@@ -120,7 +121,9 @@ const Buttons = ({
         onOpenChange={setPostItModalOpen}
         tags={tags}
         onNewTag={onNewTag}
-        onCreate={onCreatePostIt}
+        onCreate={(content, tags, postItFatherId, dimension, section) => 
+          onCreatePostIt(content, tags, postItFatherId, dimension, section)
+        }
       />
       <NewImageModal
         isOpen={isImageModalOpen}

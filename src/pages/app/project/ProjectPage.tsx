@@ -1,147 +1,141 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
-import Loader from "@/components/common/Loader.tsx";
-import { Button } from "@/components/ui/button";
-import {ArrowLeftIcon, Eye, FileText, Sparkles} from "lucide-react";
-import { useState } from "react";
-import logo from "@/assets/logo.png";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeftIcon, Folder, Edit } from "lucide-react";
 import useProject from "@/hooks/useProject.ts";
-import ProjectUserList from "@/components/project/ProjectUserList";
 import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
-import FilesDrawer from "@/components/project/FilesDrawer";
-import ProvocationBox from "@/components/project/ProvocationBox.tsx";
-import ProvocationCard from "@/components/project/ProvocationCard.tsx";
-import {Provocation} from "@/types/mandala";
-import useProvocations from "@/hooks/useProvocations.ts";
-
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
+import { ProvocationsSection } from "@/components/project/ProvocationsSection";
+import FileListContainer from "@/components/files/FileListContainer";
+import ProjectUserCircles from "@/components/project/ProjectUserCircles";
+import MandalaListPage from "./mandala/MandalaListPage";
+import AppLayout from "@/components/layout/AppLayout";
+import CreateEntityModal from "@/components/project/CreateEntityModal";
+import useUpdateProject from "@/hooks/useUpdateProject";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { getOrganizationById } from "@/services/organizationService";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
     organizationId: string;
     projectId: string;
   }>();
-  const navigate = useNavigate();
+  const { canManageUsers, canEdit } = useProjectPermissions(projectId);
+  const { project, fetchProject } = useProject(projectId!);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { project, loading: projectLoading } = useProject(projectId);
-  const { provocations, generateAI, createManual } = useProvocations(projectId!);
+    const { update: updateProject, loading: updating, error: updateError } = useUpdateProject(() => {
+    fetchProject();
+  });
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [provBoxOpen, setProvBoxOpen] = useState(false);
-  const [selectedProvocation, setSelectedProvocation] = useState<Provocation | null>(null);
-  const [creating, setCreating] = useState(false);
+  const handleEditProject = async (data: { name: string; description?: string }) => {
+    try {
+      await updateProject(projectId!, data);
+      setIsEditModalOpen(false);
+      setErrorMessage(null);
+    } catch {
+      setErrorMessage("No se pudo actualizar el proyecto. Intentalo de nuevo más tarde.");
+    }
+  };
+  const [orgName, setOrgName] = useState<string>("");
 
-
-
-  if (projectLoading) {
-    return (
-        <div className="flex items-center justify-center h-screen">
-          <Loader size="large" text="Cargando proyecto..." />
-        </div>
-    );
-  }
-
+  useEffect(() => {
+    if (organizationId) {
+      getOrganizationById(organizationId)
+        .then((org) => setOrgName(org.name))
+        .catch(() => setOrgName("Organización desconocida"));
+    }
+  }, [organizationId]);
 
   return (
-      <div className="p-6 min-h-screen flex flex-col justify-center items-center relative">
+    <AppLayout>
+      <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
         <div className="absolute top-10 left-10">
           <Link to={`/app/organization/${organizationId}/projects`}>
-            <ArrowLeftIcon className="w-5 h-5" />
+            <ArrowLeftIcon size={20} />
           </Link>
         </div>
 
-        <div className="flex flex-col items-center justify-center w-full max-w-lg gap-4 mb-10">
-          <img src={logo} alt="logo" className="w-50 h-auto" />
-          <h1 className="text-xl sm:text-2xl font-bold text-center break-words">
-            Proyecto: {project?.name}
-          </h1>
-
-          <div className="w-full flex flex-col gap-2">
-            <h2 className="text-base font-semibold mb-1">Descripción</h2>
-
-            <div className="text-sm leading-6 whitespace-pre-wrap break-words italic">
-              {project?.description && project?.description.trim().length > 0
-                  ? project.description
-                  : "No hay detalles agregados."}
+        <div className="w-full flex flex-col gap-6 flex-1">
+          <div className="flex justify-between">
+            <div className="flex flex-col gap-2 flex-1">
+              <Folder size={40} className="text-primary" />
+              <h1 className="text-3xl font-bold">{project?.name || ""}</h1>
+              <div className="mt-2">
+                {project?.description && project.description.trim().length > 0 ? (
+                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                    {project.description}
+                  </p>
+                ) : (
+                  <p className="text-gray-500 text-sm italic">
+                    Este mundo no tiene descripción
+                  </p>
+                )}
+              </div>
             </div>
-
-            <Button
-                variant="outline"
-                onClick={() => setDrawerOpen(true)}
-                icon={<FileText size={16} />}
-                className="self-end mt-2"
-            >
-              Archivos del proyecto
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-start justify-start max-w-lg w-full">
-          <div className="flex gap-3 mb-10">
-            <Button
-                color="primary"
-                onClick={() =>
-                    navigate(
-                        `/app/organization/${organizationId}/projects/${projectId}/mandalas`
-                    )
-                }
-                icon={<Eye size={16} />}
-            >
-              Ver Mandalas
-            </Button>
-
-            <Button color="secondary" onClick={() => setProvBoxOpen(true)}>
-               Generar provocaciones <Sparkles className="w-4 h-4" />
-            </Button>
-
-
-          {projectId && organizationId && (
-            <UnifiedInvitationDialog
-                projectId={projectId}
-                organizationId={organizationId}
-                projectName={project?.name ?? "Proyecto"}
-                defaultRole="member"
-            />
-          )}
-        </div>
-
-          <div className="w-full overflow-y-auto border rounded-lg p-4 shadow bg-white mt-6">
-            <h2 className="text-lg font-bold mb-4">Usuarios del proyecto</h2>
-            <ProjectUserList projectId={projectId!} canManage={true} />
-          </div>
-        </div>
-
-            <FilesDrawer
-                id={projectId!}
-                open={drawerOpen}
-                onClose={() => setDrawerOpen(false)}
-                title="Archivos del proyecto"
-                scope="project"
-            />
-
-            {selectedProvocation && (
-                <ProvocationCard
-                    provocation={selectedProvocation}
-                    onClose={() => setSelectedProvocation(null)}
+            <div className="flex flex-col gap-2 items-end">
+              <div className="flex gap-2">
+                {canEdit && (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    color="white"
+                    onClick={() => setIsEditModalOpen(true)}
+                    aria-label="Editar"
+                    icon={<Edit size={16} />}
+                  >
+                    Editar
+                  </Button>
+                )}
+                <UnifiedInvitationDialog
+                  projectName={project?.name ?? "Proyecto"}
+                  projectId={projectId ?? ""}
+                  organizationId={organizationId ?? ""}
+                  defaultRole="member"
                 />
-            )}
-
-            <ProvocationBox
-                open={provBoxOpen}
-                onClose={() => setProvBoxOpen(false)}
-                provocations={provocations}
-                onSelect={setSelectedProvocation}
-                onGenerateAI={generateAI}
-                onCreateManual={() => setCreating(true)}
+              </div>
+              <ProjectUserCircles
+                projectId={projectId ?? ""}
+                canManageUsers={canManageUsers}
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex flex-1 flex-row gap-6 justify-between w-full">
+            <MandalaListPage />
+            <FileListContainer
+              scope="project"
+              id={projectId ?? ""}
+              organizationName={orgName}
+              projectName={project?.name}
             />
-
-            {creating && (
-                <ProvocationCard
-                    provocation={null}
-                    onClose={() => setCreating(false)}
-                    onSave={createManual}
-                />
-            )}
+          </div>
+          <ProvocationsSection
+            organizationId={organizationId ?? ""}
+            projectId={projectId ?? ""}
+          />
         </div>
-    );
+
+        <CreateEntityModal
+          open={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onCreate={handleEditProject}
+          loading={updating}
+          error={updateError}
+          title="Editar proyecto"
+          placeholder="Nombre del proyecto"
+          showQuestions={true}
+          initialName={project?.name || ""}
+          initialDescription={project?.description || ""}
+          mode="edit"
+        />
+        {errorMessage && (
+            <p className="text-red-500 mt-4 text-sm text-center">
+                {errorMessage}
+            </p>
+        )}
+      </div>
+    </AppLayout>
+  );
 };
 
 export default ProjectPage;

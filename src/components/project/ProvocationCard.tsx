@@ -1,33 +1,53 @@
-import {Globe, X} from "lucide-react";
+import { Globe, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {Provocation} from "@/types/mandala";
+import useProvocationToProject from "@/hooks/useProvocationToProject";
+import { Provocation } from "@/types/mandala";
 
 interface ProvocationCardProps {
     provocation: Provocation | null;
+    open?: boolean;
     onClose: () => void;
     onSave?: (data: Omit<Provocation, "id">) => void;
+    onOpenWorlds?: () => void;
+    onNavigate?: () => void;
 }
 
-export default function ProvocationCard({ provocation, onClose, onSave }: ProvocationCardProps) {
+export default function ProvocationCard({
+                                            provocation,
+                                            open = true,
+                                            onClose,
+                                            onSave,
+                                            onOpenWorlds,
+                                            onNavigate,
+                                        }: ProvocationCardProps) {
     const isCreate = !provocation;
-
     const [title, setTitle] = useState("");
     const [question, setQuestion] = useState("");
     const [description, setDescription] = useState("");
+    const { provocationToProject } = useProvocationToProject();
+
+    if (!open) return null;
 
     const handleSave = () => {
         if (onSave) {
-            onSave({ title, question, description });
+            onSave({
+                projectsOrigin: provocation?.projectsOrigin ?? [],
+                title,
+                question,
+                description,
+            });
             onClose();
         }
     };
 
+    const isCached = provocation?.isCached || !provocation?.id;
+    const hasWorlds = (provocation?.projectsOrigin?.length ?? 0) > 0;
     return (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-[500px] max-w-full p-6 relative">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-100">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-[500px] max-w-full p-6 relative">
                 <button
                     className="absolute top-3 right-3 text-gray-500 hover:text-black"
                     onClick={onClose}
@@ -60,19 +80,46 @@ export default function ProvocationCard({ provocation, onClose, onSave }: Provoc
                             <Button variant="outline" onClick={onClose}>
                                 Cancelar
                             </Button>
-                            <Button color="primary" onClick={handleSave} disabled={!title || !question}>
+                            <Button onClick={handleSave} disabled={!title || !question}>
                                 Guardar
                             </Button>
                         </div>
                     </>
                 ) : (
                     <>
-                        <h3 className="text-xl font-bold mb-2">{provocation!.title}</h3>
-                        <p className="text-gray-700 font-medium mb-4 italic">{provocation!.question}</p>
-                        <p className="text-gray-600 mb-4">{provocation!.description}</p>
-                        <Button color="secondary"    >
-                            Explorar mundo <Globe className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xl font-bold text-gray-900">
+                                {provocation!.title}
+                            </h3>
+
+                        </div>
+
+                        <p className="font-medium italic mb-4 text-gray-800">
+                            {provocation!.question}
+                        </p>
+                        <p className="mb-4 text-gray-700">{provocation!.description}</p>
+
+
+                        <div className="flex flex-col gap-3">
+                            {!hasWorlds && (
+                                <Button
+                                    onClick={() =>
+                                        provocation && provocationToProject(provocation, onNavigate)
+                                    }
+                                >
+                                    {isCached ? "Explorar y guardar mundo" : "Explorar nuevo mundo"}
+                                    <Globe className="w-4 h-4 ml-1" />
+                                </Button>
+                            )}
+
+                            {hasWorlds && (
+                                <Button variant="outline" onClick={onOpenWorlds}>
+                                    Explorar mundo creado
+                                    <Globe className="w-4 h-4 ml-1 text-blue-900" />
+                                </Button>
+                            )}
+                        </div>
+
                     </>
                 )}
             </div>

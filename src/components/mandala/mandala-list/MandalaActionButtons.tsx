@@ -1,8 +1,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MergeIcon, PlusIcon, SquaresIntersect, XIcon } from "lucide-react";
-import { useProjectAccess } from "@/hooks/useProjectAccess";
-import { useParams } from "react-router-dom";
+import {
+  MergeIcon,
+  PlusIcon,
+  Search,
+  SquaresIntersect,
+  XIcon,
+} from "lucide-react";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
+import { Input } from "@/components/ui/input";
 
 interface MandalaActionButtonsProps {
   selectionMode: boolean;
@@ -10,10 +16,12 @@ interface MandalaActionButtonsProps {
   isUnifying: boolean;
   isComparing: boolean;
   mandalasExists: boolean;
+  projectId: string;
   onCreateClick: () => void;
   onToggleSelectionMode: () => void;
   onUnifyClick: () => void;
   onCompareClick: () => void;
+  onSearchChange?: (value: string) => void;
 }
 
 /**
@@ -26,48 +34,58 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
   isUnifying,
   isComparing,
   mandalasExists,
+  projectId,
   onCreateClick,
   onToggleSelectionMode,
   onUnifyClick,
   onCompareClick,
+  onSearchChange,
 }) => {
-  const { projectId } = useParams<{ projectId: string }>();
-  const { hasAccess, userRole } = useProjectAccess(projectId || "");
-  const canEdit = !!hasAccess && (userRole === null || ['owner', 'admin', 'member'].includes(userRole));
+  const { canEdit } = useProjectPermissions(projectId);
   return (
-    <div className="flex flex-row w-full justify-between items-center">
+    <div className="relative flex flex-col">
       {/* Botón de crear mandala - Solo visible cuando no está en modo selección y puede editar */}
       {!selectionMode && canEdit && (
-        <Button
-          color="primary"
-          className="mb-4"
-          onClick={onCreateClick}
-          icon={<PlusIcon size={16} />}
-        >
-          Crear Mandala
-        </Button>
+        <div className="relative flex flex-row w-full justify-between overflow-x-auto gap-2">
+          <div className="relative flex-1">
+            <Search className="h-4 w-4 absolute left-3 top-5 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              className="pl-9"
+              placeholder="Buscar por nombre"
+              onChange={(e) => onSearchChange?.(e.target.value)}
+            />
+          </div>
+          <Button
+            color="primary"
+            className="mb-4"
+            onClick={onCreateClick}
+            icon={<PlusIcon size={16} />}
+          >
+            Crear Mandala
+          </Button>
+        </div>
       )}
-
-      <div className="flex gap-2">
-        {/* Botón para activar/desactivar modo selección */}
-        {mandalasExists && (
-          <>
+      {mandalasExists && (
+        <div className="flex gap-2 items-end flex-1">
+          {/* Botón para activar/desactivar modo selección */}
+          <div className="flex flex-row gap-2 items-end flex-1">
             {!selectionMode ? (
               <Button
-                color="primary"
                 variant="ghost"
-                className="mb-4 text-gray-500 hover:text-gray-700"
+                size="sm"
+                className="p-2"
                 onClick={onToggleSelectionMode}
               >
                 Seleccionar
               </Button>
             ) : (
-              <>
+              <div className="flex flex-row justify-between gap-4 items-end flex-1">
                 {/* Botón para cancelar selección */}
                 <Button
+                  variant="ghost"
                   color="danger"
-                  variant="outline"
-                  className="mb-4"
+                  size="sm"
+                  className="p-2"
                   onClick={onToggleSelectionMode}
                   icon={<XIcon size={16} />}
                 >
@@ -76,10 +94,9 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
 
                 {/* Botón para unificar mandalas seleccionadas */}
                 {selectedCount >= 2 && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 flex-1 justify-end">
                     <Button
                       color="primary"
-                      className="mb-4"
                       onClick={onUnifyClick}
                       icon={<MergeIcon size={16} />}
                       disabled={isUnifying}
@@ -90,7 +107,6 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
                     </Button>
                     <Button
                       color="secondary"
-                      className="mb-4"
                       onClick={onCompareClick}
                       icon={<SquaresIntersect size={16} />}
                       disabled={isComparing}
@@ -101,11 +117,11 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
                     </Button>
                   </div>
                 )}
-              </>
+              </div>
             )}
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

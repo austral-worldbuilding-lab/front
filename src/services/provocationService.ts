@@ -1,29 +1,17 @@
-import {Provocation, SelectedFile} from "@/types/mandala";
+import {Provocation} from "@/types/mandala";
 import axiosInstance from "@/lib/axios.ts";
-
-interface ProvocationResponse {
-    id?: string;
-    title?: string;
-    description?: string;
-    provocation: string;
-}
+import {getSelectedFileNames} from "./filesService.ts";
 
 
 export const provocationsService = {
     async generateAIProvocations(projectId: string): Promise<Provocation[]> {
         if (!projectId) throw new Error("projectId es requerido");
 
-        const selectedFiles: SelectedFile[] = JSON.parse(
-            localStorage.getItem("selectedFiles") || "[]"
-        );
-
-        const projectFiles = selectedFiles
-            .filter(f => f.scope === "project" && f.parentId === projectId)
-            .map(f => f.fileName);
+        const projectFiles = await getSelectedFileNames("project", projectId);
 
         const payload = { selectedFiles: projectFiles };
-        const response = await axiosInstance.post<{ data: ProvocationResponse[] }>(
-            `/project/${projectId}/generate-solutions`,
+        const response = await axiosInstance.post<{ data: Provocation[] }>(
+            `/project/${projectId}/generate-provocations`,
             payload
         );
 
@@ -31,18 +19,43 @@ export const provocationsService = {
             throw new Error("Error generating provocations.");
         }
 
-        const solutions = response.data.data;
-
-        return solutions.map((s, idx) => ({
-            id: s.id ?? idx.toString(),
-            question: s.provocation  ?? "¿Cómo podemos explorar esta idea?",
-            title: s.title ?? `Provocación ${idx + 1}`,
-            description: s.description ?? "",
-        }));
+        return response.data.data;
     },
 
-    // TODO: conectar con el endpoint para crear manual
-    async createManualProvocation(projectId: string, body: Omit<Provocation, "id">): Promise<Provocation> {
-        return { id: projectId, ...body };
-    },
+    async createManualProvocation(projectId: string,   body: Omit<Provocation, "id">
+    ): Promise<Provocation> {
+        if (!projectId) throw new Error("projectId es requerido");
+
+        const response = await axiosInstance.post<{ data: Provocation }>(
+            `/project/${projectId}/provocation`,
+            body
+        );
+
+        if (response.status !== 201 && response.status !== 200) {
+            throw new Error("Error generating provocations.");
+        }
+
+        return response.data.data;
+        },
+
+    async getAllProvocations(projectId: string): Promise<Provocation[]> {
+        if (!projectId) throw new Error("projectId es requerido");
+
+        const [cacheRes, dbRes] = await Promise.all([
+            axiosInstance.get<{data: Provocation[]}>(`/project/${projectId}/cached-provocations`),
+            axiosInstance.get<{ data: Provocation[] }>(`/project/${projectId}/provocations`)
+
+        ]);
+
+        if (cacheRes.status !== 200 || dbRes.status !== 200) {
+            throw new Error("Error fetching provocations.");
+        }
+
+        const dbProvs = dbRes.data.data;
+        const cacheProvs = cacheRes.data.data?.map(p => ({ ...p, isCached: true })) ?? [];
+
+        const all = [...dbProvs, ...cacheProvs.filter(p => !dbProvs.some(d => d.title === p.title))];
+
+        return all;
+    }
 };

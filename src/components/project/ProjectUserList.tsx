@@ -8,15 +8,17 @@ import ProjectUserRow from "./ProjectUserRow";
 import { Role } from "@/services/invitationService";
 import { useAuthContext } from "@/context/AuthContext";
 import { isRoleDemotion } from "@/utils/roleUtils";
+import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
+import { Trash2 } from "lucide-react";
 
 interface ProjectUserListProps {
   projectId: string;
-  canManage: boolean;
 }
 
-const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
+const ProjectUserList = ({ projectId }: ProjectUserListProps) => {
   const { users, loading, error, refetch } = useProjectUsers(projectId);
   const { user } = useAuthContext();
+  const { canManageUsers } = useProjectPermissions(projectId);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -98,22 +100,24 @@ const ProjectUserList = ({ projectId, canManage }: ProjectUserListProps) => {
             name={u.name ?? u.username ?? u.email}
             email={u.email}
             initialRole={u.role as Role}
-            isAdmin={canManage}
+            isAdmin={canManageUsers}
             isCurrentUser={currentUserId === u.id}
             onConfirm={onUpdateRole}
           />
 
-          {canManage && (
+          {canManageUsers && (
             <Button
-              variant="outline"
+              variant="ghost"
+              size={"sm"}
               color="danger"
               loading={actionLoading && selectedUserId === u.id}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-2"
               onClick={() => {
                 setSelectedUserId(u.id);
                 setConfirmOpen(true);
               }}
             >
-              Eliminar
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -15,7 +14,6 @@ import {
   ArrowLeftIcon,
   Download,
   FileText,
-  Filter,
   InfoIcon,
   Sparkles,
 } from "lucide-react";
@@ -23,7 +21,7 @@ import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
 import { Tag } from "@/types/mandala";
 import { Button } from "../ui/button";
-import FiltersModal from "./filters/FiltersModal";
+import FiltersDropdowns from "./filters/FiltersDropdowns";
 import { useTags } from "@/hooks/useTags";
 import { useProjectCharacters } from "@/hooks/useProjectCharacters.ts";
 import CharacterDropdown from "./characters/modal/CharacterDropdown";
@@ -45,6 +43,24 @@ import FilesDrawer from "@/components/project/FilesDrawer.tsx";
 import { useSvgExport } from "@/hooks/useSvgExport";
 import { MandalaSVG } from "@/components/mandala/MandalaSVG.tsx";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils.ts";
+import SupportButton from "./SupportButton";
+import { useGenerateSummary } from "@/hooks/useGenerateSummary";
+import {
+  generateOverlapReportPDF,
+  generateNormalMandalaReportPDF,
+} from "@/components/download/GeneradorDePDF.tsx";
+import { useOverlapReport, useNormalMandalaReport } from "@/hooks/useReport.tsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { getOrganizationById } from "@/services/organizationService";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -59,13 +75,21 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const [isDraggingPostIt, setIsDraggingPostIt] = useState(false);
   const [isHoveringPostIt, setIsHoveringPostIt] = useState(false);
   const [state, setState] = useState<ReactZoomPanPinchState | null>(null);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"overlap" | "all">("overlap");
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
+  const [orgName, setOrgName] = useState<string>("");
+
+  useEffect(() => {
+    if (organizationId) {
+      getOrganizationById(organizationId)
+        .then((org) => setOrgName(org.name))
+        .catch(() => setOrgName("Organización desconocida"));
+    }
+  }, [organizationId]);
 
   const projectId = useParams<{ projectId: string }>().projectId!;
   const { characters: projectCharacters, linkCharacter } =
@@ -83,6 +107,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     deleteCharacter,
     updateImage,
     deleteImage,
+    setEditingUser,
+    removeEditingUser,
   } = useMandala(mandalaId);
   const { createMandala, loading: isCreatingCharacter } =
     useCreateMandala(projectId);
@@ -96,6 +122,23 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     mandala?.postits ?? [],
     maxRadius
   );
+
+  // Hooks específicos según el tipo de mandala
+  const { report: overlapReport, loading: overlapReportLoading } = useOverlapReport(
+    projectId,
+    mandalaId
+  );
+  const { report: normalReport, loading: normalReportLoading } = useNormalMandalaReport(
+    projectId,
+    mandalaId
+  );
+  const { generateSummary, loading: generatingReport } = useGenerateSummary();
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+
+  // Determinar qué tipo de reporte usar según el tipo de mandala
+  const isOverlapMandala = mandala?.mandala.type === "OVERLAP_SUMMARY";
+  const report = isOverlapMandala ? overlapReport : normalReport;
+  const reportLoading = isOverlapMandala ? overlapReportLoading : normalReportLoading;
 
   const postsAbs = (mandala?.postits ?? []).map((p) => {
     const a = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
@@ -125,7 +168,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     const stack = [...mandala.postits];
     while (stack.length) {
       const p = stack.pop()!;
-      const from = (p as any).from;
+      const from = p.from;
       if (from?.id) ids.add(from.id);
       if (p.childrens?.length) stack.push(...p.childrens);
     }
@@ -140,6 +183,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     dimensions: { name: string; color?: string }[];
     scales: string[];
     parentId?: string;
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => {
     await createMandala(
       character.name,
@@ -148,21 +192,24 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       character.useAIMandala,
       character.dimensions,
       character.scales,
-      character.parentId
+      character.parentId,
+      character.mandalaType
     );
   };
 
   const handleCreatePostIt = (
     content: string,
     tags: Tag[],
-    postItFatherId?: string
+    postItFatherId?: string,
+    dimension?: string,
+    section?: string
   ) => {
     createPostit(
       {
         content: content,
         coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
-        dimension: "Gobierno",
-        section: "Institución",
+        dimension: dimension || "Gobierno",
+        section: section || "Institución",
         tags: tags || null,
         childrens: [],
       },
@@ -183,11 +230,10 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const handleDeleteCharacter = async (index: number) => {
     try {
       await deleteCharacter(index);
-      return true;
     } catch (e) {
       console.error("Error al eliminar el personaje:", e);
-      return false;
     }
+    return true;
   };
 
   const project = useProject(projectId);
@@ -208,6 +254,31 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     );
   }
 
+  const handleDownloadReport = () => {
+    if (!report) return;
+
+    if (isOverlapMandala && overlapReport) {
+      // Para mandalas comparadas (OVERLAP_SUMMARY) - reporte complejo
+      generateOverlapReportPDF(
+        overlapReport,
+        `${mandala?.mandala.name ?? "mandala"}-reporte-comparado.pdf`
+      );
+    } else if (!isOverlapMandala && normalReport) {
+      // Para mandalas normales - reporte simple (string)
+      generateNormalMandalaReportPDF(
+        normalReport,
+        `${mandala?.mandala.name ?? "mandala"}-reporte.pdf`
+      );
+    }
+  };
+
+  const handleGenerateSummary = async () => {
+    const success = await generateSummary(mandalaId);
+    if (success) {
+      setShowGenerateDialog(false);
+    }
+  };
+
   return (
     <div className="overflow-hidden h-screen">
       <BreadcrumbMandala />
@@ -215,7 +286,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         <Button
           onClick={() =>
             navigate(
-              `/app/organization/${organizationId}/projects/${projectId}/mandalas`
+              `/app/organization/${organizationId}/projects/${projectId}`
             )
           }
           className="flex items-center gap-2 cursor-pointer"
@@ -230,8 +301,70 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
             {mandala?.mandala.name}
           </p>
         </div>
-        {/* Botón Info + Diálogo */}
-        <div className="ml-auto pr-4">
+        {/* Botones según el tipo de mandala */}
+        <div className="ml-auto pr-4 flex gap-2">
+          {/* Para mandalas comparadas (OVERLAP_SUMMARY) - solo descarga */}
+          {isOverlapMandala && report && !reportLoading && (
+            <Button
+              variant="outline"
+              color="primary"
+              size="sm"
+              icon={<Download size={16} />}
+              onClick={handleDownloadReport}
+            >
+              Reporte Comparado
+            </Button>
+          )}
+
+          {/* Para mandalas normales - generar y descargar */}
+          {!isOverlapMandala && (
+            <>
+              {report && !reportLoading && (
+                <Button
+                  variant="outline"
+                  color="primary"
+                  size="sm"
+                  icon={<Download size={16} />}
+                  onClick={handleDownloadReport}
+                >
+                  Resumen
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                color="primary"
+                size="sm"
+                icon={<Sparkles size={16} />}
+                onClick={() => setShowGenerateDialog(true)}
+                loading={generatingReport}
+                disabled={generatingReport}
+              >
+                {report ? "Regenerar resumen" : "Generar resumen"}
+              </Button>
+            </>
+          )}
+
+          <Button
+            variant="outline"
+            color="primary"
+            size="sm"
+            icon={<Download size={16} />}
+            onClick={() =>
+              downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
+            }
+          >
+            SVG
+          </Button>
+          <Button
+            variant="outline"
+            color="primary"
+            size="sm"
+            icon={<FileText size={16} />}
+            onClick={() => setIsFilesDrawerOpen(true)}
+          >
+            Archivos
+          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button
@@ -285,13 +418,6 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white">
         {mandala && (
           <>
-            <FiltersModal
-              isOpen={isFiltersOpen}
-              onOpenChange={setIsFiltersOpen}
-              onApplyFilters={(filters) => setAppliedFilters(filters)}
-              mandalaId={mandalaId}
-              projectId={projectId}
-            />
             <TransformWrapper
               initialScale={0.5}
               minScale={0.3}
@@ -312,23 +438,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
             >
               {() => (
                 <>
-                  {/* Controles superiores izquierdos */}
-                  <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col">
-                    <div className="flex flex-col gap-2">
-                      {mandala.mandala.type === "CHARACTER" && (
-                        <Button
-                          variant="filled"
-                          color="primary"
-                          onClick={() => setIsSidebarOpen(true)}
-                          icon={<Sparkles size={16} />}
-                        >
-                          Herramientas IA
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                  <div className="absolute top-4 left-4 flex gap-10 z-20 flex-col"></div>
 
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
+                  <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
                     {mandala?.mandala.type === "OVERLAP" && (
                       <ViewToggle
                         viewMode={viewMode}
@@ -337,36 +449,23 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     )}
                   </div>
 
-                  {/* Controles superiores derechos */}
                   <div className="absolute top-4 right-4 z-20 flex items-center gap-4">
-                    {/* Toggle de vista - solo visible para mandalas unificadas */}
+                    <FiltersDropdowns
+                      mandalaId={mandalaId}
+                      projectId={projectId}
+                      onApplyFilters={(filters) => setAppliedFilters(filters)}
+                    />
 
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<Filter size={16} />}
-                      onClick={() => setIsFiltersOpen(true)}
-                    >
-                      Filtros
-                    </Button>
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<FileText size={16} />}
-                      onClick={() => setIsFilesDrawerOpen(true)}
-                    >
-                      Archivos
-                    </Button>
-                    <Button
-                      variant="filled"
-                      color="primary"
-                      icon={<Download size={16} />}
-                      onClick={() =>
-                        downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
-                      }
-                    >
-                      SVG
-                    </Button>
+                    {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type == "CONTEXT") && (
+                      <Button
+                        variant="filled"
+                        color="primary"
+                        onClick={() => setIsSidebarOpen(true)}
+                        icon={<Sparkles size={16} />}
+                      >
+                        Herramientas IA
+                      </Button>
+                    )}
                   </div>
 
                   <div className="absolute bottom-26 right-4 z-20">
@@ -387,29 +486,21 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     />
                   </div>
 
-                  {/* Mostrar botones/controles:
-                      - siempre para mandalas NO unificadas
-                      - para unificadas, solo en vista 'unified' */}
-                  {(mandala.mandala.type === "CHARACTER" ||
-                    viewMode === "overlap") && (
-                    <>
-                      {mandala.mandala.type !== "OVERLAP_SUMMARY" && (
-                        <Buttons
-                          onCreatePostIt={handleCreatePostIt}
-                          onCreateCharacter={handleCreateCharacter}
-                          currentMandalaId={mandalaId}
-                          onNewTag={handleNewTag}
-                          tags={tags}
-                          loading={isCreatingCharacter}
-                        />
-                      )}
-                      <ZoomControls />
-                    </>
+                  {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type === "CONTEXT") && (
+                    <Buttons
+                      onCreatePostIt={handleCreatePostIt}
+                      onCreateCharacter={handleCreateCharacter}
+                      currentMandalaId={mandalaId}
+                      onNewTag={handleNewTag}
+                      tags={tags}
+                      loading={isCreatingCharacter}
+                    />
                   )}
+                  <ZoomControls scale={state?.scale} />
+                  <SupportButton />
 
-                  {/* Contenido principal - alternar entre vistas en unificadas */}
-                  {mandala.mandala.type === "OVERLAP" && viewMode === "all" ? (
-                    // Vista "all": todas las mandalas en un único canvas Konva
+                  {/* UNA SOLA LLAMADA a MultiKonvaContainer para OVERLAP */}
+                  {mandala.mandala.type === "OVERLAP" ? (
                     <TransformComponent
                       wrapperStyle={{
                         width: "100%",
@@ -427,14 +518,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     >
                       <div className="relative w-full h-full flex items-center justify-center">
                         <MultiKonvaContainer
-                          unified={mandala}
                           sourceMandalaIds={sourceMandalaIds}
-                          appliedFilters={
-                            /* en vista all se pueden aplicar filtros también */
-                            // si querés desactivarlos aquí, pasa {}.
-                            // dejamos los aplicados para preservar ambos commits.
-                            appliedFilters
-                          }
+                          appliedFilters={appliedFilters}
                           onPostItUpdate={updatePostit}
                           onCharacterUpdate={updateCharacter}
                           onPostItDelete={deletePostit}
@@ -444,7 +529,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           onPostItChildCreate={(
                             content: string,
                             tags: Tag[],
-                            postitFatherId?: string
+                            postItFatherId?: string
                           ) => {
                             createPostit(
                               {
@@ -460,21 +545,31 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                                 section: "Institución",
                                 childrens: [],
                               },
-                              postitFatherId
+                              postItFatherId
                             );
                           }}
                           state={state}
                           onMouseEnter={() => setIsHoveringPostIt(true)}
                           onMouseLeave={() => setIsHoveringPostIt(false)}
-                          onDragStart={() => setIsDraggingPostIt(true)}
-                          onDragEnd={() => setIsDraggingPostIt(false)}
+                          onDragStart={(postitId) => {
+                            setIsDraggingPostIt(true);
+                            setEditingUser(postitId);
+                          }}
+                          onDragEnd={(postitId) => {
+                            setIsDraggingPostIt(false);
+                            removeEditingUser(postitId);
+                          }}
                           tags={tags}
                           onNewTag={handleNewTag}
+                          onDblClick={setEditingUser}
+                          onBlur={removeEditingUser}
+                          onContextMenu={setEditingUser}
+                          hidePreviews={viewMode !== "all"} // ← una sola llamada
                         />
                       </div>
                     </TransformComponent>
                   ) : (
-                    // Vista unificada "normal" o cualquier mandala no unificada
+                    // Mandala NO unificada (CHARACTER, etc.) — se mantiene igual
                     <TransformComponent
                       wrapperStyle={{
                         width: "100%",
@@ -505,7 +600,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           onPostItChildCreate={(
                             content: string,
                             tags: Tag[],
-                            postitFatherId?: string
+                            postItFatherId?: string
                           ) => {
                             createPostit(
                               {
@@ -521,13 +616,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                                 section: "Institución",
                                 childrens: [],
                               },
-                              postitFatherId
+                              postItFatherId
                             );
                           }}
                           onMouseEnter={() => setIsHoveringPostIt(true)}
                           onMouseLeave={() => setIsHoveringPostIt(false)}
-                          onDragStart={() => setIsDraggingPostIt(true)}
-                          onDragEnd={() => setIsDraggingPostIt(false)}
+                          onDragStart={(postitId) => {
+                            setIsDraggingPostIt(true);
+                            setEditingUser(postitId);
+                          }}
+                          onDragEnd={(postitId) => {
+                            setIsDraggingPostIt(false);
+                            removeEditingUser(postitId);
+                          }}
                           appliedFilters={appliedFilters}
                           onPostItDelete={deletePostit}
                           onCharacterDelete={(id: string) =>
@@ -536,6 +637,9 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           tags={tags}
                           onNewTag={handleNewTag}
                           state={state}
+                          onDblClick={setEditingUser}
+                          onBlur={removeEditingUser}
+                          onContextMenu={setEditingUser}
                         />
                       </div>
                     </TransformComponent>
@@ -543,6 +647,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                 </>
               )}
             </TransformWrapper>
+
             {/* SVG oculta para exportación */}
             <div
               style={{
@@ -572,7 +677,46 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         title="Archivos de la mandala"
         scope="mandala"
         id={mandalaId}
+        organizationName={orgName}
+        projectName={project.project?.name}
       />
+
+      {/* Modal de confirmación para generar resumen - solo para mandalas normales */}
+      {!isOverlapMandala && (
+        <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {normalReport ? "¿Regenerar resumen de esta mandala?" : "¿Generar resumen de esta mandala?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                El sistema generará un resumen mediante IA según el estado actual de la mandala.
+                Este proceso puede tardar unos segundos.
+                {normalReport && " El resumen existente será reemplazado por uno nuevo."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={generatingReport}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleGenerateSummary}
+                disabled={generatingReport}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {generatingReport ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Generando...</span>
+                  </div>
+                ) : (
+                  "Confirmar generación"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };

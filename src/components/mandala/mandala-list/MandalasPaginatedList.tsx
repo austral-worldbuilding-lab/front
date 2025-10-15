@@ -65,10 +65,10 @@ const MandalasPaginatedList = ({
   return (
     <>
       {/* Contenedor de la lista */}
-      <div className="bg-white rounded-lg shadow-sm border">
+      <div className="w-full flex bg-white rounded-lg border flex-1 overflow-hidden">
         {/* Estado de carga */}
         {loading ? (
-          <div className="flex justify-center items-center min-h-[100px]">
+          <div className="w-full flex justify-center items-center">
             <Loader size="medium" text="Cargando mandalas..." />
           </div>
         ) : mandalas.length === 0 ? (
@@ -78,7 +78,7 @@ const MandalasPaginatedList = ({
           </p>
         ) : (
           // Lista de mandalas
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-gray-100 min-h-0 overflow-y-auto w-full">
             {mandalas.map((mandala) => (
               <MandalaListItem
                 key={mandala.id}

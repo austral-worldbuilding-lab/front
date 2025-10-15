@@ -1,3 +1,5 @@
+import { AcceptedTypes } from "@/hooks/useUploadFiles";
+
 export interface Level {
   id: string;
   name: string;
@@ -31,6 +33,8 @@ export interface Postit {
   from?: { id: string; name: string };
   fromSummary?: string[];
   type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";
+  editingUsers?: EditingUser[];
+  scale?: number;
 }
 
 export interface Tag {
@@ -56,6 +60,8 @@ export interface MandalaImage {
   coordinates: { x: number; y: number };
   dimension: string;
   section: string;
+  tags: Tag[];
+  scale?: number;
 }
 
 export interface Mandala {
@@ -70,7 +76,7 @@ export interface Mandala {
 export interface MandalData {
   id: string;
   name: string;
-  type?: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
+  type?: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY" | "CONTEXT";
   configuration: MandalaConfiguration;
   parentId: string;
 }
@@ -96,7 +102,7 @@ export interface MandalaConfiguration {
 export interface CompleteApiMandala {
   id: string;
   name: string;
-  type: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY";
+  type: "CHARACTER" | "OVERLAP" | "OVERLAP_SUMMARY" | "CONTEXT";
   projectId: string;
   configuration: MandalaConfiguration;
   childrenIds: string[];
@@ -109,6 +115,13 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
+  organizationId: string;
+  configuration?: ProjectConfiguration;
+}
+
+export interface ProjectConfiguration {
+  dimensions: DimensionDto[];
+  scales: string[];
 }
 
 export interface CreateProject {
@@ -116,6 +129,21 @@ export interface CreateProject {
   userId: string;
   description?: string;
   organizationId: string;
+  dimensions?: DimensionDto[];
+  scales?: string[];
+}
+
+export interface DimensionDto {
+  name: string;
+  color: string;
+}
+
+export interface CreateProjectFromQuestion {
+  question: string;
+  organizationId: string;
+  name?: string;
+  dimensions?: DimensionDto[];
+  scales?: string[];
 }
 
 export interface FilterOption {
@@ -146,26 +174,47 @@ export interface MessageDTO {
 export interface Organization {
   id: string;
   name: string;
-  accessType?: 'full' | 'limited';
+  accessType?: "full" | "limited";
 }
 export interface FileItem {
   id: string;
   file_name: string;
-  file_type: string;
+  file_type: AcceptedTypes;
   source_scope: string;
   full_path: string;
   url: string;
-}
-
-export interface SelectedFile {
-  fileName: string;
-  scope: string;
-  parentId: string;
+  selected: boolean;
 }
 
 export interface Provocation {
-    id: string;
-    question: string;
-    title: string;
+  projectsOrigin: ProvocationProject[];
+  id: string;
+  title: string;
+  question: string;
+  description?: string;
+  isCached?: boolean;
+}
+
+export interface ProvocationProject {
+  id: string;
+  name: string;
+  description: string;
+  organizationId: string;
+}
+
+export interface EditingUser {
+  id: string;
+  displayName: string;
+}
+
+export interface Solution {
+  id: string;
+  title: string;
+  description: string;
+  problem: string;
+  impact: {
+    level: "low" | "medium" | "high";
     description: string;
+  };
+  provocations: string[];
 }

@@ -1,5 +1,6 @@
 import axiosInstance from "@/lib/axios.ts";
-import {CompleteApiMandala, SelectedFile} from "@/types/mandala";
+import {CompleteApiMandala} from "@/types/mandala";
+import {getSelectedFileNames} from "./filesService.ts";
 import axios from "axios";
 
 export interface CreateMandalaDto {
@@ -18,17 +19,27 @@ export interface CreateMandalaDto {
     selectedFiles?: string[];
 }
 
+export interface CreateContextMandalaDto {
+    name: string;
+    projectId: string;
+    center: {
+        name: string;
+        description: string;
+        color: string;
+    };
+    dimensions: { name: string; color?: string }[]
+    scales: string[];
+    parentId?: string | null;
+    selectedFiles?: string[];
+}
+
 
 export async function createMandalaService(payload: CreateMandalaDto): Promise<string> {
     const endpoint = payload.useAIMandala ? "/mandala/generate" : "/mandala";
 
     try {
         if (payload.useAIMandala) {
-            const stored: SelectedFile[] = JSON.parse(localStorage.getItem("selectedFiles") || "[]");
-
-            const projectFiles = stored
-                .filter(f => f.scope === "project" && f.parentId === payload.projectId)
-                .map(f => f.fileName);
+            const projectFiles = await getSelectedFileNames("project", payload.projectId);
 
             payload = {
                 ...payload,
@@ -51,6 +62,43 @@ export async function createMandalaService(payload: CreateMandalaDto): Promise<s
             const path = error.response?.data?.path;
 
             if (statusCode === 500 && path === "/mandala/generate") {
+                throw new Error("Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA.");
+            }
+        }
+        throw error;
+    }
+}
+
+export async function createContextMandalaService(payload: CreateContextMandalaDto, useAI: boolean = false): Promise<string> {
+    const endpoint = useAI ? "/mandala/context/generate" : "/mandala/context";
+
+    try {
+        let finalPayload = { ...payload };
+        
+        if (useAI) {
+            const projectFiles = await getSelectedFileNames("project", payload.projectId);
+
+            finalPayload = {
+                ...finalPayload,
+                selectedFiles: payload.selectedFiles
+                    ? [...payload.selectedFiles, ...projectFiles]
+                    : projectFiles
+            };
+        }
+
+        const response = await axiosInstance.post(endpoint, finalPayload);
+
+        if (response.status !== 201) {
+            throw new Error("Failed to create context mandala");
+        }
+
+        return response.data?.data?.id || response.data?.data?.mandala?.id;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            const statusCode = error.response?.data?.statusCode;
+            const path = error.response?.data?.path;
+
+            if (statusCode === 500 && (path === "/mandala/context/generate")) {
                 throw new Error("Este proyecto no tiene archivos. Por favor, subí archivos antes de generar una mandala con IA.");
             }
         }
