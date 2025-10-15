@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -61,6 +60,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getOrganizationById } from "@/services/organizationService";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -81,6 +81,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   const [appliedFilters, setAppliedFilters] = useState<
     Record<string, string[]>
   >({});
+  const [orgName, setOrgName] = useState<string>("");
+
+  useEffect(() => {
+    if (organizationId) {
+      getOrganizationById(organizationId)
+        .then((org) => setOrgName(org.name))
+        .catch(() => setOrgName("Organización desconocida"));
+    }
+  }, [organizationId]);
 
   const projectId = useParams<{ projectId: string }>().projectId!;
   const { characters: projectCharacters, linkCharacter } =
@@ -159,7 +168,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     const stack = [...mandala.postits];
     while (stack.length) {
       const p = stack.pop()!;
-      const from = (p as any).from;
+      const from = p.from;
       if (from?.id) ids.add(from.id);
       if (p.childrens?.length) stack.push(...p.childrens);
     }
@@ -668,6 +677,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         title="Archivos de la mandala"
         scope="mandala"
         id={mandalaId}
+        organizationName={orgName}
+        projectName={project.project?.name}
       />
 
       {/* Modal de confirmación para generar resumen - solo para mandalas normales */}

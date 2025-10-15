@@ -10,8 +10,9 @@ import MandalaListPage from "./mandala/MandalaListPage";
 import AppLayout from "@/components/layout/AppLayout";
 import CreateEntityModal from "@/components/project/CreateEntityModal";
 import useUpdateProject from "@/hooks/useUpdateProject";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { getOrganizationById } from "@/services/organizationService";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -36,6 +37,15 @@ const ProjectPage = () => {
       setErrorMessage("No se pudo actualizar el proyecto. Intentalo de nuevo más tarde.");
     }
   };
+  const [orgName, setOrgName] = useState<string>("");
+
+  useEffect(() => {
+    if (organizationId) {
+      getOrganizationById(organizationId)
+        .then((org) => setOrgName(org.name))
+        .catch(() => setOrgName("Organización desconocida"));
+    }
+  }, [organizationId]);
 
   return (
     <AppLayout>
@@ -92,14 +102,19 @@ const ProjectPage = () => {
           </div>
           <div className="mt-4 flex flex-1 flex-row gap-6 justify-between w-full">
             <MandalaListPage />
-            <FileListContainer scope="project" id={projectId ?? ""} />
+            <FileListContainer
+              scope="project"
+              id={projectId ?? ""}
+              organizationName={orgName}
+              projectName={project?.name}
+            />
           </div>
           <ProvocationsSection
             organizationId={organizationId ?? ""}
             projectId={projectId ?? ""}
           />
         </div>
-          
+
         <CreateEntityModal
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
