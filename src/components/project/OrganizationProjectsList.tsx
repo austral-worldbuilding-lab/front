@@ -1,133 +1,139 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Globe,
-  PlusIcon,
-  Search,
+    ChevronLeft,
+    ChevronRight,
+    Globe,
+    PlusIcon,
+    Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ProjectRow from "./ProjectRow";
 import Loader from "@/components/common/Loader";
+import { ProjectRow } from "@/components/project/ProjectRow.tsx";
+import {buildProjectTree, filterProjectTree} from "@/utils/projectTree.ts";
 
-interface Project {
-  id: string;
-  name: string;
+export interface Project {
+    id: string;
+    name: string;
+    rootProjectId?: string;
+    parentId?: string;
+    children?: Project[];
 }
 
 interface OrganizationProjectsListProps {
-  projects: Project[];
-  loading: boolean;
-  error: Error | null;
-  organizationId: string;
-  canCreateProject: boolean;
-  onCreateProject: () => void;
-  page: number;
-  setPage: (page: number) => void;
+    projects: Project[];
+    loading: boolean;
+    error: Error | null;
+    organizationId: string;
+    canCreateProject: boolean;
+    onCreateProject: () => void;
 }
 
 const OrganizationProjectsList = ({
-  projects,
-  loading,
-  error,
-  organizationId,
-  canCreateProject,
-  onCreateProject,
-  page,
-  setPage,
-}: OrganizationProjectsListProps) => {
-  const [searchText, setSearchText] = useState("");
+                                      projects,
+                                      loading,
+                                      error,
+                                      organizationId,
+                                      canCreateProject,
+                                      onCreateProject,
+                                  }: OrganizationProjectsListProps) => {
+    const [page, setPage] = useState(1);
+    const [searchText, setSearchText] = useState("");
+    const limit = 10;
 
-  return (
-    <div className="flex flex-col gap-4 bg-white rounded-[12px] border border-gray-200 overflow-hidden px-5 py-4 flex-1 lg:min-w-[450px] min-w-[300px]">
-      <div className="flex items-center justify-between flex-wrap w-full gap-2">
-        <div className="flex items-center gap-2">
-          <Globe size={20} className="text-foreground" />
-          <span className="font-semibold text-xl text-foreground">Mundos</span>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap w-full">
-          <div className="relative flex-1">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              className="pl-9"
-              placeholder="Buscar por nombre"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-          </div>
-          {canCreateProject && (
-            <Button
-              color="primary"
-              onClick={onCreateProject}
-              icon={<PlusIcon size={16} />}
-            >
-              Crear Proyecto
-            </Button>
-          )}
-        </div>
-      </div>
+    const projectTree = buildProjectTree(projects);
+    const filteredTree = filterProjectTree(projectTree, searchText);
 
-      <div className="border border-gray-200 rounded-md flex-1">
-        {loading && (
-          <div className="p-8">
-            <Loader size="medium" text="Cargando proyectos..." />
-          </div>
-        )}
+    const totalPages = Math.max(1, Math.ceil(filteredTree.length / limit));
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const rootsToShow = filteredTree.slice(start, end);
 
-        {error && (
-          <div className="flex flex-col items-center justify-center p-8">
-            <div className="text-center max-w-md">
-              <h2 className="text-lg font-semibold text-red-600 mb-3">
-                Error al cargar proyectos
-              </h2>
-              <p className="text-gray-600 mb-4">
-                {error.message || "Error al cargar los proyectos"}
-              </p>
+    useEffect(() => {
+        if (page > totalPages) setPage(totalPages);
+        if (page < 1) setPage(1);
+    }, [page, totalPages]);
+
+    return (
+        <div className="flex flex-col gap-4 bg-white rounded-[12px] border border-gray-200 overflow-hidden px-5 py-4 flex-1 lg:min-w-[450px] min-w-[300px]">
+            <div className="flex items-center justify-between flex-wrap w-full gap-2">
+                <div className="flex items-center gap-2">
+                    <Globe size={20} className="text-foreground" />
+                    <span className="font-semibold text-xl text-foreground">
+                        Mundos
+                    </span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap w-full">
+                    <div className="relative flex-1">
+                        <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Input
+                            className="pl-9"
+                            placeholder="Buscar por nombre"
+                            value={searchText}
+                            onChange={(e) => {
+                                setSearchText(e.target.value);
+                                setPage(1);
+                            }}
+                        />
+                    </div>
+                    {canCreateProject && (
+                        <Button
+                            color="primary"
+                            onClick={onCreateProject}
+                            icon={<PlusIcon size={16} />}
+                        >
+                            Crear Proyecto
+                        </Button>
+                    )}
+                </div>
             </div>
-          </div>
-        )}
 
-        {!error && !loading && projects.length === 0 && (
-          <p className="p-4 text-gray-600 text-center">
-            No hay proyectos creados aún.
-          </p>
-        )}
+            <div className="border border-gray-200 rounded-md flex-1 overflow-auto">
+                {loading && <Loader size="medium" text="Cargando proyectos..." />}
+                {error && <p className="p-4 text-red-600">{error.message}</p>}
+                {!loading && !error && rootsToShow.length === 0 && (
+                    <p className="p-4 text-gray-600 text-center">
+                        {searchText
+                            ? "No se encontraron proyectos"
+                            : "No hay proyectos creados aún."}
+                    </p>
+                )}
+                {!loading && !error && rootsToShow.length > 0 && (
+                    <ul className="divide-y divide-gray-100">
+                        {rootsToShow.map((p) => (
+                            <ProjectRow
+                                key={p.id}
+                                project={p}
+                                organizationId={organizationId}
+                            />
+                        ))}
+                    </ul>
+                )}
+            </div>
 
-        {!error && !loading && projects.length > 0 && (
-          <ul className="divide-y divide-gray-100">
-            {projects.map((project) => (
-              <ProjectRow
-                key={project.id}
-                project={project}
-                organizationId={organizationId}
-              />
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {projects.length > 0 && (
-        <div className="flex justify-center items-center gap-4 p-4">
-          <Button
-            variant="outline"
-            color="white"
-            onClick={() => setPage(page - 1)}
-            disabled={page === 1}
-            icon={<ChevronLeft size={16} />}
-          />
-          <span>Página {page}</span>
-          <Button
-            variant="outline"
-            color="white"
-            onClick={() => setPage(page + 1)}
-            disabled={projects.length < 10}
-            icon={<ChevronRight size={16} />}
-          />
+            {filteredTree.length > 0 && (
+                <div className="flex justify-center items-center gap-4 p-4">
+                    <Button
+                        variant="outline"
+                        color="white"
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
+                        icon={<ChevronLeft size={16} />}
+                    />
+                    <span>
+                        Página {page} de {totalPages}
+                    </span>
+                    <Button
+                        variant="outline"
+                        color="white"
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === totalPages}
+                        icon={<ChevronRight size={16} />}
+                    />
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default OrganizationProjectsList;

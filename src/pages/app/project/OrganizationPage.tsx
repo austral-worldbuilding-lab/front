@@ -19,16 +19,15 @@ import AppLayout from "@/components/layout/AppLayout";
 
 const OrganizationPage = () => {
   const { organizationId } = useParams();
-  const { projects, loading, page, setPage, error } = useProjects(
-    organizationId!,
-    1,
-    10,
-    true
+  const { projects, loading, error } = useProjects(
+      organizationId!,
+      1,
+      100
   );
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const { canCreateProject, canManageUsers } =
-    useOrganizationPermissions(organizationId);
+      useOrganizationPermissions(organizationId);
   const [modalOpen, setModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -37,16 +36,18 @@ const OrganizationPage = () => {
   useEffect(() => {
     if (organizationId) {
       getOrganizationById(organizationId)
-        .then((org) => setOrgName(org.name))
-        .catch(() => setOrgName("Organización desconocida"));
+          .then((org) => setOrgName(org.name))
+          .catch(() => setOrgName("Organización desconocida"));
     }
   }, [organizationId]);
 
   const handleCreateProject = async (data: {
     name: string;
     description?: string;
+    dimensions?: DimensionDto[];
+    scales?: string[];
   }) => {
-    const { name, description } = data;
+    const { name, description, dimensions, scales } = data;
     setCreating(true);
     try {
       if (!user) {
@@ -58,12 +59,14 @@ const OrganizationPage = () => {
         description: description || "",
         userId: user.uid,
         organizationId: organizationId!,
+        dimensions,
+        scales,
       });
       setModalOpen(false);
       navigate(`/app/organization/${organizationId}/projects/${project.id}`);
     } catch (error) {
       setErrorMsg(
-        error instanceof Error ? error.message : "Error al crear proyecto"
+          error instanceof Error ? error.message : "Error al crear proyecto"
       );
     } finally {
       setCreating(false);
@@ -95,9 +98,9 @@ const OrganizationPage = () => {
       navigate(`/app/organization/${organizationId}/projects/${project.id}`);
     } catch (error) {
       setErrorMsg(
-        error instanceof Error
-          ? error.message
-          : "Error al crear proyecto desde provocación"
+          error instanceof Error
+              ? error.message
+              : "Error al crear proyecto desde provocación"
       );
     } finally {
       setCreating(false);
@@ -105,52 +108,50 @@ const OrganizationPage = () => {
   };
 
   return (
-    <AppLayout>
-      <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
-        <div className="absolute top-10 left-10">
-          <Link to={`/app/organization/`}>
-            <ArrowLeftIcon size={20} />
-          </Link>
-        </div>
+      <AppLayout>
+        <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
+          <div className="absolute top-10 left-10">
+            <Link to={`/app/organization/`}>
+              <ArrowLeftIcon size={20} />
+            </Link>
+          </div>
 
-        <div className="w-full flex flex-col gap-2 flex-1">
-          <div className="flex justify-between">
-            <div className="flex flex-col gap-2">
-              <Folder size={40} className="text-primary" />
-              <h1 className="text-3xl font-bold">{orgName || ""}</h1>
+          <div className="w-full flex flex-col gap-2 flex-1">
+            <div className="flex justify-between">
+              <div className="flex flex-col gap-2">
+                <Folder size={40} className="text-primary" />
+                <h1 className="text-3xl font-bold">{orgName || ""}</h1>
+              </div>
+              <div className="flex flex-col gap-2 items-end flex-1">
+                <UnifiedInvitationDialog
+                    projectName={orgName ?? "Organización"}
+                    projectId={projects[0]?.id ?? ""}
+                    organizationId={organizationId ?? ""}
+                    defaultRole="member"
+                    isOrganization
+                />
+                <OrganizationUserCircles
+                    organizationId={organizationId!}
+                    canManageUsers={canManageUsers}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-2 items-end flex-1">
-              <UnifiedInvitationDialog
-                projectName={orgName ?? "Organización"}
-                projectId={projects[0]?.id ?? ""}
-                organizationId={organizationId ?? ""}
-                defaultRole="member"
-                isOrganization
+            <div className="flex flex-wrap gap-6 mt-6 flex-1">
+              <OrganizationProjectsList
+                  projects={projects}
+                  loading={loading}
+                  error={error}
+                  organizationId={organizationId!}
+                  canCreateProject={canCreateProject}
+                  onCreateProject={() => setModalOpen(true)}
               />
-              <OrganizationUserCircles
-                organizationId={organizationId!}
-                canManageUsers={canManageUsers}
+              <FileListContainer 
+                scope="organization" 
+                id={organizationId!} 
+                organizationName={orgName}
               />
             </div>
           </div>
-          <div className="flex flex-wrap gap-6 mt-6 flex-1">
-            <OrganizationProjectsList
-              projects={projects}
-              loading={loading}
-              error={error}
-              organizationId={organizationId!}
-              canCreateProject={canCreateProject}
-              onCreateProject={() => setModalOpen(true)}
-              page={page}
-              setPage={setPage}
-            />
-            <FileListContainer 
-              scope="organization" 
-              id={organizationId!} 
-              organizationName={orgName}
-            />
-          </div>
-        </div>
 
         <CreateEntityModal
           open={modalOpen}
@@ -166,6 +167,7 @@ const OrganizationPage = () => {
           placeholder="Nombre del proyecto"
           showQuestions={true}
           allowProvocationMode={true}
+          showConfiguration={true}
         />
       </div>
     </AppLayout>

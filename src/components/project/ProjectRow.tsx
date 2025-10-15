@@ -1,50 +1,78 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FolderIcon, MoreHorizontal } from "lucide-react";
-import { Button } from "../ui/button";
+import {ChevronDown, ChevronRight, FolderIcon} from "lucide-react";
+import {useNavigate} from "react-router-dom";
+import {useState} from "react";
 
-interface ProjectRowProps {
-  project: {
-    id: string;
-    name: string;
-  };
-  organizationId: string;
+interface Project {
+  id: string;
+  name: string;
+  children?: Project[];
 }
 
-const ProjectRow = ({ project, organizationId }: ProjectRowProps) => {
-  const [showDropdown, setShowDropdown] = useState(false);
+interface ProjectRowProps {
+  project: Project;
+  organizationId: string;
+  level?: number;
+}
 
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
-  };
-
+export const ProjectRow = ({ project, organizationId, level = 0 }: ProjectRowProps) => {
+  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
+
+  const hasChildren = project.children && project.children.length > 0;
+
+  // Debug: ver qué está recibiendo cada proyecto
+  if (level === 0) {
+    console.log(`🔹 Proyecto "${project.name}":`, {
+      id: project.id,
+      childrenCount: project.children?.length || 0,
+      hasChildren
+    });
+  }
 
   const handleClick = () => {
     navigate(`/app/organization/${organizationId}/projects/${project.id}`);
   };
 
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpanded(!expanded);
+  };
+
   return (
-    <li
-      className="hover:bg-gray-50 transition-colors relative cursor-pointer"
-      onClick={handleClick}
-    >
-      <div className="flex items-center justify-between p-3">
-        <div className="flex items-center gap-3 text-gray-800 transition-colors flex-grow">
-          <FolderIcon className="w-5 h-5 text-primary flex-shrink-0" />
-          <span className="flex-1 text-sm">
-            {project.name || "Proyecto sin nombre"}
-          </span>
+      <li>
+        <div
+            className="hover:bg-gray-50 transition-colors cursor-pointer flex items-center justify-between p-3"
+            style={{ paddingLeft: `${level * 20 + 12}px` }}
+            onClick={handleClick}
+        >
+          <div className="flex items-center gap-3 flex-1 text-gray-800">
+            {hasChildren ? (
+                <button
+                    onClick={handleToggle}
+                    className="flex-shrink-0 hover:bg-gray-200 rounded p-0.5"
+                >
+                  {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+            ) : (
+                <span className="w-5" />
+            )}
+            <FolderIcon className="w-5 h-5 text-primary flex-shrink-0" />
+            <span className="flex-1 text-sm font-medium">{project.name || "Proyecto sin nombre"}</span>
+          </div>
         </div>
-        <Button
-          onClick={toggleDropdown}
-          aria-label="Opciones"
-          variant="ghost"
-          icon={<MoreHorizontal size={16} className="text-gray-500" />}
-        ></Button>
-      </div>
-    </li>
+
+        {expanded && hasChildren && (
+            <ul>
+              {project.children!.map((child) => (
+                  <ProjectRow
+                      key={child.id}
+                      project={child}
+                      organizationId={organizationId}
+                      level={level + 1}
+                  />
+              ))}
+            </ul>
+        )}
+      </li>
   );
 };
-
-export default ProjectRow;

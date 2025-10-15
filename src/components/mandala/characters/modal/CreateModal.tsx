@@ -13,25 +13,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ColorSelector from "./ColorSelector";
 import { Sparkles } from "lucide-react";
 import TagInput, { Item } from "@/components/common/TagInput.tsx";
-import { Sectors, Levels } from "@/constants/mandala";
 import Loader from "@/components/common/Loader";
 import posthog from "posthog-js";
+import { useProjectConfiguration } from "@/hooks/useProjectConfiguration";
+import { useParams } from "react-router-dom";
 
 const MESSAGE_ROTATION_INTERVAL = 5000; // 5 segundos
-
-const initialDimensions: Item[] = Sectors.map((sector) => {
-  return {
-    id: sector.id,
-    value: sector.name,
-    color: sector.color,
-  };
-});
-
-const initialScales: Item[] = Levels.map((level) => ({
-  id: level.id,
-  value: level.name,
-  color: "rgba(180, 210, 255, 0.7)",
-}));
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -62,9 +49,32 @@ const CreateModal = ({
   const [description, setDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [mandalaType, setMandalaType] = useState("empty");
-  const [dimensions, setDimensions] = useState<Item[]>(initialDimensions);
-  const [scales, setScales] = useState<Item[]>(initialScales);
+  const [dimensions, setDimensions] = useState<Item[]>([]);
+  const [scales, setScales] = useState<Item[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  const { projectId } = useParams<{ projectId: string }>();
+  const { configuration, isLoading: configLoading } = useProjectConfiguration(projectId!);
+
+  useEffect(() => {
+    if (configuration && !configLoading) {
+      
+      const projectDimensions: Item[] = configuration.dimensions.map((dim) => ({
+        id: dim.name.toLowerCase().replace(/\s+/g, '-'),
+        value: dim.name,
+        color: dim.color,
+      }));
+
+      const projectScales: Item[] = configuration.scales.map((scale) => ({
+        id: scale.toLowerCase().replace(/\s+/g, '-'),
+        value: scale,
+        color: "rgba(180, 210, 255, 0.7)",
+      }));
+
+      setDimensions(projectDimensions);
+      setScales(projectScales);
+    }
+  }, [configuration, configLoading]);
 
   // Mensajes para mandala con IA
   const aiMessages = [
@@ -107,8 +117,6 @@ const CreateModal = ({
       setDescription("");
       setSelectedColor(colors[0]);
       setMandalaType("empty");
-      setDimensions(initialDimensions);
-      setScales(initialScales);
       setCurrentMessageIndex(0);
     }
   }, [isOpen]);
@@ -191,14 +199,22 @@ const CreateModal = ({
             <div className="grid  sm:grid-cols-2 gap-4">
               <TagInput
                 label="Dimensiones"
-                initialItems={initialDimensions}
+                initialItems={configuration?.dimensions.map((dim) => ({
+                  id: dim.name.toLowerCase().replace(/\s+/g, '-'),
+                  value: dim.name,
+                  color: dim.color,
+                })) || []}
                 onChange={setDimensions}
                 tooltip="Las dimensiones representan los sectores de la mandala. Se pueden agregar, eliminar o editar."
               />
 
               <TagInput
                 label="Escalas"
-                initialItems={initialScales}
+                initialItems={configuration?.scales.map((scale) => ({
+                  id: scale.toLowerCase().replace(/\s+/g, '-'),
+                  value: scale,
+                  color: "rgba(180, 210, 255, 0.7)",
+                })) || []}
                 onChange={setScales}
                 colorPicker={false}
                 tooltip="Las escalas representan los niveles de la mandala. Se pueden agergar, eliminar o editar."

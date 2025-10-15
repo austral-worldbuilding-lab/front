@@ -68,7 +68,7 @@ const MandalasPaginatedList = ({
       <div className="w-full flex bg-white rounded-lg border flex-1 overflow-hidden">
         {/* Estado de carga */}
         {loading ? (
-          <div className="flex justify-center items-center min-h-[100px]">
+          <div className="w-full flex justify-center items-center">
             <Loader size="medium" text="Cargando mandalas..." />
           </div>
         ) : mandalas.length === 0 ? (
