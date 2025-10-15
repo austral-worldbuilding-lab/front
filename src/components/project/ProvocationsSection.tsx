@@ -21,6 +21,7 @@ export const ProvocationsSection = ({
     createManual,
     generateAI,
     loading: loadingAI,
+    error,
   } = useProvocations(projectId);
   const { data, loading } = useTimeline(projectId);
   const navigate = useNavigate();
@@ -54,6 +55,11 @@ export const ProvocationsSection = ({
             >
               Generar
             </Button>
+            {error && (
+                <div className="mt-2 p-2 text-sm text-red-700 ">
+                  {error}
+                </div>
+            )}
           </div>
           <div className="flex flex-1 border border-gray-200 rounded-xl overflow-hidden">
             <div className="w-full h-full overflow-y-auto custom-scrollbar">
