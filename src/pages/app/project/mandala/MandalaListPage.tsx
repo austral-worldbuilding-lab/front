@@ -80,8 +80,9 @@ const MandalaListPage = () => {
     color: string;
     dimensions: { name: string; color?: string }[];
     scales: string[];
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => {
-    const { name, description, color, useAIMandala, dimensions, scales } =
+    const { name, description, color, useAIMandala, dimensions, scales, mandalaType } =
       character;
 
     if (!name.trim()) {
@@ -98,7 +99,9 @@ const MandalaListPage = () => {
         color,
         useAIMandala,
         dimensions,
-        scales
+        scales,
+        undefined,
+        mandalaType
       );
       navigate(
         `/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`
