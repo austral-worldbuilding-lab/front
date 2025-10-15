@@ -22,6 +22,7 @@ interface ButtonsProps {
     dimensions: { name: string; color?: string }[];
     scales: string[];
     parentId?: string;
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => void;
   tags: Tag[];
   currentMandalaId?: string;
@@ -64,6 +65,7 @@ const Buttons = ({
     color: string;
     dimensions: { name: string; color?: string }[];
     scales: string[];
+    mandalaType: "CHARACTER" | "CONTEXT";
   }) => {
     if (onCreateCharacter) {
       onCreateCharacter({
@@ -95,7 +97,7 @@ const Buttons = ({
           variant="filled"
           className="w-12 h-12 bg-violet-500 hover:bg-violet-400 active:bg-violet-400"
           icon={<PersonStanding size={24} />}
-          tooltipText="Nuevo personaje"
+          tooltipText="Nueva mandala"
         ></Button>
         <Button
           onClick={() => setImageModalOpen(true)}
@@ -110,8 +112,8 @@ const Buttons = ({
         isOpen={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onCreateCharacter={handleCreateCharacter}
-        title="Crear nuevo personaje"
-        createButtonText="Crear personaje"
+        title="Crear Mandala"
+        createButtonText="Crear Mandala"
         loading={loading}
       />
       <NewPostItModal

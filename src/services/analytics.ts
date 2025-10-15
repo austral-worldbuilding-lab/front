@@ -43,7 +43,7 @@ export interface MandalaInteractionEventClient {
   user_id: string;
   project_id: string;
   mandala_id: string;
-  mandala_type: 'CHARACTER' | 'OVERLAP' | 'OVERLAP_SUMMARY';
+  mandala_type: 'CHARACTER' | 'OVERLAP' | 'OVERLAP_SUMMARY' | 'CONTEXT';
   object_id?: string;
   collaboration_session_active: boolean;
   ai_assisted: boolean
