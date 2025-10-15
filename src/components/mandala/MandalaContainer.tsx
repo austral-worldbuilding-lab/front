@@ -447,7 +447,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       onApplyFilters={(filters) => setAppliedFilters(filters)}
                     />
 
-                    {mandala.mandala.type === "CHARACTER" && (
+                    {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type == "CONTEXT") && (
                       <Button
                         variant="filled"
                         color="primary"
@@ -477,7 +477,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     />
                   </div>
 
-                  {mandala.mandala.type === "CHARACTER" && (
+                  {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type === "CONTEXT") && (
                     <Buttons
                       onCreatePostIt={handleCreatePostIt}
                       onCreateCharacter={handleCreateCharacter}
