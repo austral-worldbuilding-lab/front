@@ -49,7 +49,10 @@ import {
   generateOverlapReportPDF,
   generateNormalMandalaReportPDF,
 } from "@/components/download/GeneradorDePDF.tsx";
-import { useOverlapReport, useNormalMandalaReport } from "@/hooks/useReport.tsx";
+import {
+  useOverlapReport,
+  useNormalMandalaReport,
+} from "@/hooks/useReport.tsx";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -124,21 +127,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   );
 
   // Hooks específicos según el tipo de mandala
-  const { report: overlapReport, loading: overlapReportLoading } = useOverlapReport(
-    projectId,
-    mandalaId
-  );
-  const { report: normalReport, loading: normalReportLoading } = useNormalMandalaReport(
-    projectId,
-    mandalaId
-  );
+  const { report: overlapReport, loading: overlapReportLoading } =
+    useOverlapReport(projectId, mandalaId);
+  const { report: normalReport, loading: normalReportLoading } =
+    useNormalMandalaReport(projectId, mandalaId);
   const { generateSummary, loading: generatingReport } = useGenerateSummary();
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
 
   // Determinar qué tipo de reporte usar según el tipo de mandala
   const isOverlapMandala = mandala?.mandala.type === "OVERLAP_SUMMARY";
   const report = isOverlapMandala ? overlapReport : normalReport;
-  const reportLoading = isOverlapMandala ? overlapReportLoading : normalReportLoading;
+  const reportLoading = isOverlapMandala
+    ? overlapReportLoading
+    : normalReportLoading;
 
   const postsAbs = (mandala?.postits ?? []).map((p) => {
     const a = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
@@ -456,14 +457,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       onApplyFilters={(filters) => setAppliedFilters(filters)}
                     />
 
-                    {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type == "CONTEXT") && (
+                    {(mandala.mandala.type === "CHARACTER" ||
+                      mandala.mandala.type == "CONTEXT") && (
                       <Button
                         variant="filled"
                         color="primary"
                         onClick={() => setIsSidebarOpen(true)}
                         icon={<Sparkles size={16} />}
                       >
-                        Herramientas IA
+                        IA
                       </Button>
                     )}
                   </div>
@@ -486,7 +488,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     />
                   </div>
 
-                  {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type === "CONTEXT") && (
+                  {(mandala.mandala.type === "CHARACTER" ||
+                    mandala.mandala.type === "CONTEXT") && (
                     <Buttons
                       onCreatePostIt={handleCreatePostIt}
                       onCreateCharacter={handleCreateCharacter}
@@ -683,16 +686,22 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
 
       {/* Modal de confirmación para generar resumen - solo para mandalas normales */}
       {!isOverlapMandala && (
-        <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+        <AlertDialog
+          open={showGenerateDialog}
+          onOpenChange={setShowGenerateDialog}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {normalReport ? "¿Regenerar resumen de esta mandala?" : "¿Generar resumen de esta mandala?"}
+                {normalReport
+                  ? "¿Regenerar resumen de esta mandala?"
+                  : "¿Generar resumen de esta mandala?"}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                El sistema generará un resumen mediante IA según el estado actual de la mandala.
-                Este proceso puede tardar unos segundos.
-                {normalReport && " El resumen existente será reemplazado por uno nuevo."}
+                El sistema generará un resumen mediante IA según el estado
+                actual de la mandala. Este proceso puede tardar unos segundos.
+                {normalReport &&
+                  " El resumen existente será reemplazado por uno nuevo."}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

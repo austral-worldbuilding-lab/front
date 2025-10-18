@@ -13,7 +13,7 @@ import { useParams } from "react-router-dom";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
-import MandalaImageComponent from "./images/MandalaImage";
+import MandalaImageComponent from "./filters/images/MandalaImage";
 import MandalaMenu from "./MandalaMenu";
 import NewPostItModal from "./postits/NewPostItModal";
 import EditPostItModal from "./postits/EditPostitModal";
