@@ -8,13 +8,12 @@ import {
   createPostit as createPostitService,
 } from "@/services/mandalaService.ts";
 import DimensionPostit from "@/components/mandala/postits/DimensionPostit.tsx";
-import DimensionImage from "@/components/mandala/images/DimensionImage.tsx";
+import DimensionImage from "@/components/mandala/filters/images/DimensionImage";
 import { useParams } from "react-router-dom";
 import NewPostItModal from "@/components/mandala/postits/NewPostItModal.tsx";
 import { useTags } from "@/hooks/useTags";
 import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
-import {useEditPostIt} from "@/hooks/useEditPostit.ts";
-
+import { useEditPostIt } from "@/hooks/useEditPostit.ts";
 
 interface MandalaDimensionProps {
   dimensionName: string;
@@ -22,9 +21,9 @@ interface MandalaDimensionProps {
 }
 
 const DimensionView: React.FC<MandalaDimensionProps> = ({
-                                                          dimensionName,
-                                                          mandalaId,
-                                                        }) => {
+  dimensionName,
+  mandalaId,
+}) => {
   const { mandala, loading, error } = useMandala(mandalaId);
   const config = mandala?.mandala.configuration;
   const { projectId } = useParams<{ projectId: string }>();
@@ -32,13 +31,13 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
   const [postitFatherId, setPostitFatherId] = useState<string | undefined>();
 
-    const {
-        isOpen: isEditModalOpen,
-        postit: editingPostit,
-        open: openEditModal,
-        close: closeEditModal,
-        handleUpdate,
-    } = useEditPostIt();
+  const {
+    isOpen: isEditModalOpen,
+    postit: editingPostit,
+    open: openEditModal,
+    close: closeEditModal,
+    handleUpdate,
+  } = useEditPostIt();
 
   if (!projectId) {
     return <div className="text-red-500">Project ID is required</div>;
@@ -49,7 +48,6 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
     console.log("Dimensión actual:", dimensionName);
     console.log("Configuración escalas:", config?.scales);
   }
-
 
   if (loading) return <Loader />;
   if (error) return <div className="text-red-500">Error: {error.message}</div>;
@@ -78,56 +76,59 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
               >
                 <div className="flex flex-wrap gap-2 w-full justify-start ">
                   {mandala?.postits
-                      .filter(
-                          (p) =>
-                              p.dimension.toLowerCase() === dimensionName.toLowerCase() &&
-                              p.section.toLowerCase() === scaleName.toLowerCase()
-                      )
-                      .map((postit) => {
-                        const dimensionColor =
-                            mandala.mandala.configuration?.dimensions.find(
-                                (d) => d.name.toLowerCase() === postit.dimension.toLowerCase()
-                            )?.color ?? "#facc15";
+                    .filter(
+                      (p) =>
+                        p.dimension.toLowerCase() ===
+                          dimensionName.toLowerCase() &&
+                        p.section.toLowerCase() === scaleName.toLowerCase()
+                    )
+                    .map((postit) => {
+                      const dimensionColor =
+                        mandala.mandala.configuration?.dimensions.find(
+                          (d) =>
+                            d.name.toLowerCase() ===
+                            postit.dimension.toLowerCase()
+                        )?.color ?? "#facc15";
 
-                        return (
-                            <DimensionPostit
-                                key={postit.id}
-                                postit={postit}
-                                color={dimensionColor}
-                                onUpdate={(updates) =>
-                                    updatePostit(
-                                        projectId,
-                                        mandalaId,
-                                        postit.id!,
-                                        updates
-                                    )
-                                }
-                                onDelete={() =>
-                                    deletePostit(projectId, mandalaId, postit.id!)
-                                }
-                                onCreateChild={() => {
-                                  setPostitFatherId(postit.id);
-                                  setIsChildModalOpen(true);
-                                }}
-                                onEdit={() => openEditModal(mandalaId, postit)}
-
-                            />
-                            );
-                          })}
-                  {mandala?.images
-                      ?.filter(
-                          (img) =>
-                              img.dimension.toLowerCase() === dimensionName.toLowerCase() &&
-                              img.section.toLowerCase() === scaleName.toLowerCase()
-                      )
-                      .map((image) => (
-                        <DimensionImage
-                          key={image.id}
-                          image={image}
-                          width={80}
-                          height={80}
+                      return (
+                        <DimensionPostit
+                          key={postit.id}
+                          postit={postit}
+                          color={dimensionColor}
+                          onUpdate={(updates) =>
+                            updatePostit(
+                              projectId,
+                              mandalaId,
+                              postit.id!,
+                              updates
+                            )
+                          }
+                          onDelete={() =>
+                            deletePostit(projectId, mandalaId, postit.id!)
+                          }
+                          onCreateChild={() => {
+                            setPostitFatherId(postit.id);
+                            setIsChildModalOpen(true);
+                          }}
+                          onEdit={() => openEditModal(mandalaId, postit)}
                         />
-                      ))}
+                      );
+                    })}
+                  {mandala?.images
+                    ?.filter(
+                      (img) =>
+                        img.dimension.toLowerCase() ===
+                          dimensionName.toLowerCase() &&
+                        img.section.toLowerCase() === scaleName.toLowerCase()
+                    )
+                    .map((image) => (
+                      <DimensionImage
+                        key={image.id}
+                        image={image}
+                        width={80}
+                        height={80}
+                      />
+                    ))}
                 </div>
               </div>
               <div
@@ -137,63 +138,67 @@ const DimensionView: React.FC<MandalaDimensionProps> = ({
                 <span className="text-blue-900 font-bold text-xs text-center">
                   {scaleName}
                 </span>
-                  </div>
-                </div>
-            ))}
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <NewPostItModal
-            isOpen={isChildModalOpen}
-            onOpenChange={setIsChildModalOpen}
-            tags={tags}
-            postItFatherId={postitFatherId}
-            onNewTag={async (tag) => {
-              try {
-                await createTag(tag.name, tag.color);
-              } catch (e) {
-                console.error("Error creating tag:", e);
-              }
-            }}
-            onCreate={
-            async (content, selectedTags, parentId, dimension, section) => {
-              await createPostitService(
-                  mandalaId,
-                  {
-                    content,
-                    tags: selectedTags,
-                    coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
-                    dimension: dimension || dimensionName,
-                    section: section || "Institución",
-                    childrens: [],
-                  },
-                  parentId
-              );
+      <NewPostItModal
+        isOpen={isChildModalOpen}
+        onOpenChange={setIsChildModalOpen}
+        tags={tags}
+        postItFatherId={postitFatherId}
+        onNewTag={async (tag) => {
+          try {
+            await createTag(tag.name, tag.color);
+          } catch (e) {
+            console.error("Error creating tag:", e);
+          }
+        }}
+        onCreate={async (
+          content,
+          selectedTags,
+          parentId,
+          dimension,
+          section
+        ) => {
+          await createPostitService(
+            mandalaId,
+            {
+              content,
+              tags: selectedTags,
+              coordinates: { x: 0, y: 0, angle: 0, percentileDistance: 0 },
+              dimension: dimension || dimensionName,
+              section: section || "Institución",
+              childrens: [],
+            },
+            parentId
+          );
 
-              setIsChildModalOpen(false);
-              setPostitFatherId(undefined);
-            }}
+          setIsChildModalOpen(false);
+          setPostitFatherId(undefined);
+        }}
+      />
+      {editingPostit && (
+        <EditPostItModal
+          isOpen={isEditModalOpen}
+          onOpenChange={(open) => {
+            if (!open) closeEditModal();
+          }}
+          tags={tags}
+          onUpdate={handleUpdate}
+          initialContent={editingPostit.content}
+          initialTags={editingPostit.tags}
+          onNewTag={async (tag) => {
+            try {
+              await createTag(tag.name, tag.color);
+            } catch (e) {
+              console.error("Error creating tag:", e);
+            }
+          }}
         />
-        {editingPostit && (
-            <EditPostItModal
-                isOpen={isEditModalOpen}
-                onOpenChange={(open) => {
-                    if (!open) closeEditModal();
-                }}
-                tags={tags}
-                onUpdate={handleUpdate}
-                initialContent={editingPostit.content}
-                initialTags={editingPostit.tags}
-                onNewTag={async (tag) => {
-                    try {
-                        await createTag(tag.name, tag.color);
-                    } catch (e) {
-                        console.error("Error creating tag:", e);
-                    }
-                }}
-            />
-        )}
-
+      )}
     </div>
   );
 };
