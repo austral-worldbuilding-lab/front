@@ -5,6 +5,7 @@ import { CustomInput } from "../ui/CustomInput";
 import { DimensionDto } from "@/types/mandala";
 import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
+import { IconSelector } from "../common/IconSelector";
 
 const getInitialDimensions = (): Item[] => {
   return Sectors.map((sector) => ({
@@ -30,12 +31,14 @@ interface CreateEntityModalProps {
     description?: string;
     dimensions?: DimensionDto[];
     scales?: string[];
+    icon?: string;
   }) => Promise<void>;
   onCreateFromProvocation?: (data: {
     question: string;
     name?: string;
     dimensions?: DimensionDto[];
     scales?: string[];
+    icon?: string;
   }) => Promise<void>;
   loading: boolean;
   error?: string | null;
@@ -71,6 +74,7 @@ const CreateEntityModal = ({
   const [question, setQuestion] = useState("");
   const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
   const [scales, setScales] = useState<Item[]>(getInitialScales());
+  const [icon, setIcon] = useState<string | null>(null);
 
   useEffect(() => {
     setName(initialName ?? "");
@@ -93,6 +97,7 @@ const CreateEntityModal = ({
         name: name.trim() || undefined,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
+        icon: icon ?? undefined,
       });
     } else if (showQuestions) {
       onCreate({ 
@@ -100,6 +105,7 @@ const CreateEntityModal = ({
         description,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
+        icon: icon ?? undefined,
       });
     } else {
       onCreate({ 
@@ -139,6 +145,7 @@ const CreateEntityModal = ({
       setQuestion("");
       setDimensions(getInitialDimensions());
       setScales(getInitialScales());
+      setIcon(null);
     }
   };
 
@@ -238,6 +245,12 @@ const CreateEntityModal = ({
               )}
             </>
           )}
+
+          <IconSelector
+            value={icon}
+            onChange={setIcon}
+            disabled={loading}
+          />
 
           {showConfiguration && (
             <div className="space-y-4 border-t pt-4">
