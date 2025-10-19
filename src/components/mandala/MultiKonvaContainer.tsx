@@ -129,9 +129,27 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         type: base.mandala.type,
         configuration: base.mandala.configuration,
       },
-      postits: sourceMandalas.flatMap((s) => s.mandala.postits ?? []),
+      postits: sourceMandalas.flatMap((s) => {
+        if (!s.mandala.postits) {
+          return [];
+        }
+        const from = {
+          id: s.mandala.id,
+          name: s.mandala.mandala.name,
+        };
+        return s.mandala.postits.map((p) => ({ ...p, from }));
+      }),
       characters: sourceMandalas.flatMap((s) => s.mandala.characters ?? []),
-      images: sourceMandalas.flatMap((s) => s.mandala.images ?? []),
+      images: sourceMandalas.flatMap((s) => {
+        if (!s.mandala.images) {
+          return [];
+        }
+        const from = {
+          id: s.mandala.id,
+          name: s.mandala.mandala.name,
+        };
+        return s.mandala.images.map((i) => ({ ...i, from }));
+      }),
     } as MandalaData;
   }, [sourceMandalas]);
 

@@ -62,6 +62,10 @@ export interface MandalaImage {
   section: string;
   tags: Tag[];
   scale?: number;
+  from?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface Mandala {
