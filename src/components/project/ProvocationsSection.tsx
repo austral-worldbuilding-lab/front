@@ -6,6 +6,8 @@ import useTimeline from "@/hooks/useTimeline";
 import { useNavigate } from "react-router-dom";
 import { ProvocationDialog } from "./ProvocationDialog";
 import { ProvocationItem } from "./ProvocationItem";
+import useProject from "@/hooks/useProject";
+import { useProjectBreadcrumb } from "@/hooks/useProjectBreadcrumb";
 
 export type ProvocationsSectionProps = {
   organizationId: string;
@@ -25,6 +27,15 @@ export const ProvocationsSection = ({
   } = useProvocations(projectId);
   const { data, loading } = useTimeline(projectId);
   const navigate = useNavigate();
+  const { project } = useProject(projectId);
+  const { push } = useProjectBreadcrumb();
+
+  const handleClick = () => {
+    push({
+      title: project!.name,
+      url: `/app/organization/${organizationId}/projects/${project!.id}`,
+    });
+  };
 
   return (
     <div className="w-full flex flex-col gap-4 p-5 border border-gray-200 rounded-xl bg-white max-h-[500px] overflow-hidden">
@@ -50,26 +61,22 @@ export const ProvocationsSection = ({
             <Button
               onClick={generateAI}
               loading={loadingAI}
-              color="secondary"
-              icon={<Sparkles />}
+              color="primary"
+              variant="outline"
+              icon={<Sparkles size={16} />}
             >
               Generar
             </Button>
             {error && (
-                <div className="mt-2 p-2 text-sm text-red-700 ">
-                  {error}
-                </div>
+              <div className="mt-2 p-2 text-sm text-red-700 ">{error}</div>
             )}
           </div>
           <div className="flex flex-1 border border-gray-200 rounded-xl overflow-hidden">
             <div className="w-full h-full overflow-y-auto custom-scrollbar">
               {provocations.length === 0 && (
-                <div className="p-4 w-full h-full flex justify-center items-center">
-                  <span>
-                    No hay provocaciones. Crea provocaciones para explorar
-                    nuevos mundos.
-                  </span>
-                </div>
+                <p className="p-4 text-gray-600 text-center w-full h-full flex items-center justify-center">
+                  No hay provocaciones creadas aún
+                </p>
               )}
               {provocations.map((provocation, index) => (
                 <ProvocationItem provocation={provocation} index={index} />
@@ -94,7 +101,11 @@ export const ProvocationsSection = ({
                 )
               }
             />
-            <TimelineTree className="rounded-xl" data={data}></TimelineTree>
+            <TimelineTree
+              className="rounded-xl"
+              data={data}
+              onProjectClick={handleClick}
+            ></TimelineTree>
           </div>
         )}
       </div>
