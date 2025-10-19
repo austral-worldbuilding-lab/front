@@ -14,7 +14,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProjectBreadcrumb } from "@/components/project/ProjectBreadcrumb";
 import { useOrganization } from "@/hooks/useOrganization";
-import { useProjectBreadcrumb } from "@/hooks/useProjectBreadcrumb";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -30,7 +29,6 @@ const ProjectPage = () => {
     fetchProject();
   });
   const { organization } = useOrganization(organizationId);
-  const { clear } = useProjectBreadcrumb();
   
   const handleEditProject = async (data: { name: string; description?: string }) => {
     try {
@@ -45,9 +43,13 @@ const ProjectPage = () => {
   return (
     <AppLayout>
       <div className="min-h-screen flex flex-col pb-8 pt-2 px-[150px] relative bg-[#F8FAFF]">
-        <ProjectBreadcrumb organizationName={organization?.name} projectName={project?.name} />
+        <ProjectBreadcrumb
+          organizationName={organization?.name}
+          projectName={project?.name}
+          projectId={projectId}
+        />
         <div className="absolute top-10 left-10">
-          <Link onClick={clear} to={`/app/organization/${organizationId}/projects`}>
+          <Link to={`/app/organization/${organizationId}/projects`}>
             <ArrowLeftIcon size={20} />
           </Link>
         </div>
