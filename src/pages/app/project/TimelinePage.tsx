@@ -51,7 +51,6 @@ export default function TimelinePage() {
                 bg-white
                 rounded-3xl
                 shadow-lg
-                p-10
                 w-full
                 max-w-[1600px]
                 mx-auto
@@ -63,7 +62,7 @@ export default function TimelinePage() {
                         >
                             {data ? (
                                 <div className="w-full h-full overflow-auto">
-                                    <TimelineTree data={data} onProjectClick={handleClick} />
+                                    <TimelineTree className="rounded-3xl" data={data} onProjectClick={handleClick} />
                                 </div>
                             ) : (
                                 <p className="text-gray-500 text-center mt-10">

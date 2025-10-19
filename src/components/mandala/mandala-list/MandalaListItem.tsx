@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SquaresIntersect, User, Users } from "lucide-react";
+import { SquaresIntersect, User, Users, Globe } from "lucide-react";
 import MandalaMenu from "../MandalaMenu";
 import { CompleteApiMandala } from "@/types/mandala";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -118,6 +118,11 @@ const MandalaListItem = ({
         >
           {mandala.type === "CHARACTER" ? (
             <User
+              className="w-5 h-5 flex-shrink-0"
+              style={{ color: mandala.configuration.center.color || "#6b7280" }}
+            />
+          ) : mandala.type === "CONTEXT" ? (
+            <Globe
               className="w-5 h-5 flex-shrink-0"
               style={{ color: mandala.configuration.center.color || "#6b7280" }}
             />

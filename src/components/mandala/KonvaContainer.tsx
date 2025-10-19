@@ -10,7 +10,7 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { Layer as KonvaLayer } from "konva/lib/Layer";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
-import MandalaImageComponent from "./images/MandalaImage";
+import MandalaImageComponent from "./filters/images/MandalaImage";
 import MandalaMenu from "./MandalaMenu";
 import { useKonvaUtils } from "@/hooks/useKonvaUtils";
 import { useContextMenu } from "@/hooks/useContextMenu.ts";

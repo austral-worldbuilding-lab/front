@@ -20,9 +20,11 @@ interface Props {
   title: string;
   id: string;
   scope: FileScope;
+  organizationName?: string;
+  projectName?: string;
 }
 
-const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
+const FilesDrawer = ({ open, onClose, title, scope, id, organizationName, projectName }: Props) => {
   const { projectId } = useParams<{ projectId: string }>();
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
 
@@ -94,6 +96,8 @@ const FilesDrawer = ({ open, onClose, title, scope, id }: Props) => {
               error={error ?? undefined}
               scope={scope}
               open={open}
+              organizationName={organizationName}
+              projectName={projectName}
             />
           )}
         </div>
