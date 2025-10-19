@@ -50,26 +50,22 @@ export const ProvocationsSection = ({
             <Button
               onClick={generateAI}
               loading={loadingAI}
-              color="secondary"
-              icon={<Sparkles />}
+              color="primary"
+              variant="outline"
+              icon={<Sparkles size={16} />}
             >
               Generar
             </Button>
             {error && (
-                <div className="mt-2 p-2 text-sm text-red-700 ">
-                  {error}
-                </div>
+              <div className="mt-2 p-2 text-sm text-red-700 ">{error}</div>
             )}
           </div>
           <div className="flex flex-1 border border-gray-200 rounded-xl overflow-hidden">
             <div className="w-full h-full overflow-y-auto custom-scrollbar">
               {provocations.length === 0 && (
-                <div className="p-4 w-full h-full flex justify-center items-center">
-                  <span>
-                    No hay provocaciones. Crea provocaciones para explorar
-                    nuevos mundos.
-                  </span>
-                </div>
+                <p className="p-4 text-gray-600 text-center w-full h-full flex items-center justify-center">
+                  No hay provocaciones creadas aún
+                </p>
               )}
               {provocations.map((provocation, index) => (
                 <ProvocationItem provocation={provocation} index={index} />

@@ -68,12 +68,12 @@ const MandalasPaginatedList = ({
       <div className="w-full flex bg-white rounded-lg border flex-1 overflow-hidden">
         {/* Estado de carga */}
         {loading ? (
-          <div className="w-full flex justify-center items-center">
+          <div className="w-full flex justify-center items-center h-full">
             <Loader size="medium" text="Cargando mandalas..." />
           </div>
         ) : mandalas.length === 0 ? (
           // Mensaje cuando no hay mandalas
-          <p className="p-4 text-gray-600 text-center">
+          <p className="p-4 text-gray-600 text-center w-full h-full flex items-center justify-center">
             No hay mandalas creadas aún
           </p>
         ) : (
@@ -100,7 +100,7 @@ const MandalasPaginatedList = ({
       </div>
 
       {/* Controles de paginación */}
-      <div className="flex justify-center items-center gap-4 mt-6 mb-10">
+      <div className="flex justify-center items-center gap-4">
         <Button
           variant="outline"
           onClick={() => handlePageChange(page - 1)}
