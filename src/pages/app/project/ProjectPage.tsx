@@ -13,6 +13,8 @@ import useUpdateProject from "@/hooks/useUpdateProject";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { getOrganizationById } from "@/services/organizationService";
+import { ProjectBreadcrumb } from "@/components/project/ProjectBreadcrumb";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -31,11 +33,9 @@ const ProjectPage = () => {
   } = useUpdateProject(() => {
     fetchProject();
   });
-
-  const handleEditProject = async (data: {
-    name: string;
-    description?: string;
-  }) => {
+  const { organization } = useOrganization(organizationId);
+  
+  const handleEditProject = async (data: { name: string; description?: string }) => {
     try {
       await updateProject(projectId!, data);
       setIsEditModalOpen(false);
@@ -58,7 +58,12 @@ const ProjectPage = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
+      <div className="min-h-screen flex flex-col pb-8 pt-2 px-[150px] relative bg-[#F8FAFF]">
+        <ProjectBreadcrumb
+          organizationName={organization?.name}
+          projectName={project?.name}
+          projectId={projectId}
+        />
         <div className="absolute top-10 left-10">
           <Link to={`/app/organization/${organizationId}/projects`}>
             <ArrowLeftIcon size={20} />

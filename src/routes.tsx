@@ -20,6 +20,7 @@ import OrganizationListPage from "@/pages/app/project/OrganizationListPage.tsx";
 import OrganizationInviteTokenPage from "./pages/OrganizationInviteTokenPage";
 import TimelinePage from "@/pages/app/project/TimelinePage.tsx";
 import SolutionsPage from "@/pages/app/project/SolutionPage.tsx";
+import { ProjectBreadcrumbProvider } from "./context/ProjectBreadcrumbContext";
 
 // Layout component for all protected routes
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
@@ -29,75 +30,77 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => (
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RootRedirect />} />
+      <ProjectBreadcrumbProvider>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
 
-        {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-        <Route path="/invite/:token" element={<InviteTokenPage />} />
-        <Route
-          path="/organization-invite/:token"
-          element={<OrganizationInviteTokenPage />}
-        />
-
-        <Route
-          path="/my-invitations"
-          element={
-            <ProtectedLayout>
-              <MyInvitationsPage />
-            </ProtectedLayout>
-          }
-        />
-
-        {/* Protected routes - all under /app path */}
-        <Route
-          path="/app"
-          element={
-            <ProtectedLayout>
-              <Outlet />
-            </ProtectedLayout>
-          }
-        >
-          {/* Redirect /app to mandala */}
+          <Route path="/invite/:token" element={<InviteTokenPage />} />
           <Route
-            index
-            element={<Navigate to={`/app/organization/`} replace />}
+            path="/organization-invite/:token"
+            element={<OrganizationInviteTokenPage />}
           />
 
-          {/* Rutas independientes */}
-          <Route path="organization/" element={<OrganizationListPage />} />
           <Route
-            path="organization/:organizationId/projects"
-            element={<OrganizationPage />}
+            path="/my-invitations"
+            element={
+              <ProtectedLayout>
+                <MyInvitationsPage />
+              </ProtectedLayout>
+            }
           />
+
+          {/* Protected routes - all under /app path */}
           <Route
-            path="organization/:organizationId/projects/:projectId"
-            element={<ProjectPage />}
-          />
-          <Route
-            path="organization/:organizationId/projects/:projectId/timeline"
-            element={<TimelinePage />}
-          />
-          <Route
+            path="/app"
+            element={
+              <ProtectedLayout>
+                <Outlet />
+              </ProtectedLayout>
+            }
+          >
+            {/* Redirect /app to mandala */}
+            <Route
+              index
+              element={<Navigate to={`/app/organization/`} replace />}
+            />
+
+            {/* Rutas independientes */}
+            <Route path="organization/" element={<OrganizationListPage />} />
+            <Route
+              path="organization/:organizationId/projects"
+              element={<OrganizationPage />}
+            />
+            <Route
+              path="organization/:organizationId/projects/:projectId"
+              element={<ProjectPage />}
+            />
+            <Route
+              path="organization/:organizationId/projects/:projectId/timeline"
+              element={<TimelinePage />}
+            />
+            <Route
               path="organization/:organizationId/projects/:projectId/solutions"
               element={<SolutionsPage />}
-          />
+            />
 
-          <Route
-            path="organization/:organizationId/projects/:projectId/mandala/:mandalaId"
-            element={<MandalaPage />}
-          />
-          <Route
-            path="organization/:organizationId/projects/:projectId/mandala/:mandalaId/dimension/:dimensionName"
-            element={<DimensionPage />}
-          />
-        </Route>
+            <Route
+              path="organization/:organizationId/projects/:projectId/mandala/:mandalaId"
+              element={<MandalaPage />}
+            />
+            <Route
+              path="organization/:organizationId/projects/:projectId/mandala/:mandalaId/dimension/:dimensionName"
+              element={<DimensionPage />}
+            />
+          </Route>
 
-        {/* 404 route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* 404 route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ProjectBreadcrumbProvider>
     </BrowserRouter>
   );
 }

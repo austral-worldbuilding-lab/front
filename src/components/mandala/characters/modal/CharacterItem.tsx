@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Plus, User } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useMandalaBreadcrumb } from "@/hooks/useMandalaBreadcrumb";
 
 interface CharacterItemProps {
   character: { id: string; name: string; color: string };
@@ -9,9 +9,8 @@ interface CharacterItemProps {
 }
 
 const CharacterItem: React.FC<CharacterItemProps> = ({ character, onAdd }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const { goToMandala } = useMandalaBreadcrumb();
 
   return (
     <div className="group flex flex-col gap-1 justify-between w-18 h-fit items-center bg-white">
@@ -20,11 +19,7 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character, onAdd }) => {
           !isButtonHovered ? "hover:bg-gray-100" : ""
         } relative cursor-pointer`}
         onClick={() => {
-          navigate(
-            `${location.pathname.split("/").slice(0, -1).join("/")}/${
-              character.id
-            }`
-          );
+          goToMandala(character.id, character.name);
         }}
       >
         <User size={36} style={{ color: character.color }} />
