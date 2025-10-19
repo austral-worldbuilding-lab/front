@@ -26,7 +26,11 @@ const ProjectPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { update: updateProject, loading: updating, error: updateError } = useUpdateProject(() => {
+  const {
+    update: updateProject,
+    loading: updating,
+    error: updateError,
+  } = useUpdateProject(() => {
     fetchProject();
   });
   const { organization } = useOrganization(organizationId);
@@ -37,7 +41,9 @@ const ProjectPage = () => {
       setIsEditModalOpen(false);
       setErrorMessage(null);
     } catch {
-      setErrorMessage("No se pudo actualizar el proyecto. Intentalo de nuevo más tarde.");
+      setErrorMessage(
+        "No se pudo actualizar el proyecto. Intentalo de nuevo más tarde."
+      );
     }
   };
   const [orgName, setOrgName] = useState<string>("");
@@ -68,7 +74,7 @@ const ProjectPage = () => {
           <div className="flex justify-between">
             <div className="flex flex-col gap-2 flex-1">
               <Folder size={40} className="text-primary" />
-              <h1 className="text-3xl font-bold">{project?.name || ""}</h1>
+              <h1 className="text-3xl font-bold h-8">{project?.name || " "}</h1>
               <div className="mt-2">
                 {project?.description &&
                 project.description.trim().length > 0 ? (
@@ -109,7 +115,7 @@ const ProjectPage = () => {
               />
             </div>
           </div>
-          <div className="mt-4 flex flex-1 flex-row gap-6 justify-between w-full">
+          <div className="mt-4 flex flex-row gap-6 justify-between w-full h-[600px]">
             <MandalaListPage />
             <FileListContainer
               scope="project"
@@ -130,8 +136,8 @@ const ProjectPage = () => {
           onCreate={handleEditProject}
           loading={updating}
           error={updateError}
-          title="Editar proyecto"
-          placeholder="Nombre del proyecto"
+          title="Editar mundo"
+          placeholder="Nombre del mundo"
           showQuestions={true}
           initialName={project?.name || ""}
           initialDescription={project?.description || ""}

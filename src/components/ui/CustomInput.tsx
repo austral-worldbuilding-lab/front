@@ -40,7 +40,9 @@ const CustomInput = React.forwardRef<
                     <HelpCircle size={16} className="text-gray-400" />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent sideOffset={4}>{about}</TooltipContent>
+                <TooltipContent sideOffset={4} className="max-w-xs">
+                  <p className="whitespace-pre-line">{about}</p>
+                </TooltipContent>
               </Tooltip>
             )}
           </label>
@@ -51,7 +53,7 @@ const CustomInput = React.forwardRef<
             disabled={disabled}
             aria-invalid={!!error}
             className={cn(
-              "border placeholder:text-input-placeholder text-sm",
+              "border placeholder:text-input-placeholder placeholder:font-normal text-sm",
               disabled &&
                 "bg-[var(--color-input-disabled-bg)] border border-[var(--color-input-disabled-border)] text-[var(--color-disabled-text)]",
               error &&

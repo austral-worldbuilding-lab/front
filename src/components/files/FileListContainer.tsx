@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Search } from "lucide-react";
+import { FileText, Search, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useFiles } from "@/hooks/useFiles";
 import Loader from "@/components/common/Loader";
@@ -14,6 +14,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FileListContainerProps {
   scope: FileScope;
@@ -22,7 +27,12 @@ interface FileListContainerProps {
   projectName?: string;
 }
 
-const FileListContainer = ({ scope, id, organizationName, projectName }: FileListContainerProps) => {
+const FileListContainer = ({
+  scope,
+  id,
+  organizationName,
+  projectName,
+}: FileListContainerProps) => {
   const [searchText, setSearchText] = useState("");
   const {
     files,
@@ -69,6 +79,18 @@ const FileListContainer = ({ scope, id, organizationName, projectName }: FileLis
           <span className="font-semibold text-xl text-foreground">
             Archivos
           </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <HelpCircle className="w-4 h-4 text-primary cursor-pointer" />
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="w-full text-sm">
+                Los siguientes archivos darán contexto a la IA a la hora de
+                generar mandalas, postits o preguntas. Selecciónalos
+                adecuadamente.
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <div className="flex items-center gap-2 flex-wrap w-full">
           <div className="relative flex-1">
@@ -84,11 +106,6 @@ const FileListContainer = ({ scope, id, organizationName, projectName }: FileLis
         </div>
       </div>
 
-      <p className="flex items-start gap-1 text-sm italic text-gray-500 mt-1 shrink-0">
-        Los siguientes archivos darán contexto a la IA a la hora de generar
-        mandalas, postits o preguntas. Selecciónalos adecuadamente.
-      </p>
-
       {totalCount > 0 && (
         <div className="flex justify-start">
           <SelectAllFilesButton
@@ -102,7 +119,7 @@ const FileListContainer = ({ scope, id, organizationName, projectName }: FileLis
 
       <div className="border border-gray-200 rounded-md flex flex-col flex-1 overflow-hidden min-h-0">
         {isLoading && (
-          <div className="p-8">
+          <div className="p-8 h-full flex items-center justify-center">
             <Loader size="medium" text="Cargando archivos..." />
           </div>
         )}
@@ -130,16 +147,22 @@ const FileListContainer = ({ scope, id, organizationName, projectName }: FileLis
 
         {!error && !isLoading && files.length > 0 && (
           <div className="flex-1 overflow-y-auto max-h-[450px] min-h-0">
-            <Accordion type="multiple" defaultValue={scopeOrder} className="w-full">
+            <Accordion
+              type="multiple"
+              defaultValue={scopeOrder}
+              className="w-full"
+            >
               {scopeOrder.map(
                 (scopeKey) =>
                   groupedFiles[scopeKey] && (
-                    <AccordionItem key={scopeKey} value={scopeKey} className="border-none">
-                      <AccordionTrigger className="px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left font-semibold text-gray-800 hover:no-underline rounded-none border-b border-gray-200 text-base">
+                    <AccordionItem
+                      key={scopeKey}
+                      value={scopeKey}
+                      className="border-none"
+                    >
+                      <AccordionTrigger className="px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left font-semibold text-gray-800 hover:no-underline rounded-none border-b border-gray-200 text-base cursor-pointer">
                         <div className="flex items-center justify-between w-full pr-2">
-                          <span>
-                            {getScopeTitle(scopeKey)}
-                          </span>
+                          <span>{getScopeTitle(scopeKey)}</span>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="p-0">

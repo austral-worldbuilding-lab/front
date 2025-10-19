@@ -25,8 +25,8 @@ const getInitialScales = (): Item[] => {
 interface CreateEntityModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { 
-    name: string; 
+  onCreate: (data: {
+    name: string;
     description?: string;
     dimensions?: DimensionDto[];
     scales?: string[];
@@ -80,12 +80,12 @@ const CreateEntityModal = ({
   if (!open) return null;
 
   const handleSubmit = () => {
-    const dimensionsData: DimensionDto[] = dimensions.map(dim => ({
+    const dimensionsData: DimensionDto[] = dimensions.map((dim) => ({
       name: dim.value,
-      color: dim.color || "#cccccc"
+      color: dim.color || "#cccccc",
     }));
 
-    const scalesData: string[] = scales.map(scale => scale.value);
+    const scalesData: string[] = scales.map((scale) => scale.value);
 
     if (isProvocationMode && onCreateFromProvocation) {
       onCreateFromProvocation({
@@ -95,14 +95,14 @@ const CreateEntityModal = ({
         scales: showConfiguration ? scalesData : undefined,
       });
     } else if (showQuestions) {
-      onCreate({ 
-        name, 
+      onCreate({
+        name,
         description,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
       });
     } else {
-      onCreate({ 
+      onCreate({
         name,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
@@ -110,10 +110,10 @@ const CreateEntityModal = ({
     }
   };
 
-  const questionText = `• ¿Qué mundo o contexto estás creando?\n
-• ¿Qué problemas aparecen en este mundo?\n
-• ¿Qué personajes o situaciones ilustran esos problemas?\n
-• ¿Cuáles son los deseos de esos personajes?\n
+  const questionText = `• ¿Qué mundo o contexto estás creando?
+• ¿Qué problemas aparecen en este mundo?
+• ¿Qué personajes o situaciones ilustran esos problemas?
+• ¿Cuáles son los deseos de esos personajes?
 • ¿Qué impacto tienen estos problemas?`;
 
   const isFormValid = () => {
@@ -121,7 +121,10 @@ const CreateEntityModal = ({
       if (isProvocationMode) {
         return question.trim().length > 0;
       }
-      return name.trim().length > 0 && (!showQuestions || description.trim().length > 0);
+      return (
+        name.trim().length > 0 &&
+        (!showQuestions || description.trim().length > 0)
+      );
     })();
 
     if (showConfiguration) {
@@ -143,15 +146,18 @@ const CreateEntityModal = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(openState) => {
-      if (!openState) {
-        handleModalChange();
-        onClose();
-      }
-    }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog
+      open={open}
+      onOpenChange={(openState) => {
+        if (!openState) {
+          handleModalChange();
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="max-w-2xl h-[90vh] overflow-y-auto flex flex-col ">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="font-bold">{title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
           {allowProvocationMode && mode !== "edit" && (
@@ -162,10 +168,10 @@ const CreateEntityModal = ({
                 className={`flex-1 px-4 py-2.5 rounded-md font-medium transition-all ${
                   !isProvocationMode
                     ? "bg-white text-primary shadow-sm border border-primary"
-                    : "bg-transparent text-gray-600 hover:text-gray-900"
+                    : "bg-transparent text-gray-600 hover:text-gray-900 cursor-pointer"
                 }`}
               >
-                Proyecto Normal
+                Mundo nuevo
               </button>
               <button
                 type="button"
@@ -173,7 +179,7 @@ const CreateEntityModal = ({
                 className={`flex-1 px-4 py-2.5 rounded-md font-medium transition-all ${
                   isProvocationMode
                     ? "bg-white text-primary shadow-sm border border-primary"
-                    : "bg-transparent text-gray-600 hover:text-gray-900"
+                    : "bg-transparent text-gray-600 hover:text-gray-900 cursor-pointer"
                 }`}
               >
                 Desde Provocación
@@ -241,7 +247,7 @@ const CreateEntityModal = ({
 
           {showConfiguration && (
             <div className="space-y-4 border-t pt-4">
-              <h3 className="text-lg font-medium">Configuración del Proyecto</h3>
+              <h3 className="text-lg font-bold">Configuración del Mundo</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TagInput
                   label="Dimensiones"
@@ -266,11 +272,7 @@ const CreateEntityModal = ({
           {error && <div className="text-red-500 mb-2">{error}</div>}
 
           <div className="flex justify-end gap-3 mt-6">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
+            <Button variant="outline" onClick={onClose} disabled={loading}>
               Cancelar
             </Button>
             <Button
