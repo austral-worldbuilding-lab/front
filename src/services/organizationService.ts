@@ -14,8 +14,8 @@ export const getOrganizations = async (page: number, limit: number): Promise<Org
     return response.data.data;
 };
 
-export const createOrganization = async ({ name }: { name: string }) => {
-    const response = await axiosInstance.post("/organization", { name });
+export const createOrganization = async ({ name, icon }: { name: string, icon: string }) => {
+    const response = await axiosInstance.post("/organization", { name, icon });
     return response.data;
 };
 

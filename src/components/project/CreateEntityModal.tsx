@@ -6,6 +6,7 @@ import { DimensionDto } from "@/types/mandala";
 import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 import { IconSelector } from "../common/IconSelector";
+import { ICON_OPTIONS } from "@/constants/icon-options";
 
 const getInitialDimensions = (): Item[] => {
   return Sectors.map((sector) => ({
@@ -31,14 +32,14 @@ interface CreateEntityModalProps {
     description?: string;
     dimensions?: DimensionDto[];
     scales?: string[];
-    icon?: string;
+    icon: string;
   }) => Promise<void>;
   onCreateFromProvocation?: (data: {
     question: string;
     name?: string;
     dimensions?: DimensionDto[];
     scales?: string[];
-    icon?: string;
+    icon: string;
   }) => Promise<void>;
   loading: boolean;
   error?: string | null;
@@ -97,7 +98,7 @@ const CreateEntityModal = ({
         name: name.trim() || undefined,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
-        icon: icon ?? undefined,
+        icon: icon ?? ICON_OPTIONS[0],
       });
     } else if (showQuestions) {
       onCreate({ 
@@ -105,13 +106,14 @@ const CreateEntityModal = ({
         description,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
-        icon: icon ?? undefined,
+        icon: icon ?? ICON_OPTIONS[0],
       });
     } else {
       onCreate({ 
         name,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
+        icon: icon ?? ICON_OPTIONS[0]
       });
     }
   };

@@ -46,8 +46,9 @@ const OrganizationPage = () => {
     description?: string;
     dimensions?: DimensionDto[];
     scales?: string[];
+    icon: string;
   }) => {
-    const { name, description, dimensions, scales } = data;
+    const { name, description, dimensions, scales, icon } = data;
     setCreating(true);
     try {
       if (!user) {
@@ -61,6 +62,7 @@ const OrganizationPage = () => {
         organizationId: organizationId!,
         dimensions,
         scales,
+        icon,
       });
       setModalOpen(false);
       navigate(`/app/organization/${organizationId}/projects/${project.id}`);
@@ -78,6 +80,7 @@ const OrganizationPage = () => {
     name?: string;
     dimensions?: DimensionDto[];
     scales?: string[];
+    icon: string;
   }) => {
     setCreating(true);
     try {
@@ -92,6 +95,7 @@ const OrganizationPage = () => {
         name: data.name,
         dimensions: data.dimensions,
         scales: data.scales,
+        icon: data.icon,
       });
 
       setModalOpen(false);
