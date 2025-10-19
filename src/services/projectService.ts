@@ -1,3 +1,4 @@
+import { ICON_OPTIONS } from "@/constants/icon-options";
 import axiosInstance from "@/lib/axios";
 import {BackendTag, CreateProject, CreateProjectFromQuestion, Project, ProjectConfiguration} from "@/types/mandala";
 import {BackendTimelineEdge, BackendTimelineNode} from "@/utils/timelineUtils.ts";
@@ -111,7 +112,7 @@ export const createProjectFromProvocationId = async (body: {
 }): Promise<Project> => {
   const response = await axiosInstance.post<{ data: Project }>(
       `/project/from-provocationId`,
-      body
+      { ...body, icon: ICON_OPTIONS[0] }
   );
 
   if (response.status !== 201 && response.status !== 200) {

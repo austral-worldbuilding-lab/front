@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Folder, Edit } from "lucide-react";
+import { ArrowLeftIcon, Edit } from "lucide-react";
 import useProject from "@/hooks/useProject.ts";
 import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
 import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
@@ -15,6 +16,7 @@ import { useState, useEffect } from "react";
 import { getOrganizationById } from "@/services/organizationService";
 import { ProjectBreadcrumb } from "@/components/project/ProjectBreadcrumb";
 import { useOrganization } from "@/hooks/useOrganization";
+import * as Icons from "lucide-react";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -56,6 +58,8 @@ const ProjectPage = () => {
     }
   }, [organizationId]);
 
+  const IconComp = project?.icon ? (Icons as any)[project?.icon] : undefined
+
   return (
     <AppLayout>
       <div className="min-h-screen flex flex-col pb-8 pt-2 px-[150px] relative bg-[#F8FAFF]">
@@ -73,7 +77,7 @@ const ProjectPage = () => {
         <div className="w-full flex flex-col gap-6 flex-1">
           <div className="flex justify-between">
             <div className="flex flex-col gap-2 flex-1">
-              <Folder size={40} className="text-primary" />
+              {IconComp && <IconComp size={40} className="text-primary" />}
               <h1 className="text-3xl font-bold h-8">{project?.name || " "}</h1>
               <div className="mt-2">
                 {project?.description &&

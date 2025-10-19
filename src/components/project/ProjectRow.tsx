@@ -1,11 +1,14 @@
-import { ChevronDown, ChevronRight, FolderIcon } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import * as Icons from "lucide-react";
 
 interface Project {
   id: string;
   name: string;
   children?: Project[];
+  icon: string;
 }
 
 interface ProjectRowProps {
@@ -42,6 +45,8 @@ export const ProjectRow = ({
     setExpanded(!expanded);
   };
 
+  const IconComp = (Icons as any)[project.icon]
+
   return (
     <li>
       <div
@@ -64,7 +69,7 @@ export const ProjectRow = ({
           ) : (
             <span className="w-5" />
           )}
-          <FolderIcon className="w-5 h-5 text-primary flex-shrink-0" />
+          <IconComp className="w-5 h-5 text-primary flex-shrink-0" />
           <span className="flex-1 text-sm font-medium">
             {project.name || "Proyecto sin nombre"}
           </span>

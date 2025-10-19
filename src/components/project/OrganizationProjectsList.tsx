@@ -18,6 +18,7 @@ export interface Project {
   rootProjectId?: string;
   parentId?: string;
   children?: Project[];
+  icon: string;
 }
 
 interface OrganizationProjectsListProps {
