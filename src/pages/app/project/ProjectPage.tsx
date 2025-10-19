@@ -13,6 +13,8 @@ import useUpdateProject from "@/hooks/useUpdateProject";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { getOrganizationById } from "@/services/organizationService";
+import { ProjectBreadcrumb } from "@/components/project/ProjectBreadcrumb";
+import { useOrganization } from "@/hooks/useOrganization";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -27,7 +29,8 @@ const ProjectPage = () => {
     const { update: updateProject, loading: updating, error: updateError } = useUpdateProject(() => {
     fetchProject();
   });
-
+  const { organization } = useOrganization(organizationId);
+  
   const handleEditProject = async (data: { name: string; description?: string }) => {
     try {
       await updateProject(projectId!, data);
@@ -49,7 +52,12 @@ const ProjectPage = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen flex flex-col py-8 px-[150px] relative bg-[#F8FAFF]">
+      <div className="min-h-screen flex flex-col pb-8 pt-2 px-[150px] relative bg-[#F8FAFF]">
+        <ProjectBreadcrumb
+          organizationName={organization?.name}
+          projectName={project?.name}
+          projectId={projectId}
+        />
         <div className="absolute top-10 left-10">
           <Link to={`/app/organization/${organizationId}/projects`}>
             <ArrowLeftIcon size={20} />
@@ -62,7 +70,8 @@ const ProjectPage = () => {
               <Folder size={40} className="text-primary" />
               <h1 className="text-3xl font-bold">{project?.name || ""}</h1>
               <div className="mt-2">
-                {project?.description && project.description.trim().length > 0 ? (
+                {project?.description &&
+                project.description.trim().length > 0 ? (
                   <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
                     {project.description}
                   </p>
@@ -129,9 +138,9 @@ const ProjectPage = () => {
           mode="edit"
         />
         {errorMessage && (
-            <p className="text-red-500 mt-4 text-sm text-center">
-                {errorMessage}
-            </p>
+          <p className="text-red-500 mt-4 text-sm text-center">
+            {errorMessage}
+          </p>
         )}
       </div>
     </AppLayout>
