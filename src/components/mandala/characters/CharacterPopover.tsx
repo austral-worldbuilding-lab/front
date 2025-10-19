@@ -2,8 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Character } from "@/types/mandala";
 import { EyeIcon } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import { parseMandalaHistory, buildMandalaHistoryQuery } from "@/utils/mandalaHistory";
+import { useMandalaBreadcrumb } from "@/hooks/useMandalaBreadcrumb";
 
 interface CharacterPopoverProps {
   character: Character;
@@ -15,8 +14,7 @@ const CharacterPopover: React.FC<CharacterPopoverProps> = ({
   onClose,
 }) => {
   const popoverRef = useRef<HTMLDivElement>(null);
-  const { organizationId, projectId } = useParams<{ organizationId: string, projectId: string }>();
-  const navigate = useNavigate();
+  const { goToMandala } = useMandalaBreadcrumb();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,16 +36,7 @@ const CharacterPopover: React.FC<CharacterPopoverProps> = ({
   }, [onClose]);
 
   const handleOpenMandala = (mandalaId: string) => {
-    // Obtener historial actual de la URL
-    const { ids, names } = parseMandalaHistory(window.location.search);
-    // Agregar el nuevo mandala al final
-    const newIds = [...ids, mandalaId];
-    const newNames = [...names, character.name];
-    const search = buildMandalaHistoryQuery(newIds, newNames);
-
-    navigate(
-        `/app/organization/${organizationId}/projects/${projectId}/mandala/${mandalaId}?${search}`
-    );
+    goToMandala(mandalaId, character.name);
   };
 
 
