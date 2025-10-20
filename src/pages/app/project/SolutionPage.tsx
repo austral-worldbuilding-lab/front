@@ -1,14 +1,11 @@
-import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Folder, Plus } from "lucide-react";
+import { ArrowLeftIcon, Folder } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import useProject from "@/hooks/useProject";
 import useSolutions from "@/hooks/useSolutions";
-import SolutionCard from "@/components/project/SolutionCard";
-import { CreateSolutionModal } from "@/components/project/CreateSolutionModal";
 import Loader from "@/components/common/Loader.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import EncyclopediaSection from "@/components/project/EnciclopediaSection.tsx";
+import SolutionsSection from "@/components/project/SolutionSection.tsx";
 
 export default function SolutionsPage() {
     const { organizationId, projectId } = useParams<{
@@ -17,8 +14,7 @@ export default function SolutionsPage() {
     }>();
 
     const { project } = useProject(projectId!);
-    const { solutions, loadingPage, creating, createSolution } = useSolutions(projectId!);
-    const [modalOpen, setModalOpen] = useState(false);
+    const { loadingPage } = useSolutions(projectId!);
 
     return (
         <AppLayout>
@@ -41,44 +37,7 @@ export default function SolutionsPage() {
                         </div>
                     </div>
                     <EncyclopediaSection projectId={projectId!} projectName={project?.name || "Proyecto"} />
-
-                    <div className="mt-4 bg-white border border-gray-200 rounded-[12px] shadow-sm p-8 flex flex-col gap-8 w-full">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-2xl font-semibold text-gray-800">Soluciones</h2>
-
-                            <Button
-                                onClick={() => setModalOpen(true)}
-                                loading={creating}
-                                color="primary"
-                                icon={<Plus />}
-                            >
-                                Crear solución
-                            </Button>
-                        </div>
-
-                        {solutions.length === 0 ? (
-                            <div className="border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-500 w-full h-[350px] flex flex-col items-center justify-center">
-                                <p className="text-lg font-medium mb-2">Aún no hay soluciones creadas</p>
-                                <p className="text-sm">Usá el botón “Crear solución” para agregar una nueva.</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {solutions.map((solution) => (
-                                    <SolutionCard key={solution.id} solution={solution} />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <CreateSolutionModal
-                        open={modalOpen}
-                        onOpenChange={setModalOpen}
-                        onCreateSolution={async (solution) => {
-                            await createSolution(solution);
-                            setModalOpen(false);
-                        }}
-                        projectId={projectId!}
-                    />
+                    <SolutionsSection projectId={projectId!} />
                 </div>
             )}
         </AppLayout>

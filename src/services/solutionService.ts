@@ -14,9 +14,29 @@ export const solutionService = {
     },
 
     async createSolution(projectId: string, body: Omit<Solution, "id">): Promise<Solution> {
-        if (!projectId) throw new Error("projectId es requerido");
+        const res = await axiosInstance.post<Solution>(`/project/${projectId}/solution`, body);
+        return res.data;
+    },
+};
 
-        const response = await axiosInstance.post<Solution>(`/project/${projectId}/solution`, body);
-        return response.data;
-    }
+export const startSolutionJob = async (projectId: string) => {
+    const res = await axiosInstance.post(`/project/${projectId}/solutions/generate`);
+    return res.data;
+};
+
+export const getSolutionJobStatus = async (projectId: string) => {
+    const res = await axiosInstance.get(`/project/${projectId}/solutions/generate/status`);
+    return res.data;
+};
+
+export async function getCachedSolutions(projectId: string) {
+    const res = await axiosInstance.get(`/project/${projectId}/solutions/cached`);
+    return res.data;
+}
+
+
+export const getSolutionValidation = async (projectId: string) => {
+
+    const res = await axiosInstance.get(`/project/${projectId}/solutions/validation`);
+    return res.data;
 };
