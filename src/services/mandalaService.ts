@@ -236,6 +236,10 @@ export async function linkMandalaToParent(mandalaId: string, childId: string) {
   return axiosInstance.post(`/mandala/${mandalaId}/link/${childId}`);
 }
 
+export async function unlinkMandalaFromParent(parentId: string, childId: string) {
+  return axiosInstance.delete(`/mandala/${parentId}/unlink/${childId}`);
+}
+
 export const deleteMandalaService = async (mandalaId: string) => {
   const response = await axiosInstance.delete(`/mandala/${mandalaId}`);
   if (response.status !== 200) {

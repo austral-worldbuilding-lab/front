@@ -7,19 +7,19 @@ export function useProjectCharacters(mandalaId: string) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadCharacters = async () => {
-            try {
-                setLoading(true);
-                const chars = await fetchAvailableCharacters(mandalaId);
-                setCharacters(chars);
-            } catch (err) {
-                setError("Error loading characters");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const loadCharacters = async () => {
+        try {
+            setLoading(true);
+            const chars = await fetchAvailableCharacters(mandalaId);
+            setCharacters(chars);
+        } catch (err) {
+            setError("Error loading characters");
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         loadCharacters();
     }, [mandalaId]);
 
@@ -32,5 +32,9 @@ export function useProjectCharacters(mandalaId: string) {
         }
     };
 
-    return { characters, loading, error, linkCharacter };
+    const refetch = async () => {
+        await loadCharacters();
+    };
+
+    return { characters, loading, error, linkCharacter, refetch };
 }

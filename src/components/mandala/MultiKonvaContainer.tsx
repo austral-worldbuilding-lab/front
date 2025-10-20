@@ -199,13 +199,10 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
       if (!owner) return false;
       const u = updaterByMandalaId.get(owner);
       if (!u) return false;
-      const mandala = sourceMandalas.find((s) => s.id === owner)?.mandala;
-      const idx = mandala?.characters?.findIndex((c) => c.id === charId) ?? -1;
-      if (idx < 0) return false;
-      const res = await u.deleteCharacter(idx);
+      const res = await u.deleteCharacter(charId);
       return !!res;
     },
-    [idToMandalaId, updaterByMandalaId, sourceMandalas]
+    [idToMandalaId, updaterByMandalaId]
   );
 
   const routedImageUpdate = useCallback(
