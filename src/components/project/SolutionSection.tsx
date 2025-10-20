@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function SolutionsSection({ projectId }: { projectId: string }) {
-    const { status, progress, startJob } = useSolutionJob(projectId);
-    const { solutions, creating, createSolution } = useSolutions(projectId);
+    const { reload, solutions, creating, createSolution } = useSolutions(projectId);
+    const { status, progress, startJob } = useSolutionJob(projectId, reload);
     const [modalOpen, setModalOpen] = useState(false);
 
     const { canGenerate, reason, loading: validationLoading } = useSolutionValidation(projectId);

@@ -4,9 +4,15 @@ import {
     getSolutionJobStatus,
     getCachedSolutions
 } from "@/services/solutionService";
-export function useSolutionJob(projectId: string, onSolutionsReady?: () => void) {
+
+export function useSolutionJob(
+    projectId: string,
+    onSolutionsReady?: () => void
+) {
     const [jobId, setJobId] = useState<string | null>(null);
-    const [status, setStatus] = useState<"none" | "waiting" | "active" | "completed" | "failed">("none");
+    const [status, setStatus] = useState<
+        "none" | "waiting" | "active" | "completed" | "failed"
+    >("none");
     const [progress, setProgress] = useState<number>(0);
     const [solutionUrl, setSolutionUrl] = useState<string | null>(null);
     const [cachedSolutions, setCachedSolutions] = useState<any[] | null>(null);
@@ -19,7 +25,7 @@ export function useSolutionJob(projectId: string, onSolutionsReady?: () => void)
             if (data?.length > 0) {
                 setCachedSolutions(data);
                 setStatus("completed");
-                if (onSolutionsReady) onSolutionsReady(); // 🔹 Notificar al padre
+                if (onSolutionsReady) onSolutionsReady();
             }
         } catch (err) {
             console.error("Error obteniendo soluciones cacheadas:", err);
@@ -45,7 +51,6 @@ export function useSolutionJob(projectId: string, onSolutionsReady?: () => void)
         const fetchStatus = async () => {
             try {
                 const data = await getSolutionJobStatus(projectId);
-
                 setStatus(data.status);
                 setProgress(data.progress || 0);
 
@@ -53,6 +58,10 @@ export function useSolutionJob(projectId: string, onSolutionsReady?: () => void)
                     setSolutionUrl(data.solutionUrl || null);
                     if (intervalRef.current) clearInterval(intervalRef.current);
                     await fetchCachedSolutions();
+                }
+                if (data.status === "failed") {
+                    if (intervalRef.current) clearInterval(intervalRef.current);
+                    setError("La generación de soluciones falló");
                 }
             } catch (err) {
                 console.error("Error consultando estado del job de soluciones:", err);
