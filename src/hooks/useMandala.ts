@@ -11,6 +11,7 @@ import {
   deleteImage as deleteImageService,
   setEditingUser as setEditingUserService,
   removeEditingUser as removeEditingUserService,
+  updateMandala as updateMandalaService,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./useAuth";
@@ -169,6 +170,20 @@ const useMandala = (mandalaId: string) => {
     removeEditingUserService(projectId!, mandalaId, postitId, user!.uid);
   };
 
+  const updateMandala = useCallback(
+    async (data: { name?: string; description?: string }) => {
+      try {
+        return await updateMandalaService(projectId!, mandalaId, data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
   return {
     mandala,
     loading,
@@ -182,6 +197,7 @@ const useMandala = (mandalaId: string) => {
     deleteImage,
     setEditingUser,
     removeEditingUser,
+    updateMandala,
   };
 };
 
