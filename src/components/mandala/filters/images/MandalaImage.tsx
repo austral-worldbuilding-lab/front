@@ -5,6 +5,7 @@ import { KonvaEventObject } from "konva/lib/Node";
 import type { MandalaImage } from "@/types/mandala";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 import { Html } from "react-konva-utils";
+import MandalaBadge from "../../postits/MandalaBadge";
 
 interface MandalaImageProps {
   image: MandalaImage;
@@ -245,6 +246,14 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
             alt=""
           />
         </Html>
+
+        {image.from && (
+          <MandalaBadge
+            originMandalaName={image.from?.name}
+            fontSize={10}
+            zindex={zindex}
+          />
+        )}
 
         <Rect
           width={width}
