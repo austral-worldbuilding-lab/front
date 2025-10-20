@@ -55,9 +55,11 @@ const ConfirmationDialog = ({
                 </AlertDialogHeader>
 
                 <AlertDialogFooter className="flex pt-4 space-x-0">
-                <Button variant="outline" color={isDanger ? "danger" : "tertiary"} onClick={() => onOpenChange(false)}>
-                        {cancelText}
-                    </Button>
+                    {cancelText && (
+                        <Button variant="outline" color={isDanger ? "danger" : "tertiary"} onClick={() => onOpenChange(false)}>
+                            {cancelText}
+                        </Button>
+                    )}
                     <Button
                         variant="filled"
                         color={isDanger ? "danger" : "primary"}
