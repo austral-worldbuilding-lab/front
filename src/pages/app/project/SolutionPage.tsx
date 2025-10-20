@@ -8,6 +8,7 @@ import SolutionCard from "@/components/project/SolutionCard";
 import { CreateSolutionModal } from "@/components/project/CreateSolutionModal";
 import Loader from "@/components/common/Loader.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import EncyclopediaSection from "@/components/project/EnciclopediaSection.tsx";
 
 export default function SolutionsPage() {
     const { organizationId, projectId } = useParams<{
@@ -39,8 +40,9 @@ export default function SolutionsPage() {
                             <h1 className="text-3xl font-bold">{project?.name || "Proyecto"}</h1>
                         </div>
                     </div>
+                    <EncyclopediaSection projectId={projectId!} projectName={project?.name || "Proyecto"} />
 
-                    <div className="bg-white border border-gray-200 rounded-[12px] shadow-sm p-8 flex flex-col gap-8 w-full">
+                    <div className="mt-4 bg-white border border-gray-200 rounded-[12px] shadow-sm p-8 flex flex-col gap-8 w-full">
                         <div className="flex justify-between items-center">
                             <h2 className="text-2xl font-semibold text-gray-800">Soluciones</h2>
 
