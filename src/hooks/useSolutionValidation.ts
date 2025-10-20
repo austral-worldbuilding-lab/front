@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-// import { getSolutionValidation } from "@/services/solutionService";
+import { getSolutionValidation } from "@/services/solutionService";
 
 export function useSolutionValidation(projectId: string) {
     const [canGenerate, setCanGenerate] = useState<boolean | null>(null);
     const [reason, setReason] = useState<string | null>(null);
+    const [missing, setMissing] = useState<string[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -13,9 +14,12 @@ export function useSolutionValidation(projectId: string) {
         setError(null);
 
         try {
-            // const res = await getSolutionValidation(projectId);
-            setCanGenerate(true);
-            setReason(null);
+            const res = await getSolutionValidation(projectId);
+            const data = res.data?.data || res.data;
+
+            setCanGenerate(data?.isValid ?? false);
+            setReason(data?.reason || null);
+            setMissing(data?.missingRequirements || []);
         } catch (err: any) {
             console.error("Error validando generación de soluciones:", err);
             setError(err.response?.data?.message || "Error consultando validación");
@@ -31,6 +35,7 @@ export function useSolutionValidation(projectId: string) {
     return {
         canGenerate,
         reason,
+        missing,
         loading,
         error,
         refresh: fetchValidation,
