@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
-import { Character, Mandala, MandalaImage, Postit } from "../types/mandala";
+import { Character, Mandala, MandalaImage, Postit } from "@/types/mandala";
 import {
   subscribeMandala,
   createPostit as createPostitService,
   updatePostit as updatePostitService,
   deletePostit as deletePostitService,
   updateCharacter as updateCharacterService, 
-  updateMandalaCharacters,
+  unlinkMandalaFromParent,
   updateImage as updateImageService,
   deleteImage as deleteImageService,
   setEditingUser as setEditingUserService,
@@ -110,21 +110,22 @@ const useMandala = (mandalaId: string) => {
   );
 
   const deleteCharacter = useCallback(
-    async (index: number) => {
+    async (characterId: string) => {
       try {
-        const updatedCharacters = [...(mandala?.characters ?? [])];
-        updatedCharacters.splice(index, 1);
-        await updateMandalaCharacters(projectId!, mandalaId, updatedCharacters);
-        setMandala((prev) =>
-          prev ? { ...prev, characters: updatedCharacters } : prev
-        );
+        if (!characterId) {
+          throw new Error("Character ID is required");
+        }
+        
+        // Call backend API to unlink the child mandala from the parent
+        await unlinkMandalaFromParent(mandalaId, characterId);
+        
         return true;
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Unknown error occurred"));
         return false;
       }
     },
-    [mandala?.characters, mandalaId, projectId]
+    [mandalaId]
   );
 
   const updateImage = useCallback(

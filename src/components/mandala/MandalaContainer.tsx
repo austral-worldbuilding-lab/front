@@ -95,7 +95,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   }, [organizationId]);
 
   const projectId = useParams<{ projectId: string }>().projectId!;
-  const { characters: projectCharacters, linkCharacter } =
+  const { characters: projectCharacters, linkCharacter, refetch: refetchCharacters } =
     useProjectCharacters(mandalaId);
 
   const navigate = useNavigate();
@@ -228,9 +228,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     }
   };
 
-  const handleDeleteCharacter = async (index: number) => {
+  const handleDeleteCharacter = async (characterId: string) => {
     try {
-      await deleteCharacter(index);
+      await deleteCharacter(characterId);
+      // Refetch available characters after unlinking
+      await refetchCharacters();
     } catch (e) {
       console.error("Error al eliminar el personaje:", e);
     }
@@ -526,9 +528,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           onPostItUpdate={updatePostit}
                           onCharacterUpdate={updateCharacter}
                           onPostItDelete={deletePostit}
-                          onCharacterDelete={(id: string) =>
-                            handleDeleteCharacter(parseInt(id))
-                          }
+                          onCharacterDelete={handleDeleteCharacter}
                           onPostItChildCreate={(
                             content: string,
                             tags: Tag[],
@@ -634,9 +634,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           }}
                           appliedFilters={appliedFilters}
                           onPostItDelete={deletePostit}
-                          onCharacterDelete={(id: string) =>
-                            handleDeleteCharacter(parseInt(id))
-                          }
+                          onCharacterDelete={handleDeleteCharacter}
                           tags={tags}
                           onNewTag={handleNewTag}
                           state={state}

@@ -7,7 +7,7 @@ import {
   MandalaImage,
   Postit,
   Tag,
-} from "../types/mandala";
+} from "@/types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -234,6 +234,10 @@ export const fetchAvailableCharacters = async (
 
 export async function linkMandalaToParent(mandalaId: string, childId: string) {
   return axiosInstance.post(`/mandala/${mandalaId}/link/${childId}`);
+}
+
+export async function unlinkMandalaFromParent(parentId: string, childId: string) {
+  return axiosInstance.delete(`/mandala/${parentId}/unlink/${childId}`);
 }
 
 export const deleteMandalaService = async (mandalaId: string) => {
