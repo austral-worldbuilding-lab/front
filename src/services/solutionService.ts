@@ -14,9 +14,19 @@ export const solutionService = {
     },
 
     async createSolution(projectId: string, body: Omit<Solution, "id">): Promise<Solution> {
-        if (!projectId) throw new Error("projectId es requerido");
+        const res = await axiosInstance.post<Solution>(`/project/${projectId}/solution`, body);
+        return res.data;
+    },
+};
 
-        const response = await axiosInstance.post<Solution>(`/project/${projectId}/solution`, body);
-        return response.data;
-    }
+export const startSolutionJob = async (projectId: string, selectedProvocations: string[]) => {
+    const res = await axiosInstance.post(`/project/${projectId}/solutions`, {
+        selectedProvocations,
+    });
+    return res.data;
+};
+
+export const getSolutionJobStatus = async (projectId: string) => {
+    const res = await axiosInstance.get(`/project/${projectId}/solutions/status`);
+    return res.data;
 };
