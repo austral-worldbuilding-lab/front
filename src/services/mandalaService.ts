@@ -7,7 +7,7 @@ import {
   MandalaImage,
   Postit,
   Tag,
-} from "../types/mandala";
+} from "@/types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (

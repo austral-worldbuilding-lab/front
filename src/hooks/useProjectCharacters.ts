@@ -12,7 +12,7 @@ export function useProjectCharacters(mandalaId: string) {
             setLoading(true);
             const chars = await fetchAvailableCharacters(mandalaId);
             setCharacters(chars);
-        } catch (err) {
+        } catch (error) {
             setError("Error loading characters");
         } finally {
             setLoading(false);

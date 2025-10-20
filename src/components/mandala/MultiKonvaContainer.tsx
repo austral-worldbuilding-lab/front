@@ -1,16 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useMemo, useCallback } from "react";
-import {
-  Character,
-  Mandala as MandalaData,
-  MandalaImage,
-  Postit,
-  Tag,
-} from "@/types/mandala";
-import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
+import React, {useCallback, useMemo} from "react";
+import {Character, Mandala as MandalaData, MandalaImage, Postit, Tag,} from "@/types/mandala";
+import {ReactZoomPanPinchState} from "react-zoom-pan-pinch";
 import useMandala from "@/hooks/useMandala";
-import { MandalaBackground } from "./MandalaBackground";
-import { MandalaCanvas } from "./MandalaCanvas";
+import {MandalaBackground} from "./MandalaBackground";
+import {MandalaCanvas} from "./MandalaCanvas";
 
 interface MultiKonvaContainerProps {
   sourceMandalaIds: string[];
@@ -102,7 +96,7 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
           d: Partial<Character>
         ) => Promise<boolean | void>;
         deletePostit: (id: string) => Promise<boolean>;
-        deleteCharacter: (idx: number) => Promise<boolean>;
+        deleteCharacter: (id: string) => Promise<boolean>;
         updateImage: (id: string, d: Partial<MandalaImage>) => Promise<boolean>;
         deleteImage: (id: string) => Promise<boolean>;
       }
@@ -199,8 +193,7 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
       if (!owner) return false;
       const u = updaterByMandalaId.get(owner);
       if (!u) return false;
-      const res = await u.deleteCharacter(charId);
-      return !!res;
+        return await u.deleteCharacter(charId);
     },
     [idToMandalaId, updaterByMandalaId]
   );
