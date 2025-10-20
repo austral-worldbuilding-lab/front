@@ -9,9 +9,9 @@ export function useSolutionJob(projectId: string) {
     const [error, setError] = useState<string | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const startJob = async (selectedProvocations: string[]) => {
+    const startJob = async () => {
         try {
-            const { jobId } = await startSolutionJob(projectId, selectedProvocations);
+            const { jobId } = await startSolutionJob(projectId);
             setJobId(jobId);
             setStatus("waiting");
             setProgress(0);

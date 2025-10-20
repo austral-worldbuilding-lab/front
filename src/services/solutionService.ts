@@ -19,14 +19,18 @@ export const solutionService = {
     },
 };
 
-export const startSolutionJob = async (projectId: string, selectedProvocations: string[]) => {
-    const res = await axiosInstance.post(`/project/${projectId}/solutions`, {
-        selectedProvocations,
-    });
+export const startSolutionJob = async (projectId: string) => {
+    const res = await axiosInstance.post(`/project/${projectId}/solutions`);
     return res.data;
 };
 
 export const getSolutionJobStatus = async (projectId: string) => {
     const res = await axiosInstance.get(`/project/${projectId}/solutions/status`);
+    return res.data;
+};
+
+export const getSolutionValidation = async (projectId: string) => {
+
+    const res = await axiosInstance.get(`/project/${projectId}/solutions/validation`);
     return res.data;
 };
