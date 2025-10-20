@@ -199,6 +199,8 @@ export const MandalaCanvas: React.FC<{
               );
               return (
                 <PostIt
+                  isUnifiedMandala
+                  currentMandalaName=" "
                   key={`p-${mandala.id}-${p.id}`}
                   postit={p}
                   color={dimensionColors[p.dimension] || "#cccccc"}
