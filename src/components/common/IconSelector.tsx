@@ -28,12 +28,12 @@ export const IconSelector = ({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex flex-col items-start gap-2 py-4">
+    <div className="flex flex-col items-start gap-2">
       <label className="text-sm font-medium text-[var(--color-black)] flex items-center gap-1">
         {label}
       </label>
 
-      <div className="w-full flex justify-center">
+      <div className="w-full flex">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Card
@@ -45,7 +45,7 @@ export const IconSelector = ({
             </Card>
           </PopoverTrigger>
 
-          <PopoverContent className="w-[300px] p-3">
+          <PopoverContent side="right" className="w-[300px] p-3">
             <div className="grid grid-cols-5 gap-2">
               {ICON_OPTIONS.map((iconName) => {
                 const IconComp = (Icons as any)[iconName];

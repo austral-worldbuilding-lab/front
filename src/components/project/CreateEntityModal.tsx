@@ -113,7 +113,7 @@ const CreateEntityModal = ({
         name,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
-        icon: icon ?? ICON_OPTIONS[0]
+        icon: icon ?? ICON_OPTIONS[0],
       });
     }
   };
@@ -164,7 +164,7 @@ const CreateEntityModal = ({
         }
       }}
     >
-      <DialogContent className="max-w-2xl h-[90vh] overflow-y-auto flex flex-col ">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col ">
         <DialogHeader>
           <DialogTitle className="font-bold">{title}</DialogTitle>
         </DialogHeader>
@@ -195,6 +195,8 @@ const CreateEntityModal = ({
               </button>
             </div>
           )}
+
+          <IconSelector value={icon} onChange={setIcon} disabled={loading} />
 
           {isProvocationMode ? (
             <>
@@ -253,12 +255,6 @@ const CreateEntityModal = ({
               )}
             </>
           )}
-
-          <IconSelector
-            value={icon}
-            onChange={setIcon}
-            disabled={loading}
-          />
 
           {showConfiguration && (
             <div className="space-y-4 border-t pt-4">
