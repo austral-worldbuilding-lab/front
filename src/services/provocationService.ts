@@ -21,14 +21,16 @@ export const provocationsService = {
             }
 
             return response.data.data;
-        } catch (error: any) {
-            if (error.response?.data?.message) {
-                throw new Error(error.response.data.message);
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { data?: { message?: string | string[] } }; message?: string };
+            
+            if (axiosError.response?.data?.message) {
+                if (Array.isArray(axiosError.response.data.message)) {
+                    throw new Error(axiosError.response.data.message.join('. '));
+                }
+                throw new Error(axiosError.response.data.message);
             }
-            if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
-                throw new Error(error.response.data.message.join('. '));
-            }
-            throw new Error(error.message || "Error generando provocaciones");
+            throw new Error(axiosError.message || "Error generando provocaciones");
         }
     },
 
