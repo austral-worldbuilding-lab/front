@@ -20,14 +20,20 @@ export const solutionService = {
 };
 
 export const startSolutionJob = async (projectId: string) => {
-    const res = await axiosInstance.post(`/project/${projectId}/solutions`);
+    const res = await axiosInstance.post(`/project/${projectId}/solutions/generate`);
     return res.data;
 };
 
 export const getSolutionJobStatus = async (projectId: string) => {
-    const res = await axiosInstance.get(`/project/${projectId}/solutions/status`);
+    const res = await axiosInstance.get(`/project/${projectId}/solutions/generate/status`);
     return res.data;
 };
+
+export async function getCachedSolutions(projectId: string) {
+    const res = await axiosInstance.get(`/project/${projectId}/solutions/cached`);
+    return res.data;
+}
+
 
 export const getSolutionValidation = async (projectId: string) => {
 

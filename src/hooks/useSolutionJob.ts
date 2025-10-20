@@ -1,15 +1,33 @@
 import { useState, useEffect, useRef } from "react";
-import { startSolutionJob, getSolutionJobStatus } from "@/services/solutionService";
-
-export function useSolutionJob(projectId: string) {
+import {
+    startSolutionJob,
+    getSolutionJobStatus,
+    getCachedSolutions
+} from "@/services/solutionService";
+export function useSolutionJob(projectId: string, onSolutionsReady?: () => void) {
     const [jobId, setJobId] = useState<string | null>(null);
     const [status, setStatus] = useState<"none" | "waiting" | "active" | "completed" | "failed">("none");
     const [progress, setProgress] = useState<number>(0);
     const [solutionUrl, setSolutionUrl] = useState<string | null>(null);
+    const [cachedSolutions, setCachedSolutions] = useState<any[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+    const fetchCachedSolutions = async () => {
+        try {
+            const data = await getCachedSolutions(projectId);
+            if (data?.length > 0) {
+                setCachedSolutions(data);
+                setStatus("completed");
+                if (onSolutionsReady) onSolutionsReady(); // 🔹 Notificar al padre
+            }
+        } catch (err) {
+            console.error("Error obteniendo soluciones cacheadas:", err);
+        }
+    };
+
     const startJob = async () => {
+        if (cachedSolutions && cachedSolutions.length > 0) return;
         try {
             const { jobId } = await startSolutionJob(projectId);
             setJobId(jobId);
@@ -34,6 +52,7 @@ export function useSolutionJob(projectId: string) {
                 if (data.status === "completed") {
                     setSolutionUrl(data.solutionUrl || null);
                     if (intervalRef.current) clearInterval(intervalRef.current);
+                    await fetchCachedSolutions();
                 }
             } catch (err) {
                 console.error("Error consultando estado del job de soluciones:", err);
@@ -48,12 +67,18 @@ export function useSolutionJob(projectId: string) {
         };
     }, [jobId, projectId]);
 
+    useEffect(() => {
+        fetchCachedSolutions();
+    }, [projectId]);
+
     return {
         jobId,
         status,
         progress,
         solutionUrl,
+        cachedSolutions,
         error,
         startJob,
+        refreshCache: fetchCachedSolutions,
     };
 }

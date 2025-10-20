@@ -81,27 +81,13 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
                 </div>
             </div>
 
-            <div className="text-sm text-gray-600 border-l-4 border-blue-200 bg-blue-50 p-4 rounded-md">
-                <p className="font-medium text-gray-800">
-                    Para generar soluciones, el proyecto debe tener suficiente progreso y contenido previo.
-                </p>
-                {validationLoading ? (
-                    <p className="italic text-gray-500 mt-1">Validando requisitos...</p>
-                ) : reason ? (
-                    <p className="mt-1 text-gray-700">{reason}</p>
-                ) : (
-                    <p className="mt-1 text-gray-500 italic">
-                        (Aún no hay información adicional sobre el estado del proyecto)
-                    </p>
-                )}
-            </div>
 
             {(status === "active" || status === "waiting") && (
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2 text-gray-600 text-sm">
                         <span>
                             {status === "waiting"
-                                ? "Esperando turno en la cola..."
+                                ? "Esperando..."
                                 : "Generando soluciones..."}
                         </span>
                     </div>
