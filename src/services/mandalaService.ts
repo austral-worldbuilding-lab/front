@@ -397,7 +397,7 @@ export const updateMandala = async (
   const mandalaSnap = await getDoc(mandalaRef);
   if (!mandalaSnap.exists()) throw new Error("Mandala not found in Firebase");
 
-  const updatePayload: Record<string, unknown> = {};
+  const updatePayload: Record<string, any> = {};
 
   if (updatedData.name !== undefined) {
     updatePayload["mandala.name"] = updatedData.name;
