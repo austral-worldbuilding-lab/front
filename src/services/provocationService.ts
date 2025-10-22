@@ -7,19 +7,31 @@ export const provocationsService = {
     async generateAIProvocations(projectId: string): Promise<Provocation[]> {
         if (!projectId) throw new Error("projectId es requerido");
 
-        const projectFiles = await getSelectedFileNames("project", projectId);
+        try {
+            const projectFiles = await getSelectedFileNames("project", projectId);
 
-        const payload = { selectedFiles: projectFiles };
-        const response = await axiosInstance.post<{ data: Provocation[] }>(
-            `/project/${projectId}/generate-provocations`,
-            payload
-        );
+            const payload = { selectedFiles: projectFiles };
+            const response = await axiosInstance.post<{ data: Provocation[] }>(
+                `/project/${projectId}/generate-provocations`,
+                payload
+            );
 
-        if (response.status !== 201 && response.status !== 200) {
-            throw new Error("Error generating provocations.");
+            if (response.status !== 201 && response.status !== 200) {
+                throw new Error("Error generating provocations.");
+            }
+
+            return response.data.data;
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { data?: { message?: string | string[] } }; message?: string };
+            
+            if (axiosError.response?.data?.message) {
+                if (Array.isArray(axiosError.response.data.message)) {
+                    throw new Error(axiosError.response.data.message.join('. '));
+                }
+                throw new Error(axiosError.response.data.message);
+            }
+            throw new Error(axiosError.message || "Error generando provocaciones");
         }
-
-        return response.data.data;
     },
 
     async createManualProvocation(projectId: string,   body: Omit<Provocation, "id">

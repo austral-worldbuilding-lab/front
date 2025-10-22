@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import useProvocations from "@/hooks/useProvocations";
 import { Button } from "../ui/button";
 import { ExternalLink, History, Lightbulb, Sparkles } from "lucide-react";
@@ -8,6 +9,7 @@ import { ProvocationDialog } from "./ProvocationDialog";
 import { ProvocationItem } from "./ProvocationItem";
 import useProject from "@/hooks/useProject";
 import { useProjectBreadcrumb } from "@/hooks/useProjectBreadcrumb";
+import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 
 export type ProvocationsSectionProps = {
   organizationId: string;
@@ -29,12 +31,25 @@ export const ProvocationsSection = ({
   const navigate = useNavigate();
   const { project } = useProject(projectId);
   const { push } = useProjectBreadcrumb();
+  
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      setShowErrorDialog(true);
+    }
+  }, [error]);
 
   const handleClick = () => {
     push({
       title: project!.name,
       url: `/app/organization/${organizationId}/projects/${project!.id}`,
     });
+  };
+
+
+  const handleGenerateAI = async () => {
+    await generateAI();
   };
 
   return (
@@ -59,7 +74,7 @@ export const ProvocationsSection = ({
               </span>
             </div>
             <Button
-              onClick={generateAI}
+              onClick={handleGenerateAI}
               loading={loadingAI}
               color="primary"
               variant="outline"
@@ -67,9 +82,6 @@ export const ProvocationsSection = ({
             >
               Generar
             </Button>
-            {error && (
-              <div className="mt-2 p-2 text-sm text-red-700 ">{error}</div>
-            )}
           </div>
           <div className="flex flex-1 border border-gray-200 rounded-xl overflow-hidden">
             <div className="w-full h-full overflow-y-auto custom-scrollbar">
@@ -109,6 +121,15 @@ export const ProvocationsSection = ({
           </div>
         )}
       </div>
+      
+      <ConfirmationDialog
+        isOpen={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        title="No se puede generar provocación"
+        description={error || "Ha ocurrido un error al intentar generar provocaciones. Por favor, verifica los requisitos del proyecto."}
+        confirmText="Entendido"
+        onConfirm={() => setShowErrorDialog(false)}
+      />
     </div>
   );
 };
