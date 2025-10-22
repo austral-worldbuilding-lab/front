@@ -95,11 +95,13 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
         name
       );
       setIsCompareModalOpen(false);
+      setSelectedMandalas([]);
+      setSelectionMode(false);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Error al comparar las mandalas"
-      );
-      throw err;
+        setError(
+            err instanceof Error ? err.message : "Error al comparar las mandalas"
+        );
+        throw err;
     }
   };
 
@@ -177,6 +179,7 @@ const MandalaListContainer: React.FC<MandalaListContainerProps> = ({
         onCompare={handleCompareMandalas}
         selectedCount={selectedMandalas.length}
         isLoading={comparingMandalas}
+        externalError={compareError}
       />
     </>
   );
