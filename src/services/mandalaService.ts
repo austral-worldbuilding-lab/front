@@ -386,6 +386,38 @@ export const setEditingUser = async (
   });
 };
 
+export const updateMandala = async (
+  projectId: string,
+  mandalaId: string,
+  updatedData: { name?: string; description?: string }
+): Promise<boolean> => {
+  const response = await axiosInstance.patch(`/mandala/${mandalaId}`, updatedData);
+  
+  if (response.status !== 200) {
+    throw new Error("Error updating mandala in backend");
+  }
+
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  if (!mandalaSnap.exists()) throw new Error("Mandala not found in Firebase");
+
+  const updatePayload: { [key: string]: string | Date } = {};
+
+  if (updatedData.name !== undefined) {
+    updatePayload["mandala.name"] = updatedData.name;
+  }
+
+  if (updatedData.description !== undefined) {
+    updatePayload["mandala.configuration.center.description"] = updatedData.description;
+  }
+
+  updatePayload.updatedAt = new Date();
+
+  await updateDoc(mandalaRef, updatePayload);
+  
+  return true;
+};
+
 export const removeEditingUser = async (
   projectId: string,
   mandalaId: string,

@@ -167,6 +167,7 @@ const MandalaListPage = () => {
           organizationId={organizationId || ""}
           projectId={projectId}
           onDeleteMandala={handleDeleteMandala}
+          onRefreshMandalas={refetch}
           nextPageMandalas={nextPageMandalas}
           page={page}
           onPageChange={setPage}

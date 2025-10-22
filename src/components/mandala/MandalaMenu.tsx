@@ -77,13 +77,22 @@ const MandalaMenu = ({
         className="z-50 min-w-[8rem] rounded-md border bg-white p-1 text-sm shadow-md"
         sideOffset={4}
       >
-        {onCreateChild && (
+        {canEdit && onCreateChild && (
           <DropdownMenu.Item
             className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-blue-600"
             onSelect={onCreateChild}
           >
             <Plus size={14} className="mr-2" />
             Crear Hijo
+          </DropdownMenu.Item>
+        )}
+        {canEdit && onEdit && (
+          <DropdownMenu.Item
+            className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary flex items-center gap-2"
+            onSelect={onEdit}
+          >
+            <Pencil size={14} />
+            Editar
           </DropdownMenu.Item>
         )}
         {onDownloadSummary && (
@@ -95,13 +104,15 @@ const MandalaMenu = ({
             Descargar Resumen
           </DropdownMenu.Item>
         )}
-        <DropdownMenu.Item
-          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
-          onSelect={onDelete}
-        >
-          <Trash2 size={14} />
-          Eliminar
-        </DropdownMenu.Item>
+        {canEdit && (
+          <DropdownMenu.Item
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
+            onSelect={onDelete}
+          >
+            <Trash2 size={14} />
+            Eliminar
+          </DropdownMenu.Item>
+        )}
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );

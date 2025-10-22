@@ -13,6 +13,7 @@ interface MandalaListItemProps {
   dropdownOpen: string | null;
   onOpenChange: (open: boolean) => void;
   onDelete: () => void;
+  onEdit?: () => void;
   selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelection?: () => void;
@@ -29,6 +30,7 @@ const MandalaListItem = ({
   dropdownOpen,
   onOpenChange,
   onDelete,
+  onEdit,
   selectionMode = false,
   isSelected = false,
   onToggleSelection,
@@ -151,6 +153,7 @@ const MandalaListItem = ({
             open={dropdownOpen === mandala.id}
             onOpenChange={onOpenChange}
             onDelete={onDelete}
+            onEdit={onEdit}
             onDownloadSummary={mandala.type === "OVERLAP_SUMMARY" ? handleDownloadSummary : undefined}
           />
         )}
