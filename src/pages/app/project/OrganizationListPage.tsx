@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
-import {Building2, ChevronLeft, ChevronRight, PlusIcon} from "lucide-react";
+import {ChevronLeft, ChevronRight, PlusIcon} from "lucide-react";
 import Loader from "@/components/common/Loader.tsx";
 import useOrganizations from "@/hooks/useOrganizations.ts";
 import {Button} from "@/components/ui/button.tsx";
@@ -10,6 +11,7 @@ import MandalaMenu from "@/components/mandala/MandalaMenu";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 import { useDeleteOrganization } from "@/hooks/useDeleteOrganizations.ts";
 import AppLayout from "@/components/layout/AppLayout";
+import * as Icons from "lucide-react";
 
 const OrganizationListPage = () => {
     const { organizations: fetchedOrgs, nextPageOrgs, loading, error, page, setPage } = useOrganizations();
@@ -88,14 +90,15 @@ const OrganizationListPage = () => {
                         <p className="p-4 text-gray-600 text-center">No hay organizaciones</p>
                     ) : (
                         <ul className="divide-y divide-gray-100">
-                            {organizations.map((org) => (
-                                <li key={org.id} className="hover:bg-gray-50 transition-colors">
+                            {organizations.map((org) => {
+                                const IconComp = (Icons as any)[org.icon];
+                                return <li key={org.id} className="hover:bg-gray-50 transition-colors">
                                     <div className="flex items-center gap-3 p-4 text-gray-800">
                                         <Link
                                             to={`/app/organization/${org.id}/projects`}
                                             className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
                                         >
-                                            <Building2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                            <IconComp className="w-5 h-5 text-gray-400 flex-shrink-0" />
                                             <div className="flex items-center gap-2">
                                                 <span>{org.name}</span>
                                                 {org.accessType === 'limited' && (
@@ -110,7 +113,7 @@ const OrganizationListPage = () => {
                                         )}
                                     </div>
                                 </li>
-                            ))}
+                            })}
                         </ul>
                     )}
                 </div>

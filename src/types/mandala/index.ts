@@ -182,6 +182,7 @@ export interface Organization {
   id: string;
   name: string;
   accessType?: "full" | "limited";
+  icon: string;
 }
 export interface FileItem {
   id: string;
