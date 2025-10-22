@@ -9,7 +9,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pt-20">
         {children}
       </main>
     </div>
