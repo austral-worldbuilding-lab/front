@@ -14,14 +14,15 @@ export const TagsIndicator = ({ tags, width, height }: TagsIndicatorProps) => {
       divProps={{
         style: {
           pointerEvents: "none",
-          left: `${width}px`,
         },
       }}
     >
       <div
         style={{
+          position: "relative",
           transform: "translateX(-20%)",
           width: `${width}px`,
+          left: `${width}px`,
           height: `${height}px`,
           display: "flex",
           flexDirection: "column",
