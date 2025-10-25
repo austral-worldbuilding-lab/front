@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { FileText, Search, HelpCircle } from "lucide-react";
+import { FileText, Search, HelpCircle, NotebookPen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useFiles } from "@/hooks/useFiles";
 import Loader from "@/components/common/Loader";
 import FileLoader from "@/components/files/FileLoader";
 import { FileItem } from "@/types/mandala";
-import { FileScope } from "@/services/filesService";
+import { FileScope, createTextFile } from "@/services/filesService";
 import FileRow from "./FileRow";
 import SelectAllFilesButton from "./SelectAllFilesButton";
 import {
@@ -19,6 +19,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "../ui/button";
+import NewTextFileModal from "./NewTextFileModal";
 
 interface FileListContainerProps {
   scope: FileScope;
@@ -34,6 +36,7 @@ const FileListContainer = ({
   projectName,
 }: FileListContainerProps) => {
   const [searchText, setSearchText] = useState("");
+  const [isTextFileModalOpen, setIsTextFileModalOpen] = useState(false);
   const {
     files,
     isLoading,
@@ -44,6 +47,11 @@ const FileListContainer = ({
     totalCount,
     isUpdatingSelections,
   } = useFiles(scope, id, true);
+
+  const handleSaveTextFile = async (filename: string, content: string) => {
+    await createTextFile(scope, id, { filename, content });
+    refetch();
+  };
 
   const filteredFiles = files.filter((file) =>
     file.file_name.toLowerCase().includes(searchText.toLowerCase())
@@ -106,17 +114,6 @@ const FileListContainer = ({
         </div>
       </div>
 
-      {totalCount > 0 && (
-        <div className="flex justify-start">
-          <SelectAllFilesButton
-            selectedCount={selectedCount}
-            totalCount={totalCount}
-            onSelectAll={selectAllFiles}
-            isUpdating={isUpdatingSelections}
-          />
-        </div>
-      )}
-
       <div className="border border-gray-200 rounded-md flex flex-col flex-1 overflow-hidden min-h-0">
         {isLoading && (
           <div className="p-8 h-full flex items-center justify-center">
@@ -139,51 +136,86 @@ const FileListContainer = ({
           </div>
         )}
 
-        {!error && !isLoading && (!files || files.length === 0) && (
-          <p className="p-4 text-gray-600 text-center">
-            No hay archivos cargados aún.
-          </p>
-        )}
-
-        {!error && !isLoading && files.length > 0 && (
-          <div className="flex-1 overflow-y-auto max-h-[450px] min-h-0">
-            <Accordion
-              type="multiple"
-              defaultValue={scopeOrder}
-              className="w-full"
-            >
-              {scopeOrder.map(
-                (scopeKey) =>
-                  groupedFiles[scopeKey] && (
-                    <AccordionItem
-                      key={scopeKey}
-                      value={scopeKey}
-                      className="border-none"
-                    >
-                      <AccordionTrigger className="px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left font-semibold text-gray-800 hover:no-underline rounded-none border-b border-gray-200 text-base cursor-pointer">
-                        <div className="flex items-center justify-between w-full pr-2">
-                          <span>{getScopeTitle(scopeKey)}</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="p-0">
-                        <div className="divide-y divide-gray-100">
-                          {groupedFiles[scopeKey].map((file, index) => (
-                            <FileRow
-                              key={index}
-                              file={file}
-                              scope={scope}
-                              id={id}
-                            />
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  )
+        {!error && !isLoading && (
+          <div>
+            <div className="flex justify-between items-center w-full p-2">
+              {totalCount > 0 && (
+                <SelectAllFilesButton
+                  selectedCount={selectedCount}
+                  totalCount={totalCount}
+                  onSelectAll={selectAllFiles}
+                  isUpdating={isUpdatingSelections}
+                />
               )}
-            </Accordion>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    color="primary"
+                    icon={<NotebookPen size={16} />}
+                    onClick={() => setIsTextFileModalOpen(true)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Nueva nota de texto</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            {!files ||
+              (files.length === 0 && (
+                <p className="p-4 text-gray-600 text-center">
+                  No hay archivos cargados aún.
+                </p>
+              ))}
+
+            {files.length > 0 && (
+              <div className="flex-1 overflow-y-auto max-h-[450px] min-h-0">
+                <Accordion
+                  type="multiple"
+                  defaultValue={scopeOrder}
+                  className="w-full"
+                >
+                  {scopeOrder.map(
+                    (scopeKey) =>
+                      groupedFiles[scopeKey] && (
+                        <AccordionItem
+                          key={scopeKey}
+                          value={scopeKey}
+                          className="border-none"
+                        >
+                          <AccordionTrigger className="px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left font-semibold text-gray-800 hover:no-underline rounded-none border-b border-gray-200 text-base cursor-pointer">
+                            <div className="flex items-center justify-between w-full pr-2">
+                              <span>{getScopeTitle(scopeKey)}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-0">
+                            <div className="divide-y divide-gray-100">
+                              {groupedFiles[scopeKey].map((file, index) => (
+                                <FileRow
+                                  key={index}
+                                  file={file}
+                                  scope={scope}
+                                  id={id}
+                                />
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      )
+                  )}
+                </Accordion>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      <NewTextFileModal
+        isOpen={isTextFileModalOpen}
+        onOpenChange={setIsTextFileModalOpen}
+        onSave={handleSaveTextFile}
+      />
     </div>
   );
 };
