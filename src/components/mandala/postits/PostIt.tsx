@@ -9,6 +9,7 @@ import { usePostItAnimation } from "@/hooks/usePostItAnimation";
 import MandalaBadge from "./MandalaBadge";
 import { useAuth } from "@/hooks/useAuth";
 import Konva from "konva";
+import { TagsIndicator } from "./TagsIndicator";
 
 interface PostItProps {
   postit: Postit;
@@ -428,6 +429,11 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             zindex={zindex}
           />
         )}
+        <TagsIndicator
+          height={postItH * localScale}
+          width={postItW * localScale}
+          tags={postit.tags}
+        />
         <Html
           divProps={{
             style: {
