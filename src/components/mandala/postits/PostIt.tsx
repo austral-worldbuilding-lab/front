@@ -9,6 +9,7 @@ import { usePostItAnimation } from "@/hooks/usePostItAnimation";
 import MandalaBadge from "./MandalaBadge";
 import { useAuth } from "@/hooks/useAuth";
 import Konva from "konva";
+import HTMLTransformerHandles from "../HTMLTransformerHandles";
 import { useClampPosition } from "@/hooks/useClampPosition";
 
 interface PostItProps {
@@ -85,6 +86,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
   const childrenScale = 0.25 * staticScale;
 
   const [localScale, setLocalScale] = useState(baseScale);
+  const [localPosition, setLocalPosition] = useState(position);
   const fontSize = postItW / 10;
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
@@ -255,16 +257,23 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       setIsResizing(true);
       onDragStart();
     };
+    const handleTransform = () => {
+      setLocalScale(node.scaleX());
+      setLocalPosition({ x: node.x(), y: node.y() });
+    };
     const handleTransformEnd = (e: KonvaEventObject<Event>) => {
       setIsResizing(false);
       const sx = node.scaleX();
       setLocalScale(sx);
+      setLocalPosition({ x: node.x(), y: node.y() });
       onTransformEnd?.(e, sx);
     };
     node.on("transformstart", handleTransformStart);
+    node.on("transform", handleTransform);
     node.on("transformend", handleTransformEnd);
     return () => {
       node.off("transformstart", handleTransformStart);
+      node.off("transform", handleTransform);
       node.off("transformend", handleTransformEnd);
     };
   }, [onDragStart, onTransformEnd]);
@@ -347,6 +356,10 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         {...(onDragMove && { onDragMove })}
         onDragEnd={(e) => {
           onDragEnd(e);
+          const node = groupRef.current;
+          if (node) {
+            setLocalPosition({ x: node.x(), y: node.y() });
+          }
           setTimeout(() => setIsDragging(false), 100);
         }}
         onClick={handleClick}
@@ -522,23 +535,34 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
         </Html>
       </Group>
       {isEditing && !disableDragging && !isOpen && (
-        <Transformer
-          ref={trRef}
-          rotateEnabled={false}
-          keepRatio
-          enabledAnchors={[
-            "top-left",
-            "top-right",
-            "bottom-left",
-            "bottom-right",
-          ]}
-          boundBoxFunc={(_oldBox, newBox) => {
-            const min = 30;
-            const max = 600;
-            const width = Math.max(min, Math.min(max, newBox.width));
-            return { ...newBox, width, height: width };
-          }}
-        />
+        <>
+          <HTMLTransformerHandles
+            width={postItW}
+            height={postItH}
+            position={localPosition}
+            scale={localScale}
+            offsetX={postItW / 2}
+            offsetY={postItH / 2}
+            zindex={zindex}
+          />
+          <Transformer
+            ref={trRef}
+            rotateEnabled={false}
+            keepRatio
+            enabledAnchors={[
+              "top-left",
+              "top-right",
+              "bottom-left",
+              "bottom-right",
+            ]}
+            boundBoxFunc={(_oldBox, newBox) => {
+              const min = 30;
+              const max = 600;
+              const width = Math.max(min, Math.min(max, newBox.width));
+              return { ...newBox, width, height: width };
+            }}
+          />
+        </>
       )}
     </Group>
   );
