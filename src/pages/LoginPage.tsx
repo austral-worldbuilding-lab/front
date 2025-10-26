@@ -60,62 +60,84 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col bg-secondary-100 h-screen items-center justify-center">
-      <div className="flex flex-col sm:flex-row gap-8 w-[90%] sm:w-[50%] p-10 bg-background rounded-[10px]">
-        {/* Logo + title */}
-        <div className="w-full sm:w-1/2 flex items-center justify-center sm:items-center sm:justify-center">
-          <div className="flex flex-row sm:flex-col items-center gap-4">
-            <img src={logo} alt="logo" className="w-[60px] sm:w-[120px]" />
-            <h1 className="text-2xl font-semibold text-center sm:text-3xl">
-              Iniciar sesión
-            </h1>
+    <div className="flex h-screen bg-gradient-to-br from-primary-100 via-secondary-100 to-primary-300">
+      <div className="w-full md:w-1/2 md:ml-auto flex items-center justify-center p-6">
+        <div className="w-full h-[95vh] bg-white rounded-3xl shadow-2xl p-12 flex flex-col justify-center items-center">
+          {/* Logo */}
+          <div className="flex justify-center mb-4">
+            <img src={logo} alt="Austral World Building Lab" className="w-40 h-40 object-contain" />
           </div>
-        </div>
+
+          {/* Title */}
+          <h1 className="text-4xl font-bold text-center mb-[78px]">Iniciar Sesión</h1>
 
         {/* Form */}
-        <div className="w-full sm:w-1/2 p-4 flex flex-col gap-4">
-          <CustomInput
-            placeholder="Correo electrónico"
-            color="foreground"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={
-              error?.includes("auth/invalid-email")
-                ? "Correo electrónico inválido"
-                : undefined
-            }
-          />
-          <CustomInput
-            placeholder="Contraseña"
-            color="white"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={
-              error?.includes("auth/wrong-password")
-                ? "Contraseña incorrecta"
-                : undefined
-            }
-          />
-          <Button onClick={handleLogin}>Iniciar sesión</Button>
+        <div className="flex flex-col gap-6 w-full max-w-md">
+          <div>
+            <label className="block text-sm font-medium mb-2">Email</label>
+            <CustomInput
+              placeholder="Correo electrónico"
+              color="foreground"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={
+                error?.includes("auth/invalid-email")
+                  ? "Correo electrónico inválido"
+                  : undefined
+              }
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Contraseña</label>
+            <CustomInput
+              placeholder="Contraseña"
+              color="white"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={
+                error?.includes("auth/wrong-password")
+                  ? "Contraseña incorrecta"
+                  : undefined
+              }
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <Link 
+              to="/forgot-password" 
+              className="text-sm underline hover:text-primary-600"
+            >
+              Olvidé mi contraseña
+            </Link>
+          </div>
+
+          <Button 
+            onClick={handleLogin}
+            className="w-full py-3 rounded-lg font-medium"
+          >
+            Iniciar Sesión
+          </Button>
 
           {error &&
             !error.includes("auth/invalid-email") &&
             !error.includes("auth/wrong-password") && (
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-sm text-center">
                 {getMessageFromErrorCode(error)}
               </p>
             )}
 
-          <p className="text-sm">
-            ¿No tienes una cuenta?{" "}
+          <p className="text-center text-sm mt-4">
+            ¿No tenés cuenta?{" "}
             <Link 
               to={`/register${searchParams.toString() ? `?${searchParams.toString()}` : ""}`} 
-              className="text-primary-500"
+              className="text-blue-600 hover:text-blue-700 font-medium"
             >
-              Registrarse
+              Crear Cuenta
             </Link>
           </p>
+          </div>
         </div>
       </div>
     </div>
