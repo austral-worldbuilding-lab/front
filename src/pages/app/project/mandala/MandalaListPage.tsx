@@ -110,6 +110,9 @@ const MandalaListPage = () => {
         undefined,
         mandalaType
       );
+      if (useAIMandala) {
+        return;
+      }
       navigate(
         `/app/organization/${organizationId}/projects/${projectId}/mandala/${id}`
       );
