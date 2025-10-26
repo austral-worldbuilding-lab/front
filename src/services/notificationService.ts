@@ -16,7 +16,9 @@ export const subscribeNotifications = (
     const notifications: Notification[] = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...(doc.data() as Omit<Notification, "id">),
+      createdAt: doc.data().createdAt.toDate(),
     }));
-    callback(notifications.reverse());
+    notifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    callback(notifications);
   });
 };
