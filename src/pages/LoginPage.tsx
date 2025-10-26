@@ -132,7 +132,7 @@ const LoginPage = () => {
             ¿No tenés cuenta?{" "}
             <Link 
               to={`/register${searchParams.toString() ? `?${searchParams.toString()}` : ""}`} 
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-primary hover:text-primary-hover font-medium"
             >
               Crear Cuenta
             </Link>
