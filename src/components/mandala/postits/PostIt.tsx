@@ -442,11 +442,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             zindex={zindex}
           />
         )}
-        <TagsIndicator
-          height={postItH}
-          width={postItW}
-          tags={postit.tags}
-        />
+
         <Html
           divProps={{
             style: {
@@ -529,6 +525,12 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             </div>
           )}
         </Html>
+        <TagsIndicator
+          height={postItH}
+          width={postItW}
+          tags={postit.tags}
+          zindex={zindex}
+        />
       </Group>
       {isEditing && !disableDragging && !isOpen && (
         <>

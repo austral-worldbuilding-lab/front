@@ -6,14 +6,21 @@ export type TagsIndicatorProps = {
   width: number;
   height: number;
   tags: Tag[];
+  zindex: number;
 };
 
-export const TagsIndicator = ({ tags, width, height }: TagsIndicatorProps) => {
+export const TagsIndicator = ({
+  tags,
+  width,
+  height,
+  zindex,
+}: TagsIndicatorProps) => {
   return (
     <Html
       divProps={{
         style: {
           pointerEvents: "none",
+          zIndex: zindex,
         },
       }}
     >
