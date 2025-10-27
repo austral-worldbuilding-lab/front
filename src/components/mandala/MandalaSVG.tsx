@@ -172,7 +172,10 @@ export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
                 {midAngles.map((mid, i) => {
                     const x = R + Math.cos(rad(mid)) * (R + 60);
                     const y = R + Math.sin(rad(mid)) * (R + 60);
-                    const textRotation = mid + 90;
+                    let textRotation = mid + 90;
+                    if (textRotation > 90 && textRotation < 270) {
+                        textRotation += 180;
+                    }
                     return (
                         <g key={`label-${i}`} transform={`translate(${x} ${y}) rotate(${textRotation})`}>
                             <text

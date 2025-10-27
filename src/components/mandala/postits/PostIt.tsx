@@ -75,7 +75,11 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
 
   const postItW = 100;
   const postItH = 100;
-  const padding = 12;
+  const horizontalPadding = 12;
+  
+  const fontSize = postItW / 10;
+  const lineHeight = 1.1;
+  const [verticalPadding, setVerticalPadding] = useState(horizontalPadding);
 
   // Escala "estática": NO depende del estado abierto/cerrado (sirve para hijos y aro)
   const staticScale = scale * (postit.scale ?? 1);
@@ -88,7 +92,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
 
   const [localScale, setLocalScale] = useState(baseScale);
   const [localPosition, setLocalPosition] = useState(position);
-  const fontSize = postItW / 10;
   const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
   const isAnimatingRef = useRef(false);
@@ -179,6 +182,17 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       toggleOpen();
     }, 250);
   };
+
+  useEffect(() => {
+    const el = textAreaRef.current;
+    if (!el) return;
+    el.style.paddingTop = `${horizontalPadding}px`;
+    el.style.paddingBottom = `${horizontalPadding}px`;
+    const contentHeight = el.scrollHeight;
+    const available = postItH - 2 * horizontalPadding;
+    const extra = Math.max(0, available - contentHeight);
+    setVerticalPadding(horizontalPadding + extra / 2);
+  }, [editingContent, postit.content, fontSize, lineHeight, postItH]);
 
   const exitEditMode = () => {
     setIsEditing(false);
@@ -402,8 +416,6 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           x={postItW / 2}
           y={postItH / 2}
           radius={postItW / 2}
-          stroke={editorCount ? "white" : undefined}
-          strokeWidth={4}
           onMouseEnter={(e) => {
             const container = e.target.getStage()?.container();
             if (container) {
@@ -461,33 +473,60 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             },
           }}
         >
-          <textarea
-            ref={textAreaRef}
-            disabled={!isEditing}
-            value={isEditing ? editingContent ?? "" : postit.content}
-            onChange={(e) => {
-              setEditingContent(e.target.value);
-              onContentChange(e.target.value, postit.id!);
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
-            style={{
-              width: postItW,
-              height: postItH,
-              padding,
-              margin: 0,
-              resize: "none",
-              background: color,
-              color: textColor,
-              borderRadius: "50%",
-              border: "solid 1px rgba(0,0,0,0.3)",
-              boxSizing: "border-box",
-              fontSize: `${fontSize}px`,
-              lineHeight: 1.1,
-              overflow: "hidden",
-              textAlign: "center",
-            }}
-          />
+          {isEditing ? (
+            <textarea
+              ref={textAreaRef}
+              disabled={!isEditing}
+              value={editingContent ?? ""}
+              onChange={(e) => {
+                setEditingContent(e.target.value);
+                onContentChange(e.target.value, postit.id!);
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              style={{
+                width: postItW,
+                height: postItH,
+                padding: `${verticalPadding}px ${horizontalPadding}px`,
+                margin: 0,
+                resize: "none",
+                background: color,
+                color: textColor,
+                borderRadius: "50%",
+                border: "none",
+                boxSizing: "border-box",
+                fontSize: `${fontSize}px`,
+                lineHeight,
+                overflow: "hidden",
+                textAlign: "center",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: postItW,
+                height: postItH,
+                padding: `${horizontalPadding}px`,
+                margin: 0,
+                background: color,
+                color: textColor,
+                borderRadius: "50%",
+                border: "none",
+                boxSizing: "border-box",
+                fontSize: `${fontSize}px`,
+                lineHeight,
+                textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                overflow: "hidden",
+              }}
+            >
+              {postit.content}
+            </div>
+          )}
           {editorCount > 0 && (
             <div
               style={{
