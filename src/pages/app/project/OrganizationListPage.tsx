@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
 import {ChevronLeft, ChevronRight, PlusIcon} from "lucide-react";
 import Loader from "@/components/common/Loader.tsx";
@@ -11,7 +10,7 @@ import MandalaMenu from "@/components/mandala/MandalaMenu";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 import { useDeleteOrganization } from "@/hooks/useDeleteOrganizations.ts";
 import AppLayout from "@/components/layout/AppLayout";
-import * as Icons from "lucide-react";
+import { getOrganizationIcon } from "@/utils/iconUtils";
 
 const OrganizationListPage = () => {
     const { organizations: fetchedOrgs, nextPageOrgs, loading, error, page, setPage } = useOrganizations();
@@ -91,7 +90,7 @@ const OrganizationListPage = () => {
                     ) : (
                         <ul className="divide-y divide-gray-100">
                             {organizations.map((org) => {
-                                const IconComp = (Icons as any)[org.icon];
+                                const IconComp = getOrganizationIcon(org.icon);
                                 return <li key={org.id} className="hover:bg-gray-50 transition-colors">
                                     <div className="flex items-center gap-3 p-4 text-gray-800">
                                         <Link
