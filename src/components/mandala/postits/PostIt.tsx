@@ -10,6 +10,7 @@ import MandalaBadge from "./MandalaBadge";
 import { useAuth } from "@/hooks/useAuth";
 import Konva from "konva";
 import HTMLTransformerHandles from "../HTMLTransformerHandles";
+import { TagsIndicator } from "./TagsIndicator";
 
 interface PostItProps {
   postit: Postit;
@@ -441,6 +442,7 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             zindex={zindex}
           />
         )}
+
         <Html
           divProps={{
             style: {
@@ -523,6 +525,12 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
             </div>
           )}
         </Html>
+        <TagsIndicator
+          height={postItH}
+          width={postItW}
+          tags={postit.tags}
+          zindex={zindex}
+        />
       </Group>
       {isEditing && !disableDragging && !isOpen && (
         <>
