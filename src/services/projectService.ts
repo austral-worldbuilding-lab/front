@@ -160,3 +160,27 @@ export const getProjectConfiguration = async (projectId: string): Promise<Projec
 
   return response.data.data;
 };
+
+export const createChildProject = async (
+    parentProjectId: string,
+    body: {
+      name: string;
+      description?: string;
+      organizationId: string;
+      icon?: string;
+      dimensions?: { name: string; color: string }[];
+      scales?: string[];
+      userId: string;
+    }
+): Promise<Project> => {
+  const response = await axiosInstance.post<{ data: Project }>(
+      ``, //TODO: replace with real backend url
+      { ...body, parentProjectId }
+  );
+
+  if (response.status !== 201 && response.status !== 200) {
+    throw new Error("Error al crear subproyecto");
+  }
+
+  return response.data.data;
+};
