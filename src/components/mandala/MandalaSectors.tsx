@@ -68,7 +68,10 @@ const MandalaSectors: React.FC<MandalaSectorsProps> = ({
           if (midAngle >= 360) midAngle -= 360;
         }
 
-        const textRotationAngle = midAngle + 90;
+        let textRotationAngle = midAngle + 90;
+        if (textRotationAngle > 90 && textRotationAngle < 270) {
+          textRotationAngle += 180;
+        }
 
         return (
           <div
