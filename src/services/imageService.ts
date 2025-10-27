@@ -40,3 +40,18 @@ export const confirmImage = async (
     throw error;
   }
 };
+
+export async function generateImagesService(mandalaId: string, payload: any): Promise<string[]> {
+  const res = await axiosInstance.post<{ data: { id: string; url: string }[] }>(
+      `/mandala/${mandalaId}/generate-images`,
+      payload
+  );
+  return res.data.data?.map(img => img.url) ?? [];
+}
+
+export async function getCachedImagesService(mandalaId: string): Promise<string[]> {
+  const res = await axiosInstance.get<{ data: { id: string; url: string }[] }>(
+      `/mandala/${mandalaId}/cached-images`
+  );
+  return res.data.data?.map(img => img.url) ?? [];
+}
