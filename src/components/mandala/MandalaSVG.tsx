@@ -211,7 +211,7 @@ export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
                     const lh = Math.round(scaledFontSize * 1.1);
 
                     // Posición Y inicial: arriba del círculo + padding (centro - radio + padding)
-                    const startY = p.ay - radius + padding*2 + (scaledFontSize / 2);
+                    const startY = p.ay - radius + padding * 2 + (scaledFontSize / 2);
 
                     return (
                         <g key={p.id ?? `p-${i}`}>
