@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import * as Icons from "lucide-react";
+import { getProjectIcon } from "@/utils/iconUtils";
 
 interface Project {
   id: string;
@@ -45,7 +44,7 @@ export const ProjectRow = ({
     setExpanded(!expanded);
   };
 
-  const IconComp = (Icons as any)[project.icon]
+  const IconComp = getProjectIcon(project.icon);
 
   return (
     <li>
