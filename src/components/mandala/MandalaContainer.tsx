@@ -149,6 +149,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       dimension: p.dimension,
       ax: a.x,
       ay: a.y,
+      scale: p.scale ?? 1, // Si no tiene scale, usar 1 (tamaño normal)
+      type: p.type, // SIMILITUD, DIFERENCIA, UNICO (para mandalas comparadas)
     };
   });
 
@@ -276,10 +278,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   };
 
   const handleGenerateSummary = async () => {
-    const success = await generateSummary(mandalaId);
-    if (success) {
-      setShowGenerateDialog(false);
-    }
+    await generateSummary(mandalaId);
+    setShowGenerateDialog(false);
   };
 
   return (
