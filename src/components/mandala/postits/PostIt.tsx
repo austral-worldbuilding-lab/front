@@ -10,6 +10,7 @@ import MandalaBadge from "./MandalaBadge";
 import { useAuth } from "@/hooks/useAuth";
 import Konva from "konva";
 import HTMLTransformerHandles from "../HTMLTransformerHandles";
+import { useClampPosition } from "@/hooks/useClampPosition";
 import { TagsIndicator } from "./TagsIndicator";
 
 interface PostItProps {
@@ -135,6 +136,15 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
     localScale
   );
 
+  // Ajusta la posición inicial para que no salga del canvas
+  const clampedPosition = useClampPosition({
+    position,
+    mandalaRadius,
+    elementWidth: postItW,
+    elementHeight: postItH,
+    scale: localScale,
+  });
+
   const orbit = useMemo(() => {
     return postItW * 0.37 * staticScale;
   }, [postItW, staticScale]);
@@ -144,11 +154,11 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
       children.map((_, i) => {
         const angle = (2 * Math.PI * i) / children.length;
         return {
-          x: position.x + Math.cos(angle) * orbit,
-          y: position.y + Math.sin(angle) * orbit,
+          x: clampedPosition.x + Math.cos(angle) * orbit,
+          y: clampedPosition.y + Math.sin(angle) * orbit,
         };
       }),
-    [children, orbit, position.x, position.y]
+    [children, orbit, clampedPosition.x, clampedPosition.y]
   );
 
   const handleClick = (e: KonvaEventObject<MouseEvent>) => {
@@ -291,8 +301,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
               opacity: 0.3,
               pointerEvents: "none",
               transform: "translate(-50%, -50%)",
-              left: position.x,
-              top: position.y,
+              left: clampedPosition.x,
+              top: clampedPosition.y,
             }}
           />
         </Html>
@@ -332,8 +342,8 @@ const PostIt = React.forwardRef<Konva.Group, PostItProps>((props, ref) => {
           else if (ref)
             (ref as React.MutableRefObject<Konva.Group | null>).current = node;
         }}
-        x={position.x}
-        y={position.y}
+        x={clampedPosition.x}
+        y={clampedPosition.y}
         width={postItW}
         height={postItH}
         draggable={!isEditing && !disableDragging}
