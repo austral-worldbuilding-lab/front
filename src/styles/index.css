@@ -207,22 +207,17 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    @apply custom-scrollbar;
   }
   body {
     @apply bg-background text-foreground;
   }
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 10px;
-  background: #172187; /* bg-blue-100 */
-  border-radius: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #172187; /* bg-blue-200 */
-  border-radius: 8px;
-}
-.custom-scrollbar {
-  scrollbar-color: #172187 #f3f3f378; /* thumb bg-blue-200, track bg-blue-100 */
+@utility custom-scrollbar {
+  scrollbar-color: #172187 white;
   scrollbar-width: thin;
+
+  &::-webkit-scrollbar { width: 10px; background: #172187 white; border-radius: 8px; }
+  &::-webkit-scrollbar-thumb { background: #172187; border-radius: 8px; }
 }
