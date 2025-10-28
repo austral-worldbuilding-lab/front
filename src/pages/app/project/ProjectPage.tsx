@@ -39,7 +39,7 @@ const ProjectPage = () => {
   });
   const { organization } = useOrganization(organizationId);
   const { handleCreateChildProject, loading: creatingChild, error: childError } =
-      useCreateChildProject(organizationId, projectId);
+      useCreateChildProject(organizationId, projectId, () => setIsCreateChildOpen(false));
 
 
   const handleEditProject = async (data: { name: string; description?: string }) => {

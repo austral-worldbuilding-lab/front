@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { createChildProject } from "@/services/projectService";
 import { useAuth } from "@/hooks/useAuth";
 
-export function useCreateChildProject(organizationId?: string, projectId?: string) {
+export function useCreateChildProject(
+    organizationId?: string,
+    projectId?: string,
+    onSuccess?: () => void
+) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -31,6 +35,7 @@ export function useCreateChildProject(organizationId?: string, projectId?: strin
                 userId: user?.uid || "",
             });
 
+            onSuccess?.();
             navigate(`/app/organization/${organizationId}/projects/${newProject.id}`);
         } catch (err) {
             setError(

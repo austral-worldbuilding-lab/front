@@ -162,7 +162,7 @@ export const getProjectConfiguration = async (projectId: string): Promise<Projec
 };
 
 export const createChildProject = async (
-    parentProjectId: string,
+    projectId:string,
     body: {
       name: string;
       description?: string;
@@ -173,9 +173,8 @@ export const createChildProject = async (
       userId: string;
     }
 ): Promise<Project> => {
-  const response = await axiosInstance.post<{ data: Project }>(
-      ``, //TODO: replace with real backend url
-      { ...body, parentProjectId }
+  const response = await axiosInstance.post<{ data: Project }>(`/project/${projectId}/child`,
+      { ...body }
   );
 
   if (response.status !== 201 && response.status !== 200) {
