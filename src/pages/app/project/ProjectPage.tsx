@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeftIcon, Edit } from "lucide-react";
+import {ArrowLeftIcon, Edit, Plus} from "lucide-react";
 import useProject from "@/hooks/useProject.ts";
 import UnifiedInvitationDialog from "@/components/project/UnifiedInvitationDialog";
 import { useProjectPermissions } from "@/hooks/usePermissionsLoader";
@@ -17,6 +17,7 @@ import { getOrganizationById } from "@/services/organizationService";
 import { ProjectBreadcrumb } from "@/components/project/ProjectBreadcrumb";
 import { useOrganization } from "@/hooks/useOrganization";
 import * as Icons from "lucide-react";
+import {useCreateChildProject} from "@/hooks/useCreateChildProject.ts";
 
 const ProjectPage = () => {
   const { projectId, organizationId } = useParams<{
@@ -27,6 +28,7 @@ const ProjectPage = () => {
   const { project, fetchProject } = useProject(projectId!);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isCreateChildOpen, setIsCreateChildOpen] = useState(false);
 
   const {
     update: updateProject,
@@ -36,7 +38,10 @@ const ProjectPage = () => {
     fetchProject();
   });
   const { organization } = useOrganization(organizationId);
-  
+  const { handleCreateChildProject, loading: creatingChild, error: childError } =
+      useCreateChildProject(organizationId, projectId, () => setIsCreateChildOpen(false));
+
+
   const handleEditProject = async (data: { name: string; description?: string }) => {
     try {
       await updateProject(projectId!, data);
@@ -112,6 +117,14 @@ const ProjectPage = () => {
                   organizationId={organizationId ?? ""}
                   defaultRole="member"
                 />
+                <Button
+                    icon={<Plus/>}
+                    size="md"
+                    onClick={() => setIsCreateChildOpen(true)}
+                >
+                  Crear subproyecto
+                </Button>
+
               </div>
               <ProjectUserCircles
                 projectId={projectId ?? ""}
@@ -147,6 +160,19 @@ const ProjectPage = () => {
           initialDescription={project?.description || ""}
           mode="edit"
         />
+        <CreateEntityModal
+            open={isCreateChildOpen}
+            onClose={() => setIsCreateChildOpen(false)}
+            onCreate={handleCreateChildProject}
+            loading={creatingChild}
+            error={childError}
+            title="Crear subproyecto"
+            placeholder="Nombre del subproyecto"
+            showQuestions={false}
+            allowProvocationMode={false}
+            showConfiguration={true}
+        />
+
         {errorMessage && (
           <p className="text-red-500 mt-4 text-sm text-center">
             {errorMessage}
