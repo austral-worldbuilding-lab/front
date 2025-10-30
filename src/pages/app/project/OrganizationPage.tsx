@@ -135,7 +135,7 @@ const OrganizationPage = () => {
                 projectName={orgName ?? "Organización"}
                 projectId={projects[0]?.id ?? ""}
                 organizationId={organizationId ?? ""}
-                defaultRole="member"
+                defaultRole="worldbuilder"
                 isOrganization
               />
               <OrganizationUserCircles
