@@ -115,7 +115,7 @@ const ProjectPage = () => {
                   projectName={project?.name ?? "Proyecto"}
                   projectId={projectId ?? ""}
                   organizationId={organizationId ?? ""}
-                  defaultRole="member"
+                  defaultRole="worldbuilder"
                 />
                 <Button
                     icon={<Plus/>}

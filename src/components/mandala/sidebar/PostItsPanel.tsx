@@ -36,7 +36,7 @@ export default function PostItsPanel({
   const { hasAccess, userRole } = useProjectAccess(projectId);
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["owner", "admin", "member"].includes(userRole));
+    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
   const { items, setItems, loading, error, generate } = usePostItsGenerator(
     mandalaId,
     projectId

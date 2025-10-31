@@ -1,7 +1,7 @@
 import { Role } from "@/services/invitationService";
 
 export function isAdminRole(role: Role): boolean {
-  return role === "owner" || role === "admin";
+  return role === "dueño" || role === "facilitador";
 }
 
 export function isRoleDemotion(fromRole: Role, toRole: Role): boolean {
@@ -12,7 +12,7 @@ export function getAvailableRoles(
   targetUserRole: Role, 
   isCurrentUser: boolean
 ): Role[] {
-  const allRoles: Role[] = ["owner", "admin", "member", "viewer"];
+  const allRoles: Role[] = ["dueño", "facilitador", "worldbuilder", "lector"];
   
   if (!isCurrentUser) {
     return allRoles;
