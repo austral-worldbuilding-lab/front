@@ -15,8 +15,8 @@ export function useCurrentUserRole(projectId: string) {
     }
   }, [loading, user, users]);
 
-  const canEdit = userRole && ['owner', 'admin', 'member'].includes(userRole);
-  const isViewer = userRole === 'viewer';
+  const canEdit = userRole && ['dueño', 'facilitador', 'worldbuilder'].includes(userRole);
+  const isViewer = userRole === 'lector';
 
   return {
     userRole,

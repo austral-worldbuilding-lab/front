@@ -50,7 +50,7 @@ export default function UnifiedInvitationDialog({
   organizationId,
   className,
   projectName = "Proyecto",
-  defaultRole = "member",
+  defaultRole = "worldbuilder",
   isOrganization = false,
 }: UnifiedInvitationDialogProps) {
   const [open, setOpen] = useState(false);
@@ -322,9 +322,9 @@ export default function UnifiedInvitationDialog({
 
                 <div className="text-xs text-muted-foreground">
                   Cualquiera en internet con el link puede{" "}
-                  {role === "viewer"
+                  {role === "lector"
                     ? "ver"
-                    : role === "member"
+                    : role === "worldbuilder"
                     ? "editar"
                     : "administrar"}
                 </div>
