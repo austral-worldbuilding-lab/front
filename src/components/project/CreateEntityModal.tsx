@@ -196,7 +196,12 @@ const CreateEntityModal = ({
             </div>
           )}
 
-          <IconSelector value={icon} onChange={setIcon} disabled={loading} />
+          <IconSelector
+            value={icon}
+            onChange={setIcon}
+            disabled={loading}
+            displayColorSelector
+          />
 
           {isProvocationMode ? (
             <>

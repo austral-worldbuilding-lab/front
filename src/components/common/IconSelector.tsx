@@ -8,13 +8,16 @@ import {
 import { Card } from "@/components/ui/card";
 import * as Icons from "lucide-react";
 import { ICON_OPTIONS } from "@/constants/icon-options";
+import ColorSelector from "../mandala/characters/modal/ColorSelector";
+import { colors } from "@/constants/character";
 
 interface IconSelectorProps {
   value?: string | null;
-  onChange: (iconName: string) => void;
+  onChange: (iconName: string, color?: string) => void;
   disabled?: boolean;
   defaultIcon?: string;
   label?: string;
+  displayColorSelector?: boolean;
 }
 
 export const IconSelector = ({
@@ -23,9 +26,11 @@ export const IconSelector = ({
   disabled = false,
   defaultIcon = "Folder",
   label = "Ícono",
+  displayColorSelector = false,
 }: IconSelectorProps) => {
   const SelectedIcon = (Icons as any)[value || defaultIcon];
   const [open, setOpen] = useState(false);
+  const [selectedColor, setSelectedColor] = useState<string>("black");
 
   return (
     <div className="flex flex-col items-start gap-2">
@@ -41,7 +46,10 @@ export const IconSelector = ({
                 disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
               }`}
             >
-              <SelectedIcon className="h-8 w-8 text-gray-700" />
+              <SelectedIcon
+                className="h-8 w-8"
+                style={{ color: selectedColor }}
+              />
             </Card>
           </PopoverTrigger>
 
@@ -51,26 +59,39 @@ export const IconSelector = ({
                 const IconComp = (Icons as any)[iconName];
                 const isSelected = (value || defaultIcon) === iconName;
                 return (
-                  <Card
-                    key={iconName}
-                    className={`cursor-pointer p-3 flex justify-center items-center transition-all border rounded-xl ${
-                      isSelected
-                        ? "border-primary bg-primary/10"
-                        : "hover:bg-gray-100"
-                    }`}
-                    onClick={() => {
-                      onChange(iconName);
-                      setOpen(false);
-                    }}
-                  >
-                    <IconComp className="h-6 w-6" />
-                  </Card>
+                  <>
+                    <Card
+                      key={iconName}
+                      className={`cursor-pointer p-3 flex justify-center items-center transition-all border rounded-xl ${
+                        isSelected
+                          ? "border-primary bg-primary/10"
+                          : "hover:bg-gray-100"
+                      }`}
+                      onClick={() => {
+                        onChange(iconName);
+                        setOpen(false);
+                      }}
+                    >
+                      <IconComp
+                        className="h-6 w-6"
+                        style={{ color: selectedColor }}
+                      />
+                    </Card>
+                  </>
                 );
               })}
             </div>
           </PopoverContent>
         </Popover>
       </div>
+      {displayColorSelector && (
+        <ColorSelector
+          className="mt-2"
+          colors={["black", ...colors]}
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
+        />
+      )}
     </div>
   );
 };
