@@ -135,11 +135,12 @@ const OrganizationListPage = () => {
             <CreateEntityModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
-                onCreate={({ name, icon }) => createOrganization(name, icon)}
+                onCreate={({ name, image }) => createOrganization(name, image!)}
                 loading={creating}
                 error={errorMsg}
                 title="Crear Organización"
                 placeholder="Nombre de la organización"
+                isOrganization
             />
 
             <ConfirmationDialog
