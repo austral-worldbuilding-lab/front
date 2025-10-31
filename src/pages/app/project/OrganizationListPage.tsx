@@ -90,28 +90,41 @@ const OrganizationListPage = () => {
                     ) : (
                         <ul className="divide-y divide-gray-100">
                             {organizations.map((org) => {
-                                const IconComp = getOrganizationIcon(org.icon);
-                                return <li key={org.id} className="hover:bg-gray-50 transition-colors">
+                                const IconComp = getOrganizationIcon("");
+                                return (
+                                  <li
+                                    key={org.id}
+                                    className="hover:bg-gray-50 transition-colors"
+                                  >
                                     <div className="flex items-center gap-3 p-4 text-gray-800">
-                                        <Link
-                                            to={`/app/organization/${org.id}/projects`}
-                                            className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
-                                        >
-                                            <IconComp className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                                            <div className="flex items-center gap-2">
-                                                <span>{org.name}</span>
-                                                {org.accessType === 'limited' && (
-                                                    <span className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded-full border border-primary-300">
-                                                        Acceso limitado
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </Link>
-                                        {org.accessType === 'full' && (
-                                            <MandalaMenu onDelete={() => handleDeleteClick(org.id)} />
+                                      <Link
+                                        to={`/app/organization/${org.id}/projects`}
+                                        className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
+                                      >
+                                        {org.imageUrl ? (
+                                                    <img className="h-5" src={org.imageUrl}></img>
+                                        ) : (
+                                          <IconComp className="w-5 h-5 text-gray-400 flex-shrink-0" />
                                         )}
+                                        <div className="flex items-center gap-2">
+                                          <span>{org.name}</span>
+                                          {org.accessType === "limited" && (
+                                            <span className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded-full border border-primary-300">
+                                              Acceso limitado
+                                            </span>
+                                          )}
+                                        </div>
+                                      </Link>
+                                      {org.accessType === "full" && (
+                                        <MandalaMenu
+                                          onDelete={() =>
+                                            handleDeleteClick(org.id)
+                                          }
+                                        />
+                                      )}
                                     </div>
-                                </li>
+                                  </li>
+                                );
                             })}
                         </ul>
                     )}
