@@ -14,9 +14,9 @@ export const getOrganizations = async (page: number, limit: number): Promise<Org
     return response.data.data;
 };
 
-export const createOrganization = async ({ name, icon }: { name: string, icon: string }) => {
-    const response = await axiosInstance.post("/organization", { name, icon });
-    return response.data;
+export const createOrganization = async ({ name }: { name: string }) => {
+  const response = await axiosInstance.post("/organization", { name });
+  return response.data;
 };
 
 export const getOrganizationById = async (id: string): Promise<Organization> => {
@@ -32,4 +32,16 @@ export const deleteOrganization = async (id: string): Promise<void> => {
     if (response.status !== 200) {
         throw new Error("Error al eliminar organización");
     }
+};
+
+export const addImage = async (id: string, imageId: string): Promise<void> => {
+  const response = await axiosInstance.post(
+    `/organization/${id}/image/confirm`,
+    {
+      imageId,
+    }
+  );
+  if (response.status !== 201) {
+    throw new Error("Error al agregar la imagen");
+  }
 };

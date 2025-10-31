@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useNavigate, useParams } from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
 import { ArrowLeftIcon } from "lucide-react";
@@ -17,7 +16,7 @@ import OrganizationProjectsList from "@/components/project/OrganizationProjectsL
 import FileListContainer from "@/components/files/FileListContainer";
 import { DimensionDto } from "@/types/mandala";
 import AppLayout from "@/components/layout/AppLayout";
-import * as Icons from "lucide-react";
+import { getOrganizationIcon } from "@/utils/iconUtils";
 
 const OrganizationPage = () => {
   const { organizationId } = useParams();
@@ -30,14 +29,14 @@ const OrganizationPage = () => {
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string>("");
-  const [icon, setIcon] = useState<string | null>(null);
+  const [orgImageUrl, setOrgImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (organizationId) {
       getOrganizationById(organizationId)
         .then((org) => {
-          setOrgName(org.name)
-          setIcon(org.icon)
+          setOrgName(org.name);
+          setOrgImageUrl(org.imageUrl ?? null);
         })
         .catch(() => setOrgName("Organización desconocida"));
     }
@@ -113,7 +112,7 @@ const OrganizationPage = () => {
     }
   };
 
-  const IconComp = (icon ? (Icons as any)[icon] : undefined)
+  const IconComp = getOrganizationIcon("");
 
   return (
     <AppLayout>
@@ -127,7 +126,11 @@ const OrganizationPage = () => {
         <div className="w-full flex flex-col gap-2 flex-1">
           <div className="flex justify-between">
             <div className="flex flex-col gap-2">
-              {IconComp && <IconComp size={40} className="text-primary" />}
+              {orgImageUrl ? (
+                <img className="h-[40px] w-fit" src={orgImageUrl}></img>
+              ) : (
+                <IconComp size={40} className="text-primary" />
+              )}
               <h1 className="text-3xl font-bold">{orgName || ""}</h1>
             </div>
             <div className="flex flex-col gap-2 items-end flex-1">

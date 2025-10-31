@@ -7,6 +7,7 @@ import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 import { IconSelector } from "../common/IconSelector";
 import { ICON_OPTIONS } from "@/constants/icon-options";
+import { ImageSelector } from "../common/ImageSelector";
 
 const getInitialDimensions = (): Item[] => {
   return Sectors.map((sector) => ({
@@ -33,6 +34,7 @@ interface CreateEntityModalProps {
     dimensions?: DimensionDto[];
     scales?: string[];
     icon: string;
+    image?: File;
   }) => Promise<void>;
   onCreateFromProvocation?: (data: {
     question: string;
@@ -51,6 +53,7 @@ interface CreateEntityModalProps {
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
+  isOrganization?: boolean;
 }
 
 const CreateEntityModal = ({
@@ -68,6 +71,7 @@ const CreateEntityModal = ({
   mode,
   allowProvocationMode = false,
   showConfiguration = false,
+  isOrganization = false,
 }: CreateEntityModalProps) => {
   const [name, setName] = useState(initialName ?? "");
   const [description, setDescription] = useState(initialDescription ?? "");
@@ -76,6 +80,7 @@ const CreateEntityModal = ({
   const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
   const [scales, setScales] = useState<Item[]>(getInitialScales());
   const [icon, setIcon] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
     setName(initialName ?? "");
@@ -107,6 +112,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        image: image ?? undefined,
       });
     } else {
       onCreate({
@@ -114,6 +120,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        image: image ?? undefined,
       });
     }
   };
@@ -137,6 +144,10 @@ const CreateEntityModal = ({
 
     if (showConfiguration) {
       return baseValidation && dimensions.length > 0 && scales.length > 0;
+    }
+
+    if (isOrganization && !image) {
+      return false;
     }
 
     return baseValidation;
@@ -196,7 +207,11 @@ const CreateEntityModal = ({
             </div>
           )}
 
-          <IconSelector value={icon} onChange={setIcon} disabled={loading} />
+          {isOrganization ? (
+            <ImageSelector onChange={setImage} />
+          ) : (
+            <IconSelector value={icon} onChange={setIcon} disabled={loading} />
+          )}
 
           {isProvocationMode ? (
             <>
