@@ -83,7 +83,7 @@ export const MandalaCanvas: React.FC<{
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["owner", "admin", "member"].includes(userRole));
+    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
 
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);

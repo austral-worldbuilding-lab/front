@@ -3,7 +3,7 @@ import { useAuthContext } from './AuthContext';
 import { getOrganizationUsers } from '@/services/userService';
 import { getProjectUsers } from '@/services/userService';
 
-type Role = 'owner' | 'admin' | 'member' | 'viewer';
+type Role = 'dueño' | 'facilitador' | 'worldbuilder' | 'lector';
 
 interface UserPermissions {
   organizationRoles: Map<string, Role>;
@@ -60,22 +60,22 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
 
   const canCreateProject = (orgId: string): boolean => {
     const role = getOrganizationRole(orgId);
-    return role === 'owner' || role === 'admin';
+    return role === 'dueño' || role === 'facilitador';
   };
 
   const canManageUsers = (orgId: string): boolean => {
     const role = getOrganizationRole(orgId);
-    return role === 'owner' || role === 'admin';
+    return role === 'dueño' || role === 'facilitador';
   };
 
   const canManageProjectUsers = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
-    return role === 'owner' || role === 'admin';
+    return role === 'dueño' || role === 'facilitador';
   };
 
   const canEditProject = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
-    return role === 'owner' || role === 'admin' || role === 'member';
+    return role === 'dueño' || role === 'facilitador' || role === 'worldbuilder';
   };
 
   const canViewProject = (projectId: string): boolean => {

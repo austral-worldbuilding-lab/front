@@ -31,7 +31,7 @@ export type InvitationResponse = {
   createdAt: string;
 };
 
-export const ROLES = ["owner", "admin", "member", "viewer"] as const;
+export const ROLES = ["dueño", "facilitador", "worldbuilder", "lector"] as const;
 export type Role = (typeof ROLES)[number];
 
 export async function createInvitation(
