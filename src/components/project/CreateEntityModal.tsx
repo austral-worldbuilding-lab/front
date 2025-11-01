@@ -7,6 +7,7 @@ import TagInput, { Item } from "@/components/common/TagInput.tsx";
 import { Sectors, Levels } from "@/constants/mandala";
 import { IconSelector } from "../common/IconSelector";
 import { ICON_OPTIONS } from "@/constants/icon-options";
+import { ImageSelector } from "../common/ImageSelector";
 
 const getInitialDimensions = (): Item[] => {
   return Sectors.map((sector) => ({
@@ -33,6 +34,7 @@ interface CreateEntityModalProps {
     dimensions?: DimensionDto[];
     scales?: string[];
     icon: string;
+    image?: File;
     iconColor?: string;
   }) => Promise<void>;
   onCreateFromProvocation?: (data: {
@@ -53,6 +55,7 @@ interface CreateEntityModalProps {
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
+  isOrganization?: boolean;
   icon?: string;
   iconColor?: string;
 }
@@ -72,6 +75,7 @@ const CreateEntityModal = ({
   mode,
   allowProvocationMode = false,
   showConfiguration = false,
+  isOrganization = false,
   icon: initialIcon,
   iconColor: initialColor,
 }: CreateEntityModalProps) => {
@@ -82,6 +86,7 @@ const CreateEntityModal = ({
   const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
   const [scales, setScales] = useState<Item[]>(getInitialScales());
   const [icon, setIcon] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
   const [iconColor, setIconColor] = useState<string | null>(null);
 
   useEffect(() => {
@@ -118,6 +123,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        image: image ?? undefined,
         iconColor: iconColor ?? undefined,
       });
     } else {
@@ -126,6 +132,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        image: image ?? undefined,
         iconColor: iconColor ?? undefined,
       });
     }
@@ -150,6 +157,10 @@ const CreateEntityModal = ({
 
     if (showConfiguration) {
       return baseValidation && dimensions.length > 0 && scales.length > 0;
+    }
+
+    if (isOrganization && !image) {
+      return false;
     }
 
     return baseValidation;
@@ -210,7 +221,10 @@ const CreateEntityModal = ({
             </div>
           )}
 
-          <IconSelector
+          {isOrganization ? (
+            <ImageSelector onChange={setImage} />
+          ) : (
+            <IconSelector
             value={icon}
             onChange={(icon, color) => {
               setIcon(icon);
@@ -221,6 +235,7 @@ const CreateEntityModal = ({
             initialColor={initialColor}
             initialIcon={initialIcon}
           />
+          )}
 
           {isProvocationMode ? (
             <>
