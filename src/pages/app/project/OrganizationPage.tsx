@@ -49,8 +49,9 @@ const OrganizationPage = () => {
     dimensions?: DimensionDto[];
     scales?: string[];
     icon: string;
+    iconColor?: string;
   }) => {
-    const { name, description, dimensions, scales, icon } = data;
+    const { name, description, dimensions, scales, icon, iconColor } = data;
     setCreating(true);
     try {
       if (!user) {
@@ -65,6 +66,7 @@ const OrganizationPage = () => {
         dimensions,
         scales,
         icon,
+        iconColor,
       });
       setModalOpen(false);
       navigate(`/app/organization/${organizationId}/projects/${project.id}`);
@@ -83,6 +85,7 @@ const OrganizationPage = () => {
     dimensions?: DimensionDto[];
     scales?: string[];
     icon: string;
+    iconColor?: string;
   }) => {
     setCreating(true);
     try {
@@ -98,6 +101,7 @@ const OrganizationPage = () => {
         dimensions: data.dimensions,
         scales: data.scales,
         icon: data.icon,
+        iconColor: data.iconColor
       });
 
       setModalOpen(false);

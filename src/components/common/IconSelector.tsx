@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -18,6 +18,8 @@ interface IconSelectorProps {
   defaultIcon?: string;
   label?: string;
   displayColorSelector?: boolean;
+  initialColor?: string;
+  initialIcon?: string;
 }
 
 export const IconSelector = ({
@@ -27,10 +29,19 @@ export const IconSelector = ({
   defaultIcon = "Folder",
   label = "Ícono",
   displayColorSelector = false,
+  initialColor,
+  initialIcon,
 }: IconSelectorProps) => {
   const SelectedIcon = (Icons as any)[value || defaultIcon];
   const [open, setOpen] = useState(false);
-  const [selectedColor, setSelectedColor] = useState<string>("black");
+  const [selectedColor, setSelectedColor] = useState<string>(initialColor ?? "black");
+  const [icon, setIcon] = useState<string>(initialIcon ?? ICON_OPTIONS[0]);
+
+  console.log(initialColor);
+
+  useEffect(() => {
+    onChange(icon, selectedColor);
+  }, [icon, onChange, selectedColor]);
 
   return (
     <div className="flex flex-col items-start gap-2">
@@ -68,7 +79,7 @@ export const IconSelector = ({
                           : "hover:bg-gray-100"
                       }`}
                       onClick={() => {
-                        onChange(iconName);
+                        setIcon(iconName);
                         setOpen(false);
                       }}
                     >

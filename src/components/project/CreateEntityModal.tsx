@@ -33,6 +33,7 @@ interface CreateEntityModalProps {
     dimensions?: DimensionDto[];
     scales?: string[];
     icon: string;
+    iconColor?: string;
   }) => Promise<void>;
   onCreateFromProvocation?: (data: {
     question: string;
@@ -40,6 +41,7 @@ interface CreateEntityModalProps {
     dimensions?: DimensionDto[];
     scales?: string[];
     icon: string;
+    iconColor?: string;
   }) => Promise<void>;
   loading: boolean;
   error?: string | null;
@@ -51,6 +53,8 @@ interface CreateEntityModalProps {
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
+  icon?: string;
+  iconColor?: string;
 }
 
 const CreateEntityModal = ({
@@ -68,6 +72,8 @@ const CreateEntityModal = ({
   mode,
   allowProvocationMode = false,
   showConfiguration = false,
+  icon: initialIcon,
+  iconColor: initialColor,
 }: CreateEntityModalProps) => {
   const [name, setName] = useState(initialName ?? "");
   const [description, setDescription] = useState(initialDescription ?? "");
@@ -76,11 +82,15 @@ const CreateEntityModal = ({
   const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
   const [scales, setScales] = useState<Item[]>(getInitialScales());
   const [icon, setIcon] = useState<string | null>(null);
+  const [iconColor, setIconColor] = useState<string | null>(null);
 
   useEffect(() => {
     setName(initialName ?? "");
     setDescription(initialDescription ?? "");
-  }, [initialName, initialDescription, open]);
+    setIcon(initialIcon ?? null);
+    setIconColor(initialColor ?? null);
+    console.log(initialName, initialDescription, initialIcon, initialColor);
+  }, [initialName, initialDescription, open, initialColor, initialIcon]);
 
   if (!open) return null;
 
@@ -99,6 +109,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        iconColor: iconColor ?? undefined,
       });
     } else if (showQuestions) {
       onCreate({
@@ -107,6 +118,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        iconColor: iconColor ?? undefined,
       });
     } else {
       onCreate({
@@ -114,6 +126,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        iconColor: iconColor ?? undefined,
       });
     }
   };
@@ -151,6 +164,7 @@ const CreateEntityModal = ({
       setDimensions(getInitialDimensions());
       setScales(getInitialScales());
       setIcon(null);
+      setIconColor(null);
     }
   };
 
@@ -198,9 +212,14 @@ const CreateEntityModal = ({
 
           <IconSelector
             value={icon}
-            onChange={setIcon}
+            onChange={(icon, color) => {
+              setIcon(icon);
+              setIconColor(color ?? null);
+            }}
             disabled={loading}
             displayColorSelector
+            initialColor={initialColor}
+            initialIcon={initialIcon}
           />
 
           {isProvocationMode ? (
