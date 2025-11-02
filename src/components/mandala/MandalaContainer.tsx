@@ -394,6 +394,23 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   )}
                 </DialogDescription>
               </DialogHeader>
+
+              <div className="mt-4 border-t pt-4">
+                <h3 className="text-sm font-semibold mb-2">
+                  Mandala: {mandala?.mandala.configuration.center.name ?? mandala?.mandala.name ?? "Sin nombre"}
+                </h3>
+                {mandala?.mandala.configuration.center.description &&
+                mandala.mandala.configuration.center.description.trim().length > 0 ? (
+                  <p className="text-sm text-muted-foreground leading-6 whitespace-pre-wrap">
+                    {mandala.mandala.configuration.center.description}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    Esta mandala no tiene descripción.
+                  </p>
+                )}
+              </div>
+
               <div className="mt-4">
                 <ProjectMembersDisplay projectId={projectId} />
               </div>
