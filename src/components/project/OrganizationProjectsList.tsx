@@ -19,6 +19,7 @@ export interface Project {
   parentId?: string;
   children?: Project[];
   icon: string;
+  iconColor: string;
 }
 
 interface OrganizationProjectsListProps {

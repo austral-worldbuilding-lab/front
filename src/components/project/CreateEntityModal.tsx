@@ -35,6 +35,7 @@ interface CreateEntityModalProps {
     scales?: string[];
     icon: string;
     image?: File;
+    iconColor?: string;
   }) => Promise<void>;
   onCreateFromProvocation?: (data: {
     question: string;
@@ -42,6 +43,7 @@ interface CreateEntityModalProps {
     dimensions?: DimensionDto[];
     scales?: string[];
     icon: string;
+    iconColor?: string;
   }) => Promise<void>;
   loading: boolean;
   error?: string | null;
@@ -54,6 +56,8 @@ interface CreateEntityModalProps {
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
   isOrganization?: boolean;
+  icon?: string;
+  iconColor?: string;
 }
 
 const CreateEntityModal = ({
@@ -72,6 +76,8 @@ const CreateEntityModal = ({
   allowProvocationMode = false,
   showConfiguration = false,
   isOrganization = false,
+  icon: initialIcon,
+  iconColor: initialColor,
 }: CreateEntityModalProps) => {
   const [name, setName] = useState(initialName ?? "");
   const [description, setDescription] = useState(initialDescription ?? "");
@@ -81,11 +87,15 @@ const CreateEntityModal = ({
   const [scales, setScales] = useState<Item[]>(getInitialScales());
   const [icon, setIcon] = useState<string | null>(null);
   const [image, setImage] = useState<File | null>(null);
+  const [iconColor, setIconColor] = useState<string | null>(null);
 
   useEffect(() => {
     setName(initialName ?? "");
     setDescription(initialDescription ?? "");
-  }, [initialName, initialDescription, open]);
+    setIcon(initialIcon ?? null);
+    setIconColor(initialColor ?? null);
+    console.log(initialName, initialDescription, initialIcon, initialColor);
+  }, [initialName, initialDescription, open, initialColor, initialIcon]);
 
   if (!open) return null;
 
@@ -104,6 +114,7 @@ const CreateEntityModal = ({
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
+        iconColor: iconColor ?? undefined,
       });
     } else if (showQuestions) {
       onCreate({
@@ -113,6 +124,7 @@ const CreateEntityModal = ({
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
         image: image ?? undefined,
+        iconColor: iconColor ?? undefined,
       });
     } else {
       onCreate({
@@ -121,6 +133,7 @@ const CreateEntityModal = ({
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
         image: image ?? undefined,
+        iconColor: iconColor ?? undefined,
       });
     }
   };
@@ -162,6 +175,7 @@ const CreateEntityModal = ({
       setDimensions(getInitialDimensions());
       setScales(getInitialScales());
       setIcon(null);
+      setIconColor(null);
     }
   };
 
@@ -210,7 +224,17 @@ const CreateEntityModal = ({
           {isOrganization ? (
             <ImageSelector onChange={setImage} />
           ) : (
-            <IconSelector value={icon} onChange={setIcon} disabled={loading} />
+            <IconSelector
+            value={icon}
+            onChange={(icon, color) => {
+              setIcon(icon);
+              setIconColor(color ?? null);
+            }}
+            disabled={loading}
+            displayColorSelector
+            initialColor={initialColor}
+            initialIcon={initialIcon}
+          />
           )}
 
           {isProvocationMode ? (

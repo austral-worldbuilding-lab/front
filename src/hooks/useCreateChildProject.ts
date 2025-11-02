@@ -19,6 +19,7 @@ export function useCreateChildProject(
         icon: string;
         dimensions?: { name: string; color: string }[];
         scales?: string[];
+        iconColor?: string;
     }) => {
         if (!organizationId || !projectId) return;
         setLoading(true);
@@ -33,6 +34,7 @@ export function useCreateChildProject(
                 dimensions: data.dimensions,
                 scales: data.scales,
                 userId: user?.uid || "",
+                iconColor: data.iconColor,
             });
 
             onSuccess?.();

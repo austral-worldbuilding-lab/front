@@ -122,6 +122,7 @@ export interface Project {
   organizationId: string;
   configuration?: ProjectConfiguration;
   icon: string;
+  iconColor: string;
 }
 
 export interface ProjectConfiguration {
@@ -137,6 +138,7 @@ export interface CreateProject {
   dimensions?: DimensionDto[];
   scales?: string[];
   icon: string;
+  iconColor?: string;
 }
 
 export interface DimensionDto {
@@ -151,6 +153,7 @@ export interface CreateProjectFromQuestion {
   dimensions?: DimensionDto[];
   scales?: string[];
   icon: string;
+  iconColor?: string;
 }
 
 export interface FilterOption {

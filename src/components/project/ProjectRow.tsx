@@ -8,6 +8,7 @@ interface Project {
   name: string;
   children?: Project[];
   icon: string;
+  iconColor: string;
 }
 
 interface ProjectRowProps {
@@ -46,6 +47,8 @@ export const ProjectRow = ({
 
   const IconComp = getProjectIcon(project.icon);
 
+  console.log(project);
+
   return (
     <li>
       <div
@@ -68,7 +71,10 @@ export const ProjectRow = ({
           ) : (
             <span className="w-5" />
           )}
-          <IconComp className="w-5 h-5 text-primary flex-shrink-0" />
+          <IconComp
+            className="w-5 h-5 flex-shrink-0"
+            style={{ color: project.iconColor }}
+          />
           <span className="flex-1 text-sm font-medium">
             {project.name || "Proyecto sin nombre"}
           </span>
