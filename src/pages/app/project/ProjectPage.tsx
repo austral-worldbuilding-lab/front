@@ -42,7 +42,7 @@ const ProjectPage = () => {
       useCreateChildProject(organizationId, projectId, () => setIsCreateChildOpen(false));
 
 
-  const handleEditProject = async (data: { name: string; description?: string }) => {
+  const handleEditProject = async (data: { name: string; description?: string; icon: string }) => {
     try {
       await updateProject(projectId!, data);
       setIsEditModalOpen(false);
@@ -158,6 +158,7 @@ const ProjectPage = () => {
           showQuestions={true}
           initialName={project?.name || ""}
           initialDescription={project?.description || ""}
+          initialIcon={project?.icon || ""}
           mode="edit"
         />
         <CreateEntityModal

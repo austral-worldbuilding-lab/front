@@ -50,6 +50,7 @@ interface CreateEntityModalProps {
   showQuestions?: boolean;
   initialName?: string;
   initialDescription?: string;
+  initialIcon?: string;
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
@@ -68,6 +69,7 @@ const CreateEntityModal = ({
   showQuestions = false,
   initialName,
   initialDescription,
+  initialIcon,
   mode,
   allowProvocationMode = false,
   showConfiguration = false,
@@ -79,13 +81,14 @@ const CreateEntityModal = ({
   const [question, setQuestion] = useState("");
   const [dimensions, setDimensions] = useState<Item[]>(getInitialDimensions());
   const [scales, setScales] = useState<Item[]>(getInitialScales());
-  const [icon, setIcon] = useState<string | null>(null);
+  const [icon, setIcon] = useState<string | null>(initialIcon ?? null);
   const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
     setName(initialName ?? "");
     setDescription(initialDescription ?? "");
-  }, [initialName, initialDescription, open]);
+    setIcon(initialIcon ?? null);
+  }, [initialName, initialDescription, initialIcon, open]);
 
   if (!open) return null;
 

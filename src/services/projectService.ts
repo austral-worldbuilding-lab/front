@@ -47,7 +47,7 @@ export const createProject = async (project: CreateProject): Promise<Project> =>
 
 export const updateProject = async (
     id: string,
-    data: { name?: string; description?: string }
+    data: { name?: string; description?: string; icon?: string }
 ): Promise<Project> => {
   const response = await axiosInstance.patch<{ data: Project }>(
       `/project/${id}`,
