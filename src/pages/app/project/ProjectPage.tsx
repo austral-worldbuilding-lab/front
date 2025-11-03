@@ -177,7 +177,7 @@ const ProjectPage = () => {
             error={childError}
             title="Crear subproyecto"
             placeholder="Nombre del subproyecto"
-            showQuestions={false}
+            showQuestions={true}
             allowProvocationMode={false}
             showConfiguration={true}
         />
