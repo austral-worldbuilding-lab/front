@@ -2,17 +2,17 @@ import { useState } from "react";
 import {ActionItem} from "@/types/mandala";
 import {getActionIntem} from "@/services/solutionService.ts";
 
-export default function useActionItems() {
+export default function useActionItems(projectId: string, solutionId: string) {
     const [actionItems, setActionItems] = useState<ActionItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const generateActionItems = async (solutionId: string) => {
+    const generateActionItems = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            const items = await getActionIntem(solutionId);
+            const items = await getActionIntem(projectId, solutionId);
             setActionItems(items);
             return items;
         } catch (err) {
