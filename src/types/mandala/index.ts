@@ -228,4 +228,12 @@ export interface Solution {
     description: string;
   };
   provocations: string[];
+  actionItems?: ActionItem[];
+}
+
+export interface ActionItem {
+  order: number;
+  title: string;
+  description: string;
+  duration?: string;
 }

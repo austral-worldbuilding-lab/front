@@ -1,11 +1,18 @@
-import { BarChart2 } from "lucide-react";
-import { Solution} from "@/types/mandala"
+import { useState } from "react";
+import { BarChart2, Loader2 } from "lucide-react";
+import { Solution } from "@/types/mandala";
+import { Button } from "@/components/ui/button";
+import ActionItemsSection from "./ActionItemSection";
+import useActionItems from "@/hooks/useActionItems";
 
 interface SolutionCardProps {
     solution: Solution;
 }
 
 export default function SolutionCard({ solution }: SolutionCardProps) {
+    const { actionItems, loading, generateActionItems } = useActionItems();
+    const [hasGenerated, setHasGenerated] = useState(false);
+
     const impactLevel =
         solution.impact?.level?.toLowerCase?.() ||
         (solution as any).impactLevel?.toLowerCase?.() ||
@@ -23,6 +30,11 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
     };
 
     const iconColor = impactColors[impactLevel as "low" | "medium" | "high"];
+
+    const handleGenerate = async () => {
+        await generateActionItems(solution.id);
+        setHasGenerated(true);
+    };
 
     return (
         <div className="bg-white border border-gray-200 rounded-[8px] p-6 w-full">
@@ -69,13 +81,31 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
                                 {prov}
                             </div>
                         ))}
-                        {solution.provocations.length > 4 && (
-                            <div className="text-xs text-gray-500 mt-1 ml-1">
-                                +{solution.provocations.length - 4} más
-                            </div>
-                        )}
                     </div>
                 </div>
+            )}
+
+            <div className="mt-6">
+                <Button
+                    onClick={handleGenerate}
+                    disabled={loading}
+                    variant="outline"
+                    className="text-sm"
+                >
+                    {loading ? (
+                        <>
+                            <Loader2 className="animate-spin mr-2 h-4 w-4" /> Generando...
+                        </>
+                    ) : hasGenerated ? (
+                        "Regenerar Plan de Acción"
+                    ) : (
+                        "Generar Plan de Acción"
+                    )}
+                </Button>
+            </div>
+
+            {actionItems.length > 0 && (
+                <ActionItemsSection actionItems={actionItems} />
             )}
         </div>
     );
