@@ -47,9 +47,9 @@ export const getDeliverable = async (projectId: string) => {
     return res.data?.data?.deliverables || [];
 };
 
-export const getActionIntem = async (solutionId: string) => {
+export const getActionIntem = async (projectId: string, solutionId: string) => {
 
-    const res = await axiosInstance.get(`/solutions/${solutionId}/action-items/generate`);
+    const res = await axiosInstance.post(`/project/${projectId}/solutions/${solutionId}/action-items/generate`);
     return res.data;
 
 };

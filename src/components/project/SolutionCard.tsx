@@ -4,13 +4,16 @@ import { Solution } from "@/types/mandala";
 import { Button } from "@/components/ui/button";
 import ActionItemsSection from "./ActionItemSection";
 import useActionItems from "@/hooks/useActionItems";
+import {useParams} from "react-router-dom";
+
 
 interface SolutionCardProps {
     solution: Solution;
 }
 
 export default function SolutionCard({ solution }: SolutionCardProps) {
-    const { actionItems, loading, generateActionItems } = useActionItems();
+    const { projectId } = useParams<{ projectId: string }>();
+    const { actionItems, loading, generateActionItems } = useActionItems(projectId!, solution.id);
     const [hasGenerated, setHasGenerated] = useState(false);
 
     const impactLevel =
@@ -32,7 +35,7 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
     const iconColor = impactColors[impactLevel as "low" | "medium" | "high"];
 
     const handleGenerate = async () => {
-        await generateActionItems(solution.id);
+        await generateActionItems();
         setHasGenerated(true);
     };
 
