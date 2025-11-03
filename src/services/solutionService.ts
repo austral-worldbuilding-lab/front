@@ -46,3 +46,10 @@ export const getDeliverable = async (projectId: string) => {
     const res = await axiosInstance.get(`/project/${projectId}/deliverables`);
     return res.data?.data?.deliverables || [];
 };
+
+export const getActionIntem = async (solutionId: string) => {
+
+    const res = await axiosInstance.get(`/solutions/${solutionId}/action-items/generate`);
+    return res.data;
+
+};
