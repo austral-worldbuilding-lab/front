@@ -40,3 +40,9 @@ export const getSolutionValidation = async (projectId: string) => {
     const res = await axiosInstance.get(`/project/${projectId}/solutions/validation`);
     return res.data;
 };
+
+export const getDeliverable = async (projectId: string) => {
+
+    const res = await axiosInstance.get(`/project/${projectId}/deliverables`);
+    return res.data?.data?.deliverables || [];
+};
