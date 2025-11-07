@@ -31,6 +31,7 @@ export function useProjectPermissions(projectId: string | undefined) {
     canEditProject, 
     canViewProject,
     canManageProjectUsers,
+    canDeleteProject,
     loading 
   } = usePermissions();
 
@@ -45,6 +46,7 @@ export function useProjectPermissions(projectId: string | undefined) {
     canEdit: projectId ? canEditProject(projectId) : false,
     canView: projectId ? canViewProject(projectId) : false,
     canManageUsers: projectId ? canManageProjectUsers(projectId) : false,
+    canDelete: projectId ? canDeleteProject(projectId) : false,
     loading,
   };
 }

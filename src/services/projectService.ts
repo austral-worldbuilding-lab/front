@@ -184,3 +184,11 @@ export const createChildProject = async (
 
   return response.data.data;
 };
+
+export const deleteProject = async (projectId: string): Promise<void> => {
+  const response = await axiosInstance.delete(`/project/${projectId}`);
+
+  if (response.status !== 200) {
+    throw new Error("Error al eliminar proyecto");
+  }
+};
