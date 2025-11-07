@@ -69,5 +69,23 @@ export const provocationsService = {
         const all = [...dbProvs, ...cacheProvs.filter(p => !dbProvs.some(d => d.title === p.title))];
 
         return all;
+    },
+
+    async deleteProvocation(projectId: string, provocationId: string): Promise<void> {
+        if (!projectId) throw new Error("projectId es requerido");
+        if (!provocationId) throw new Error("provocationId es requerido");
+
+        try {
+            const response = await axiosInstance.delete(
+                `/project/${projectId}/provocation/${provocationId}`
+            );
+
+            if (response.status !== 200) {
+                throw new Error("Error eliminando provocación");
+            }
+        } catch (error: any) {
+            const errorMsg = error?.response?.data?.message || error?.message || "Error eliminando provocación";
+            throw new Error(errorMsg);
+        }
     }
 };

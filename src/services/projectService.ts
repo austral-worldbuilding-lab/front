@@ -140,8 +140,9 @@ export const createProjectFromQuestion = async (
 export const getTimelineForProject = async (
     projectId: string
 ): Promise<{ nodes: BackendTimelineNode[]; edges: BackendTimelineEdge[] }> => {
+  const timestamp = new Date().getTime();
   const response = await axiosInstance.get<{ data: { nodes: BackendTimelineNode[]; edges: BackendTimelineEdge[] } }>(
-      `/project/${projectId}/timeline`
+      `/project/${projectId}/timeline?t=${timestamp}`
   );
 
   if (response.status !== 200) {
