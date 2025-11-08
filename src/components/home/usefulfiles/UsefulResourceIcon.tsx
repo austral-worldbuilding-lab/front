@@ -1,10 +1,4 @@
-import {
-  FileText,
-  Image as ImageIcon,
-  Clapperboard,
-  Link as LinkIcon,
-  File,
-} from "lucide-react";
+import { FileText, Clapperboard, Link as LinkIcon, File } from "lucide-react";
 
 interface UsefulResourceIconProps {
   fileType: string;
@@ -41,7 +35,11 @@ const UsefulResourceIcon = ({
   }
   if (fileType.includes("video")) {
     return (
-      <Clapperboard size={size} className={iconColor} strokeWidth={strokeWidth} />
+      <Clapperboard
+        size={size}
+        className={iconColor}
+        strokeWidth={strokeWidth}
+      />
     );
   }
   if (fileType === "application/pdf") {
@@ -54,4 +52,3 @@ const UsefulResourceIcon = ({
 };
 
 export default UsefulResourceIcon;
-
