@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function SolutionsSection({ projectId }: { projectId: string }) {
-    const { reload, solutions, creating, createSolution } = useSolutions(projectId);
+    const { reload, solutions, creating, createSolution, error } = useSolutions(projectId);
     const { status, progress, startJob } = useSolutionJob(projectId, reload);
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -81,6 +81,11 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
                 </div>
             </div>
 
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-md text-sm">
+                    {error}
+                </div>
+            )}
 
             {(status === "active" || status === "waiting") && (
                 <div className="flex flex-col gap-2">

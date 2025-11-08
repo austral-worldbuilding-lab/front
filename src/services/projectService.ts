@@ -47,7 +47,7 @@ export const createProject = async (project: CreateProject): Promise<Project> =>
 
 export const updateProject = async (
     id: string,
-    data: { name?: string; description?: string; icon?: string }
+    data: { name?: string; description?: string, icon: string, iconColor?: string }
 ): Promise<Project> => {
   const response = await axiosInstance.patch<{ data: Project }>(
       `/project/${id}`,
@@ -171,6 +171,7 @@ export const createChildProject = async (
       dimensions?: { name: string; color: string }[];
       scales?: string[];
       userId: string;
+      iconColor?: string;
     }
 ): Promise<Project> => {
   const response = await axiosInstance.post<{ data: Project }>(`/project/${projectId}/child`,

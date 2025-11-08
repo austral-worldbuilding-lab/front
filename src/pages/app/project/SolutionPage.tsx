@@ -4,8 +4,8 @@ import AppLayout from "@/components/layout/AppLayout";
 import useProject from "@/hooks/useProject";
 import useSolutions from "@/hooks/useSolutions";
 import Loader from "@/components/common/Loader.tsx";
-import EncyclopediaSection from "@/components/project/EnciclopediaSection.tsx";
 import SolutionsSection from "@/components/project/SolutionSection.tsx";
+import DeliverablesSection from "@/components/project/DeliverableSection.tsx";
 
 export default function SolutionsPage() {
     const { organizationId, projectId } = useParams<{
@@ -36,7 +36,8 @@ export default function SolutionsPage() {
                             <h1 className="text-3xl font-bold">{project?.name || "Proyecto"}</h1>
                         </div>
                     </div>
-                    <EncyclopediaSection projectId={projectId!} projectName={project?.name || "Proyecto"} />
+                    <DeliverablesSection projectId={projectId!} projectName={project?.name || "Proyecto"} />
+
                     <SolutionsSection projectId={projectId!} />
                 </div>
             )}

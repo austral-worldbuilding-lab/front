@@ -42,7 +42,12 @@ const ProjectPage = () => {
       useCreateChildProject(organizationId, projectId, () => setIsCreateChildOpen(false));
 
 
-  const handleEditProject = async (data: { name: string; description?: string; icon: string }) => {
+  const handleEditProject = async (data: {
+    name: string;
+    description?: string;
+    icon: string;
+    iconColor?: string;
+  }) => {
     try {
       await updateProject(projectId!, data);
       setIsEditModalOpen(false);
@@ -82,7 +87,9 @@ const ProjectPage = () => {
         <div className="w-full flex flex-col gap-6 flex-1">
           <div className="flex justify-between">
             <div className="flex flex-col gap-2 flex-1">
-              {IconComp && <IconComp size={40} className="text-primary" />}
+              {IconComp && (
+                <IconComp size={40} style={{ color: project?.iconColor }} />
+              )}
               <h1 className="text-3xl font-bold h-8">{project?.name || " "}</h1>
               <div className="mt-2">
                 {project?.description &&
@@ -160,6 +167,8 @@ const ProjectPage = () => {
           initialDescription={project?.description || ""}
           initialIcon={project?.icon || ""}
           mode="edit"
+          icon={project?.icon}
+          iconColor={project?.iconColor}
         />
         <CreateEntityModal
             open={isCreateChildOpen}
@@ -169,7 +178,7 @@ const ProjectPage = () => {
             error={childError}
             title="Crear subproyecto"
             placeholder="Nombre del subproyecto"
-            showQuestions={false}
+            showQuestions={true}
             allowProvocationMode={false}
             showConfiguration={true}
         />
