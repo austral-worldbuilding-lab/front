@@ -38,7 +38,7 @@ const ConfirmationDialog = ({
         <AlertDialog open={isOpen} onOpenChange={loading ? undefined : onOpenChange}>
             <AlertDialogContent
                 className={cn(
-                    "max-w-md border",
+                    "max-w-md border z-[200]",
                     isDanger ? "border-red-500" : "border-gray-200"
                 )}
             >

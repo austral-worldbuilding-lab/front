@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getTimelineForProject } from "@/services/projectService";
 import { buildTimelineTree } from "@/utils/timelineUtils";
 import {TimelineNode} from "@/components/project/TimelineTree.tsx";
@@ -8,7 +8,7 @@ export default function useTimeline(projectId?: string) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<Error | null>(null);
 
-    useEffect(() => {
+    const reload = useCallback(() => {
         if (!projectId) return;
 
         setLoading(true);
@@ -23,5 +23,9 @@ export default function useTimeline(projectId?: string) {
             .finally(() => setLoading(false));
     }, [projectId]);
 
-    return { data, loading, error };
+    useEffect(() => {
+        reload();
+    }, [reload]);
+
+    return { data, loading, error, reload };
 }

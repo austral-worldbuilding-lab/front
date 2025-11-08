@@ -6,6 +6,7 @@ export default function useProvocations(projectId: string) {
     const [provocations, setProvocations] = useState<Provocation[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const reload = async () => {
         setLoading(true);
@@ -52,6 +53,26 @@ export default function useProvocations(projectId: string) {
         }
     };
 
+    const deleteProvocation = async (provocationId: string) => {
+        if (!provocationId) {
+            throw new Error("provocationId es requerido");
+        }
+        
+        setDeletingId(provocationId);
+        setError(null);
+        try {
+            await provocationsService.deleteProvocation(projectId, provocationId);
+            await reload();
+        } catch (err: any) {
+            console.error("Error eliminando provocación:", err);
+            const errorMsg = err.message ?? "Error eliminando provocación";
+            setError(errorMsg);
+            throw err;
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     const linkProvocationToProject = (provId: string, newProjectId: string) => {
         setProvocations(prev =>
             prev.map(p => (p.id === provId ? { ...p, parentProjectId: newProjectId, isCached: false } : p))
@@ -62,5 +83,5 @@ export default function useProvocations(projectId: string) {
         reload();
     }, [projectId]);
 
-    return { provocations, loading, error, setProvocations, reload, generateAI, createManual, linkProvocationToProject };
+    return { provocations, loading, error, deletingId, setProvocations, reload, generateAI, createManual, deleteProvocation, linkProvocationToProject };
 }
