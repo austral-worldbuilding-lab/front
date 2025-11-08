@@ -18,9 +18,13 @@ export const useCreateOrganization = () => {
     setError(null);
     try {
       const response = await createOrgService({ name });
-      const result = await uploadFileToS3(response.data.presignedUrl, icon, {
-        contentType: icon.type,
-      });
+      const result = await uploadFileToS3(
+        response.data.profilePicture.presignedUrl,
+        icon,
+        {
+          contentType: icon.type,
+        }
+      );
       if (result.error) {
         setError(result.error.message);
         return;
