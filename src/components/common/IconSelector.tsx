@@ -37,11 +37,17 @@ export const IconSelector = ({
   const [selectedColor, setSelectedColor] = useState<string>(initialColor ?? "black");
   const [icon, setIcon] = useState<string>(initialIcon ?? ICON_OPTIONS[0]);
 
-  console.log(initialColor);
+  useEffect(() => {
+    setSelectedColor(initialColor ?? "black");
+  }, [initialColor]);
+
+  useEffect(() => {
+    setIcon(initialIcon ?? ICON_OPTIONS[0]);
+  }, [initialIcon]);
 
   useEffect(() => {
     onChange(icon, selectedColor);
-  }, [icon, onChange, selectedColor]);
+  }, [icon, selectedColor]);
 
   return (
     <div className="flex flex-col items-start gap-2">

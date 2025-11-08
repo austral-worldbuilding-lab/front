@@ -166,9 +166,8 @@ const ProjectPage = () => {
           initialName={project?.name || ""}
           initialDescription={project?.description || ""}
           initialIcon={project?.icon || ""}
+          initialIconColor={project?.iconColor || ""}
           mode="edit"
-          icon={project?.icon}
-          iconColor={project?.iconColor}
         />
         <CreateEntityModal
             open={isCreateChildOpen}

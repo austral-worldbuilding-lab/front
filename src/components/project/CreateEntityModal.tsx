@@ -53,12 +53,11 @@ interface CreateEntityModalProps {
   initialName?: string;
   initialDescription?: string;
   initialIcon?: string;
+  initialIconColor?: string;
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
   isOrganization?: boolean;
-  icon?: string;
-  iconColor?: string;
 }
 
 const CreateEntityModal = ({
@@ -74,12 +73,11 @@ const CreateEntityModal = ({
   initialName,
   initialDescription,
   initialIcon,
+  initialIconColor,
   mode,
   allowProvocationMode = false,
   showConfiguration = false,
   isOrganization = false,
-  icon: initialIcon,
-  iconColor: initialColor,
 }: CreateEntityModalProps) => {
   const [name, setName] = useState(initialName ?? "");
   const [description, setDescription] = useState(initialDescription ?? "");
@@ -89,15 +87,14 @@ const CreateEntityModal = ({
   const [scales, setScales] = useState<Item[]>(getInitialScales());
   const [icon, setIcon] = useState<string | null>(initialIcon ?? null);
   const [image, setImage] = useState<File | null>(null);
-  const [iconColor, setIconColor] = useState<string | null>(null);
+  const [iconColor, setIconColor] = useState<string | null>(initialIconColor ?? null);
 
   useEffect(() => {
     setName(initialName ?? "");
     setDescription(initialDescription ?? "");
     setIcon(initialIcon ?? null);
-    setIconColor(initialColor ?? null);
-    console.log(initialName, initialDescription, initialIcon, initialColor);
-  }, [initialName, initialDescription, open, initialColor, initialIcon]);
+    setIconColor(initialIconColor ?? null);
+  }, [initialName, initialDescription, initialIcon, initialIconColor, open]);
 
   if (!open) return null;
 
@@ -119,24 +116,36 @@ const CreateEntityModal = ({
         iconColor: iconColor ?? undefined,
       });
     } else if (showQuestions) {
-      onCreate({
+      const data: any = {
         name,
         description,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
-        icon: icon ?? ICON_OPTIONS[0],
-        image: image ?? undefined,
-        iconColor: iconColor ?? undefined,
-      });
+      };
+      
+      if (isOrganization) {
+        data.image = image ?? undefined;
+      } else {
+        data.icon = icon ?? ICON_OPTIONS[0];
+        data.iconColor = iconColor ?? undefined;
+      }
+      
+      onCreate(data);
     } else {
-      onCreate({
+      const data: any = {
         name,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
-        icon: icon ?? ICON_OPTIONS[0],
-        image: image ?? undefined,
-        iconColor: iconColor ?? undefined,
-      });
+      };
+      
+      if (isOrganization) {
+        data.image = image ?? undefined;
+      } else {
+        data.icon = icon ?? ICON_OPTIONS[0];
+        data.iconColor = iconColor ?? undefined;
+      }
+      
+      onCreate(data);
     }
   };
 
@@ -234,7 +243,7 @@ const CreateEntityModal = ({
             }}
             disabled={loading}
             displayColorSelector
-            initialColor={initialColor}
+            initialColor={initialIconColor}
             initialIcon={initialIcon}
           />
           )}
