@@ -116,34 +116,26 @@ const CreateEntityModal = ({
         iconColor: iconColor ?? undefined,
       });
     } else if (showQuestions) {
-      const data: any = {
+      const data = {
         name,
         description,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
+        icon: (isOrganization ? undefined : (icon ?? ICON_OPTIONS[0])) as string,
+        image: isOrganization ? (image ?? undefined) : undefined,
+        iconColor: isOrganization ? undefined : (iconColor ?? undefined),
       };
-      
-      if (isOrganization) {
-        data.image = image ?? undefined;
-      } else {
-        data.icon = icon ?? ICON_OPTIONS[0];
-        data.iconColor = iconColor ?? undefined;
-      }
       
       onCreate(data);
     } else {
-      const data: any = {
+      const data = {
         name,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
+        icon: (isOrganization ? undefined : (icon ?? ICON_OPTIONS[0])) as string,
+        image: isOrganization ? (image ?? undefined) : undefined,
+        iconColor: isOrganization ? undefined : (iconColor ?? undefined),
       };
-      
-      if (isOrganization) {
-        data.image = image ?? undefined;
-      } else {
-        data.icon = icon ?? ICON_OPTIONS[0];
-        data.iconColor = iconColor ?? undefined;
-      }
       
       onCreate(data);
     }
