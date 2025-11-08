@@ -1,18 +1,15 @@
-import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, PlusIcon } from "lucide-react";
 import Loader from "@/components/common/Loader.tsx";
 import useOrganizations from "@/hooks/useOrganizations.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { useState, useEffect } from "react";
 import CreateEntityModal from "@/components/project/CreateEntityModal.tsx";
 import { useCreateOrganization } from "@/hooks/useCreateOrganization.ts";
-import MandalaMenu from "@/components/mandala/MandalaMenu";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 import { useDeleteOrganization } from "@/hooks/useDeleteOrganizations.ts";
 import AppLayout from "@/components/layout/AppLayout";
-import { getOrganizationIcon } from "@/utils/iconUtils";
 import UsefulFiles from "@/components/home/usefulfiles/UsefulFiles";
 import AccountStadistics from "@/components/home/stadistics/AccountStadistics";
+import OrganizationsSection from "@/components/home/organizationsList/OrganizationsSection";
 
 const OrganizationListPage = () => {
   const {
@@ -28,6 +25,8 @@ const OrganizationListPage = () => {
   useEffect(() => {
     setOrganizations(fetchedOrgs);
   }, [fetchedOrgs]);
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const {
@@ -88,81 +87,17 @@ const OrganizationListPage = () => {
   return (
     <AppLayout>
       <div className="min-h-screen flex flex-col items-center pt-12">
-        <div className="w-full max-w-2xl px-4">
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Organizaciones
-          </h1>
-          <Button
-            color="primary"
-            className="mb-6"
-            onClick={() => setModalOpen(true)}
-            icon={<PlusIcon size={16} />}
-          >
-            Crear Organización
-          </Button>
-
-          <div className="bg-white rounded-lg shadow-sm border">
-            {organizations.length === 0 ? (
-              <p className="p-4 text-gray-600 text-center">
-                No hay organizaciones
-              </p>
-            ) : (
-              <ul className="divide-y divide-gray-100">
-                {organizations.map((org) => {
-                  const IconComp = getOrganizationIcon("");
-                  return (
-                    <li
-                      key={org.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 p-4 text-gray-800">
-                        <Link
-                          to={`/app/organization/${org.id}/projects`}
-                          className="flex-1 flex items-center gap-3 hover:text-blue-600 transition-colors"
-                        >
-                          {org.imageUrl ? (
-                            <img className="h-5" src={org.imageUrl}></img>
-                          ) : (
-                            <IconComp className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                          )}
-                          <div className="flex items-center gap-2">
-                            <span>{org.name}</span>
-                            {org.accessType === "limited" && (
-                              <span className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded-full border border-primary-300">
-                                Acceso limitado
-                              </span>
-                            )}
-                          </div>
-                        </Link>
-                        {org.accessType === "full" && (
-                          <MandalaMenu
-                            onDelete={() => handleDeleteClick(org.id)}
-                          />
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-          <div className="flex justify-center items-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-              icon={<ChevronLeft size={16} />}
-            />
-            <span>Página {page}</span>
-            <Button
-              variant="outline"
-              onClick={() => setPage(page + 1)}
-              disabled={nextPageOrgs.length === 0}
-              icon={<ChevronRight size={16} />}
-            />
-          </div>
-        </div>
-        <div className="w-full max-w-2xl mt-6 flex flex-col gap-4">
+        <OrganizationsSection
+          organizations={organizations}
+          page={page}
+          setPage={setPage}
+          nextPageOrgs={nextPageOrgs}
+          onDeleteClick={handleDeleteClick}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onCreateClick={() => setModalOpen(true)}
+        />
+        <div className="w-full max-w-6xl mt-6 flex flex-col gap-4 px-4">
           <UsefulFiles />
           <AccountStadistics />
         </div>
