@@ -45,3 +45,24 @@ export const addImage = async (id: string, imageId: string): Promise<void> => {
     throw new Error("Error al agregar la imagen");
   }
 };
+
+export interface OrganizationWithPresignedUrl extends Organization {
+  imageId: string;
+  presignedUrl: string;
+}
+
+export const updateOrganization = async (
+  id: string,
+  data: { name?: string }
+): Promise<OrganizationWithPresignedUrl> => {
+  const response = await axiosInstance.patch<{ data: OrganizationWithPresignedUrl }>(
+    `/organization/${id}`,
+    data
+  );
+
+  if (response.status !== 200) {
+    throw new Error(response.statusText || "Error actualizando organización.");
+  }
+
+  return response.data.data;
+};

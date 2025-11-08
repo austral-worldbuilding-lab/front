@@ -10,16 +10,21 @@ import { Upload, X } from "lucide-react";
 
 interface ImageSelectorProps {
   onChange: (file: File | null) => void;
+  initialImageUrl?: string | null;
 }
 
-export const ImageSelector = ({ onChange }: ImageSelectorProps) => {
+export const ImageSelector = ({ onChange, initialImageUrl }: ImageSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const previewUrl = useMemo(
-    () => (file ? URL.createObjectURL(file) : null),
-    [file]
+    () => {
+      if (file) return URL.createObjectURL(file);
+      if (initialImageUrl) return initialImageUrl;
+      return null;
+    },
+    [file, initialImageUrl]
   );
 
   useEffect(() => {

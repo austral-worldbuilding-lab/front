@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import useProjects from "@/hooks/useProjects";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, Edit } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   createProject,
@@ -17,6 +17,9 @@ import FileListContainer from "@/components/files/FileListContainer";
 import { DimensionDto } from "@/types/mandala";
 import AppLayout from "@/components/layout/AppLayout";
 import { getOrganizationIcon } from "@/utils/iconUtils";
+import { Button } from "@/components/ui/button";
+import useUpdateOrganization from "@/hooks/useUpdateOrganization";
+import { useUpdateOrganizationImage } from "@/hooks/useUpdateOrganizationImage";
 
 const OrganizationPage = () => {
   const { organizationId } = useParams();
@@ -26,12 +29,26 @@ const OrganizationPage = () => {
   const { canCreateProject, canManageUsers } =
     useOrganizationPermissions(organizationId);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string>("");
   const [orgImageUrl, setOrgImageUrl] = useState<string | null>(null);
 
-  useEffect(() => {
+  const {
+    update: updateOrganization,
+    loading: updating,
+    error: updateError,
+  } = useUpdateOrganization(() => {
+    fetchOrganization();
+  });
+
+  const {
+    updateImage: updateOrganizationImage,
+    loading: updatingImage,
+  } = useUpdateOrganizationImage();
+
+  const fetchOrganization = () => {
     if (organizationId) {
       getOrganizationById(organizationId)
         .then((org) => {
@@ -40,6 +57,10 @@ const OrganizationPage = () => {
         })
         .catch(() => setOrgName("Organización desconocida"));
     }
+  };
+
+  useEffect(() => {
+    fetchOrganization();
   }, [organizationId]);
 
   const handleCreateProject = async (data: {
@@ -112,6 +133,35 @@ const OrganizationPage = () => {
     }
   };
 
+  const handleEditOrganization = async (data: { name: string; image?: File }) => {
+    try {
+      // 1. Actualizar nombre (esto devuelve presignedUrl e imageId)
+      const updatedOrg = await updateOrganization(organizationId!, { name: data.name });
+      
+      // 2. Si hay nueva imagen, subirla usando el presignedUrl devuelto
+      if (data.image && updatedOrg.presignedUrl && updatedOrg.imageId) {
+        const success = await updateOrganizationImage(
+          organizationId!,
+          data.image,
+          updatedOrg.presignedUrl,
+          updatedOrg.imageId
+        );
+        if (!success) {
+          setErrorMsg("El nombre se actualizó, pero hubo un error al actualizar la imagen.");
+          return;
+        }
+      }
+      
+      setIsEditModalOpen(false);
+      setErrorMsg(null);
+      fetchOrganization();
+    } catch {
+      setErrorMsg(
+        "No se pudo actualizar la organización. Intentalo de nuevo más tarde."
+      );
+    }
+  };
+
   const IconComp = getOrganizationIcon("");
 
   return (
@@ -134,13 +184,27 @@ const OrganizationPage = () => {
               <h1 className="text-3xl font-bold">{orgName || ""}</h1>
             </div>
             <div className="flex flex-col gap-2 items-end flex-1">
-              <UnifiedInvitationDialog
-                projectName={orgName ?? "Organización"}
-                projectId={projects[0]?.id ?? ""}
-                organizationId={organizationId ?? ""}
-                defaultRole="worldbuilder"
-                isOrganization
-              />
+              <div className="flex gap-2">
+                {canManageUsers && (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    color="white"
+                    onClick={() => setIsEditModalOpen(true)}
+                    aria-label="Editar"
+                    icon={<Edit size={16} />}
+                  >
+                    Editar
+                  </Button>
+                )}
+                <UnifiedInvitationDialog
+                  projectName={orgName ?? "Organización"}
+                  projectId={projects[0]?.id ?? ""}
+                  organizationId={organizationId ?? ""}
+                  defaultRole="worldbuilder"
+                  isOrganization
+                />
+              </div>
               <OrganizationUserCircles
                 organizationId={organizationId!}
                 canManageUsers={canManageUsers}
@@ -180,6 +244,27 @@ const OrganizationPage = () => {
           allowProvocationMode={true}
           showConfiguration={true}
         />
+
+        <CreateEntityModal
+          open={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onCreate={handleEditOrganization}
+          loading={updating || updatingImage}
+          error={updateError}
+          title="Editar organización"
+          placeholder="Nombre de la organización"
+          showQuestions={false}
+          initialName={orgName || ""}
+          initialImageUrl={orgImageUrl}
+          mode="edit"
+          isOrganization
+        />
+
+        {errorMsg && (
+          <p className="text-red-500 mt-4 text-sm text-center">
+            {errorMsg}
+          </p>
+        )}
       </div>
     </AppLayout>
   );

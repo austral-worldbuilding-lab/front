@@ -50,6 +50,7 @@ interface CreateEntityModalProps {
   showQuestions?: boolean;
   initialName?: string;
   initialDescription?: string;
+  initialImageUrl?: string | null;
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
@@ -68,6 +69,7 @@ const CreateEntityModal = ({
   showQuestions = false,
   initialName,
   initialDescription,
+  initialImageUrl,
   mode,
   allowProvocationMode = false,
   showConfiguration = false,
@@ -106,22 +108,34 @@ const CreateEntityModal = ({
         icon: icon ?? ICON_OPTIONS[0],
       });
     } else if (showQuestions) {
-      onCreate({
+      const data: any = {
         name,
         description,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
-        icon: icon ?? ICON_OPTIONS[0],
-        image: image ?? undefined,
-      });
+      };
+      
+      if (isOrganization) {
+        data.image = image ?? undefined;
+      } else {
+        data.icon = icon ?? ICON_OPTIONS[0];
+      }
+      
+      onCreate(data);
     } else {
-      onCreate({
+      const data: any = {
         name,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
-        icon: icon ?? ICON_OPTIONS[0],
-        image: image ?? undefined,
-      });
+      };
+      
+      if (isOrganization) {
+        data.image = image ?? undefined;
+      } else {
+        data.icon = icon ?? ICON_OPTIONS[0];
+      }
+      
+      onCreate(data);
     }
   };
 
@@ -208,7 +222,7 @@ const CreateEntityModal = ({
           )}
 
           {isOrganization ? (
-            <ImageSelector onChange={setImage} />
+            <ImageSelector onChange={setImage} initialImageUrl={initialImageUrl} />
           ) : (
             <IconSelector value={icon} onChange={setIcon} disabled={loading} />
           )}
