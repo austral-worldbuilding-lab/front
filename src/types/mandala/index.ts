@@ -197,6 +197,12 @@ export interface FileItem {
   selected: boolean;
 }
 
+export interface UsefulResource {
+  file_name: string;
+  file_type: string;
+  url: string;
+}
+
 export interface Provocation {
   projectsOrigin: ProvocationProject[];
   id: string;
