@@ -12,6 +12,7 @@ import { useDeleteOrganization } from "@/hooks/useDeleteOrganizations.ts";
 import AppLayout from "@/components/layout/AppLayout";
 import { getOrganizationIcon } from "@/utils/iconUtils";
 import UsefulFiles from "@/components/home/usefulfiles/UsefulFiles";
+import AccountStadistics from "@/components/home/stadistics/AccountStadistics";
 
 const OrganizationListPage = () => {
   const {
@@ -161,8 +162,9 @@ const OrganizationListPage = () => {
             />
           </div>
         </div>
-        <div className="w-full max-w-2xl mt-6">
+        <div className="w-full max-w-2xl mt-6 flex flex-col gap-4">
           <UsefulFiles />
+          <AccountStadistics />
         </div>
         <CreateEntityModal
           open={modalOpen}
