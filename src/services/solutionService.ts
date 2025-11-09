@@ -53,3 +53,23 @@ export const getActionIntem = async (projectId: string, solutionId: string) => {
     return res.data;
 
 };
+
+export const getSolutionImages = async (
+  projectId: string,
+  solutionId: string
+): Promise<{ urls: string[] }> => {
+  const response = await axiosInstance.get(
+    `/project/${projectId}/solutions/${solutionId}/images`
+  );
+  return response.data.data;
+};
+
+export const generateSolutionImages = async (
+  projectId: string,
+  solutionId: string
+): Promise<{ urls: string[] }> => {
+  const response = await axiosInstance.post(
+    `/project/${projectId}/solutions/${solutionId}/images/generate`
+  );
+  return response.data.data;
+};
