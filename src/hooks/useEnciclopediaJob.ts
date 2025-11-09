@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { EncyclopediaJobStatus, getEncyclopediaJobStatus, startEncyclopediaJob } from "@/services/enciclopediaService.ts";
+import { v4 as uuid } from "uuid";
+import { useAnalytics } from "@/services/analytics";
+import { useAuth } from "./useAuth";
 
 export function useEncyclopediaJob(projectId: string) {
     const [jobId, setJobId] = useState<string | null>(null);
@@ -7,16 +10,42 @@ export function useEncyclopediaJob(projectId: string) {
     const [progress, setProgress] = useState<number>(0);
     const [error, setError] = useState<string | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const { trackAiRequest, trackAiResponse, createTimer } = useAnalytics();
+    const { backendUser } = useAuth();
 
     const startJob = async (selectedFiles: string[]) => {
+        const requestId = uuid();
+        const timer = createTimer();
+        trackAiRequest({
+          request_id: requestId,
+          user_id: backendUser?.firebaseUid ?? "",
+          project_id: projectId,
+          request_type: "generate_encyclopedia",
+        });
         try {
             const { jobId } = await startEncyclopediaJob(projectId, selectedFiles);
             setJobId(jobId);
             setStatus("waiting");
             setProgress(0);
             setError(null);
+            trackAiResponse({
+              request_id: requestId,
+              user_id: backendUser?.firebaseUid ?? "",
+              project_id: projectId,
+              response_type: "encyclopedia",
+              success: true,
+              latency_ms: timer(),
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || "Error al iniciar la generación");
+            trackAiResponse({
+              request_id: requestId,
+              user_id: backendUser?.firebaseUid ?? "",
+              project_id: projectId,
+              response_type: "encyclopedia",
+              success: false,
+              latency_ms: timer(),
+            });
         }
     };
 
