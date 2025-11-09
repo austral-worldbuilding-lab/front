@@ -21,6 +21,7 @@ interface NewImageModalProps {
   onCreate?: (imageFile: File, tags: Tag[]) => void;
   onNewTag: (tag: Tag) => void;
   onUploadComplete?: () => void;
+  initialImageUrl?: string;
 }
 
 const NewImageModal = ({
@@ -30,6 +31,7 @@ const NewImageModal = ({
   onCreate,
   onNewTag,
   onUploadComplete,
+    initialImageUrl,
 }: NewImageModalProps) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -48,6 +50,12 @@ const NewImageModal = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen && initialImageUrl) {
+      setPreviewUrl(initialImageUrl);
+    }
+  }, [isOpen, initialImageUrl]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -63,20 +71,25 @@ const NewImageModal = ({
   };
 
   const handleCreate = async () => {
-    if (selectedImage) {
+    let imageToUpload: File | null = selectedImage;
+
+    if (!selectedImage && initialImageUrl) {
+      const response = await fetch(initialImageUrl);
+      const blob = await response.blob();
+      imageToUpload = new File([blob], "generated-image.png", { type: blob.type });
+    }
+
+    if (imageToUpload) {
       if (onCreate) {
-        onCreate(selectedImage, selectedTags);
+        onCreate(imageToUpload, selectedTags);
         onOpenChange(false);
         return;
       }
 
-      // Use the new upload functionality
-      const success = await uploadImage(selectedImage, selectedTags);
+      const success = await uploadImage(imageToUpload, selectedTags);
 
       if (success) {
-        if (onUploadComplete) {
-          onUploadComplete();
-        }
+        if (onUploadComplete) onUploadComplete();
         onOpenChange(false);
       }
     }
@@ -175,7 +188,7 @@ const NewImageModal = ({
             variant="filled"
             color="primary"
             onClick={handleCreate}
-            disabled={!selectedImage || isUploading}
+            disabled={!selectedImage && !initialImageUrl|| isUploading}
           >
             {isUploading ? (
               <>

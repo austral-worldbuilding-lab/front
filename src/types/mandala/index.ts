@@ -62,6 +62,10 @@ export interface MandalaImage {
   section: string;
   tags: Tag[];
   scale?: number;
+  from?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface Mandala {
@@ -117,6 +121,8 @@ export interface Project {
   description?: string;
   organizationId: string;
   configuration?: ProjectConfiguration;
+  icon: string;
+  iconColor: string;
 }
 
 export interface ProjectConfiguration {
@@ -131,6 +137,8 @@ export interface CreateProject {
   organizationId: string;
   dimensions?: DimensionDto[];
   scales?: string[];
+  icon: string;
+  iconColor?: string;
 }
 
 export interface DimensionDto {
@@ -144,6 +152,8 @@ export interface CreateProjectFromQuestion {
   name?: string;
   dimensions?: DimensionDto[];
   scales?: string[];
+  icon: string;
+  iconColor?: string;
 }
 
 export interface FilterOption {
@@ -175,6 +185,7 @@ export interface Organization {
   id: string;
   name: string;
   accessType?: "full" | "limited";
+  imageUrl?: string;
 }
 export interface FileItem {
   id: string;
@@ -184,6 +195,12 @@ export interface FileItem {
   full_path: string;
   url: string;
   selected: boolean;
+}
+
+export interface UsefulResource {
+  file_name: string;
+  file_type: string;
+  url: string;
 }
 
 export interface Provocation {
@@ -217,4 +234,12 @@ export interface Solution {
     description: string;
   };
   provocations: string[];
+  actionItems?: ActionItem[];
+}
+
+export interface ActionItem {
+  order: number;
+  title: string;
+  description: string;
+  duration?: string;
 }

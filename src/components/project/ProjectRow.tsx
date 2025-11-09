@@ -1,11 +1,14 @@
-import {ChevronDown, ChevronRight, FolderIcon} from "lucide-react";
-import {useNavigate} from "react-router-dom";
-import {useState} from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { getProjectIcon } from "@/utils/iconUtils";
 
 interface Project {
   id: string;
   name: string;
   children?: Project[];
+  icon: string;
+  iconColor: string;
 }
 
 interface ProjectRowProps {
@@ -14,7 +17,11 @@ interface ProjectRowProps {
   level?: number;
 }
 
-export const ProjectRow = ({ project, organizationId, level = 0 }: ProjectRowProps) => {
+export const ProjectRow = ({
+  project,
+  organizationId,
+  level = 0,
+}: ProjectRowProps) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
@@ -25,7 +32,7 @@ export const ProjectRow = ({ project, organizationId, level = 0 }: ProjectRowPro
     console.log(`🔹 Proyecto "${project.name}":`, {
       id: project.id,
       childrenCount: project.children?.length || 0,
-      hasChildren
+      hasChildren,
     });
   }
 
@@ -38,41 +45,54 @@ export const ProjectRow = ({ project, organizationId, level = 0 }: ProjectRowPro
     setExpanded(!expanded);
   };
 
-  return (
-      <li>
-        <div
-            className="hover:bg-gray-50 transition-colors cursor-pointer flex items-center justify-between p-3"
-            style={{ paddingLeft: `${level * 20 + 12}px` }}
-            onClick={handleClick}
-        >
-          <div className="flex items-center gap-3 flex-1 text-gray-800">
-            {hasChildren ? (
-                <button
-                    onClick={handleToggle}
-                    className="flex-shrink-0 hover:bg-gray-200 rounded p-0.5"
-                >
-                  {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                </button>
-            ) : (
-                <span className="w-5" />
-            )}
-            <FolderIcon className="w-5 h-5 text-primary flex-shrink-0" />
-            <span className="flex-1 text-sm font-medium">{project.name || "Proyecto sin nombre"}</span>
-          </div>
-        </div>
+  const IconComp = getProjectIcon(project.icon);
 
-        {expanded && hasChildren && (
-            <ul>
-              {project.children!.map((child) => (
-                  <ProjectRow
-                      key={child.id}
-                      project={child}
-                      organizationId={organizationId}
-                      level={level + 1}
-                  />
-              ))}
-            </ul>
-        )}
-      </li>
+  console.log(project);
+
+  return (
+    <li>
+      <div
+        className="hover:bg-gray-50 transition-colors cursor-pointer flex items-center justify-between p-3"
+        style={{ paddingLeft: `${level * 20 + 12}px` }}
+        onClick={handleClick}
+      >
+        <div className="flex items-center gap-3 flex-1 text-gray-800">
+          {hasChildren ? (
+            <button
+              onClick={handleToggle}
+              className="flex-shrink-0 hover:bg-gray-200 rounded p-0.5"
+            >
+              {expanded ? (
+                <ChevronDown size={16} />
+              ) : (
+                <ChevronRight size={16} />
+              )}
+            </button>
+          ) : (
+            <span className="w-5" />
+          )}
+          <IconComp
+            className="w-5 h-5 flex-shrink-0"
+            style={{ color: project.iconColor }}
+          />
+          <span className="flex-1 text-sm font-medium">
+            {project.name || "Proyecto sin nombre"}
+          </span>
+        </div>
+      </div>
+
+      {expanded && hasChildren && (
+        <ul>
+          {project.children!.map((child) => (
+            <ProjectRow
+              key={child.id}
+              project={child}
+              organizationId={organizationId}
+              level={level + 1}
+            />
+          ))}
+        </ul>
+      )}
+    </li>
   );
 };

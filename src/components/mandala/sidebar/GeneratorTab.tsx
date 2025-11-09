@@ -6,7 +6,8 @@ import FiltersPanel, {
   FiltersState,
 } from "@/components/mandala/sidebar/FiltersPanel.tsx";
 import type { Tag } from "@/types/mandala";
-import { MessageCircleQuestion, StickyNote } from "lucide-react";
+import {ImageIcon, MessageCircleQuestion, StickyNote} from "lucide-react";
+import ImagesPanel from "@/components/mandala/sidebar/ImagesPanel.tsx";
 
 export interface GeneratorTabProps {
   mandalaId: string;
@@ -35,7 +36,7 @@ export default function GeneratorTab({
   onNewTag,
   dimensionsMandala,
 }: GeneratorTabProps) {
-  const [activeTab, setActiveTab] = useState<"questions" | "postits">(
+  const [activeTab, setActiveTab] = useState<"questions" | "postits" | "images">(
     "questions"
   );
   const [filters, setFilters] = useState<FiltersState>({
@@ -57,23 +58,40 @@ export default function GeneratorTab({
   }, [filters, sections, scales]);
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col">
-      <div className="px-4 pt-3 flex-1 min-h-0 flex flex-col">
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as any)}
-          className="flex-1 min-h-0 flex flex-col"
-        >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="questions" className="flex items-center gap-2">
-              Máquina de preguntas
-              <MessageCircleQuestion />
-            </TabsTrigger>
-            <TabsTrigger value="postits" className="flex items-center gap-2">
-              Generador de Post-Its
-              <StickyNote />
-            </TabsTrigger>
-          </TabsList>
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="px-4 pt-3 flex-1 min-h-0 flex flex-col">
+          <Tabs
+              value={activeTab}
+              onValueChange={(v) => setActiveTab(v as any)}
+              className="flex-1 min-h-0 flex flex-col"
+          >
+            <TabsList
+                className="flex flex-wrap justify-between w-full gap-2 bg-white border border-gray-200 rounded-lg shadow-sm p-1"
+            >
+              <TabsTrigger
+                  value="questions"
+                  className="flex flex-1 min-w-[100px] sm:min-w-0 items-center justify-center gap-2 text-center px-3 py-2 text-sm font-medium leading-tight whitespace-normal break-words rounded-md transition-colors duration-150 data-[state=active]:bg-primary/10 data-[state=active]:text-primary hover:bg-gray-50"
+              >
+                <MessageCircleQuestion className="w-4 h-4 shrink-0" />
+                <span className="block">Máquina de preguntas</span>
+              </TabsTrigger>
+
+              <TabsTrigger
+                  value="postits"
+                  className="flex flex-1 min-w-[100px] sm:min-w-0 items-center justify-center gap-2 text-center px-3 py-2 text-sm font-medium leading-tight whitespace-normal break-words rounded-md transition-colors duration-150 data-[state=active]:bg-primary/10 data-[state=active]:text-primary hover:bg-gray-50"
+              >
+                <StickyNote className="w-4 h-4 shrink-0" />
+                <span className="block">Generador de Post-Its</span>
+              </TabsTrigger>
+
+              <TabsTrigger
+                  value="images"
+                  className="flex flex-1 min-w-[100px] sm:min-w-0 items-center justify-center gap-2 text-center px-3 py-2 text-sm font-medium leading-tight whitespace-normal break-words rounded-md transition-colors duration-150 data-[state=active]:bg-primary/10 data-[state=active]:text-primary hover:bg-gray-50"
+              >
+                <ImageIcon className="w-4 h-4 shrink-0" />
+                <span className="block">Generador de Imágenes</span>
+              </TabsTrigger>
+            </TabsList>
 
           <TabsContent
             value="questions"
@@ -95,27 +113,45 @@ export default function GeneratorTab({
             </QuestionsPanel>
           </TabsContent>
 
-          <TabsContent value="postits" className="flex flex-col flex-1 min-h-0">
-            <PostItsPanel
-              mandalaId={mandalaId}
-              organizationId={organizationId}
-              projectId={projectId}
-              selected={selected}
-              tags={tags}
-              onCreate={onCreatePostIt}
-              onNewTag={onNewTag}
-              dimensions={dimensionsMandala}
-            >
-              <FiltersPanel
-                sections={sections}
-                scales={scales}
-                value={filters}
-                onChange={setFilters}
-              />
-            </PostItsPanel>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="postits" className="flex flex-col flex-1 min-h-0">
+              <PostItsPanel
+                  mandalaId={mandalaId}
+                  organizationId={organizationId}
+                  projectId={projectId}
+                  selected={selected}
+                  tags={tags}
+                  onCreate={onCreatePostIt}
+                  onNewTag={onNewTag}
+                  dimensions={dimensionsMandala}
+              >
+                <FiltersPanel
+                    sections={sections}
+                    scales={scales}
+                    value={filters}
+                    onChange={setFilters}
+                />
+              </PostItsPanel>
+            </TabsContent>
+            <TabsContent value="images" className="flex flex-col flex-1 min-h-0">
+              <ImagesPanel
+                  mandalaId={mandalaId}
+                  organizationId={organizationId}
+                  projectId={projectId}
+                  selected={selected}
+                  dimensions={dimensionsMandala}
+                  allTags={tags}
+                onNewTag={onNewTag}>
+
+                <FiltersPanel
+                    sections={sections}
+                    scales={scales}
+                    value={filters}
+                    onChange={setFilters}
+                />
+              </ImagesPanel>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-    </div>
   );
 }

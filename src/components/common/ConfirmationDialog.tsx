@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 interface ConfirmationDialogProps {
     isOpen: boolean;
@@ -19,6 +20,7 @@ interface ConfirmationDialogProps {
     isDanger?: boolean;
     onConfirm: () => void;
     children?: React.ReactNode;
+    loading?: boolean;
 }
 
 const ConfirmationDialog = ({
@@ -30,12 +32,13 @@ const ConfirmationDialog = ({
                                 confirmText = "Confirmar",
                                 isDanger = false,
                                 onConfirm,
+                                loading = false,
                             }: ConfirmationDialogProps) => {
     return (
-        <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+        <AlertDialog open={isOpen} onOpenChange={loading ? undefined : onOpenChange}>
             <AlertDialogContent
                 className={cn(
-                    "max-w-md border",
+                    "max-w-md border z-[200]",
                     isDanger ? "border-red-500" : "border-gray-200"
                 )}
             >
@@ -55,20 +58,34 @@ const ConfirmationDialog = ({
                 </AlertDialogHeader>
 
                 <AlertDialogFooter className="flex pt-4 space-x-0">
-                <Button variant="outline" color={isDanger ? "danger" : "tertiary"} onClick={() => onOpenChange(false)}>
-                        {cancelText}
-                    </Button>
+                    {cancelText && (
+                        <Button 
+                            variant="outline" 
+                            color={isDanger ? "danger" : "tertiary"} 
+                            onClick={() => onOpenChange(false)}
+                            disabled={loading}
+                        >
+                            {cancelText}
+                        </Button>
+                    )}
                     <Button
                         variant="filled"
                         color={isDanger ? "danger" : "primary"}
                         onClick={() => {
-                            onOpenChange(false);
-                            setTimeout(() => {
+                            if (!loading) {
                                 onConfirm();
-                            }, 150);
+                            }
                         }}
+                        disabled={loading}
                     >
-                        {confirmText}
+                        {loading ? (
+                            <>
+                                <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                                Eliminando...
+                            </>
+                        ) : (
+                            confirmText
+                        )}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

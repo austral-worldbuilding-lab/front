@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
+import { NotificationBell } from "./NotificationBell";
 
 export default function Header() {
   const { logout } = useAuthContext();
@@ -39,7 +40,7 @@ export default function Header() {
   if (error) {
     console.error('Error loading user data:', error);
     return (
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center">
           <img src={logo} alt="AWBL Logo" className="h-10 w-auto" />
         </div>
@@ -51,50 +52,56 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
       <div className="flex items-center">
         <img src={logo} alt="AWBL Logo" className="h-10 w-auto" />
       </div>
 
       <div className="flex items-center">
-        {isLoading ? (
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-            <div className="w-24 h-4 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-        ) : (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex items-center space-x-3 hover:bg-gray-50 px-3 py-2 rounded-lg"
-              >
-                <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
-                  {getUserInitials()}
-                </div>
+        <NotificationBell />
+        <div className="flex items-center">
+          {isLoading ? (
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="w-24 h-4 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-3 hover:bg-gray-50 px-3 py-2 rounded-lg"
+                >
+                  <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+                    {getUserInitials()}
+                  </div>
 
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium text-gray-900">
-                    {getDisplayName()}
-                  </span>
-                </div>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium text-gray-900">
+                      {getDisplayName()}
+                    </span>
+                  </div>
 
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
-            
-            <DropdownMenuContent align="end" className="w-40 bg-white border border-gray-200 shadow-lg">
-              <DropdownMenuItem 
-                onClick={handleLogout}
-                variant="destructive"
-                className="cursor-pointer"
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="end"
+                className="w-40 bg-white border border-gray-200 shadow-lg"
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                Cerrar sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  variant="destructive"
+                  className="cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Cerrar sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
     </header>
   );

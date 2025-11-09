@@ -12,6 +12,13 @@ const GUIDE_COLOR = "rgba(100,150,255,0.5)";
 const PRIMARY_TEXT = "#0b3ea7";
 const LABEL_PAD = 110; // margen para que no se corten rótulos superior/inferior
 
+// Colores para post-its de mandalas comparadas (OVERLAP_SUMMARY)
+const COMPARISON_COLORS = {
+    SIMILITUD: "#33f25f",
+    DIFERENCIA: "#9f2d2d",
+    UNICO: "#c2c2c2",
+};
+
 // Misma interpolación de niveles que en el fondo
 function getInterpolatedLevelColor(index: number, total: number): string {
     const from = [200, 220, 255, 0.9];
@@ -26,7 +33,15 @@ export type MandalaSVGProps = {
     mandala: MandalaData;
     embeddedFontCss?: string;
     // Posiciones absolutas (idénticas a Konva)
-    postsAbs?: Array<{ id?: string; content: string; dimension: string; ax: number; ay: number }>;
+    postsAbs?: Array<{
+        id?: string;
+        content: string;
+        dimension: string;
+        ax: number;
+        ay: number;
+        scale?: number;  // Escala del post-it (1 es normal)
+        type?: "SIMILITUD" | "DIFERENCIA" | "UNICO";  // Tipo para mandalas comparadas
+    }>;
     charsAbs?: Array<{ id?: string; name: string; color?: string; ax: number; ay: number }>;
     imagesAbs?: Array<{ id?: string; url: string; ax: number; ay: number }>;
 };
@@ -80,7 +95,15 @@ export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
             postsAbs ??
             (mandala.postits || []).map(p => {
                 const { x, y } = relToAbs(p.coordinates.x, p.coordinates.y);
-                return { id: p.id, content: p.content, dimension: p.dimension, ax: x, ay: y };
+                return {
+                    id: p.id,
+                    content: p.content,
+                    dimension: p.dimension,
+                    ax: x,
+                    ay: y,
+                    scale: p.scale,
+                    type: p.type,
+                };
             });
 
         // Personajes absolutos (si vienen por props, usarlos)
@@ -149,7 +172,10 @@ export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
                 {midAngles.map((mid, i) => {
                     const x = R + Math.cos(rad(mid)) * (R + 60);
                     const y = R + Math.sin(rad(mid)) * (R + 60);
-                    const textRotation = mid + 90;
+                    let textRotation = mid + 90;
+                    if (textRotation > 90 && textRotation < 270) {
+                        textRotation += 180;
+                    }
                     return (
                         <g key={`label-${i}`} transform={`translate(${x} ${y}) rotate(${textRotation})`}>
                             <text
@@ -167,22 +193,47 @@ export const MandalaSVG = forwardRef<SVGSVGElement, MandalaSVGProps>(
 
                 {/* Post-its */}
                 {posts.map((p, i) => {
-                    const maxTextW = POSTIT_R * 2 * 0.8;
-                    const lines = wrapTextByWidth(p.content ?? "", maxTextW, POSTIT_FONT);
-                    const lh = Math.round(POSTIT_FONT * 1.1);
-                    const totalH = lh * Math.max(lines.length, 1);
-                    const startY = p.ay - (totalH - lh) / 2;
+                    const postItScale = p.scale ?? 1;
+                    const radius = POSTIT_R * postItScale;
+                    const fillColor = p.type
+                        ? COMPARISON_COLORS[p.type]
+                        : (dimensionColors[p.dimension] ?? "white");
+
+                    // Padding
+                    const paddingRatio = 5 / 100; // 0.05
+                    const padding = radius * 2 * paddingRatio;
+
+                    // Ancho disponible para texto (diámetro - padding horizontal)
+                    const availableWidth = (radius * 2) - (padding * 2);
+                    const maxTextW = availableWidth * 0.95;
+
+                    // FontSize escala con el post-it
+                    const scaledFontSize = POSTIT_FONT * postItScale;
+
+                    const lines = wrapTextByWidth(p.content ?? "", maxTextW, scaledFontSize);
+                    const lh = Math.round(scaledFontSize * 1.1);
+
+                    // Posición Y inicial: arriba del círculo + padding (centro - radio + padding)
+                    const startY = p.ay - radius + padding * 2 + (scaledFontSize / 2);
+
                     return (
                         <g key={p.id ?? `p-${i}`}>
                             <circle
                                 cx={p.ax}
                                 cy={p.ay}
-                                r={POSTIT_R}
-                                fill={dimensionColors[p.dimension] ?? "white"}
+                                r={radius}
+                                fill={fillColor}
                                 stroke="rgba(0,0,0,0.25)"
                             />
                             {lines.map((line, j) => (
-                                <text key={j} x={p.ax} y={startY + j * lh} fontSize={POSTIT_FONT} textAnchor="middle" dominantBaseline="middle">
+                                <text
+                                    key={j}
+                                    x={p.ax}
+                                    y={startY + j * lh}
+                                    fontSize={scaledFontSize}
+                                    textAnchor="middle"
+                                    dominantBaseline="hanging"
+                                >
                                     {line}
                                 </text>
                             ))}

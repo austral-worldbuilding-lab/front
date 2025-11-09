@@ -39,9 +39,9 @@ const OrganizationUserList = ({
     if (
       isCurrentUser &&
       targetUser &&
-      ((targetUser.role === "owner" && newRole !== "owner") ||
-        (targetUser.role === "admin" &&
-          (newRole === "member" || newRole === "viewer")))
+      ((targetUser.role === "dueño" && newRole !== "dueño") ||
+        (targetUser.role === "facilitador" &&
+          (newRole === "worldbuilder" || newRole === "lector")))
     ) {
       setActionError(
         "No puedes reducir tu propio rol de administrador. Solicita a otro administrador que cambie tu rol."

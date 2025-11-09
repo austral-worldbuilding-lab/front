@@ -49,7 +49,10 @@ import {
   generateOverlapReportPDF,
   generateNormalMandalaReportPDF,
 } from "@/components/download/GeneradorDePDF.tsx";
-import { useOverlapReport, useNormalMandalaReport } from "@/hooks/useReport.tsx";
+import {
+  useOverlapReport,
+  useNormalMandalaReport,
+} from "@/hooks/useReport.tsx";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,7 +95,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   }, [organizationId]);
 
   const projectId = useParams<{ projectId: string }>().projectId!;
-  const { characters: projectCharacters, linkCharacter } =
+  const { characters: projectCharacters, linkCharacter, refetch: refetchCharacters } =
     useProjectCharacters(mandalaId);
 
   const navigate = useNavigate();
@@ -124,21 +127,19 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   );
 
   // Hooks específicos según el tipo de mandala
-  const { report: overlapReport, loading: overlapReportLoading } = useOverlapReport(
-    projectId,
-    mandalaId
-  );
-  const { report: normalReport, loading: normalReportLoading } = useNormalMandalaReport(
-    projectId,
-    mandalaId
-  );
+  const { report: overlapReport, loading: overlapReportLoading } =
+    useOverlapReport(projectId, mandalaId);
+  const { report: normalReport, loading: normalReportLoading } =
+    useNormalMandalaReport(projectId, mandalaId);
   const { generateSummary, loading: generatingReport } = useGenerateSummary();
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
 
   // Determinar qué tipo de reporte usar según el tipo de mandala
   const isOverlapMandala = mandala?.mandala.type === "OVERLAP_SUMMARY";
   const report = isOverlapMandala ? overlapReport : normalReport;
-  const reportLoading = isOverlapMandala ? overlapReportLoading : normalReportLoading;
+  const reportLoading = isOverlapMandala
+    ? overlapReportLoading
+    : normalReportLoading;
 
   const postsAbs = (mandala?.postits ?? []).map((p) => {
     const a = toAbsolutePostit(p.coordinates.x, p.coordinates.y);
@@ -148,6 +149,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
       dimension: p.dimension,
       ax: a.x,
       ay: a.y,
+      scale: p.scale ?? 1, // Si no tiene scale, usar 1 (tamaño normal)
+      type: p.type, // SIMILITUD, DIFERENCIA, UNICO (para mandalas comparadas)
     };
   });
 
@@ -227,9 +230,11 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     }
   };
 
-  const handleDeleteCharacter = async (index: number) => {
+  const handleDeleteCharacter = async (characterId: string) => {
     try {
-      await deleteCharacter(index);
+      await deleteCharacter(characterId);
+      // Refetch available characters after unlinking
+      await refetchCharacters();
     } catch (e) {
       console.error("Error al eliminar el personaje:", e);
     }
@@ -273,10 +278,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   };
 
   const handleGenerateSummary = async () => {
-    const success = await generateSummary(mandalaId);
-    if (success) {
-      setShowGenerateDialog(false);
-    }
+    await generateSummary(mandalaId);
+    setShowGenerateDialog(false);
   };
 
   return (
@@ -391,6 +394,23 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                   )}
                 </DialogDescription>
               </DialogHeader>
+
+              <div className="mt-4 border-t pt-4">
+                <h3 className="text-sm font-semibold mb-2">
+                  Mandala: {mandala?.mandala.configuration.center.name ?? mandala?.mandala.name ?? "Sin nombre"}
+                </h3>
+                {mandala?.mandala.configuration.center.description &&
+                mandala.mandala.configuration.center.description.trim().length > 0 ? (
+                  <p className="text-sm text-muted-foreground leading-6 whitespace-pre-wrap">
+                    {mandala.mandala.configuration.center.description}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    Esta mandala no tiene descripción.
+                  </p>
+                )}
+              </div>
+
               <div className="mt-4">
                 <ProjectMembersDisplay projectId={projectId} />
               </div>
@@ -456,14 +476,15 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       onApplyFilters={(filters) => setAppliedFilters(filters)}
                     />
 
-                    {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type == "CONTEXT") && (
+                    {(mandala.mandala.type === "CHARACTER" ||
+                      mandala.mandala.type == "CONTEXT") && (
                       <Button
                         variant="filled"
                         color="primary"
                         onClick={() => setIsSidebarOpen(true)}
                         icon={<Sparkles size={16} />}
                       >
-                        Herramientas IA
+                        IA
                       </Button>
                     )}
                   </div>
@@ -486,7 +507,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                     />
                   </div>
 
-                  {(mandala.mandala.type === "CHARACTER" || mandala.mandala.type === "CONTEXT") && (
+                  {(mandala.mandala.type === "CHARACTER" ||
+                    mandala.mandala.type === "CONTEXT") && (
                     <Buttons
                       onCreatePostIt={handleCreatePostIt}
                       onCreateCharacter={handleCreateCharacter}
@@ -523,9 +545,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           onPostItUpdate={updatePostit}
                           onCharacterUpdate={updateCharacter}
                           onPostItDelete={deletePostit}
-                          onCharacterDelete={(id: string) =>
-                            handleDeleteCharacter(parseInt(id))
-                          }
+                          onCharacterDelete={handleDeleteCharacter}
                           onPostItChildCreate={(
                             content: string,
                             tags: Tag[],
@@ -631,9 +651,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                           }}
                           appliedFilters={appliedFilters}
                           onPostItDelete={deletePostit}
-                          onCharacterDelete={(id: string) =>
-                            handleDeleteCharacter(parseInt(id))
-                          }
+                          onCharacterDelete={handleDeleteCharacter}
                           tags={tags}
                           onNewTag={handleNewTag}
                           state={state}
@@ -683,16 +701,22 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
 
       {/* Modal de confirmación para generar resumen - solo para mandalas normales */}
       {!isOverlapMandala && (
-        <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+        <AlertDialog
+          open={showGenerateDialog}
+          onOpenChange={setShowGenerateDialog}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {normalReport ? "¿Regenerar resumen de esta mandala?" : "¿Generar resumen de esta mandala?"}
+                {normalReport
+                  ? "¿Regenerar resumen de esta mandala?"
+                  : "¿Generar resumen de esta mandala?"}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                El sistema generará un resumen mediante IA según el estado actual de la mandala.
-                Este proceso puede tardar unos segundos.
-                {normalReport && " El resumen existente será reemplazado por uno nuevo."}
+                El sistema generará un resumen mediante IA según el estado
+                actual de la mandala. Este proceso puede tardar unos segundos.
+                {normalReport &&
+                  " El resumen existente será reemplazado por uno nuevo."}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

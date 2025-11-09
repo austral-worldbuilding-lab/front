@@ -3,7 +3,7 @@ import { useAuthContext } from './AuthContext';
 import { getOrganizationUsers } from '@/services/userService';
 import { getProjectUsers } from '@/services/userService';
 
-type Role = 'owner' | 'admin' | 'member' | 'viewer';
+type Role = 'dueño' | 'facilitador' | 'worldbuilder' | 'lector';
 
 interface UserPermissions {
   organizationRoles: Map<string, Role>;
@@ -20,6 +20,7 @@ interface PermissionsContextType extends UserPermissions {
   canEditProject: (projectId: string) => boolean;
   canViewProject: (projectId: string) => boolean;
   canManageProjectUsers: (projectId: string) => boolean;
+  canDeleteProject: (projectId: string) => boolean;
   refreshOrganizationRoles: (orgId: string) => Promise<void>;
   refreshProjectRoles: (projectId: string) => Promise<void>;
   clearCache: () => void;
@@ -60,27 +61,32 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
 
   const canCreateProject = (orgId: string): boolean => {
     const role = getOrganizationRole(orgId);
-    return role === 'owner' || role === 'admin';
+    return role === 'dueño' || role === 'facilitador';
   };
 
   const canManageUsers = (orgId: string): boolean => {
     const role = getOrganizationRole(orgId);
-    return role === 'owner' || role === 'admin';
+    return role === 'dueño' || role === 'facilitador';
   };
 
   const canManageProjectUsers = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
-    return role === 'owner' || role === 'admin';
+    return role === 'dueño' || role === 'facilitador';
   };
 
   const canEditProject = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
-    return role === 'owner' || role === 'admin' || role === 'member';
+    return role === 'dueño' || role === 'facilitador' || role === 'worldbuilder';
   };
 
   const canViewProject = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
     return role !== null; // Any role can view
+  };
+
+  const canDeleteProject = (projectId: string): boolean => {
+    const role = getProjectRole(projectId);
+    return role === 'dueño'; // Only owner can delete
   };
 
   const refreshOrganizationRoles = async (orgId: string): Promise<void> => {
@@ -167,6 +173,7 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
     canEditProject,
     canViewProject,
     canManageProjectUsers,
+    canDeleteProject,
     refreshOrganizationRoles,
     refreshProjectRoles,
     clearCache,

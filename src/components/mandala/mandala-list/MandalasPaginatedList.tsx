@@ -5,6 +5,8 @@ import Loader from "@/components/common/Loader";
 import { CompleteApiMandala } from "@/types/mandala";
 import MandalaListItem from "./MandalaListItem";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
+import CreateEntityModal from "@/components/project/CreateEntityModal";
+import useUpdateMandala from "@/hooks/useUpdateMandala";
 
 interface MandalasPaginatedListProps {
   mandalas: CompleteApiMandala[];
@@ -12,6 +14,8 @@ interface MandalasPaginatedListProps {
   organizationId: string;
   projectId: string;
   onDeleteMandala: (id: string) => Promise<void>;
+  onEditMandala?: (id: string, data: { name: string; description?: string }) => Promise<void>;
+  onRefreshMandalas?: () => void;
   nextPageMandalas: CompleteApiMandala[];
   page: number;
   onPageChange: (page: number) => void;
@@ -30,6 +34,8 @@ const MandalasPaginatedList = ({
   organizationId,
   projectId,
   onDeleteMandala,
+  onEditMandala,
+  onRefreshMandalas,
   nextPageMandalas,
   page,
   onPageChange,
@@ -41,12 +47,43 @@ const MandalasPaginatedList = ({
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mandalaToDelete, setMandalaToDelete] = useState<string | null>(null);
+  
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [mandalaToEdit, setMandalaToEdit] = useState<CompleteApiMandala | null>(null);
+  
+  const { update: updateMandala, loading: updating, error: updateError } = useUpdateMandala();
 
   // Abre el diálogo de confirmación para eliminar una mandala
   const confirmDeleteMandala = (id: string) => {
     setMandalaToDelete(id);
     setDialogOpen(true);
     setDropdownOpen(null);
+  };
+
+  const openEditMandala = (mandala: CompleteApiMandala) => {
+    setMandalaToEdit(mandala);
+    setEditModalOpen(true);
+    setDropdownOpen(null);
+  };
+
+  const handleEditMandala = async (data: { name: string; description?: string }) => {
+    if (!mandalaToEdit) return;
+    
+    try {
+      if (onEditMandala) {
+        await onEditMandala(mandalaToEdit.id, data);
+      } else {
+        await updateMandala(projectId, mandalaToEdit.id, data);
+      }
+      setEditModalOpen(false);
+      setMandalaToEdit(null);
+      
+      if (onRefreshMandalas) {
+        onRefreshMandalas();
+      }
+    } catch (error) {
+      console.error("Error editing mandala:", error);
+    }
   };
 
   // Manejador para cambiar de página
@@ -68,12 +105,12 @@ const MandalasPaginatedList = ({
       <div className="w-full flex bg-white rounded-lg border flex-1 overflow-hidden">
         {/* Estado de carga */}
         {loading ? (
-          <div className="w-full flex justify-center items-center">
+          <div className="w-full flex justify-center items-center h-full">
             <Loader size="medium" text="Cargando mandalas..." />
           </div>
         ) : mandalas.length === 0 ? (
           // Mensaje cuando no hay mandalas
-          <p className="p-4 text-gray-600 text-center">
+          <p className="p-4 text-gray-600 text-center w-full h-full flex items-center justify-center">
             No hay mandalas creadas aún
           </p>
         ) : (
@@ -90,6 +127,7 @@ const MandalasPaginatedList = ({
                   setDropdownOpen(open ? mandala.id : null)
                 }
                 onDelete={() => confirmDeleteMandala(mandala.id)}
+                onEdit={() => openEditMandala(mandala)}
                 selectionMode={selectionMode}
                 isSelected={selectedMandalas.includes(mandala.id)}
                 onToggleSelection={() => onToggleSelection?.(mandala.id)}
@@ -100,7 +138,7 @@ const MandalasPaginatedList = ({
       </div>
 
       {/* Controles de paginación */}
-      <div className="flex justify-center items-center gap-4 mt-6 mb-10">
+      <div className="flex justify-center items-center gap-4">
         <Button
           variant="outline"
           onClick={() => handlePageChange(page - 1)}
@@ -131,6 +169,20 @@ const MandalasPaginatedList = ({
         confirmText="Eliminar Mandala"
         isDanger={true}
         onConfirm={handleConfirmDelete}
+      />
+
+      <CreateEntityModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onCreate={handleEditMandala}
+        loading={updating}
+        error={updateError}
+        title="Editar Mandala"
+        placeholder="Nombre de la mandala"
+        showQuestions={true}
+        mode="edit"
+        initialName={mandalaToEdit?.name}
+        initialDescription={mandalaToEdit?.configuration.center?.description}
       />
     </>
   );

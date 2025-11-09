@@ -1,35 +1,30 @@
 import MandalaContainer from "@/components/mandala/MandalaContainer";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import useMandala from "@/hooks/useMandala.ts";
-import { parseMandalaHistory, buildMandalaHistoryQuery } from "@/utils/mandalaHistory";
+import { parseMandalaHistory } from "@/utils/mandalaHistory";
 import { useProjectAccess } from "@/hooks/useProjectAccess";
 import MandalaNotFoundPage from "./MandalaNotFoundPage";
 import Loader from "@/components/common/Loader";
 import React from "react";
+import { useMandalaBreadcrumb } from "@/hooks/useMandalaBreadcrumb";
 
 const MandalaPage = () => {
   const { mandalaId, organizationId, projectId } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const { hasAccess, loading: accessLoading, isUnauthorized } = useProjectAccess(projectId || "");
 
   const { mandala, loading: mandalaLoading } = useMandala(hasAccess ? mandalaId! : "");
 
   // Parsear historial actual de la URL
-  const { ids, names } = parseMandalaHistory(location.search);
+  const { ids } = parseMandalaHistory(location.search);
+  const { goToMandala } = useMandalaBreadcrumb();
 
   // Si el mandala actual no está al final del historial, agregarlo
   React.useEffect(() => {
     if (!mandalaId || !mandala?.mandala) return;
     if (ids[ids.length - 1] !== mandalaId) {
-      const newIds = [...ids, mandalaId];
-      const newNames = [...names, mandala.mandala.name];
-      const search = buildMandalaHistoryQuery(newIds, newNames);
-      navigate(
-          `/app/organization/${organizationId}/projects/${projectId}/mandala/${mandalaId}?${search}`,
-          { replace: true }
-      );
+      goToMandala(mandalaId, mandala.mandala.name);
     }
     // eslint-disable-next-line
   }, [mandalaId, mandala?.mandala?.id]);

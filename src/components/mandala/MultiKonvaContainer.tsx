@@ -1,16 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useMemo, useCallback } from "react";
-import {
-  Character,
-  Mandala as MandalaData,
-  MandalaImage,
-  Postit,
-  Tag,
-} from "@/types/mandala";
-import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
+import React, {useCallback, useMemo} from "react";
+import {Character, Mandala as MandalaData, MandalaImage, Postit, Tag,} from "@/types/mandala";
+import {ReactZoomPanPinchState} from "react-zoom-pan-pinch";
 import useMandala from "@/hooks/useMandala";
-import { MandalaBackground } from "./MandalaBackground";
-import { MandalaCanvas } from "./MandalaCanvas";
+import {MandalaBackground} from "./MandalaBackground";
+import {MandalaCanvas} from "./MandalaCanvas";
 
 interface MultiKonvaContainerProps {
   sourceMandalaIds: string[];
@@ -102,7 +96,7 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
           d: Partial<Character>
         ) => Promise<boolean | void>;
         deletePostit: (id: string) => Promise<boolean>;
-        deleteCharacter: (idx: number) => Promise<boolean>;
+        deleteCharacter: (id: string) => Promise<boolean>;
         updateImage: (id: string, d: Partial<MandalaImage>) => Promise<boolean>;
         deleteImage: (id: string) => Promise<boolean>;
       }
@@ -129,9 +123,27 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
         type: base.mandala.type,
         configuration: base.mandala.configuration,
       },
-      postits: sourceMandalas.flatMap((s) => s.mandala.postits ?? []),
+      postits: sourceMandalas.flatMap((s) => {
+        if (!s.mandala.postits) {
+          return [];
+        }
+        const from = {
+          id: s.mandala.id,
+          name: s.mandala.mandala.name,
+        };
+        return s.mandala.postits.map((p) => ({ ...p, from }));
+      }),
       characters: sourceMandalas.flatMap((s) => s.mandala.characters ?? []),
-      images: sourceMandalas.flatMap((s) => s.mandala.images ?? []),
+      images: sourceMandalas.flatMap((s) => {
+        if (!s.mandala.images) {
+          return [];
+        }
+        const from = {
+          id: s.mandala.id,
+          name: s.mandala.mandala.name,
+        };
+        return s.mandala.images.map((i) => ({ ...i, from }));
+      }),
     } as MandalaData;
   }, [sourceMandalas]);
 
@@ -181,13 +193,9 @@ const MultiKonvaContainer: React.FC<MultiKonvaContainerProps> = ({
       if (!owner) return false;
       const u = updaterByMandalaId.get(owner);
       if (!u) return false;
-      const mandala = sourceMandalas.find((s) => s.id === owner)?.mandala;
-      const idx = mandala?.characters?.findIndex((c) => c.id === charId) ?? -1;
-      if (idx < 0) return false;
-      const res = await u.deleteCharacter(idx);
-      return !!res;
+        return await u.deleteCharacter(charId);
     },
-    [idToMandalaId, updaterByMandalaId, sourceMandalas]
+    [idToMandalaId, updaterByMandalaId]
   );
 
   const routedImageUpdate = useCallback(

@@ -7,7 +7,7 @@ import {
   MandalaImage,
   Postit,
   Tag,
-} from "../types/mandala";
+} from "@/types/mandala";
 import axiosInstance from "@/lib/axios.ts";
 
 export const subscribeMandala = (
@@ -236,6 +236,10 @@ export async function linkMandalaToParent(mandalaId: string, childId: string) {
   return axiosInstance.post(`/mandala/${mandalaId}/link/${childId}`);
 }
 
+export async function unlinkMandalaFromParent(parentId: string, childId: string) {
+  return axiosInstance.delete(`/mandala/${parentId}/unlink/${childId}`);
+}
+
 export const deleteMandalaService = async (mandalaId: string) => {
   const response = await axiosInstance.delete(`/mandala/${mandalaId}`);
   if (response.status !== 200) {
@@ -380,6 +384,38 @@ export const setEditingUser = async (
       },
     ],
   });
+};
+
+export const updateMandala = async (
+  projectId: string,
+  mandalaId: string,
+  updatedData: { name?: string; description?: string }
+): Promise<boolean> => {
+  const response = await axiosInstance.patch(`/mandala/${mandalaId}`, updatedData);
+  
+  if (response.status !== 200) {
+    throw new Error("Error updating mandala in backend");
+  }
+
+  const mandalaRef = doc(db, projectId, mandalaId);
+  const mandalaSnap = await getDoc(mandalaRef);
+  if (!mandalaSnap.exists()) throw new Error("Mandala not found in Firebase");
+
+  const updatePayload: { [key: string]: string | Date } = {};
+
+  if (updatedData.name !== undefined) {
+    updatePayload["mandala.name"] = updatedData.name;
+  }
+
+  if (updatedData.description !== undefined) {
+    updatePayload["mandala.configuration.center.description"] = updatedData.description;
+  }
+
+  updatePayload.updatedAt = new Date();
+
+  await updateDoc(mandalaRef, updatePayload);
+  
+  return true;
 };
 
 export const removeEditingUser = async (

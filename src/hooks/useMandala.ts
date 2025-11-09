@@ -1,16 +1,17 @@
 import { useEffect, useState, useCallback } from "react";
-import { Character, Mandala, MandalaImage, Postit } from "../types/mandala";
+import { Character, Mandala, MandalaImage, Postit } from "@/types/mandala";
 import {
   subscribeMandala,
   createPostit as createPostitService,
   updatePostit as updatePostitService,
   deletePostit as deletePostitService,
   updateCharacter as updateCharacterService, 
-  updateMandalaCharacters,
+  unlinkMandalaFromParent,
   updateImage as updateImageService,
   deleteImage as deleteImageService,
   setEditingUser as setEditingUserService,
   removeEditingUser as removeEditingUserService,
+  updateMandala as updateMandalaService,
 } from "../services/mandalaService";
 import { useParams } from "react-router-dom";
 import { useAuth } from "./useAuth";
@@ -110,21 +111,22 @@ const useMandala = (mandalaId: string) => {
   );
 
   const deleteCharacter = useCallback(
-    async (index: number) => {
+    async (characterId: string) => {
       try {
-        const updatedCharacters = [...(mandala?.characters ?? [])];
-        updatedCharacters.splice(index, 1);
-        await updateMandalaCharacters(projectId!, mandalaId, updatedCharacters);
-        setMandala((prev) =>
-          prev ? { ...prev, characters: updatedCharacters } : prev
-        );
+        if (!characterId) {
+          throw new Error("Character ID is required");
+        }
+        
+        // Call backend API to unlink the child mandala from the parent
+        await unlinkMandalaFromParent(mandalaId, characterId);
+        
         return true;
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Unknown error occurred"));
         return false;
       }
     },
-    [mandala?.characters, mandalaId, projectId]
+    [mandalaId]
   );
 
   const updateImage = useCallback(
@@ -169,6 +171,20 @@ const useMandala = (mandalaId: string) => {
     removeEditingUserService(projectId!, mandalaId, postitId, user!.uid);
   };
 
+  const updateMandala = useCallback(
+    async (data: { name?: string; description?: string }) => {
+      try {
+        return await updateMandalaService(projectId!, mandalaId, data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred")
+        );
+        throw err;
+      }
+    },
+    [mandalaId, projectId]
+  );
+
   return {
     mandala,
     loading,
@@ -182,6 +198,7 @@ const useMandala = (mandalaId: string) => {
     deleteImage,
     setEditingUser,
     removeEditingUser,
+    updateMandala,
   };
 };
 

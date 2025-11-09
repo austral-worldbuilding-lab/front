@@ -45,26 +45,26 @@ const MandalaActionButtons: React.FC<MandalaActionButtonsProps> = ({
   return (
     <div className="relative flex flex-col">
       {/* Botón de crear mandala - Solo visible cuando no está en modo selección y puede editar */}
-      {!selectionMode && canEdit && (
-        <div className="relative flex flex-row w-full justify-between overflow-x-auto gap-2">
-          <div className="relative flex-1">
-            <Search className="h-4 w-4 absolute left-3 top-5 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              className="pl-9"
-              placeholder="Buscar por nombre"
-              onChange={(e) => onSearchChange?.(e.target.value)}
-            />
-          </div>
+
+      <div className="relative flex flex-row w-full justify-between overflow-x-auto gap-2">
+        <div className="relative flex-1">
+          <Search className="h-4 w-4 absolute left-3 top-5 transform -translate-y-1/2 text-gray-400" />
+          <Input
+            className="pl-9"
+            placeholder="Buscar por nombre"
+            onChange={(e) => onSearchChange?.(e.target.value)}
+          />
+        </div>
+        {!selectionMode && canEdit && (
           <Button
             color="primary"
-            className="mb-4"
             onClick={onCreateClick}
             icon={<PlusIcon size={16} />}
           >
             Crear Mandala
           </Button>
-        </div>
-      )}
+        )}
+      </div>
       {mandalasExists && (
         <div className="flex gap-2 items-end flex-1">
           {/* Botón para activar/desactivar modo selección */}

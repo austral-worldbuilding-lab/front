@@ -1,5 +1,5 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import {MoreVertical, Pencil, Plus, Trash2, Download} from "lucide-react";
+import { MoreVertical, Pencil, Plus, Trash2, Download } from "lucide-react";
 
 interface MandalaMenuProps {
   onDelete: () => void;
@@ -26,41 +26,41 @@ const MandalaMenu = ({
     return (
       <div className="z-50 min-w-[8rem] rounded-md border bg-white p-1 text-sm shadow-md">
         {canEdit && onCreateChild && (
-          <button
+          <div
             className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
             onClick={onCreateChild}
           >
             <Plus size={14} />
             Crear Hijo
-          </button>
+          </div>
         )}
-          {canEdit && onEdit && (
-              <button
-                  className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
-                  onClick={onEdit}
-              >
-                  <Pencil size={14} />
-                  Editar
-              </button>
-          )}
-          {onDownloadSummary && (
-            <button
-              className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
-              onClick={onDownloadSummary}
-            >
-              <Download size={14} />
-              Descargar Resumen
-            </button>
-          )}
-          {canEdit && (
-            <button
-              className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
-              onClick={onDelete}
-            >
-                <Trash2 size={14} />
-                Eliminar
-            </button>
-          )}
+        {canEdit && onEdit && (
+          <div
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
+            onClick={onEdit}
+          >
+            <Pencil size={14} />
+            Editar
+          </div>
+        )}
+        {onDownloadSummary && (
+          <div
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
+            onClick={onDownloadSummary}
+          >
+            <Download size={14} />
+            Descargar Resumen
+          </div>
+        )}
+        {canEdit && (
+          <div
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
+            onClick={onDelete}
+          >
+            <Trash2 size={14} />
+            Eliminar
+          </div>
+        )}
       </div>
     );
   }
@@ -68,7 +68,7 @@ const MandalaMenu = ({
   return (
     <DropdownMenu.Root open={open} onOpenChange={onOpenChange}>
       <DropdownMenu.Trigger asChild>
-        <button className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-gray-200 active:bg-gray-300">
+        <button className="p-2 rounded focus:outline-none hover:bg-gray-200 active:bg-gray-300 cursor-pointer">
           <MoreVertical className="w-4 h-4" />
         </button>
       </DropdownMenu.Trigger>
@@ -77,13 +77,22 @@ const MandalaMenu = ({
         className="z-50 min-w-[8rem] rounded-md border bg-white p-1 text-sm shadow-md"
         sideOffset={4}
       >
-        {onCreateChild && (
+        {canEdit && onCreateChild && (
           <DropdownMenu.Item
             className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-blue-600"
             onSelect={onCreateChild}
           >
             <Plus size={14} className="mr-2" />
             Crear Hijo
+          </DropdownMenu.Item>
+        )}
+        {canEdit && onEdit && (
+          <DropdownMenu.Item
+            className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary flex items-center gap-2"
+            onSelect={onEdit}
+          >
+            <Pencil size={14} />
+            Editar
           </DropdownMenu.Item>
         )}
         {onDownloadSummary && (
@@ -95,13 +104,15 @@ const MandalaMenu = ({
             Descargar Resumen
           </DropdownMenu.Item>
         )}
-        <DropdownMenu.Item
-          className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-red-600 text-left flex items-center gap-2"
-          onSelect={onDelete}
-        >
-          <Trash2 size={14} />
-          Eliminar
-        </DropdownMenu.Item>
+        {canEdit && (
+          <DropdownMenu.Item
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 hover:border-none text-red-600 text-left flex items-center gap-2 focus:outline-none focus:ring-0 focus:border-none border-none"
+            onSelect={onDelete}
+          >
+            <Trash2 size={14} />
+            Eliminar
+          </DropdownMenu.Item>
+        )}
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );

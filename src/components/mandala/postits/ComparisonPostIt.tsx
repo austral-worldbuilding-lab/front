@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useRef, useMemo, useState } from "react";
 import { Circle, Group } from "react-konva";
 import { Html } from "react-konva-utils";
 import Konva from "konva";
@@ -73,21 +73,20 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
     const groupRef = useRef<Konva.Group>(null);
     const clickTimeout = useRef<NodeJS.Timeout | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     const textColor = isDarkColor(getBackgroundColor()) ? "white" : "black";
     const { shouldAnimate, markAnimated, isOpen, toggleOpen } =
       usePostItAnimation(postit.id!);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editingContent, setEditingContent] = useState<string>(
-      postit.content ?? ""
-    );
+    const isEditing = false;
 
     const postItW = 100;
     const postItH = 100;
-    const padding = 12;
+    const horizontalPadding = 12;
+    
+    const fontSize = postItW / 10;
+    const lineHeight = 1.1;
     const scaleFather = 0.4 * scale;
     const scaleChildren = 0.25 * scale;
-    const fontSize = postItW / 10;
     const children = useMemo(() => postit.childrens || [], [postit.childrens]);
 
     const currentScale = isOpen ? scaleFather : scale;
@@ -151,28 +150,6 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
         toggleOpen();
       }, 250);
     };
-
-    const exitEditMode = () => {
-      setIsEditing(false);
-      window.getSelection()?.removeAllRanges();
-    };
-
-    useEffect(() => {
-      const handleClickOutside = (e: MouseEvent) => {
-        if (
-          isEditing &&
-          textAreaRef.current &&
-          !textAreaRef.current.contains(e.target as Node)
-        ) {
-          exitEditMode();
-        }
-      };
-
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [isEditing]);
 
     return (
       <Group>
@@ -254,23 +231,7 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
             setTimeout(() => setIsDragging(false), 100);
           }}
           onClick={handleClick}
-          onDblClick={() => {
-            if (clickTimeout.current) {
-              clearTimeout(clickTimeout.current);
-              clickTimeout.current = null;
-            }
-            setIsEditing(true);
-            setEditingContent(postit.content ?? "");
-
-            setTimeout(() => {
-              const textarea = textAreaRef.current;
-              if (textarea) {
-                textarea.focus();
-                textarea.selectionStart = textarea.selectionEnd =
-                  textarea.value.length;
-              }
-            }, 0);
-          }}
+          onDblClick={() => {}}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           onContextMenu={(e) => {
@@ -281,6 +242,7 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
             x={postItW / 2}
             y={postItH / 2}
             radius={postItW / 2}
+            strokeEnabled={false}
             onMouseEnter={(e) => {
               const container = e.target.getStage()?.container();
               if (container) {
@@ -335,38 +297,36 @@ const ComparisonPostIt = React.forwardRef<Konva.Group, ComparisonPostItProps>(
           <Html
             divProps={{
               style: {
-                pointerEvents: isEditing ? "auto" : "none",
+                pointerEvents: "none",
                 // zIndex removed to prevent Konva conflicts
               },
             }}
           >
-            <textarea
-              ref={textAreaRef}
-              disabled={true}
-              value={isEditing ? editingContent ?? "" : postit.content}
-              onChange={(e) => {
-                setEditingContent(e.target.value);
-                onContentChange(e.target.value, postit.id!);
-              }}
-              onMouseDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
+            <div
+              ref={contentRef}
               style={{
                 width: postItW,
                 height: postItH,
-                padding,
+                padding: `${horizontalPadding}px`,
                 margin: 0,
-                resize: "none",
                 background: getBackgroundColor(),
                 color: textColor,
                 borderRadius: "50%",
-                border: "solid 1px rgba(0,0,0,0.3)",
+                border: "none",
                 boxSizing: "border-box",
                 fontSize: `${fontSize}px`,
-                lineHeight: 1.1,
-                overflow: "hidden",
+                lineHeight,
                 textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                overflow: "hidden",
               }}
-            />
+            >
+              {postit.content}
+            </div>
             {type === "SIMILITUD" && (
               <ThumbsUp
                 size={12}

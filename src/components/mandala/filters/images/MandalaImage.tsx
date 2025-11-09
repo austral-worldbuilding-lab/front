@@ -5,6 +5,8 @@ import { KonvaEventObject } from "konva/lib/Node";
 import type { MandalaImage } from "@/types/mandala";
 import useDragBoundFunc from "@/hooks/useDragBoundFunc";
 import { Html } from "react-konva-utils";
+import MandalaBadge from "../../postits/MandalaBadge";
+import HTMLTransformerHandles from "../../HTMLTransformerHandles";
 
 interface MandalaImageProps {
   image: MandalaImage;
@@ -52,6 +54,7 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
   const IMAGE_SIZE = 80;
   const staticScale = scale * (image.scale ?? 1);
   const [localScale, setLocalScale] = useState(staticScale);
+  const [localPosition, setLocalPosition] = useState(position);
 
   useEffect(() => {
     const img = new window.Image();
@@ -66,10 +69,6 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
     };
     img.src = image.url;
   }, [image.url]);
-
-  useEffect(() => {
-    if (!isResizing) setLocalScale(staticScale);
-  }, [staticScale, isResizing]);
 
   const getBaseDimensions = () => {
     const base = IMAGE_SIZE;
@@ -148,18 +147,26 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
       onDragStart(image.id);
     };
 
+    const handleTransform = () => {
+      setLocalScale(node.scaleX());
+      setLocalPosition({ x: node.x(), y: node.y() });
+    };
+
     const handleTransformEnd = (e: KonvaEventObject<Event>) => {
       setIsResizing(false);
       const sx = node.scaleX();
       setLocalScale(sx);
+      setLocalPosition({ x: node.x(), y: node.y() });
       onTransformEnd?.(e, sx);
     };
 
     node.on("transformstart", handleTransformStart);
+    node.on("transform", handleTransform);
     node.on("transformend", handleTransformEnd);
 
     return () => {
       node.off("transformstart", handleTransformStart);
+      node.off("transform", handleTransform);
       node.off("transformend", handleTransformEnd);
     };
   }, [onDragStart, onTransformEnd, image.id]);
@@ -205,6 +212,10 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
         {...(onDragMove && { onDragMove })}
         onDragEnd={(e) => {
           onDragEnd(e);
+          const node = groupRef.current;
+          if (node) {
+            setLocalPosition({ x: node.x(), y: node.y() });
+          }
           setTimeout(() => setIsDragging(false), 100);
         }}
         onDblClick={() => {
@@ -246,6 +257,14 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
           />
         </Html>
 
+        {image.from && (
+          <MandalaBadge
+            originMandalaName={image.from?.name}
+            fontSize={10}
+            zindex={zindex}
+          />
+        )}
+
         <Rect
           width={width}
           height={height}
@@ -260,20 +279,36 @@ const MandalaImage = React.forwardRef<Konva.Group, MandalaImageProps>((props, re
       </Group>
 
       {/* Transformer como en PostIt: sólo si está en edición y no está bloqueado */}
-      {isEditing && !disableDragging && (
-        <Transformer
-          ref={trRef}
-          rotateEnabled={false}
-          keepRatio
-          enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]}
-          boundBoxFunc={(_oldBox, newBox) => {
-            const min = 40;
-            const max = 600;
-            const nextW = Math.max(min, Math.min(max, newBox.width));
-            const nextH = nextW / (aspect || 1);
-            return { ...newBox, width: nextW, height: nextH };
-          }}
-        />
+      {isEditing && !disableDragging && !isDragging && (
+        <>
+          <HTMLTransformerHandles
+            width={width}
+            height={height}
+            position={localPosition}
+            scale={localScale}
+            offsetX={width / 2}
+            offsetY={height / 2}
+            zindex={zindex}
+          />
+          <Transformer
+            ref={trRef}
+            rotateEnabled={false}
+            keepRatio
+            enabledAnchors={[
+              "top-left",
+              "top-right",
+              "bottom-left",
+              "bottom-right",
+            ]}
+            boundBoxFunc={(_oldBox, newBox) => {
+              const min = 40;
+              const max = 600;
+              const nextW = Math.max(min, Math.min(max, newBox.width));
+              const nextH = nextW / (aspect || 1);
+              return { ...newBox, width: nextW, height: nextH };
+            }}
+          />
+        </>
       )}
     </Group>
   );

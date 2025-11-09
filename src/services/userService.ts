@@ -67,3 +67,15 @@ export async function getCurrentUser(): Promise<User> {
     const response = await axiosInstance.get<{data: User}>('/user/me');
     return response.data.data;
 }
+
+export interface UserStats {
+    organizationsCount: number;
+    projectsCount: number;
+    mandalasCount: number;
+    solutionsCount: number;
+}
+
+export async function getUserStats(): Promise<UserStats> {
+    const response = await axiosInstance.get<{data: UserStats}>('/user/me/stats');
+    return response.data.data;
+}

@@ -1,3 +1,4 @@
+import { ICON_OPTIONS } from "@/constants/icon-options";
 import axiosInstance from "@/lib/axios";
 import {BackendTag, CreateProject, CreateProjectFromQuestion, Project, ProjectConfiguration} from "@/types/mandala";
 import {BackendTimelineEdge, BackendTimelineNode} from "@/utils/timelineUtils.ts";
@@ -46,7 +47,7 @@ export const createProject = async (project: CreateProject): Promise<Project> =>
 
 export const updateProject = async (
     id: string,
-    data: { name?: string; description?: string }
+    data: { name?: string; description?: string, icon: string, iconColor?: string }
 ): Promise<Project> => {
   const response = await axiosInstance.patch<{ data: Project }>(
       `/project/${id}`,
@@ -111,7 +112,7 @@ export const createProjectFromProvocationId = async (body: {
 }): Promise<Project> => {
   const response = await axiosInstance.post<{ data: Project }>(
       `/project/from-provocationId`,
-      body
+      { ...body, icon: ICON_OPTIONS[0] }
   );
 
   if (response.status !== 201 && response.status !== 200) {
@@ -139,8 +140,9 @@ export const createProjectFromQuestion = async (
 export const getTimelineForProject = async (
     projectId: string
 ): Promise<{ nodes: BackendTimelineNode[]; edges: BackendTimelineEdge[] }> => {
+  const timestamp = new Date().getTime();
   const response = await axiosInstance.get<{ data: { nodes: BackendTimelineNode[]; edges: BackendTimelineEdge[] } }>(
-      `/project/${projectId}/timeline`
+      `/project/${projectId}/timeline?t=${timestamp}`
   );
 
   if (response.status !== 200) {
@@ -158,4 +160,36 @@ export const getProjectConfiguration = async (projectId: string): Promise<Projec
   }
 
   return response.data.data;
+};
+
+export const createChildProject = async (
+    projectId:string,
+    body: {
+      name: string;
+      description?: string;
+      organizationId: string;
+      icon?: string;
+      dimensions?: { name: string; color: string }[];
+      scales?: string[];
+      userId: string;
+      iconColor?: string;
+    }
+): Promise<Project> => {
+  const response = await axiosInstance.post<{ data: Project }>(`/project/${projectId}/child`,
+      { ...body }
+  );
+
+  if (response.status !== 201 && response.status !== 200) {
+    throw new Error("Error al crear subproyecto");
+  }
+
+  return response.data.data;
+};
+
+export const deleteProject = async (projectId: string): Promise<void> => {
+  const response = await axiosInstance.delete(`/project/${projectId}`);
+
+  if (response.status !== 200) {
+    throw new Error("Error al eliminar proyecto");
+  }
 };

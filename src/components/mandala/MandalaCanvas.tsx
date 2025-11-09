@@ -13,7 +13,7 @@ import { useParams } from "react-router-dom";
 import { ReactZoomPanPinchState } from "react-zoom-pan-pinch";
 import PostIt from "./postits/PostIt";
 import CharacterIcon from "./characters/CharacterIcon";
-import MandalaImageComponent from "./images/MandalaImage";
+import MandalaImageComponent from "./filters/images/MandalaImage";
 import MandalaMenu from "./MandalaMenu";
 import NewPostItModal from "./postits/NewPostItModal";
 import EditPostItModal from "./postits/EditPostitModal";
@@ -83,7 +83,7 @@ export const MandalaCanvas: React.FC<{
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["owner", "admin", "member"].includes(userRole));
+    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
 
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
@@ -199,6 +199,8 @@ export const MandalaCanvas: React.FC<{
               );
               return (
                 <PostIt
+                  isUnifiedMandala
+                  currentMandalaName=" "
                   key={`p-${mandala.id}-${p.id}`}
                   postit={p}
                   color={dimensionColors[p.dimension] || "#cccccc"}
