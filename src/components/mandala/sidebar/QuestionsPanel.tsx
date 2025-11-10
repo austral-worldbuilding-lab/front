@@ -1,8 +1,7 @@
-import { Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useQuestionGenerator } from "@/components/mandala/sidebar/useQuestionGenerator.tsx";
 import { Link } from "react-router-dom";
 import { CSSProperties, PropsWithChildren, useEffect, useRef } from "react";
+import GenerarButton from "../../ui/GenerarButton";
 
 export interface QuestionsPanelProps extends PropsWithChildren {
   mandalaId: string;
@@ -115,14 +114,12 @@ export default function QuestionsPanel({
       <div className="mt-2">
         {children}
         <div className="sticky bottom-0 bg-background pt-3 pb-4">
-          <Button
-            className="w-full h-11 text-base"
-            onClick={() => generate(selected.dimensions, selected.scales)}
-            icon={<Sparkles size={16} />}
+          <GenerarButton
+            text="Generar Preguntas"
+            loading={loading}
             disabled={loading}
-          >
-            Generar Preguntas
-          </Button>
+            onClick={() => generate(selected.dimensions, selected.scales)}
+          />
         </div>
       </div>
     </div>

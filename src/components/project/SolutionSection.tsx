@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Plus, Sparkles } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProgressBar from "@/components/common/ProgressBar";
 import SolutionCard from "@/components/project/SolutionCard";
@@ -13,6 +13,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import GenerarButton from "@/components/ui/GenerarButton";
 
 export default function SolutionsSection({ projectId }: { projectId: string }) {
     const { reload, solutions, creating, createSolution, error } = useSolutions(projectId);
@@ -37,22 +38,12 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <span>
-                                    <Button
-                                        variant="outline"
-                                        onClick={handleGenerateSolutions}
+                                    <GenerarButton
+                                        text="Generar"
+                                        loading={validationLoading}
                                         disabled={disabledGenerate}
-                                        className="flex items-center gap-2"
-                                    >
-                                        {validationLoading ? (
-                                            <>
-                                                <Loader2 className="animate-spin" size={16} /> Validando...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Sparkles size={16} /> Generar
-                                            </>
-                                        )}
-                                    </Button>
+                                        onClick={handleGenerateSolutions}
+                                    />
                                 </span>
                             </TooltipTrigger>
 

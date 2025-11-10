@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
-import { BarChart2, Loader2 } from "lucide-react";
+import { BarChart2 } from "lucide-react";
 import { Solution } from "@/types/mandala";
-import { Button } from "@/components/ui/button";
+import GenerarButton from "../ui/GenerarButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
@@ -121,38 +121,18 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
 
       {/* Botones: generar plan + generar imágenes */}
       <div className="mt-6 flex items-center gap-3">
-        <Button
-          onClick={handleGenerate}
+        <GenerarButton
+          text={hasGenerated ? "Regenerar Plan de Acción" : "Generar Plan de Acción"}
+          loading={loading}
           disabled={loading}
-          variant="outline"
-          className="text-sm"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin mr-2 h-4 w-4" /> Generando...
-            </>
-          ) : hasGenerated ? (
-            "Regenerar Plan de Acción"
-          ) : (
-            "Generar Plan de Acción"
-          )}
-        </Button>
-
-        <Button
-          onClick={generateSolutionImage}
+          onClick={handleGenerate}
+        />
+        <GenerarButton
+          text="Generar imágenes"
+          loading={imagesLoading}
           disabled={imagesLoading}
-          className="text-sm"
-          variant="outline"
-        >
-          {imagesLoading ? (
-            <>
-              <Loader2 className="animate-spin mr-2 h-4 w-4" /> Generando
-              imágenes...
-            </>
-          ) : (
-            <>Generar imágenes</>
-          )}
-        </Button>
+          onClick={generateSolutionImage}
+        />
       </div>
 
       {/* Carrusel de imágenes */}

@@ -1,7 +1,8 @@
-import {  Sparkles, X } from "lucide-react";
+import {  X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Provocation } from "@/types/mandala";
+import GenerarButton from "../ui/GenerarButton";
 
 interface ProvocationBoxProps {
     open: boolean;
@@ -53,7 +54,12 @@ export default function ProvocationBox({
                             className="cursor-pointer px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-md"
                             onSelect={onGenerateAI}
                         >
-                            Generar con IA <Sparkles className="w-4 h-4" />
+                            <GenerarButton
+                                text="Generar con IA"
+                                loading={loading}
+                                disabled={loading}
+                                onClick={onGenerateAI}
+                            />
                         </DropdownMenu.Item>
 
                         <DropdownMenu.Item
