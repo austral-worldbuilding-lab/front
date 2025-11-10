@@ -6,6 +6,7 @@ interface MandalaMenuProps {
   onCreateChild?: () => void;
   onEdit?: () => void;
   onDownloadSummary?: () => void;
+  onDownloadImage?: () => void;
   isContextMenu?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -17,6 +18,7 @@ const MandalaMenu = ({
   onCreateChild,
   onEdit,
   onDownloadSummary,
+  onDownloadImage,
   isContextMenu = false,
   open,
   onOpenChange,
@@ -50,6 +52,15 @@ const MandalaMenu = ({
           >
             <Download size={14} />
             Descargar Resumen
+          </div>
+        )}
+        {onDownloadImage && (
+          <div
+            className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary text-left flex items-center gap-2"
+            onClick={onDownloadImage}
+          >
+            <Download size={14} />
+            Descargar Imagen
           </div>
         )}
         {canEdit && (
@@ -102,6 +113,15 @@ const MandalaMenu = ({
           >
             <Download size={14} />
             Descargar Resumen
+          </DropdownMenu.Item>
+        )}
+        {onDownloadImage && (
+          <DropdownMenu.Item
+            className="cursor-pointer px-2 py-1.5 hover:bg-gray-100 text-primary flex items-center gap-2"
+            onSelect={onDownloadImage}
+          >
+            <Download size={14} />
+            Descargar Imagen
           </DropdownMenu.Item>
         )}
         {canEdit && (

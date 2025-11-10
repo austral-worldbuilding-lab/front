@@ -1,12 +1,14 @@
-import {Plus, Sparkles} from "lucide-react";
+import {Plus, Sparkles, Download} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useImageGenerator } from "@/hooks/useImageGenerator.ts";
 import { useRef, useState } from "react";
 import NewImageModal from "@/components/mandala/postits/NewImageModal.tsx";
 import { Tag } from "@/types/mandala";
+import { downloadImage, generateImageFilename } from "@/utils/downloadImage";
 
 interface ImagesPanelProps {
     mandalaId: string;
+    mandalaName?: string;
     organizationId: string;
     projectId: string;
     selected: { dimensions: string[]; scales: string[] };
@@ -18,6 +20,7 @@ interface ImagesPanelProps {
 
 export default function ImagesPanel({
                                         mandalaId,
+                                        mandalaName,
                                         projectId,
                                         selected,
                                         allTags,
@@ -60,18 +63,29 @@ export default function ImagesPanel({
                                         alt={`Imagen generada ${i}`}
                                         className="rounded-lg shadow-md object-cover w-full h-48 border border-black/10"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setSelectedImageUrl(url);
-                                            setIsModalOpen(true);
-                                        }}
-                                        className="absolute -top-2 -right-2 h-7 w-7 rounded-full border border-black/20 bg-white shadow flex items-center justify-center"
-                                        aria-label="Agregar imagen"
-                                        title="Agregar imagen"
-                                    >
-                                        <Plus className="h-4 w-4"/>
-                                    </button>
+                                    <div className="absolute -top-2 -right-2 flex gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => downloadImage(url, generateImageFilename(mandalaName || "mandala"))}
+                                            className="h-7 w-7 rounded-full border border-black/20 bg-white shadow flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                            aria-label="Descargar imagen"
+                                            title="Descargar imagen"
+                                        >
+                                            <Download className="h-4 w-4"/>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedImageUrl(url);
+                                                setIsModalOpen(true);
+                                            }}
+                                            className="h-7 w-7 rounded-full border border-black/20 bg-white shadow flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                            aria-label="Agregar imagen"
+                                            title="Agregar imagen"
+                                        >
+                                            <Plus className="h-4 w-4"/>
+                                        </button>
+                                    </div>
 
                                 </div>
                             ))}
