@@ -4,6 +4,9 @@ import {
     getSolutionJobStatus,
     getCachedSolutions
 } from "@/services/solutionService";
+import { useAnalytics } from "@/services/analytics";
+import { useAuth } from "./useAuth";
+import { v4 as uuid } from "uuid";
 
 export function useSolutionJob(
     projectId: string,
@@ -18,6 +21,8 @@ export function useSolutionJob(
     const [cachedSolutions, setCachedSolutions] = useState<any[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const { trackAiRequest, trackAiResponse, createTimer } = useAnalytics();
+    const { backendUser } = useAuth();
 
     const fetchCachedSolutions = async () => {
         try {
@@ -34,14 +39,38 @@ export function useSolutionJob(
 
     const startJob = async () => {
         if (cachedSolutions && cachedSolutions.length > 0) return;
+        const requestId = uuid();
+        const timer = createTimer();
+        trackAiRequest({
+          request_id: requestId,
+          user_id: backendUser?.firebaseUid ?? "",
+          project_id: projectId,
+          request_type: "generate_solutions",
+        });
         try {
             const { jobId } = await startSolutionJob(projectId);
             setJobId(jobId);
             setStatus("waiting");
             setProgress(0);
+            trackAiResponse({
+              request_id: requestId,
+              user_id: backendUser?.firebaseUid ?? "",
+              project_id: projectId,
+              response_type: "solutions",
+              success: true,
+              latency_ms: timer(),
+            });
         } catch (err: any) {
             console.error("Error al iniciar job de soluciones:", err);
             setError(err.response?.data?.message || "Error al iniciar la generación de soluciones");
+            trackAiResponse({
+              request_id: requestId,
+              user_id: backendUser?.firebaseUid ?? "",
+              project_id: projectId,
+              response_type: "solutions",
+              success: false,
+              latency_ms: timer(),
+            });
         }
     };
 

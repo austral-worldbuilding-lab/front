@@ -10,7 +10,16 @@ export interface AiRequestEventClient {
   user_id: string;
   project_id: string;
   mandala_id?: string;
-  request_type: 'generate_postits' | 'generate_questions' | 'generate_summary';
+  request_type:
+    | "generate_postits"
+    | "generate_questions"
+    | "generate_summary"
+    | "generate_provocations"
+    | "generate_encyclopedia"
+    | "generate_solutions"
+    | "generate_action_items"
+    | "generate_mandala_images"
+    | "generate_solution_images";
   dimensions_count?: number;
   scales_count?: number;
   tags_count?: number;
@@ -21,7 +30,16 @@ export interface AiResponseEventClient {
   request_id: string;
   user_id: string;
   project_id: string;
-  response_type: 'postits' | 'questions' | 'summary';
+  response_type:
+    | "postits"
+    | "questions"
+    | "summary"
+    | "provocations"
+    | "encyclopedia"
+    | "solutions"
+    | "action_items"
+    | "mandala_images"
+    | "solution_images";
   success: boolean;
   error_type?: string;
   latency_ms: number;
