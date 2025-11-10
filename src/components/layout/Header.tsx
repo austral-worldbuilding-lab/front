@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { NotificationBell } from "./NotificationBell";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   const { logout } = useAuthContext();
@@ -41,9 +42,9 @@ export default function Header() {
     console.error('Error loading user data:', error);
     return (
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center">
-          <img src={logo} alt="AWBL Logo" className="h-10 w-auto" />
-        </div>
+        <Link to="/app/organization" className="flex items-center">
+          <img src={logo} alt="AWBL Logo" className="h-10 w-auto cursor-pointer" />
+        </Link>
         <Button variant="ghost" onClick={handleLogout}>
           Cerrar sesión
         </Button>
@@ -53,9 +54,9 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center">
-        <img src={logo} alt="AWBL Logo" className="h-10 w-auto" />
-      </div>
+      <Link to="/app/organization" className="flex items-center">
+        <img src={logo} alt="AWBL Logo" className="h-10 w-auto cursor-pointer" />
+      </Link>
 
       <div className="flex items-center">
         <NotificationBell />
@@ -80,6 +81,11 @@ export default function Header() {
                     <span className="text-sm font-medium text-gray-900">
                       {getDisplayName()}
                     </span>
+                    {currentUser?.email && (
+                      <span className="text-xs font-normal text-gray-500">
+                        {currentUser.email}
+                      </span>
+                    )}
                   </div>
 
                   <ChevronDown className="w-4 h-4 text-gray-500" />

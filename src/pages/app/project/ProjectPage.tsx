@@ -128,38 +128,46 @@ const ProjectPage = () => {
               </div>
             </div>
             <div className="flex flex-col gap-2 items-end">
-              <div className="flex gap-2">
-                {canEdit && (
-                  <Button
-                    variant="outline"
-                    size="md"
-                    color="white"
-                    onClick={() => setIsEditModalOpen(true)}
-                    aria-label="Editar"
-                    icon={<Edit size={16} />}
-                  >
-                    Editar
-                  </Button>
-                )}
-                {canDelete && (
-                  <Button
-                    variant="outline"
-                    size="md"
-                    color="danger"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                    aria-label="Eliminar"
-                    icon={<Trash2 size={16} />}
-                    disabled={deletingProject}
-                  >
-                    Eliminar
-                  </Button>
-                )}
-                <UnifiedInvitationDialog
-                  projectName={project?.name ?? "Proyecto"}
-                  projectId={projectId ?? ""}
-                  organizationId={organizationId ?? ""}
-                  defaultRole="worldbuilder"
-                />
+              <div className="flex gap-2 items-start">
+                <div className="flex gap-2">
+                  {canEdit && (
+                    <Button
+                      variant="outline"
+                      size="md"
+                      color="white"
+                      onClick={() => setIsEditModalOpen(true)}
+                      aria-label="Editar"
+                      icon={<Edit size={16} />}
+                    >
+                      Editar
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button
+                      variant="outline"
+                      size="md"
+                      color="danger"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                      aria-label="Eliminar"
+                      icon={<Trash2 size={16} />}
+                      disabled={deletingProject}
+                    >
+                      Eliminar
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <UnifiedInvitationDialog
+                    projectName={project?.name ?? "Proyecto"}
+                    projectId={projectId ?? ""}
+                    organizationId={organizationId ?? ""}
+                    defaultRole="worldbuilder"
+                  />
+                  <ProjectUserCircles
+                    projectId={projectId ?? ""}
+                    canManageUsers={canManageUsers}
+                  />
+                </div>
                 <Button
                     icon={<Plus/>}
                     size="md"
@@ -167,12 +175,7 @@ const ProjectPage = () => {
                 >
                   Crear subproyecto
                 </Button>
-
               </div>
-              <ProjectUserCircles
-                projectId={projectId ?? ""}
-                canManageUsers={canManageUsers}
-              />
             </div>
           </div>
           <div className="mt-4 flex flex-row gap-6 justify-between w-full h-[600px]">
