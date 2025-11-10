@@ -278,7 +278,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   };
 
   const handleGenerateSummary = async () => {
-    await generateSummary(mandalaId);
+    await generateSummary(mandalaId, projectId);
     setShowGenerateDialog(false);
   };
 
