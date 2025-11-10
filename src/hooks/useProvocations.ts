@@ -16,6 +16,20 @@ export default function useProvocations(projectId: string) {
     const reload = async () => {
         setLoading(true);
         setError(null);
+        try {
+            const provs = await provocationsService.getAllProvocations(projectId);
+            setProvocations(Array.isArray(provs) ? provs : []);
+        } catch (err: any) {
+            setError(err.message ?? "Error cargando provocaciones");
+            setProvocations([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const generateAI = async () => {
+        setLoading(true);
+        setError(null);
         const requestId = uuid();
         const timer = createTimer();
         trackAiRequest({
@@ -25,8 +39,7 @@ export default function useProvocations(projectId: string) {
           request_type: "generate_provocations",
         });
         try {
-            const provs = await provocationsService.getAllProvocations(projectId);
-            setProvocations(Array.isArray(provs) ? provs : []);
+            const data = await provocationsService.generateAIProvocations(projectId);
             trackAiResponse({
               request_id: requestId,
               user_id: backendUser?.firebaseUid ?? "",
@@ -35,27 +48,6 @@ export default function useProvocations(projectId: string) {
               success: true,
               latency_ms: timer(),
             });
-        } catch (err: any) {
-            setError(err.message ?? "Error cargando provocaciones");
-            setProvocations([]);
-            trackAiResponse({
-              request_id: requestId,
-              user_id: backendUser?.firebaseUid ?? "",
-              project_id: projectId,
-              response_type: "provocations",
-              success: false,
-              latency_ms: timer(),
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const generateAI = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await provocationsService.generateAIProvocations(projectId);
             setProvocations((prev) => {
                 const newOnes = data.filter(
                     (p) => !prev.some((existing) => existing.id === p.id)
@@ -64,6 +56,14 @@ export default function useProvocations(projectId: string) {
             });
         } catch (err: any) {
             setError(err.message ?? "Error generando provocaciones");
+            trackAiResponse({
+              request_id: requestId,
+              user_id: backendUser?.firebaseUid ?? "",
+              project_id: projectId,
+              response_type: "provocations",
+              success: false,
+              latency_ms: timer(),
+            });
         } finally {
             setLoading(false);
         }
