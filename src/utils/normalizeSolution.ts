@@ -20,5 +20,6 @@ export function normalizeSolution(raw: any): Solution {
             raw.provocations?.map((p: any) => (typeof p === "string" ? p : p.title || p.name)) ||
             raw.provocationIds ||
             [],
+        actionItems: raw.actionItems || [],
     };
 }

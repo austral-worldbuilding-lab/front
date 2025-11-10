@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function SolutionsSection({ projectId }: { projectId: string }) {
-    const { reload, solutions, creating, createSolution, error } = useSolutions(projectId);
+    const { reload, solutions, creating, createSolutions, error } = useSolutions(projectId);
     const { status, progress, startJob } = useSolutionJob(projectId, reload);
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -120,7 +120,7 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
                 open={modalOpen}
                 onOpenChange={setModalOpen}
                 onCreateSolution={async (solution) => {
-                    await createSolution(solution);
+                    await createSolutions(solution);
                     setModalOpen(false);
                 }}
                 projectId={projectId}
