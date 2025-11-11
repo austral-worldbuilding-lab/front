@@ -60,6 +60,10 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
     setHasGenerated(true);
   };
 
+  const displayedActionItems = actionItems.length > 0
+      ? actionItems
+      : solution.actionItems || [];
+
   // Normaliza el retorno de imágenes: admite array o string con URLs separadas por coma/espacio/nueva línea
   const images: string[] = useMemo(() => {
     if (!solutionImages) return [];
@@ -192,8 +196,8 @@ export default function SolutionCard({ solution }: SolutionCardProps) {
         )}
       </div>
 
-      {actionItems.length > 0 && (
-        <ActionItemsSection actionItems={actionItems} />
+      {displayedActionItems.length > 0 && (
+          <ActionItemsSection actionItems={displayedActionItems} />
       )}
     </div>
   );
