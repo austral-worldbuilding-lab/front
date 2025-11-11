@@ -184,6 +184,7 @@ export default function PostItsPanel({
           <div className="sticky bottom-0 bg-background pt-3 pb-4">
             <GenerarButton
               text="Generar Post-Its"
+              className={"w-full"}
               loading={loading}
               disabled={loading}
               onClick={() => generate(selected.dimensions, selected.scales)}

@@ -92,7 +92,8 @@ export default function ImagesPanel({
                 {children}
                 <div className="sticky bottom-0 bg-background pt-3 pb-4 flex flex-col sm:flex-row gap-2">
                     <GenerarButton
-                        text={loading ? "Generando..." : "Generar imágenes"}
+                        text={loading ? "Generando..." : "Generar Imágenes"}
+                        className={"w-full"}
                         loading={loading}
                         disabled={loading}
                         onClick={() => generate(selected.dimensions, selected.scales)}

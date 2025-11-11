@@ -404,6 +404,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                       loading={generatingReport}
                       disabled={generatingReport}
                       onClick={handleGenerateSummary}
+                      className={"h-4"}
                   />
               </>
             )}

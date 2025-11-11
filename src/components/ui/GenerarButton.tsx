@@ -21,7 +21,7 @@ const GenerarButton: React.FC<GenerarButtonProps> = ({
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
-      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold shadow-md transition-all text-white text-base min-h-[40px] min-w-[140px] ${className}` +
+      className={`${className} flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold shadow-md transition-all text-white text-base min-h-[32px] min-w-[140px]` +
         " bg-gradient-to-r from-[#172187] to-[#3b82f6] hover:opacity-90 disabled:opacity-60"}
       style={{
         backgroundImage:
