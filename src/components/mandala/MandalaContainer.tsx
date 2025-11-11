@@ -64,6 +64,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { getOrganizationById } from "@/services/organizationService";
+import GenerarButton from "../ui/GenerarButton";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -334,17 +335,12 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
                 </Button>
               )}
 
-              <Button
-                variant="outline"
-                color="primary"
-                size="sm"
-                icon={<Sparkles size={16} />}
-                onClick={() => setShowGenerateDialog(true)}
+              <GenerarButton
+                text={report ? "Regenerar resumen" : "Generar resumen"}
                 loading={generatingReport}
                 disabled={generatingReport}
-              >
-                {report ? "Regenerar resumen" : "Generar resumen"}
-              </Button>
+                onClick={handleGenerateSummary}
+              />
             </>
           )}
 
