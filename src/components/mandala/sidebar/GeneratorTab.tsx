@@ -11,6 +11,7 @@ import ImagesPanel from "@/components/mandala/sidebar/ImagesPanel.tsx";
 
 export interface GeneratorTabProps {
   mandalaId: string;
+  mandalaName?: string;
   organizationId: string;
   projectId: string;
   sections: string[];
@@ -27,6 +28,7 @@ export interface GeneratorTabProps {
 
 export default function GeneratorTab({
   mandalaId,
+  mandalaName,
   organizationId,
   projectId,
   sections,
@@ -135,6 +137,7 @@ export default function GeneratorTab({
             <TabsContent value="images" className="flex flex-col flex-1 min-h-0">
               <ImagesPanel
                   mandalaId={mandalaId}
+                  mandalaName={mandalaName}
                   organizationId={organizationId}
                   projectId={projectId}
                   selected={selected}
