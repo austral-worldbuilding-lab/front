@@ -234,7 +234,8 @@ export interface Solution {
     level: "low" | "medium" | "high";
     description: string;
   };
-  provocations: string[];
+  provocations?: string[];
+  provocationIds?: string[];
   actionItems?: ActionItem[];
 }
 

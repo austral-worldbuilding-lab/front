@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -17,25 +17,31 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { BarChart2 } from "lucide-react";
+import { BarChart2, Plus, Trash2 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandItem, CommandEmpty } from "@/components/ui/command";
 import useProvocations from "@/hooks/useProvocations";
-import type {Provocation, Solution} from "@/types/mandala";
+import type { Provocation, Solution, ActionItem } from "@/types/mandala";
 
 interface CreateSolutionModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onCreateSolution: (solution: Omit<Solution, "id">) => void;
+    onCreateSolution?: (solution: Omit<Solution, "id">) => void;
+    onUpdateSolution?: (solutionId: string, solution: Partial<Omit<Solution, "id">>) => void;
     projectId: string;
+    editingSolution?: Solution | null;
 }
 
 export function CreateSolutionModal({
                                         open,
                                         onOpenChange,
                                         onCreateSolution,
+                                        onUpdateSolution,
                                         projectId,
+                                        editingSolution,
                                     }: CreateSolutionModalProps) {
+    const isEditMode = !!editingSolution;
+
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -47,17 +53,52 @@ export function CreateSolutionModal({
     const { provocations, reload } = useProvocations(projectId);
     const [selectedProvocations, setSelectedProvocations] = useState<Provocation[]>([]);
     const [openProvocations, setOpenProvocations] = useState(false);
+    const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+
+    useEffect(() => {
+        if (editingSolution && open) {
+            setFormData({
+                title: editingSolution.title || "",
+                description: editingSolution.description || "",
+                problem: editingSolution.problem || "",
+                impactDescription: editingSolution.impact?.description || "",
+                impactLevel: (editingSolution.impact?.level?.toLowerCase() as "low" | "medium" | "high") || "medium",
+            });
+
+            if (editingSolution.provocations && provocations.length > 0) {
+                const matchedProvocations = provocations.filter(p =>
+                    editingSolution.provocations?.includes(p.question)
+                );
+                setSelectedProvocations(matchedProvocations);
+            }
+
+            setActionItems(editingSolution.actionItems || []);
+        } else if (!editingSolution && open) {
+            resetForm();
+        }
+    }, [editingSolution, open, provocations]);
+
+    const areActionItemsValid = () => {
+        if (!isEditMode || actionItems.length === 0) return true;
+
+        return actionItems.every(item =>
+            item.title.trim() !== "" &&
+            item.description.trim() !== ""
+        );
+    };
 
     const isFormValid =
         formData.title.trim() &&
         formData.description.trim() &&
-        formData.problem.trim()
+        formData.problem.trim() &&
+        formData.impactDescription.trim() &&
+        areActionItemsValid();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isFormValid) return;
 
-        onCreateSolution({
+        const solutionData = {
             title: formData.title,
             description: formData.description,
             problem: formData.problem,
@@ -65,8 +106,15 @@ export function CreateSolutionModal({
                 level: formData.impactLevel,
                 description: formData.impactDescription,
             },
-            provocations: selectedProvocations.map((p) => p.question),
-        });
+            provocationIds: selectedProvocations.map((p) => p.id),
+            ...(isEditMode && { actionItems }),
+        };
+
+        if (isEditMode && editingSolution && onUpdateSolution) {
+            await onUpdateSolution(editingSolution.id, solutionData);
+        } else if (onCreateSolution) {
+            onCreateSolution(solutionData);
+        }
 
         resetForm();
         onOpenChange(false);
@@ -81,6 +129,35 @@ export function CreateSolutionModal({
             impactLevel: "medium",
         });
         setSelectedProvocations([]);
+        setActionItems([]);
+    };
+
+    const addActionItem = () => {
+        const newOrder = actionItems.length > 0
+            ? Math.max(...actionItems.map(item => item.order)) + 1
+            : 1;
+
+        setActionItems([
+            ...actionItems,
+            {
+                order: newOrder,
+                title: "",
+                description: "",
+                duration: "",
+            },
+        ]);
+    };
+
+    const removeActionItem = (order: number) => {
+        setActionItems(actionItems.filter((item) => item.order !== order));
+    };
+
+    const updateActionItem = (order: number, field: keyof ActionItem, value: string | number) => {
+        setActionItems(
+            actionItems.map((item) =>
+                item.order === order ? { ...item, [field]: value } : item
+            )
+        );
     };
 
     const impactColors: Record<"low" | "medium" | "high", string> = {
@@ -94,9 +171,13 @@ export function CreateSolutionModal({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Crear Solución</DialogTitle>
+                    <DialogTitle>
+                        {isEditMode ? "Editar Solución" : "Crear Solución"}
+                    </DialogTitle>
                     <DialogDescription>
-                        Define una nueva solución basada en tu análisis
+                        {isEditMode
+                            ? "Modifica los detalles de la solución"
+                            : "Define una nueva solución basada en tu análisis"}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -158,7 +239,9 @@ export function CreateSolutionModal({
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="impactDescription">Descripción del impacto</Label>
+                            <Label htmlFor="impactDescription">
+                                Descripción del impacto
+                            </Label>
                             <Input
                                 id="impactDescription"
                                 value={formData.impactDescription}
@@ -170,6 +253,7 @@ export function CreateSolutionModal({
                             />
                         </div>
                     </div>
+
                     <div className="space-y-2">
                         <Label>Provocaciones</Label>
                         <Popover
@@ -199,7 +283,7 @@ export function CreateSolutionModal({
                                         <CommandEmpty>No hay provocaciones.</CommandEmpty>
                                         {provocations.map((prov) => {
                                             const isSelected = selectedProvocations.some(
-                                                (p) => p.question === prov.question
+                                                (p) => p.id === prov.id
                                             );
                                             return (
                                                 <CommandItem
@@ -208,7 +292,7 @@ export function CreateSolutionModal({
                                                         if (isSelected) {
                                                             setSelectedProvocations(
                                                                 selectedProvocations.filter(
-                                                                    (p) => p.question !== prov.question
+                                                                    (p) => p.id !== prov.id
                                                                 )
                                                             );
                                                         } else {
@@ -232,6 +316,77 @@ export function CreateSolutionModal({
                         </Popover>
                     </div>
 
+                    {isEditMode && (
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <Label>Plan de Acción</Label>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={addActionItem}
+                                    className="gap-2"
+                                >
+                                    <Plus size={16} /> Agregar paso
+                                </Button>
+                            </div>
+
+                            {actionItems.length > 0 && (
+                                <div className="space-y-3">
+                                    {actionItems
+                                        .sort((a, b) => a.order - b.order)
+                                        .map((item) => (
+                                            <div
+                                                key={item.order}
+                                                className="border rounded-lg p-4 space-y-3 bg-gray-50"
+                                            >
+                                                <div className="flex items-start gap-2">
+                                                    <div className="w-6 h-6 flex items-center justify-center bg-primary text-white rounded-full text-sm font-semibold flex-shrink-0 mt-1">
+                                                        {item.order}
+                                                    </div>
+                                                    <div className="flex-1 space-y-3">
+                                                        <Input
+                                                            value={item.title}
+                                                            onChange={(e) =>
+                                                                updateActionItem(item.order, "title", e.target.value)
+                                                            }
+                                                            placeholder="Título del paso *"
+                                                            className="h-9"
+                                                        />
+                                                        <Textarea
+                                                            value={item.description}
+                                                            onChange={(e) =>
+                                                                updateActionItem(item.order, "description", e.target.value)
+                                                            }
+                                                            placeholder="Descripción *"
+                                                            rows={2}
+                                                        />
+                                                        <Input
+                                                            value={item.duration || ""}
+                                                            onChange={(e) =>
+                                                                updateActionItem(item.order, "duration", e.target.value)
+                                                            }
+                                                            placeholder="Duración (opcional - ej: 2 semanas)"
+                                                            className="h-9"
+                                                        />
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => removeActionItem(item.order)}
+                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div className="flex justify-end gap-3">
                         <Button
                             type="button"
@@ -244,7 +399,7 @@ export function CreateSolutionModal({
                             Cancelar
                         </Button>
                         <Button type="submit" disabled={!isFormValid}>
-                            Crear Solución
+                            {isEditMode ? "Guardar Cambios" : "Crear Solución"}
                         </Button>
                     </div>
                 </form>

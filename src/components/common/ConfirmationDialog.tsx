@@ -18,7 +18,7 @@ interface ConfirmationDialogProps {
     cancelText?: string;
     confirmText?: string;
     isDanger?: boolean;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
     children?: React.ReactNode;
     loading?: boolean;
 }
@@ -34,8 +34,15 @@ const ConfirmationDialog = ({
                                 onConfirm,
                                 loading = false,
                             }: ConfirmationDialogProps) => {
+
+    const handleConfirm = async () => {
+        if (!loading) {
+            await onConfirm();
+        }
+    };
+
     return (
-        <AlertDialog open={isOpen} onOpenChange={loading ? undefined : onOpenChange}>
+        <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
             <AlertDialogContent
                 className={cn(
                     "max-w-md border z-[200]",
@@ -59,9 +66,9 @@ const ConfirmationDialog = ({
 
                 <AlertDialogFooter className="flex pt-4 space-x-0">
                     {cancelText && (
-                        <Button 
-                            variant="outline" 
-                            color={isDanger ? "danger" : "tertiary"} 
+                        <Button
+                            variant="outline"
+                            color={isDanger ? "danger" : "tertiary"}
                             onClick={() => onOpenChange(false)}
                             disabled={loading}
                         >
@@ -71,11 +78,7 @@ const ConfirmationDialog = ({
                     <Button
                         variant="filled"
                         color={isDanger ? "danger" : "primary"}
-                        onClick={() => {
-                            if (!loading) {
-                                onConfirm();
-                            }
-                        }}
+                        onClick={handleConfirm}
                         disabled={loading}
                     >
                         {loading ? (

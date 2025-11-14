@@ -7,6 +7,7 @@ import { CreateSolutionModal } from "@/components/project/CreateSolutionModal";
 import { useSolutionJob } from "@/hooks/useSolutionJob";
 import useSolutions from "@/hooks/useSolutions";
 import { useSolutionValidation } from "@/hooks/useSolutionValidation";
+import type { Solution } from "@/types/mandala";
 import {
     Tooltip,
     TooltipContent,
@@ -14,11 +15,25 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import GenerarButton from "@/components/ui/GenerarButton";
+import useUpdateSolution from "@/hooks/useUpdateSolutions.ts";
 
 export default function SolutionsSection({ projectId }: { projectId: string }) {
-    const { reload, solutions, creating, createSolutions, error } = useSolutions(projectId);
+    const {
+        reload,
+        solutions,
+        creating,
+        createSolutions,
+        removeSolution,
+        error,
+        setSolutions,
+        loadingPage
+    } = useSolutions(projectId);
+
     const { status, progress, startJob } = useSolutionJob(projectId, reload);
+    const { updateSolutionById } = useUpdateSolution();
+
     const [modalOpen, setModalOpen] = useState(false);
+    const [editingSolution, setEditingSolution] = useState<Solution | null>(null);
 
     const { canGenerate, reason, loading: validationLoading } = useSolutionValidation(projectId);
 
@@ -29,7 +44,22 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
         if (!disabledGenerate) startJob();
     };
 
+    const handleUpdateSolution = async (
+        solutionId: string,
+        data: Partial<Omit<Solution, "id">>
+    ) => {
+        try {
+            const updated = await updateSolutionById(solutionId, data);
+            // Actualizar en el state local
+            setSolutions(solutions.map(s => s.id === solutionId ? updated : s));
+            setEditingSolution(null);
+        } catch (err) {
+            console.error("Error actualizando solución:", err);
+        }
+    };
+
     return (
+
         <div className="mt-6 bg-white border border-gray-200 rounded-[12px] shadow-sm p-8 flex flex-col gap-8 w-full">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold text-gray-800">Soluciones</h2>
@@ -63,7 +93,10 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
                     </TooltipProvider>
 
                     <Button
-                        onClick={() => setModalOpen(true)}
+                        onClick={() => {
+                            setEditingSolution(null);
+                            setModalOpen(true);
+                        }}
                         disabled={creating}
                         className="flex items-center gap-2"
                     >
@@ -92,7 +125,13 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
             )}
 
             {status === "completed" && (
-                <p className=" text-sm">Soluciones generadas correctamente</p>
+                <p className="text-sm">Soluciones generadas correctamente</p>
+            )}
+
+            {loadingPage && (
+                <div className="w-full h-[200px] flex items-center justify-center">
+                    <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-gray-600 rounded-full"></div>
+                </div>
             )}
 
             {solutions.length === 0 ? (
@@ -102,18 +141,31 @@ export default function SolutionsSection({ projectId }: { projectId: string }) {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {solutions.map((solution) => (
-                        <SolutionCard key={solution.id} solution={solution} />
+                        <SolutionCard
+                            key={solution.id}
+                            solution={solution}
+                            onDeleteSuccess={() => removeSolution(solution.id)}
+                            onEditClick={(sol) => {
+                                setEditingSolution(sol);
+                                setModalOpen(true);
+                            }}
+                        />
                     ))}
                 </div>
             )}
 
             <CreateSolutionModal
                 open={modalOpen}
-                onOpenChange={setModalOpen}
+                onOpenChange={(open) => {
+                    setModalOpen(open);
+                    if (!open) setEditingSolution(null); // ✅ Limpiar al cerrar
+                }}
                 onCreateSolution={async (solution) => {
                     await createSolutions(solution);
                     setModalOpen(false);
                 }}
+                onUpdateSolution={handleUpdateSolution}
+                editingSolution={editingSolution}
                 projectId={projectId}
             />
         </div>
