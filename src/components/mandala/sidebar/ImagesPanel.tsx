@@ -1,5 +1,4 @@
-import {Plus, Sparkles, Download} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {Plus, Download} from "lucide-react";
 import { useImageGenerator } from "@/hooks/useImageGenerator.ts";
 import { useRef, useState } from "react";
 import NewImageModal from "@/components/mandala/postits/NewImageModal.tsx";
