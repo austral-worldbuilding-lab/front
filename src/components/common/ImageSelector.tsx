@@ -16,12 +16,12 @@ interface ImageSelectorProps {
   initialImageUrl?: string | null;
 }
 
-export const ImageSelector = ({ onChange, initialImageUrl }: ImageSelectorProps) => {
 export const ImageSelector = ({
   onChange,
   label = "Imagen",
   aspectRatio = "square",
   optional = false,
+  initialImageUrl,
 }: ImageSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);

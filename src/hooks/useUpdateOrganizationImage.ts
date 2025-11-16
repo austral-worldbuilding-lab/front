@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { addImage } from "@/services/organizationService";
+import { addImage, addBannerImage } from "@/services/organizationService";
 import { useUploadFilesToS3 } from "./useUploadFilesToS3";
 
 export const useUpdateOrganizationImage = () => {
@@ -11,7 +11,8 @@ export const useUpdateOrganizationImage = () => {
     organizationId: string,
     imageFile: File,
     presignedUrl: string,
-    imageId: string
+    imageId: string,
+    isBanner: boolean = false
   ) => {
     setLoading(true);
     setError(null);
@@ -25,11 +26,16 @@ export const useUpdateOrganizationImage = () => {
         return false;
       }
       
-      await addImage(organizationId, imageId);
+      if (isBanner) {
+        await addBannerImage(organizationId, imageId);
+      } else {
+        await addImage(organizationId, imageId);
+      }
       
       return true;
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? err?.message ?? "Error al actualizar la imagen";
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg = error?.response?.data?.message ?? error?.message ?? "Error al actualizar la imagen";
       setError(msg);
       return false;
     } finally {

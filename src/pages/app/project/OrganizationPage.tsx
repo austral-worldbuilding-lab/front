@@ -34,6 +34,7 @@ const OrganizationPage = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string>("");
   const [orgImageUrl, setOrgImageUrl] = useState<string | null>(null);
+  const [orgBannerUrl, setOrgBannerUrl] = useState<string | null>(null);
 
   const {
     update: updateOrganization,
@@ -54,13 +55,22 @@ const OrganizationPage = () => {
         .then((org) => {
           setOrgName(org.name);
           setOrgImageUrl(org.imageUrl ?? null);
+          setOrgBannerUrl(org.bannerUrl ?? null);
         })
         .catch(() => setOrgName("Organización desconocida"));
     }
   };
 
   useEffect(() => {
-    fetchOrganization();
+    if (organizationId) {
+      getOrganizationById(organizationId)
+        .then((org) => {
+          setOrgName(org.name);
+          setOrgImageUrl(org.imageUrl ?? null);
+          setOrgBannerUrl(org.bannerUrl ?? null);
+        })
+        .catch(() => setOrgName("Organización desconocida"));
+    }
   }, [organizationId]);
 
   const handleCreateProject = async (data: {
@@ -137,21 +147,33 @@ const OrganizationPage = () => {
     }
   };
 
-  const handleEditOrganization = async (data: { name: string; image?: File }) => {
+  const handleEditOrganization = async (data: { name: string; image?: File; bannerImage?: File }) => {
     try {
-      // 1. Actualizar nombre (esto devuelve presignedUrl e imageId)
       const updatedOrg = await updateOrganization(organizationId!, { name: data.name });
       
-      // 2. Si hay nueva imagen, subirla usando el presignedUrl devuelto
-      if (data.image && updatedOrg.presignedUrl && updatedOrg.imageId) {
+      if (data.image && updatedOrg.profilePicture) {
         const success = await updateOrganizationImage(
           organizationId!,
           data.image,
-          updatedOrg.presignedUrl,
-          updatedOrg.imageId
+          updatedOrg.profilePicture.presignedUrl,
+          updatedOrg.profilePicture.imageId
         );
         if (!success) {
-          setErrorMsg("El nombre se actualizó, pero hubo un error al actualizar la imagen.");
+          setErrorMsg("El nombre se actualizó, pero hubo un error al actualizar la imagen de perfil.");
+          return;
+        }
+      }
+      
+      if (data.bannerImage && updatedOrg.bannerPicture) {
+        const success = await updateOrganizationImage(
+          organizationId!,
+          data.bannerImage,
+          updatedOrg.bannerPicture.presignedUrl,
+          updatedOrg.bannerPicture.imageId,
+          true 
+        );
+        if (!success) {
+          setErrorMsg("El nombre y la imagen de perfil se actualizaron, pero hubo un error al actualizar el banner.");
           return;
         }
       }
@@ -260,6 +282,7 @@ const OrganizationPage = () => {
           showQuestions={false}
           initialName={orgName || ""}
           initialImageUrl={orgImageUrl}
+          initialBannerImageUrl={orgBannerUrl}
           mode="edit"
           isOrganization
         />

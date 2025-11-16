@@ -48,8 +48,14 @@ export const addImage = async (id: string, imageId: string): Promise<void> => {
 };
 
 export interface OrganizationWithPresignedUrl extends Organization {
-  imageId: string;
-  presignedUrl: string;
+  profilePicture: {
+    imageId: string;
+    presignedUrl: string;
+  };
+  bannerPicture: {
+    imageId: string;
+    presignedUrl: string;
+  };
 }
 
 export const updateOrganization = async (

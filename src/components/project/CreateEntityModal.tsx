@@ -54,6 +54,7 @@ interface CreateEntityModalProps {
   initialName?: string;
   initialDescription?: string;
   initialImageUrl?: string | null;
+  initialBannerImageUrl?: string | null;
   mode?: "create" | "edit";
   allowProvocationMode?: boolean;
   showConfiguration?: boolean;
@@ -75,6 +76,7 @@ const CreateEntityModal = ({
   initialName,
   initialDescription,
   initialImageUrl,
+  initialBannerImageUrl,
   mode,
   allowProvocationMode = false,
   showConfiguration = false,
@@ -121,41 +123,60 @@ const CreateEntityModal = ({
         iconColor: iconColor ?? undefined,
       });
     } else if (showQuestions) {
-      const data: any = {
+      const data: {
+        name: string;
+        description?: string;
+        dimensions?: DimensionDto[];
+        scales?: string[];
+        icon: string;
+        image?: File;
+        bannerImage?: File;
+        iconColor?: string;
+      } = {
         name,
         description,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
-        image: image ?? undefined,
-        bannerImage: bannerImage ?? undefined,
-        iconColor: iconColor ?? undefined,
-      });
       };
 
       if (isOrganization) {
         data.image = image ?? undefined;
+        data.bannerImage = bannerImage ?? undefined;
       } else {
-        data.icon = icon ?? ICON_OPTIONS[0];
+        data.iconColor = iconColor ?? undefined;
+      }
+
+      if (!isOrganization) {
+        data.bannerImage = bannerImage ?? undefined;
       }
 
       onCreate(data);
     } else {
-      const data: any = {
+      const data: {
+        name: string;
+        dimensions?: DimensionDto[];
+        scales?: string[];
+        icon: string;
+        image?: File;
+        bannerImage?: File;
+        iconColor?: string;
+      } = {
         name,
         dimensions: showConfiguration ? dimensionsData : undefined,
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
-        image: image ?? undefined,
-        bannerImage: bannerImage ?? undefined,
-        iconColor: iconColor ?? undefined,
-      });
       };
 
       if (isOrganization) {
         data.image = image ?? undefined;
+        data.bannerImage = bannerImage ?? undefined;
       } else {
-        data.icon = icon ?? ICON_OPTIONS[0];
+        data.iconColor = iconColor ?? undefined;
+      }
+
+      if (!isOrganization) {
+        data.bannerImage = bannerImage ?? undefined;
       }
 
       onCreate(data);
@@ -183,7 +204,7 @@ const CreateEntityModal = ({
       return baseValidation && dimensions.length > 0 && scales.length > 0;
     }
 
-    if (isOrganization && !image) {
+    if (isOrganization && mode !== "edit" && !image) {
       return false;
     }
 
@@ -248,17 +269,18 @@ const CreateEntityModal = ({
           )}
 
           {isOrganization ? (
-            <ImageSelector onChange={setImage} initialImageUrl={initialImageUrl} />
             <>
               <ImageSelector
                 onChange={setImage}
                 label="Imagen de perfil"
+                initialImageUrl={initialImageUrl}
               />
               <ImageSelector
                 onChange={setBannerImage}
                 label="Imagen de banner"
                 aspectRatio="banner"
                 optional
+                initialImageUrl={initialBannerImageUrl}
               />
             </>
           ) : (
