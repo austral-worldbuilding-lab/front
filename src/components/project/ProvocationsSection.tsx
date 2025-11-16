@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import useProvocations from "@/hooks/useProvocations";
 import { Button } from "../ui/button";
-import { ExternalLink, History, Lightbulb, Sparkles } from "lucide-react";
+import { ExternalLink, History, Lightbulb } from "lucide-react";
 import TimelineTree from "./TimelineTree";
 import useTimeline from "@/hooks/useTimeline";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { ProvocationItem } from "./ProvocationItem";
 import useProject from "@/hooks/useProject";
 import { useProjectBreadcrumb } from "@/hooks/useProjectBreadcrumb";
 import ConfirmationDialog from "@/components/common/ConfirmationDialog";
+import GenerarButton from "../ui/GenerarButton";
 
 export type ProvocationsSectionProps = {
   organizationId: string;
@@ -24,10 +25,12 @@ export const ProvocationsSection = ({
     provocations,
     createManual,
     generateAI,
+    deleteProvocation,
     loading: loadingAI,
+    deletingId,
     error,
   } = useProvocations(projectId);
-  const { data, loading } = useTimeline(projectId);
+  const { data, loading, reload: reloadTimeline } = useTimeline(projectId);
   const navigate = useNavigate();
   const { project } = useProject(projectId);
   const { push } = useProjectBreadcrumb();
@@ -47,9 +50,13 @@ export const ProvocationsSection = ({
     });
   };
 
-
   const handleGenerateAI = async () => {
     await generateAI();
+  };
+
+  const handleDeleteProvocation = async (provocationId: string) => {
+    await deleteProvocation(provocationId);
+    reloadTimeline();
   };
 
   return (
@@ -73,15 +80,12 @@ export const ProvocationsSection = ({
                 Ideas
               </span>
             </div>
-            <Button
-              onClick={handleGenerateAI}
+            <GenerarButton
+              text="Generar"
               loading={loadingAI}
-              color="primary"
-              variant="outline"
-              icon={<Sparkles size={16} />}
-            >
-              Generar
-            </Button>
+              disabled={loadingAI}
+              onClick={handleGenerateAI}
+            />
           </div>
           <div className="flex flex-1 border border-gray-200 rounded-xl overflow-hidden">
             <div className="w-full h-full overflow-y-auto custom-scrollbar">
@@ -91,7 +95,14 @@ export const ProvocationsSection = ({
                 </p>
               )}
               {provocations.map((provocation, index) => (
-                <ProvocationItem provocation={provocation} index={index} />
+                <ProvocationItem 
+                  key={provocation.id || index} 
+                  provocation={provocation} 
+                  index={index} 
+                  projectId={projectId}
+                  onDelete={handleDeleteProvocation}
+                  deleting={deletingId === provocation.id}
+                />
               ))}
             </div>
           </div>

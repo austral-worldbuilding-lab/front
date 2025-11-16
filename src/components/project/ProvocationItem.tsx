@@ -7,15 +7,23 @@ import { Provocation } from "@/types/mandala";
 export type ProvocationItemProps = {
   provocation: Provocation;
   index: number;
+  projectId: string;
+  onDelete?: (provocationId: string) => Promise<void>;
+  deleting?: boolean;
 };
 
-export const ProvocationItem = ({ provocation, index }: ProvocationItemProps) => {
+export const ProvocationItem = ({ provocation, index, projectId, onDelete, deleting }: ProvocationItemProps) => {
   const [open, setOpen] = useState(false);
   const [worldsOpen, setWorldsOpen] = useState(false);
 
     const hasWorlds = provocation.projectsOrigin?.length > 0;
     const isCached = !provocation.id;
 
+    const handleDelete = async () => {
+        if (onDelete && provocation.id) {
+            await onDelete(provocation.id);
+        }
+    };
 
     const state = isCached
         ? {
@@ -52,6 +60,9 @@ export const ProvocationItem = ({ provocation, index }: ProvocationItemProps) =>
                     setWorldsOpen(true);
                 }}
                 onNavigate={() => setOpen(false)}
+                projectId={projectId}
+                onDelete={onDelete ? handleDelete : undefined}
+                deleting={deleting}
             />
 
             <CreatedWorldsModal

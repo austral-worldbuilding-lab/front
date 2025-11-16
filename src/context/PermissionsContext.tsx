@@ -20,6 +20,7 @@ interface PermissionsContextType extends UserPermissions {
   canEditProject: (projectId: string) => boolean;
   canViewProject: (projectId: string) => boolean;
   canManageProjectUsers: (projectId: string) => boolean;
+  canDeleteProject: (projectId: string) => boolean;
   refreshOrganizationRoles: (orgId: string) => Promise<void>;
   refreshProjectRoles: (projectId: string) => Promise<void>;
   clearCache: () => void;
@@ -81,6 +82,11 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
   const canViewProject = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
     return role !== null; // Any role can view
+  };
+
+  const canDeleteProject = (projectId: string): boolean => {
+    const role = getProjectRole(projectId);
+    return role === 'dueño'; // Only owner can delete
   };
 
   const refreshOrganizationRoles = async (orgId: string): Promise<void> => {
@@ -167,6 +173,7 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
     canEditProject,
     canViewProject,
     canManageProjectUsers,
+    canDeleteProject,
     refreshOrganizationRoles,
     refreshProjectRoles,
     clearCache,

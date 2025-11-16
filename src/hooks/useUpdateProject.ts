@@ -6,7 +6,7 @@ const useUpdateProject = (onSuccess?: (updated: Project) => void) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const update = async (id: string, data: { name: string; description?: string }) => {
+    const update = async (id: string, data: { name: string; description?: string, icon: string, iconColor?: string }) => {
         setLoading(true);
         setError(null);
         try {

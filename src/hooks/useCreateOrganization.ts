@@ -2,6 +2,7 @@
 import { useState } from "react";
 import {
   addImage,
+  addBannerImage,
   createOrganization as createOrgService,
 } from "@/services/organizationService";
 import { useNavigate } from "react-router-dom";
@@ -13,20 +14,50 @@ export const useCreateOrganization = () => {
   const navigate = useNavigate();
   const { uploadFileToS3 } = useUploadFilesToS3();
 
-  const createOrganization = async (name: string, icon: File) => {
+  const createOrganization = async (
+    name: string,
+    icon: File,
+    bannerImage?: File
+  ) => {
     setLoading(true);
     setError(null);
     try {
       const response = await createOrgService({ name });
-      const result = await uploadFileToS3(response.data.presignedUrl, icon, {
-        contentType: icon.type,
-      });
-      if (result.error) {
-        setError(result.error.message);
+
+      // Subir imagen de perfil
+      const profileResult = await uploadFileToS3(
+        response.data.profilePicture.presignedUrl,
+        icon,
+        {
+          contentType: icon.type,
+        }
+      );
+      if (profileResult.error) {
+        setError(profileResult.error.message);
         return;
       }
-      const objectUrl = response.data.imageId;
-      await addImage(response.data.id, objectUrl);
+      const profileImageId =
+        response.data.profilePicture.imageId || response.data.imageId;
+      await addImage(response.data.id, profileImageId);
+
+      // Subir imagen de banner si existe
+      if (bannerImage && response.data.bannerPicture) {
+        const bannerResult = await uploadFileToS3(
+          response.data.bannerPicture.presignedUrl,
+          bannerImage,
+          {
+            contentType: bannerImage.type,
+          }
+        );
+        if (bannerResult.error) {
+          setError(bannerResult.error.message);
+          return;
+        }
+        const bannerImageId =
+          response.data.bannerPicture.imageId || response.data.bannerImageId;
+        await addBannerImage(response.data.id, bannerImageId);
+      }
+
       navigate(`/app/organization/${response.data.id}/projects`);
       return response;
     } catch (err: any) {

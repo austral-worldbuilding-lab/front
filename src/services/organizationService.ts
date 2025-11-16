@@ -39,6 +39,7 @@ export const addImage = async (id: string, imageId: string): Promise<void> => {
     `/organization/${id}/image/confirm`,
     {
       imageId,
+      imageType: 'profilePicture',
     }
   );
   if (response.status !== 201) {
@@ -65,4 +66,17 @@ export const updateOrganization = async (
   }
 
   return response.data.data;
+};
+
+export const addBannerImage = async (id: string, bannerImageId: string): Promise<void> => {
+  const response = await axiosInstance.post(
+    `/organization/${id}/image/confirm`,
+    {
+      imageId: bannerImageId,
+      imageType: 'bannerPicture',
+    }
+  );
+  if (response.status !== 201) {
+    throw new Error("Error al agregar la imagen de banner");
+  }
 };

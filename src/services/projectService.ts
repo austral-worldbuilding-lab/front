@@ -47,7 +47,7 @@ export const createProject = async (project: CreateProject): Promise<Project> =>
 
 export const updateProject = async (
     id: string,
-    data: { name?: string; description?: string }
+    data: { name?: string; description?: string, icon: string, iconColor?: string }
 ): Promise<Project> => {
   const response = await axiosInstance.patch<{ data: Project }>(
       `/project/${id}`,
@@ -140,8 +140,9 @@ export const createProjectFromQuestion = async (
 export const getTimelineForProject = async (
     projectId: string
 ): Promise<{ nodes: BackendTimelineNode[]; edges: BackendTimelineEdge[] }> => {
+  const timestamp = new Date().getTime();
   const response = await axiosInstance.get<{ data: { nodes: BackendTimelineNode[]; edges: BackendTimelineEdge[] } }>(
-      `/project/${projectId}/timeline`
+      `/project/${projectId}/timeline?t=${timestamp}`
   );
 
   if (response.status !== 200) {
@@ -171,6 +172,7 @@ export const createChildProject = async (
       dimensions?: { name: string; color: string }[];
       scales?: string[];
       userId: string;
+      iconColor?: string;
     }
 ): Promise<Project> => {
   const response = await axiosInstance.post<{ data: Project }>(`/project/${projectId}/child`,
@@ -182,4 +184,12 @@ export const createChildProject = async (
   }
 
   return response.data.data;
+};
+
+export const deleteProject = async (projectId: string): Promise<void> => {
+  const response = await axiosInstance.delete(`/project/${projectId}`);
+
+  if (response.status !== 200) {
+    throw new Error("Error al eliminar proyecto");
+  }
 };

@@ -122,6 +122,7 @@ export interface Project {
   organizationId: string;
   configuration?: ProjectConfiguration;
   icon: string;
+  iconColor: string;
 }
 
 export interface ProjectConfiguration {
@@ -137,6 +138,7 @@ export interface CreateProject {
   dimensions?: DimensionDto[];
   scales?: string[];
   icon: string;
+  iconColor?: string;
 }
 
 export interface DimensionDto {
@@ -151,6 +153,7 @@ export interface CreateProjectFromQuestion {
   dimensions?: DimensionDto[];
   scales?: string[];
   icon: string;
+  iconColor?: string;
 }
 
 export interface FilterOption {
@@ -183,6 +186,7 @@ export interface Organization {
   name: string;
   accessType?: "full" | "limited";
   imageUrl?: string;
+  bannerUrl?: string;
 }
 export interface FileItem {
   id: string;
@@ -192,6 +196,12 @@ export interface FileItem {
   full_path: string;
   url: string;
   selected: boolean;
+}
+
+export interface UsefulResource {
+  file_name: string;
+  file_type: string;
+  url: string;
 }
 
 export interface Provocation {
@@ -225,4 +235,12 @@ export interface Solution {
     description: string;
   };
   provocations: string[];
+  actionItems?: ActionItem[];
+}
+
+export interface ActionItem {
+  order: number;
+  title: string;
+  description: string;
+  duration?: string;
 }
