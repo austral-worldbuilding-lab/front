@@ -13,6 +13,7 @@ interface ImageSelectorProps {
   label?: string;
   aspectRatio?: "square" | "banner";
   optional?: boolean;
+  initialImageUrl?: string | null;
 }
 
 export const ImageSelector = ({
@@ -20,14 +21,19 @@ export const ImageSelector = ({
   label = "Imagen",
   aspectRatio = "square",
   optional = false,
+  initialImageUrl,
 }: ImageSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const previewUrl = useMemo(
-    () => (file ? URL.createObjectURL(file) : null),
-    [file]
+    () => {
+      if (file) return URL.createObjectURL(file);
+      if (initialImageUrl) return initialImageUrl;
+      return null;
+    },
+    [file, initialImageUrl]
   );
 
   useEffect(() => {
