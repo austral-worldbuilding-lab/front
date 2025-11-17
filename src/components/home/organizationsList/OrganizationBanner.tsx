@@ -30,7 +30,8 @@ const OrganizationBanner = ({
           )}
           {organization.accessType === "full" && (
             <div
-              className="absolute top-2 right-2"
+              className="absolute top-2 right-2 z-50"
+              data-menu-container="true"
               onClick={(e) => e.stopPropagation()}
             >
               <MandalaMenu onDelete={() => onDeleteClick(organization.id)} />
@@ -49,7 +50,8 @@ const OrganizationBanner = ({
           )}
           {organization.accessType === "full" && (
             <div
-              className="absolute top-2 right-2"
+              className="absolute top-2 right-2 z-50"
+              data-menu-container="true"
               onClick={(e) => e.stopPropagation()}
             >
               <MandalaMenu onDelete={() => onDeleteClick(organization.id)} />
