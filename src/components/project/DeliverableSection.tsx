@@ -1,4 +1,4 @@
-import { Download, FileImage, BookOpen, Info } from "lucide-react";
+import { FileImage, BookOpen, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDeliverables } from "@/hooks/useDeliverable";
 import { useEncyclopediaJob } from "@/hooks/useEnciclopediaJob";
@@ -119,7 +119,7 @@ export default function DeliverablesSection({
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1 text-blue-600 hover:underline"
                             >
-                                <Download size={16} /> Descargar
+                                 Abrir
                             </a>
                         </div>
                     ))}
