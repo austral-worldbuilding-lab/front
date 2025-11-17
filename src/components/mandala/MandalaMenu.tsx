@@ -68,7 +68,10 @@ const MandalaMenu = ({
   return (
     <DropdownMenu.Root open={open} onOpenChange={onOpenChange}>
       <DropdownMenu.Trigger asChild>
-        <button className="p-2 rounded focus:outline-none hover:bg-gray-200 active:bg-gray-300 cursor-pointer">
+        <button
+          className="p-2 rounded bg-white/60 focus:outline-none hover:bg-gray-200 active:bg-gray-300 cursor-pointer"
+          onClick={(e) => e.stopPropagation()}
+        >
           <MoreVertical className="w-4 h-4" />
         </button>
       </DropdownMenu.Trigger>
@@ -76,6 +79,7 @@ const MandalaMenu = ({
       <DropdownMenu.Content
         className="z-50 min-w-[8rem] rounded-md border bg-white p-1 text-sm shadow-md"
         sideOffset={4}
+        onClick={(e) => e.stopPropagation()}
       >
         {canEdit && onCreateChild && (
           <DropdownMenu.Item
@@ -107,7 +111,11 @@ const MandalaMenu = ({
         {canEdit && (
           <DropdownMenu.Item
             className="w-full cursor-pointer px-2 py-1.5 hover:bg-gray-100 hover:border-none text-red-600 text-left flex items-center gap-2 focus:outline-none focus:ring-0 focus:border-none border-none"
-            onSelect={onDelete}
+            onSelect={(event) => {
+              event.preventDefault();
+              onDelete();
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
             <Trash2 size={14} />
             Eliminar
