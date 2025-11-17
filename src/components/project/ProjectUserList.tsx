@@ -5,7 +5,7 @@ import ConfirmationDialog from "@/components/common/ConfirmationDialog";
 import { removeProjectUser } from "@/services/userService";
 import axiosInstance from "@/lib/axios";
 import ProjectUserRow from "./ProjectUserRow";
-import { Role } from "@/services/invitationService";
+import { Role } from "@/constants/roles";
 import { useAuthContext } from "@/context/AuthContext";
 import { isRoleDemotion } from "@/utils/roleUtils";
 import { useProjectPermissions } from "@/hooks/usePermissionsLoader";

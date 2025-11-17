@@ -137,7 +137,7 @@ export const ProvocationsSection = ({
         isOpen={showErrorDialog}
         onOpenChange={setShowErrorDialog}
         title="No se puede generar provocación"
-        description={error || "Ha ocurrido un error al intentar generar provocaciones. Por favor, verifica los requisitos del proyecto."}
+        description={ "Ha ocurrido un error al intentar generar provocaciones. Por favor, verifica los requisitos del proyecto."}
         confirmText="Entendido"
         onConfirm={() => setShowErrorDialog(false)}
       />

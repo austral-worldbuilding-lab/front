@@ -2,8 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useAuthContext } from './AuthContext';
 import { getOrganizationUsers } from '@/services/userService';
 import { getProjectUsers } from '@/services/userService';
-
-type Role = 'dueño' | 'facilitador' | 'worldbuilder' | 'lector';
+import { Role, isAdminRole, isEditorRole } from '@/constants/roles';
 
 interface UserPermissions {
   organizationRoles: Map<string, Role>;
@@ -61,22 +60,22 @@ export const PermissionsProvider: React.FC<PermissionsProviderProps> = ({ childr
 
   const canCreateProject = (orgId: string): boolean => {
     const role = getOrganizationRole(orgId);
-    return role === 'dueño' || role === 'facilitador';
+    return role ? isAdminRole(role) : false;
   };
 
   const canManageUsers = (orgId: string): boolean => {
     const role = getOrganizationRole(orgId);
-    return role === 'dueño' || role === 'facilitador';
+    return role ? isAdminRole(role) : false;
   };
 
   const canManageProjectUsers = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
-    return role === 'dueño' || role === 'facilitador';
+    return role ? isAdminRole(role) : false;
   };
 
   const canEditProject = (projectId: string): boolean => {
     const role = getProjectRole(projectId);
-    return role === 'dueño' || role === 'facilitador' || role === 'worldbuilder';
+    return role ? isEditorRole(role) : false;
   };
 
   const canViewProject = (projectId: string): boolean => {

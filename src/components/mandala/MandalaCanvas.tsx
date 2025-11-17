@@ -19,6 +19,7 @@ import NewPostItModal from "./postits/NewPostItModal";
 import EditPostItModal from "./postits/EditPostitModal";
 import { useContextMenu } from "@/hooks/useContextMenu";
 import { Layer as KonvaLayer } from "konva/lib/Layer";
+import { isEditorRole } from "@/constants/roles";
 
 export const MandalaCanvas: React.FC<{
   mandala: Mandala;
@@ -83,7 +84,7 @@ export const MandalaCanvas: React.FC<{
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
+    (userRole === null || isEditorRole(userRole));
 
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
