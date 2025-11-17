@@ -186,6 +186,7 @@ export interface Organization {
   name: string;
   accessType?: "full" | "limited";
   imageUrl?: string;
+  bannerUrl?: string;
 }
 export interface FileItem {
   id: string;

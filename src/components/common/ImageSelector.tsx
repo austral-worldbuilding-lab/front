@@ -10,9 +10,17 @@ import { Upload, X } from "lucide-react";
 
 interface ImageSelectorProps {
   onChange: (file: File | null) => void;
+  label?: string;
+  aspectRatio?: "square" | "banner";
+  optional?: boolean;
 }
 
-export const ImageSelector = ({ onChange }: ImageSelectorProps) => {
+export const ImageSelector = ({
+  onChange,
+  label = "Imagen",
+  aspectRatio = "square",
+  optional = false,
+}: ImageSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -44,18 +52,27 @@ export const ImageSelector = ({ onChange }: ImageSelectorProps) => {
   const handleClear = () => {
     setFile(null);
     onChange(null);
+    setOpen(false);
   };
 
+  const cardClasses =
+    aspectRatio === "banner"
+      ? "p-2 rounded-2xl cursor-pointer flex items-center justify-center w-full h-24 transition-all border overflow-hidden hover:bg-gray-100"
+      : "p-2 rounded-2xl cursor-pointer flex items-center justify-center w-20 h-20 transition-all border overflow-hidden hover:bg-gray-100";
+
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className="flex flex-col items-start gap-2 w-full">
       <label className="text-sm font-medium text-[var(--color-black)]">
-        Imagen
+        {label}
+        {optional && (
+          <span className="text-gray-500 ml-1">(opcional)</span>
+        )}
       </label>
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Card
-            className="p-2 rounded-2xl cursor-pointer flex items-center justify-center w-20 h-20 transition-all border overflow-hidden hover:bg-gray-100"
+            className={cardClasses}
             onClick={() => setOpen(true)}
           >
             {previewUrl ? (

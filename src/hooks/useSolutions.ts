@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Solution } from "@/types/mandala";
-import { solutionService, getCachedSolutions } from "@/services/solutionService";
+import {getAllSolutions, createSolution} from "@/services/solutionService";
 import { normalizeSolution } from "@/utils/normalizeSolution";
 
 export default function useSolutions(projectId: string) {
@@ -15,35 +15,14 @@ export default function useSolutions(projectId: string) {
         setError(null);
 
         try {
-            const [dbSolutions, cached] = await Promise.allSettled([
-                solutionService.getAllSolutions(projectId),
-                getCachedSolutions(projectId),
-            ]);
+            const dbSolutions = await getAllSolutions(projectId);
+            console.log("🔍 dbSolutions", dbSolutions);
+            console.log("✅ Normalized", dbSolutions.map(normalizeSolution));
 
-            const dbData: Solution[] =
-                dbSolutions.status === "fulfilled"
-                    ? dbSolutions.value.map(normalizeSolution)
-                    : [];
-
-            const cacheData: Solution[] =
-                cached.status === "fulfilled"
-                    ? cached.value.map(normalizeSolution)
-                    : [];
-
-            const merged: Solution[] = [...dbData];
-
-            cacheData.forEach((item: Solution) => {
-                const exists = merged.some((s) => s.title === item.title);
-                if (!exists) merged.push(item);
-            });
-
-            setSolutions(merged);
+            setSolutions(dbSolutions.map(normalizeSolution));
         } catch (err) {
             console.error("Error cargando soluciones:", err);
-            const message =
-                err instanceof Error
-                    ? err.message
-                    : "Error cargando soluciones";
+            const message = err instanceof Error ? err.message : "Error cargando soluciones";
             setError(message);
             setSolutions([]);
         } finally {
@@ -51,13 +30,14 @@ export default function useSolutions(projectId: string) {
         }
     };
 
-    const createSolution = async (body: Omit<Solution, "id">): Promise<Solution | undefined> => {
+
+    const createSolutions = async (body: Omit<Solution, "id">): Promise<Solution | undefined> => {
         if (!projectId) return;
         setCreating(true);
         setError(null);
 
         try {
-            const newSolution = await solutionService.createSolution(projectId, body);
+            const newSolution = await createSolution(projectId, body);
             const normalized = normalizeSolution(newSolution);
             setSolutions((prev) => [normalized, ...prev]);
             return normalized;
@@ -83,7 +63,7 @@ export default function useSolutions(projectId: string) {
         creating,
         error,
         reload,
-        createSolution,
+        createSolutions,
         setSolutions,
     };
 }

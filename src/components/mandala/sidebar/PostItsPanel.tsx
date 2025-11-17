@@ -1,6 +1,5 @@
 // PostItsPanel.tsx
-import { Button } from "@/components/ui/button";
-import { Plus, Sparkles } from "lucide-react";
+import { Plus } from "lucide-react";
 import { GeneratedPostIt, usePostItsGenerator } from "./usePostItsGenerator";
 import type { Tag } from "@/types/mandala";
 import { PropsWithChildren, useEffect, useMemo, useRef, useState } from "react";
@@ -10,6 +9,7 @@ import { getLocalQueue } from "@/utils/localQueue.ts";
 import { useAuth } from "@/hooks/useAuth";
 import { useAnalytics } from "@/services/analytics";
 import { useProjectAccess } from "@/hooks/useProjectAccess";
+import GenerarButton from "../../ui/GenerarButton";
 
 export interface PostItsPanelProps extends PropsWithChildren {
   mandalaId: string;
@@ -182,14 +182,13 @@ export default function PostItsPanel({
         {children}
         {canEdit && (
           <div className="sticky bottom-0 bg-background pt-3 pb-4">
-            <Button
-              className="w-full h-11 text-base"
-              onClick={() => generate(selected.dimensions, selected.scales)}
-              icon={<Sparkles size={16} />}
+            <GenerarButton
+              text="Generar Post-Its"
+              className={"w-full"}
+              loading={loading}
               disabled={loading}
-            >
-              Generar Post-Its
-            </Button>
+              onClick={() => generate(selected.dimensions, selected.scales)}
+            />
           </div>
         )}
       </div>

@@ -35,6 +35,7 @@ interface CreateEntityModalProps {
     scales?: string[];
     icon: string;
     image?: File;
+    bannerImage?: File;
     iconColor?: string;
   }) => Promise<void>;
   onCreateFromProvocation?: (data: {
@@ -87,6 +88,7 @@ const CreateEntityModal = ({
   const [scales, setScales] = useState<Item[]>(getInitialScales());
   const [icon, setIcon] = useState<string | null>(null);
   const [image, setImage] = useState<File | null>(null);
+  const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [iconColor, setIconColor] = useState<string | null>(null);
 
   useEffect(() => {
@@ -124,6 +126,7 @@ const CreateEntityModal = ({
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
         image: image ?? undefined,
+        bannerImage: bannerImage ?? undefined,
         iconColor: iconColor ?? undefined,
       });
     } else {
@@ -133,6 +136,7 @@ const CreateEntityModal = ({
         scales: showConfiguration ? scalesData : undefined,
         icon: icon ?? ICON_OPTIONS[0],
         image: image ?? undefined,
+        bannerImage: bannerImage ?? undefined,
         iconColor: iconColor ?? undefined,
       });
     }
@@ -175,6 +179,8 @@ const CreateEntityModal = ({
       setDimensions(getInitialDimensions());
       setScales(getInitialScales());
       setIcon(null);
+      setImage(null);
+      setBannerImage(null);
       setIconColor(null);
     }
   };
@@ -222,7 +228,18 @@ const CreateEntityModal = ({
           )}
 
           {isOrganization ? (
-            <ImageSelector onChange={setImage} />
+            <>
+              <ImageSelector
+                onChange={setImage}
+                label="Imagen de perfil"
+              />
+              <ImageSelector
+                onChange={setBannerImage}
+                label="Imagen de banner"
+                aspectRatio="banner"
+                optional
+              />
+            </>
           ) : (
             <IconSelector
             value={icon}

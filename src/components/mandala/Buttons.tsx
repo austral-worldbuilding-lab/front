@@ -82,7 +82,7 @@ const Buttons = ({
   return (
     <>
       <div
-        className="absolute top-1/2 -translate-y-1/2 left-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
+        className="absolute top-4 left-4 flex flex-col gap-2 z-[10] bg-white rounded-lg p-2 shadow"
         data-floating-buttons
       >
         <Button

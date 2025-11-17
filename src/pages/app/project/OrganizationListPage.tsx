@@ -37,6 +37,19 @@ const OrganizationListPage = () => {
     error: errorMsg,
   } = useCreateOrganization();
 
+  const handleCreateOrganization = async (data: {
+    name: string;
+    image?: File;
+    bannerImage?: File;
+  }) => {
+    try {
+      await createOrganization(data.name, data.image!, data.bannerImage);
+      setModalOpen(false); // Cerrar el modal después de crear exitosamente
+    } catch (err) {
+      console.error("Error creating organization", err);
+    }
+  };
+
   const { deleteOrganization } = useDeleteOrganization();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -121,7 +134,7 @@ const OrganizationListPage = () => {
         <CreateEntityModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          onCreate={({ name, image }) => createOrganization(name, image!)}
+          onCreate={handleCreateOrganization}
           loading={creating}
           error={errorMsg}
           title="Crear Organización"
