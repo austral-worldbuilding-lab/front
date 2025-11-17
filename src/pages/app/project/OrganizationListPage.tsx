@@ -10,8 +10,10 @@ import AppLayout from "@/components/layout/AppLayout";
 import UsefulFiles from "@/components/home/usefulfiles/UsefulFiles";
 import AccountStadistics from "@/components/home/stadistics/AccountStadistics";
 import OrganizationsSection from "@/components/home/organizationsList/OrganizationsSection";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const OrganizationListPage = () => {
+  const { data: currentUser } = useCurrentUser();
   const {
     organizations: fetchedOrgs,
     nextPageOrgs,
@@ -35,10 +37,28 @@ const OrganizationListPage = () => {
     error: errorMsg,
   } = useCreateOrganization();
 
+  const handleCreateOrganization = async (data: {
+    name: string;
+    image?: File;
+    bannerImage?: File;
+  }) => {
+    try {
+      await createOrganization(data.name, data.image!, data.bannerImage);
+      setModalOpen(false); // Cerrar el modal después de crear exitosamente
+    } catch (err) {
+      console.error("Error creating organization", err);
+    }
+  };
+
   const { deleteOrganization } = useDeleteOrganization();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+  const getGreeting = () => {
+    const firstName = currentUser?.fullName?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Usuario';
+    return `Hola, ${firstName}!`;
+  };
 
   const handleDeleteClick = (id: string) => {
     setSelectedOrgId(id);
@@ -86,25 +106,35 @@ const OrganizationListPage = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen flex flex-col items-center pt-12">
-        <OrganizationsSection
-          organizations={organizations}
-          page={page}
-          setPage={setPage}
-          nextPageOrgs={nextPageOrgs}
-          onDeleteClick={handleDeleteClick}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onCreateClick={() => setModalOpen(true)}
-        />
-        <div className="w-full max-w-6xl mt-6 flex flex-col gap-4 px-4">
-          <UsefulFiles />
-          <AccountStadistics />
+      <div className="min-h-screen px-8 py-8">
+        <div className="max-w-[1400px] mx-auto">
+          <h1 className="text-4xl font-bold mb-8">{getGreeting()}</h1>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+            <div className="flex flex-col">
+              <OrganizationsSection
+                organizations={organizations}
+                page={page}
+                setPage={setPage}
+                nextPageOrgs={nextPageOrgs}
+                onDeleteClick={handleDeleteClick}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onCreateClick={() => setModalOpen(true)}
+              />
+            </div>
+
+            <div className="flex flex-col gap-6">
+              <AccountStadistics />
+              <UsefulFiles />
+            </div>
+          </div>
         </div>
+
         <CreateEntityModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          onCreate={({ name, image }) => createOrganization(name, image!)}
+          onCreate={handleCreateOrganization}
           loading={creating}
           error={errorMsg}
           title="Crear Organización"

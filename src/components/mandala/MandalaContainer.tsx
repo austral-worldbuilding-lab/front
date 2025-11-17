@@ -16,6 +16,7 @@ import {
   FileText,
   InfoIcon,
   Sparkles,
+  MoreVertical,
 } from "lucide-react";
 import Buttons from "./Buttons";
 import { useCreateMandala } from "@/hooks/useCreateMandala.ts";
@@ -35,6 +36,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import useProject from "@/hooks/useProject";
 import ProjectMembersDisplay from "./ProjectMembersDisplay";
 import ViewToggle from "./ViewToggle";
@@ -54,6 +61,7 @@ import {
   useNormalMandalaReport,
 } from "@/hooks/useReport.tsx";
 import { getOrganizationById } from "@/services/organizationService";
+import GenerarButton from "../ui/GenerarButton";
 
 interface MandalaContainerProps {
   mandalaId: string;
@@ -329,68 +337,123 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         </div>
         {/* Botones según el tipo de mandala */}
         <div className="ml-auto pr-4 flex gap-2">
-          {/* Para mandalas comparadas (OVERLAP_SUMMARY) - solo descarga */}
-          {isOverlapMandala && report && !reportLoading && (
+          {/* Versión móvil/tablet - Dropdown */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  color="primary"
+                  size="sm"
+                  icon={<MoreVertical size={16} />}
+                  aria-label="Más opciones"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-white">
+                {isOverlapMandala && report && !reportLoading && (
+                  <DropdownMenuItem onClick={handleDownloadReport}>
+                    <Download size={16} className="mr-2" />
+                    Reporte Comparado
+                  </DropdownMenuItem>
+                )}
+
+                {!isOverlapMandala && (
+                  <>
+                    {report && !reportLoading && (
+                      <DropdownMenuItem onClick={handleDownloadReport}>
+                        <Download size={16} className="mr-2" />
+                        Resumen
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuItem
+                      onClick={() => setShowGenerateDialog(true)}
+                      disabled={generatingReport}
+                    >
+                      <Sparkles size={16} className="mr-2" />
+                      {report ? "Regenerar resumen" : "Generar resumen"}
+                    </DropdownMenuItem>
+                  </>
+                )}
+
+                <DropdownMenuItem
+                  onClick={() =>
+                    downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
+                  }
+                >
+                  <Download size={16} className="mr-2" />
+                  SVG
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsFilesDrawerOpen(true)}>
+                  <FileText size={16} className="mr-2" />
+                  Archivos
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Versión desktop - Botones individuales */}
+          <div className="hidden md:contents">
+            {/* Para mandalas comparadas (OVERLAP_SUMMARY) - solo descarga */}
+            {isOverlapMandala && report && !reportLoading && (
+              <Button
+                variant="outline"
+                color="primary"
+                size="sm"
+                icon={<Download size={16} />}
+                onClick={handleDownloadReport}
+              >
+                Reporte Comparado
+              </Button>
+            )}
+
+            {/* Para mandalas normales - generar y descargar */}
+            {!isOverlapMandala && (
+              <>
+                {report && !reportLoading && (
+                  <Button
+                    variant="outline"
+                    color="primary"
+                    size="sm"
+                    icon={<Download size={16} />}
+                    onClick={handleDownloadReport}
+                  >
+                    Resumen
+                  </Button>
+                )}
+
+                  <GenerarButton
+                      text={report ? "Regenerar resumen" : "Generar resumen"}
+                      loading={generatingReport}
+                      disabled={generatingReport}
+                      onClick={handleGenerateSummary}
+                      className={"h-4"}
+                  />
+              </>
+            )}
+
             <Button
               variant="outline"
               color="primary"
               size="sm"
               icon={<Download size={16} />}
-              onClick={handleDownloadReport}
+              onClick={() =>
+                downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
+              }
             >
-              Reporte Comparado
+              SVG
             </Button>
-          )}
+            <Button
+              variant="outline"
+              color="primary"
+              size="sm"
+              icon={<FileText size={16} />}
+              onClick={() => setIsFilesDrawerOpen(true)}
+            >
+              Archivos
+            </Button>
+          </div>
 
-          {/* Para mandalas normales - generar y descargar */}
-          {!isOverlapMandala && (
-            <>
-              {report && !reportLoading && (
-                <Button
-                  variant="outline"
-                  color="primary"
-                  size="sm"
-                  icon={<Download size={16} />}
-                  onClick={handleDownloadReport}
-                >
-                  Resumen
-                </Button>
-              )}
-
-              <Button
-                variant="outline"
-                color="primary"
-                size="sm"
-                icon={<Sparkles size={16} />}
-                onClick={() => setShowGenerateDialog(true)}
-                loading={generatingReport}
-                disabled={generatingReport}
-              >
-                {report ? "Regenerar resumen" : "Generar resumen"}
-              </Button>
-            </>
-          )}
-
-          <Button
-            variant="outline"
-            color="primary"
-            size="sm"
-            icon={<Download size={16} />}
-            onClick={() =>
-              downloadSVG(`${mandala?.mandala.name ?? "mandala"}.svg`)
-            }
-          >
-            SVG
-          </Button>
-          <Button
-            variant="outline"
-            color="primary"
-            size="sm"
-            icon={<FileText size={16} />}
-            onClick={() => setIsFilesDrawerOpen(true)}
-          >
-            Archivos
-          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button

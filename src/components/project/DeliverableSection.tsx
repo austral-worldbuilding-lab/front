@@ -1,11 +1,11 @@
-import { Download, FileImage, BookOpen, Info, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Download, FileImage, BookOpen, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDeliverables } from "@/hooks/useDeliverable";
 import { useEncyclopediaJob } from "@/hooks/useEnciclopediaJob";
 import { useFiles } from "@/hooks/useFiles";
 import ProgressBar from "@/components/common/ProgressBar";
 import { useEffect, useRef } from "react";
+import GenerarButton from "../ui/GenerarButton";
 
 function translateStatus(status: string | null) {
     switch (status) {
@@ -77,9 +77,12 @@ export default function DeliverablesSection({
                 </h2>
 
                 {(!status || ["none", "failed", "completed"].includes(status)) && (
-                    <Button onClick={handleStart} icon={<Sparkles size={16} />}>
-                        Generar enciclopedia
-                    </Button>
+                    <GenerarButton
+                        text="Generar enciclopedia"
+                        loading={false}
+                        disabled={false}
+                        onClick={handleStart}
+                    />
                 )}
             </div>
 

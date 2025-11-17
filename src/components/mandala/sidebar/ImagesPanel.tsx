@@ -1,9 +1,9 @@
-import {Plus, Sparkles} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {Plus} from "lucide-react";
 import { useImageGenerator } from "@/hooks/useImageGenerator.ts";
 import { useRef, useState } from "react";
 import NewImageModal from "@/components/mandala/postits/NewImageModal.tsx";
 import { Tag } from "@/types/mandala";
+import GenerarButton from "../../ui/GenerarButton";
 
 interface ImagesPanelProps {
     mandalaId: string;
@@ -91,14 +91,13 @@ export default function ImagesPanel({
             <div className="mt-2">
                 {children}
                 <div className="sticky bottom-0 bg-background pt-3 pb-4 flex flex-col sm:flex-row gap-2">
-                    <Button
-                        className="flex-1 h-11 text-base"
-                        onClick={() => generate(selected.dimensions, selected.scales)}
+                    <GenerarButton
+                        text={loading ? "Generando..." : "Generar Imágenes"}
+                        className={"w-full"}
+                        loading={loading}
                         disabled={loading}
-                    >
-                        <Sparkles size={16} />
-                        {loading ? "Generando..." : "Generar imágenes"}
-                    </Button>
+                        onClick={() => generate(selected.dimensions, selected.scales)}
+                    />
                 </div>
             </div>
         </div>
