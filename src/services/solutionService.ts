@@ -67,3 +67,17 @@ export const generateSolutionImages = async (
   );
   return response.data.data;
 };
+
+export async function deleteSolution(solutionId: string): Promise<void> {
+    const res = await axiosInstance.delete(`/solutions/${solutionId}`);
+    if (res.status !== 200 && res.status !== 204) {
+        throw new Error("Error al eliminar la solución");
+    }}
+
+export async function updateSolution(
+    solutionId: string,
+    data: Partial<Omit<Solution, "id">>
+): Promise<Solution> {
+    const res = await axiosInstance.patch(`/solutions/${solutionId}`, data);
+    return res.data;
+}

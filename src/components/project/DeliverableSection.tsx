@@ -1,9 +1,10 @@
-import { Download, FileImage, BookOpen, Info } from "lucide-react";
+import { FileImage, BookOpen, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDeliverables } from "@/hooks/useDeliverable";
 import { useEncyclopediaJob } from "@/hooks/useEnciclopediaJob";
 import { useFiles } from "@/hooks/useFiles";
 import ProgressBar from "@/components/common/ProgressBar";
+import { useEffect, useRef } from "react";
 import GenerarButton from "../ui/GenerarButton";
 
 function translateStatus(status: string | null) {
@@ -27,11 +28,18 @@ export default function DeliverablesSection({
     projectId: string;
     projectName: string;
 }) {
-    const { deliverables, loading, error } = useDeliverables(projectId);
+    const { deliverables, loading, error, refresh } = useDeliverables(projectId);
     const { startJob, status, progress, error: encError } =
         useEncyclopediaJob(projectId);
     const { files } = useFiles("project", projectId, true);
+    const previousStatus = useRef<string>("none");
 
+    useEffect(() => {
+        if (previousStatus.current !== "completed" && status === "completed") {
+            refresh();
+        }
+        previousStatus.current = status;
+    }, [status, refresh]);
 
     const handleStart = async () => {
         const selectedFiles = files.filter((f) => f.selected).map((f) => f.file_name);
@@ -111,7 +119,7 @@ export default function DeliverablesSection({
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1 text-blue-600 hover:underline"
                             >
-                                <Download size={16} /> Descargar
+                                 Abrir
                             </a>
                         </div>
                     ))}

@@ -60,16 +60,6 @@ import {
   useOverlapReport,
   useNormalMandalaReport,
 } from "@/hooks/useReport.tsx";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { getOrganizationById } from "@/services/organizationService";
 import GenerarButton from "../ui/GenerarButton";
 
@@ -141,6 +131,8 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
     useNormalMandalaReport(projectId, mandalaId);
   const { generateSummary, loading: generatingReport } = useGenerateSummary();
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
+  const [infoDialogMessage, setInfoDialogMessage] = useState("");
 
   // Determinar qué tipo de reporte usar según el tipo de mandala
   const isOverlapMandala = mandala?.mandala.type === "OVERLAP_SUMMARY";
@@ -286,8 +278,39 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
   };
 
   const handleGenerateSummary = async () => {
-    await generateSummary(mandalaId, projectId);
     setShowGenerateDialog(false);
+    setInfoDialogMessage("Generando resumen con IA. Este proceso puede tardar unos segundos...");
+    setShowInfoDialog(true);
+
+    try {
+      const success = await generateSummary(mandalaId, projectId);
+      
+      if (success) {
+        setInfoDialogMessage(
+          "¡Resumen generado exitosamente! Puedes consultarlo desde la sección de Entregables del proyecto."
+        );
+
+        setTimeout(() => {
+          setShowInfoDialog(false);
+        }, 5000);
+      } else {
+        setInfoDialogMessage(
+          "Ocurrió un error al generar el resumen. Por favor, intenta nuevamente."
+        );
+
+        setTimeout(() => {
+          setShowInfoDialog(false);
+        }, 5000);
+      }
+    } catch (error) {
+      setInfoDialogMessage(
+        "Ocurrió un error al generar el resumen. Por favor, intenta nuevamente."
+      );
+
+      setTimeout(() => {
+        setShowInfoDialog(false);
+      }, 5000);
+    }
   };
 
   return (
@@ -764,45 +787,82 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
 
       {/* Modal de confirmación para generar resumen - solo para mandalas normales */}
       {!isOverlapMandala && (
-        <AlertDialog
-          open={showGenerateDialog}
-          onOpenChange={setShowGenerateDialog}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {normalReport
-                  ? "¿Regenerar resumen de esta mandala?"
-                  : "¿Generar resumen de esta mandala?"}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                El sistema generará un resumen mediante IA según el estado
-                actual de la mandala. Este proceso puede tardar unos segundos.
-                {normalReport &&
-                  " El resumen existente será reemplazado por uno nuevo."}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={generatingReport}>
-                Cancelar
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleGenerateSummary}
-                disabled={generatingReport}
-                className="bg-primary hover:bg-primary/90"
-              >
-                {generatingReport ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Generando...</span>
-                  </div>
-                ) : (
-                  "Confirmar generación"
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <>
+          <Dialog
+            open={showGenerateDialog}
+            onOpenChange={setShowGenerateDialog}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>
+                  {normalReport
+                    ? "¿Regenerar resumen de esta mandala?"
+                    : "¿Generar resumen de esta mandala?"}
+                </DialogTitle>
+                <DialogDescription>
+                  El sistema generará un resumen mediante IA según el estado
+                  actual de la mandala. Este proceso puede tardar unos segundos.
+                  {normalReport &&
+                    " El resumen existente será reemplazado por uno nuevo."}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowGenerateDialog(false)}
+                  disabled={generatingReport}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleGenerateSummary}
+                  disabled={generatingReport}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Confirmar generación
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modal de progreso */}
+          <Dialog
+            open={showInfoDialog}
+            onOpenChange={setShowInfoDialog}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {generatingReport ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                      <span>Generando resumen</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-5 w-5 text-green-600" />
+                      <span>Resumen generado</span>
+                    </>
+                  )}
+                </DialogTitle>
+                <DialogDescription className="pt-2">
+                  {infoDialogMessage}
+                </DialogDescription>
+              </DialogHeader>
+              {!generatingReport && (
+                <div className="flex justify-end mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowInfoDialog(false)}
+                    size="sm"
+                  >
+                    Cerrar
+                  </Button>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </div>
   );

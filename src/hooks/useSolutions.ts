@@ -16,9 +16,6 @@ export default function useSolutions(projectId: string) {
 
         try {
             const dbSolutions = await getAllSolutions(projectId);
-            console.log("🔍 dbSolutions", dbSolutions);
-            console.log("✅ Normalized", dbSolutions.map(normalizeSolution));
-
             setSolutions(dbSolutions.map(normalizeSolution));
         } catch (err) {
             console.error("Error cargando soluciones:", err);
@@ -30,6 +27,9 @@ export default function useSolutions(projectId: string) {
         }
     };
 
+    const removeSolution = (solutionId: string): void => {
+        setSolutions((prev) => prev.filter((s) => s.id !== solutionId));
+    };
 
     const createSolutions = async (body: Omit<Solution, "id">): Promise<Solution | undefined> => {
         if (!projectId) return;
@@ -64,6 +64,7 @@ export default function useSolutions(projectId: string) {
         error,
         reload,
         createSolutions,
+        removeSolution,
         setSolutions,
     };
 }
