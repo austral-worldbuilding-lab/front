@@ -29,11 +29,8 @@ import {
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 
-import {
-  Role,
-  ROLES,
-  createInviteLink as createProjectInviteLink,
-} from "@/services/invitationService";
+import { Role, ROLES } from "@/constants/roles";
+import { createInviteLink as createProjectInviteLink } from "@/services/invitationService";
 import { createOrganizationInviteLink } from "@/services/organizationInvitationService";
 
 interface UnifiedInvitationDialogProps {

@@ -28,6 +28,7 @@ import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
 import ComparisonPostIt from "./postits/ComparisonPostIt";
 import { useProjectAccess } from "@/hooks/useProjectAccess";
 import { useParams } from "react-router-dom";
+import { isEditorRole } from "@/constants/roles";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -87,7 +88,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
+    (userRole === null || isEditorRole(userRole));
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
