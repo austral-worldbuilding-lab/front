@@ -513,6 +513,7 @@ const MandalaContainer: React.FC<MandalaContainerProps> = ({
         open={isSidebarOpen}
         onOpenChange={setIsSidebarOpen}
         mandalaId={mandalaId}
+        mandalaName={mandala?.mandala.name}
         organizationId={organizationId}
         projectId={projectId}
         tags={tags}

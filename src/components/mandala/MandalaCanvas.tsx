@@ -110,6 +110,11 @@ export const MandalaCanvas: React.FC<{
     bringToFront,
   } = useKonvaUtils(mandala.postits, maxRadius, mandala.images);
 
+  const getImageUrl = (imageId: string) => {
+    const image = mandala.images?.find((img) => img.id === imageId);
+    return image?.url;
+  };
+
   const {
     contextMenu,
     showContextMenu,
@@ -117,6 +122,7 @@ export const MandalaCanvas: React.FC<{
     handleDelete,
     handleCreateChild,
     handleEditPostIt,
+    handleDownloadImage,
   } = useContextMenu(
     onPostItDelete || (() => Promise.resolve(false)),
     onCharacterDelete || (() => Promise.resolve(false)),
@@ -132,7 +138,9 @@ export const MandalaCanvas: React.FC<{
         openEditModal(mandala.id, postit);
       }
     },
-    onImageDelete || (() => Promise.resolve(false))
+    onImageDelete || (() => Promise.resolve(false)),
+    getImageUrl,
+    mandala.mandala.name
   );
 
   const lastPostItIdRef = useRef<string | null>(null);
@@ -380,6 +388,9 @@ export const MandalaCanvas: React.FC<{
             }
             onEdit={
               contextMenu.type === "postit" ? handleEditPostIt : undefined
+            }
+            onDownloadImage={
+              contextMenu.type === "image" ? handleDownloadImage : undefined
             }
             isContextMenu={true}
             canEdit={canEdit}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { KonvaEventObject } from "konva/lib/Node";
+import { downloadImage, generateImageFilename } from "@/utils/downloadImage";
 
 type ContextMenuType = "postit" | "character" | "image" | null;
 
@@ -20,7 +21,9 @@ export function useContextMenu(
   setEditingContent: (content: string | null) => void,
   onPostItCreateChild?: (id: string) => void,
   onPostItEdit?: (id: string) => void,
-  onImageDelete?: (id: string) => Promise<boolean>
+  onImageDelete?: (id: string) => Promise<boolean>,
+  getImageUrl?: (id: string) => string | undefined,
+  mandalaName?: string
 ) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
@@ -69,41 +72,29 @@ export function useContextMenu(
 
   const handleDeletePostIt = async () => {
     if (contextMenu.postItId !== null) {
-      try {
-        const success = await onPostItDelete(contextMenu.postItId);
-        if (success) {
-          hideContextMenu();
-          setEditableIndex(null);
-          setEditingContent(null);
-        }
-      } catch (error) {
-        console.error("Error al eliminar postit:", error);
+      const success = await onPostItDelete(contextMenu.postItId);
+      if (success) {
+        hideContextMenu();
+        setEditableIndex(null);
+        setEditingContent(null);
       }
     }
   };
 
   const handleDeleteCharacter = async () => {
     if (contextMenu.characterId !== null) {
-      try {
-        const success = await onCharacterDelete(contextMenu.characterId);
-        if (success) {
-          hideContextMenu();
-        }
-      } catch (error) {
-        console.error("Error al eliminar personaje:", error);
+      const success = await onCharacterDelete(contextMenu.characterId);
+      if (success) {
+        hideContextMenu();
       }
     }
   };
 
   const handleDeleteImage = async () => {
     if (contextMenu.imageId !== null && onImageDelete) {
-      try {
-        const success = await onImageDelete(contextMenu.imageId);
-        if (success) {
-          hideContextMenu();
-        }
-      } catch (error) {
-        console.error("Error al eliminar imagen:", error);
+      const success = await onImageDelete(contextMenu.imageId);
+      if (success) {
+        hideContextMenu();
       }
     }
   };
@@ -139,12 +130,23 @@ export function useContextMenu(
     }
   };
 
+  const handleDownloadImage = async () => {
+    if (contextMenu.type === "image" && contextMenu.imageId !== null && getImageUrl) {
+      const imageUrl = getImageUrl(contextMenu.imageId);
+      if (imageUrl) {
+        await downloadImage(imageUrl, generateImageFilename(mandalaName || "mandala"));
+        hideContextMenu();
+      }
+    }
+  };
+
   return {
     contextMenu,
     showContextMenu,
     hideContextMenu,
     handleDelete,
     handleCreateChild,
-    handleEditPostIt
+    handleEditPostIt,
+    handleDownloadImage
   };
 }
