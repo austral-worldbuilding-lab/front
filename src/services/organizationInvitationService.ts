@@ -1,6 +1,7 @@
 import axiosInstance from "@/lib/axios";
 import { Invitation } from "@/types/invitation";
 import { PaginatedResponse } from "@/types/api";
+import { Role } from "@/constants/roles";
 
 export async function getMyOrganizationInvitationsPaginated(
   page = 1,
@@ -30,9 +31,6 @@ export type InvitationResponse = {
   status: "pending" | "sent" | "accepted" | "rejected";
   createdAt: string;
 };
-
-export const ROLES = ["dueño", "facilitador", "worldbuilder", "lector"] as const;
-export type Role = (typeof ROLES)[number];
 
 export async function createOrganizationInvitation(
   payload: CreateInvitationDto

@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Badge } from "../ui/badge";
-import { Role, ROLES } from "@/services/invitationService";
+import { Role, ROLES } from "@/constants/roles";
 import { getAvailableRoles } from "@/utils/roleUtils";
 
 export default function ProjectUserRow({

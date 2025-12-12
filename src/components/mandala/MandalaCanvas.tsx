@@ -19,6 +19,7 @@ import NewPostItModal from "./postits/NewPostItModal";
 import EditPostItModal from "./postits/EditPostitModal";
 import { useContextMenu } from "@/hooks/useContextMenu";
 import { Layer as KonvaLayer } from "konva/lib/Layer";
+import { isEditorRole } from "@/constants/roles";
 
 export const MandalaCanvas: React.FC<{
   mandala: Mandala;
@@ -83,7 +84,7 @@ export const MandalaCanvas: React.FC<{
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
+    (userRole === null || isEditorRole(userRole));
 
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
@@ -110,6 +111,11 @@ export const MandalaCanvas: React.FC<{
     bringToFront,
   } = useKonvaUtils(mandala.postits, maxRadius, mandala.images);
 
+  const getImageUrl = (imageId: string) => {
+    const image = mandala.images?.find((img) => img.id === imageId);
+    return image?.url;
+  };
+
   const {
     contextMenu,
     showContextMenu,
@@ -117,6 +123,7 @@ export const MandalaCanvas: React.FC<{
     handleDelete,
     handleCreateChild,
     handleEditPostIt,
+    handleDownloadImage,
   } = useContextMenu(
     onPostItDelete || (() => Promise.resolve(false)),
     onCharacterDelete || (() => Promise.resolve(false)),
@@ -132,7 +139,9 @@ export const MandalaCanvas: React.FC<{
         openEditModal(mandala.id, postit);
       }
     },
-    onImageDelete || (() => Promise.resolve(false))
+    onImageDelete || (() => Promise.resolve(false)),
+    getImageUrl,
+    mandala.mandala.name
   );
 
   const lastPostItIdRef = useRef<string | null>(null);
@@ -380,6 +389,9 @@ export const MandalaCanvas: React.FC<{
             }
             onEdit={
               contextMenu.type === "postit" ? handleEditPostIt : undefined
+            }
+            onDownloadImage={
+              contextMenu.type === "image" ? handleDownloadImage : undefined
             }
             isContextMenu={true}
             canEdit={canEdit}

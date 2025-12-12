@@ -28,6 +28,7 @@ import EditPostItModal from "@/components/mandala/postits/EditPostitModal.tsx";
 import ComparisonPostIt from "./postits/ComparisonPostIt";
 import { useProjectAccess } from "@/hooks/useProjectAccess";
 import { useParams } from "react-router-dom";
+import { isEditorRole } from "@/constants/roles";
 
 export interface KonvaContainerProps {
   mandala: MandalaData;
@@ -87,7 +88,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
   const { hasAccess, userRole } = useProjectAccess(projectId || "");
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
+    (userRole === null || isEditorRole(userRole));
   const [, setEditableIndex] = useState<number | null>(null);
   const [, setEditingContent] = useState<string | null>(null);
   const [isChildPostItModalOpen, setIsChildPostItModalOpen] = useState(false);
@@ -106,6 +107,11 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     maxRadius
   );
 
+  const getImageUrl = (imageId: string) => {
+    const image = mandala.images?.find((img) => img.id === imageId);
+    return image?.url;
+  };
+
   const {
     contextMenu,
     showContextMenu,
@@ -113,6 +119,7 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
     handleDelete,
     handleCreateChild,
     handleEditPostIt,
+    handleDownloadImage,
   } = useContextMenu(
     onPostItDelete,
     onCharacterDelete,
@@ -128,7 +135,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
         openEditModal(mandala.id, postit);
       }
     },
-    onImageDelete
+    onImageDelete,
+    getImageUrl,
+    mandala.mandala.name
   );
 
   // Ensure we call onBlur (to remove editing user) when context menu closes
@@ -435,6 +444,9 @@ const KonvaContainer: React.FC<KonvaContainerProps> = ({
             }
             onEdit={
               contextMenu.type === "postit" ? handleEditPostIt : undefined
+            }
+            onDownloadImage={
+              contextMenu.type === "image" ? handleDownloadImage : undefined
             }
             isContextMenu={true}
             canEdit={canEdit}

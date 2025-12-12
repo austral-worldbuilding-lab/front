@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAnalytics } from "@/services/analytics";
 import { useProjectAccess } from "@/hooks/useProjectAccess";
 import GenerarButton from "../../ui/GenerarButton";
+import { isEditorRole } from "@/constants/roles";
 
 export interface PostItsPanelProps extends PropsWithChildren {
   mandalaId: string;
@@ -36,7 +37,7 @@ export default function PostItsPanel({
   const { hasAccess, userRole } = useProjectAccess(projectId);
   const canEdit =
     !!hasAccess &&
-    (userRole === null || ["dueño", "facilitador", "worldbuilder"].includes(userRole));
+    (userRole === null || isEditorRole(userRole));
   const { items, setItems, loading, error, generate } = usePostItsGenerator(
     mandalaId,
     projectId

@@ -9,9 +9,9 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Badge } from "../ui/badge";
-import { Role } from "@/services/invitationService";
+import { Role, ROLES, isAdminRole } from "@/constants/roles";
 
-const ORGANIZATION_ROLES: Role[] = ["dueño", "facilitador", "worldbuilder", "lector"];
+const ORGANIZATION_ROLES: Role[] = [...ROLES];
 
 export default function OrganizationUserRow({
   userId,
@@ -39,7 +39,7 @@ export default function OrganizationUserRow({
   const availableRoles = ORGANIZATION_ROLES.filter((role) => {
     if (isCurrentUser) {
       if (
-        (initialRole === "dueño" || initialRole === "facilitador") &&
+        isAdminRole(initialRole) &&
         (role === "worldbuilder" ||
           role === "lector" ||
           (role === "facilitador" && initialRole === "dueño"))

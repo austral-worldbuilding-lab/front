@@ -7,7 +7,7 @@ import {
   updateOrganizationUserRole,
 } from "@/services/userService";
 import OrganizationUserRow from "./OrganizationUserRow";
-import { Role } from "@/services/invitationService";
+import { Role, isAdminRole } from "@/constants/roles";
 import { useAuthContext } from "@/context/AuthContext";
 import { Trash2 } from "lucide-react";
 
@@ -39,9 +39,8 @@ const OrganizationUserList = ({
     if (
       isCurrentUser &&
       targetUser &&
-      ((targetUser.role === "dueño" && newRole !== "dueño") ||
-        (targetUser.role === "facilitador" &&
-          (newRole === "worldbuilder" || newRole === "lector")))
+      isAdminRole(targetUser.role as Role) &&
+      !isAdminRole(newRole)
     ) {
       setActionError(
         "No puedes reducir tu propio rol de administrador. Solicita a otro administrador que cambie tu rol."

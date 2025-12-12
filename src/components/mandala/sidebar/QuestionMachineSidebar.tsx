@@ -5,6 +5,7 @@ import { PanelLeftClose } from "lucide-react";
 
 export interface QuestionMachineSidebarProps {
   mandalaId: string;
+  mandalaName?: string;
   organizationId: string;
   projectId: string;
   sections?: string[];
@@ -31,6 +32,7 @@ const DEFAULT_SCALES = ["MI ESQUINA", "CIUDAD / BARRIO", "PROVINCIA"];
 
 export default function QuestionMachineSidebar({
   mandalaId,
+  mandalaName,
   organizationId,
   projectId,
   sections = DEFAULT_SECTIONS,
@@ -64,6 +66,7 @@ export default function QuestionMachineSidebar({
         <div className="h-full flex flex-col">
           <GeneratorTab
             mandalaId={mandalaId}
+            mandalaName={mandalaName}
             organizationId={organizationId}
             projectId={projectId}
             sections={sections}
