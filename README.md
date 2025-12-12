@@ -1,4 +1,4 @@
-# Lab3 Frontend
+# Austral Worldbuilding Lab - Frontend
 
 The frontend application for the Austral Worldbuilding Lab platform, built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and TypeScript. It uses Tailwind CSS for styling and Firebase for authentication.
 
