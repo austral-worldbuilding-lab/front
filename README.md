@@ -1,81 +1,127 @@
-# Lab3 Frontend – Vite React TypeScript
+# Lab3 Frontend
 
-This is the frontend application for the **Lab3** worldbuilding platform, built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and TypeScript. It uses SCSS for styling and Firebase for authentication and data storage.
+The frontend application for the Austral Worldbuilding Lab platform, built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and TypeScript. It uses Tailwind CSS for styling and Firebase for authentication.
 
----
+## Tech Stack
 
-## 🚀 Getting Started
+- **Framework:** React 19 + TypeScript
+- **Build Tool:** Vite 6
+- **Styling:** Tailwind CSS 4 + Radix UI
+- **State Management:** TanStack React Query + Context API
+- **Authentication:** Firebase Auth
+- **Canvas:** Konva (for Mandala visualization)
+- **HTTP Client:** Axios
 
-### 1. Clonar el repositorio
+## Prerequisites
 
-```bash
-$ git clone git@github.com:austral-worldbuilding-lab/front.git
-$ cd front
-```
+- Node.js 18+
+- npm 9+
+- Firebase project credentials
+- Backend API running (see backend repository)
 
-### 2. Configurar los Git Hooks
+## Getting Started
 
-Para asegurarte de que el código cumpla con los estándares antes de subirlo, configuraremos los git hooks. Ejecuta el script de inicialización:
-
-```bash
-$ bash git-hooks/init.sh
-```
-
-### 3. Instalar las Dependencias
-
-A continuación, instala todas las dependencias necesarias para el proyecto utilizando npm:
+### 1. Clone the repository
 
 ```bash
-$ npm install
+git clone git@github.com:austral-worldbuilding-lab/front.git
+cd front
 ```
 
-### 4. Configurar las Variables de Entorno
+### 2. Configure Git Hooks
 
-Crea el archivo `.env` en la raíz del proyecto basándote en el template `.env.template` y configura las variables de entorno necesarias:
+To ensure code quality before commits, set up the git hooks:
 
 ```bash
-$ cp .env.template .env
+bash git-hooks/init.sh
 ```
 
-Luego, edita el archivo `.env` con las credenciales correspondientes.
-
-### 5. Iniciar el Proyecto en Modo Desarrollo
-
-Para iniciar el servidor de desarrollo:
+### 3. Install Dependencies
 
 ```bash
-$ npm run dev
+npm install
 ```
 
-La aplicación estará disponible en [http://localhost:5173](http://localhost:5173) por defecto.
+### 4. Configure Environment Variables
 
-### 6. Compilar para Producción
-
-Cuando estés listo para desplegar la aplicación:
+Create a `.env` file based on the template:
 
 ```bash
-$ npm run build
+cp .env.template .env
 ```
 
-Esto generará la versión optimizada de la aplicación en el directorio `dist/`.
+Then edit `.env` with your credentials:
 
-Para previsualizar la versión compilada localmente:
+| Variable                            | Description                                               |
+| ----------------------------------- | --------------------------------------------------------- |
+| `VITE_FIREBASE_API_KEY`             | Firebase API key                                          |
+| `VITE_FIREBASE_AUTH_DOMAIN`         | Firebase auth domain (e.g., `project.firebaseapp.com`)    |
+| `VITE_FIREBASE_PROJECT_ID`          | Firebase project ID                                       |
+| `VITE_FIREBASE_STORAGE_BUCKET`      | Firebase storage bucket                                   |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID                              |
+| `VITE_FIREBASE_APP_ID`              | Firebase app ID                                           |
+| `VITE_FIREBASE_MEASUREMENT_ID`      | Firebase analytics measurement ID (optional)              |
+| `VITE_FIREBASE_DATABASE_URL`        | Firebase Realtime Database URL                            |
+| `VITE_API_URL`                      | Backend API base URL (e.g., `http://localhost:3000`)      |
+| `VITE_PUBLIC_POSTHOG_KEY`           | PostHog analytics key (optional)                          |
+| `VITE_PUBLIC_POSTHOG_HOST`          | PostHog host URL (optional)                               |
+| `VITE_PUBLIC_ENVIRONMENT`           | Environment name (`development`, `staging`, `production`) |
+
+### 5. Start Development Server
 
 ```bash
-$ npm run preview
+npm run dev
 ```
 
-## 🧪 Testing
+The application will be available at [http://localhost:5173](http://localhost:5173).
 
-Para ejecutar los tests:
+## Available Scripts
+
+| Script            | Description                              |
+| ----------------- | ---------------------------------------- |
+| `npm run dev`     | Start development server with hot reload |
+| `npm run build`   | Type-check and build for production      |
+| `npm run preview` | Preview production build locally         |
+| `npm run lint`    | Run ESLint to check code quality         |
+
+## Project Structure
+
+```
+src/
+├── assets/          # Static assets (images, fonts)
+├── components/      # React components
+│   ├── ui/          # Base UI components (Button, Dialog, etc.)
+│   ├── mandala/     # Mandala-specific components
+│   ├── layout/      # Layout components (Header, AppLayout)
+│   └── ...          # Feature-specific components
+├── config/          # Configuration (Firebase)
+├── constants/       # Application constants
+├── context/         # React Context providers
+├── hooks/           # Custom React hooks
+├── lib/             # Utilities and configurations
+├── pages/           # Page components
+├── services/        # API service layer
+├── styles/          # Global styles
+├── types/           # TypeScript type definitions
+└── utils/           # Utility functions
+```
+
+## Build for Production
 
 ```bash
-# Ejecutar todos los tests
-$ npm run test
-
-# Ejecutar tests con watch mode
-$ npm run test:watch
-
-# Ver cobertura de tests
-$ npm run test:coverage
+npm run build
 ```
+
+This generates an optimized build in the `dist/` directory.
+
+## Contributing
+
+1. Create a branch following the naming pattern: `[CARD_ID]/description`
+2. Make your changes
+3. Ensure `npm run lint` passes
+4. Test your changes manually
+5. Create a Pull Request using the template
+
+## Documentation
+
+For detailed technical documentation including architecture, patterns, and development guidelines, see [TECHNICAL_DOCS.md](./TECHNICAL_DOCS.md).
