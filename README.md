@@ -124,4 +124,4 @@ This generates an optimized build in the `dist/` directory.
 
 ## Documentation
 
-For detailed technical documentation including architecture, patterns, and development guidelines, see [TECHNICAL_DOCS.md](./TECHNICAL_DOCS.md).
+For detailed technical documentation including architecture, patterns, and development guidelines, see [TECHNICAL_DOCS.md](https://github.com/austral-worldbuilding-lab/docs/blob/main/DEVELOPER_MANUAL_FRONT.md).
